@@ -14,7 +14,7 @@ public class RandomVariableTester {
 	public static int test() {
 		System.out.println("Creating a random variable...");
 		String [] domain = {"x1", "x2", "x3"};		
-		RandomVariable v = new RandomVariable("myRandomVarible", domain);
+		RandomVariable v = new RandomVariable("myRandomVariable", domain);
 		System.out.println("Done. Let's see what has been created: ");
 		v.print();
 		

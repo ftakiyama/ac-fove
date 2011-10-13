@@ -53,12 +53,19 @@ public class RandomVariable {
 		return domain;
 	}
 	
+	/**
+	 * Prints this random variable. It simply outputs its name and the 
+	 * elements of the domain.
+	 */
 	public void print() {
-		System.out.print("dom(" + this.name + ") = {");
+		String result = new String();
+		result = "dom(" + this.name + ") = {";
 		Iterator<String> it = domain.iterator();
 		while (it.hasNext()) {
-			System.out.print(it.next() + ", ");
+			result += it.next() + ", ";
 		}
-		System.out.print("}");
+		result = result.substring(0, result.length() - 2);
+		result += "}";
+		System.out.print(result);
 	}
 }

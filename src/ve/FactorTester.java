@@ -3,6 +3,7 @@
  */
 package ve;
 
+import java.util.Hashtable;
 import java.util.Vector;
 
 /**
@@ -49,58 +50,57 @@ public class FactorTester {
 		Vector<String> tuple = new Vector<String>();
 		tuple.add("false");
 		f1.addAssignment(tuple, 0.8);
-		tuple.clear();
+		tuple = new Vector<String>();
 		tuple.add("true");
 		f1.addAssignment(tuple, 0.2);
 		
-		tuple.clear();
+		tuple = new Vector<String>();
 		tuple.add("false");
 		f2.addAssignment(tuple, 0.6);
-		tuple.clear();
+		tuple = new Vector<String>();
 		tuple.add("true");
 		f2.addAssignment(tuple, 0.4);
 		
-		tuple.clear();
+		tuple = new Vector<String>();
 		tuple.add("false");
 		tuple.add("false");
 		tuple.add("false");
 		f3.addAssignment(tuple, 1.0);
-		tuple.clear();
+		tuple = new Vector<String>();
 		tuple.add("false");
 		tuple.add("false");
 		tuple.add("true");
 		f3.addAssignment(tuple, 0.0);
-		tuple.clear();
+		tuple = new Vector<String>();
 		tuple.add("false");
 		tuple.add("true");
 		tuple.add("false");
 		f3.addAssignment(tuple, 0.2);
-		tuple.clear();
+		tuple = new Vector<String>();
 		tuple.add("false");
 		tuple.add("true");
 		tuple.add("true");
 		f3.addAssignment(tuple, 0.8);
-		tuple.clear();
+		tuple = new Vector<String>();
 		tuple.add("true");
 		tuple.add("false");
 		tuple.add("false");
 		f3.addAssignment(tuple, 0.1);
-		tuple.clear();
+		tuple = new Vector<String>();
 		tuple.add("true");
 		tuple.add("false");
 		tuple.add("true");
 		f3.addAssignment(tuple, 0.9);
-		tuple.clear();
+		tuple = new Vector<String>();
 		tuple.add("true");
 		tuple.add("true");
 		tuple.add("false");
 		f3.addAssignment(tuple, 0.01);
-		tuple.clear();
+		tuple = new Vector<String>();
 		tuple.add("true");
 		tuple.add("true");
 		tuple.add("true");
 		f3.addAssignment(tuple, 0.99);
-		tuple.clear();
 		
 		System.out.println("Factors filled. I will print them now:");
 		
@@ -109,5 +109,49 @@ public class FactorTester {
 		f3.print();
 		
 		return 0;
+	}
+	
+	// This should not be here...
+	public static int testCartesianProduct() {
+		Vector<String> a = new Vector<String>();
+		Vector<String> b = new Vector<String>();
+		Vector<String> c = new Vector<String>();
+		Vector<String> d = new Vector<String>();
+		Vector<Vector<String>> bc = new Vector<Vector<String>>();
+		Vector<String> r = new Vector<String>();
+		
+		a.add("a1");
+		a.add("a2");
+		b.add("b1");
+		b.add("b2");
+		c.add("c1");
+		c.add("c2");
+		d.add("d1");
+		d.add("d2");
+		
+		bc.add(a);
+		bc.add(b);
+		bc.add(c);
+		//bc.add(d);
+		
+		Factor f = new Factor();
+		
+		f.cartesianProduct(bc, r);
+		
+		for (int i = 0; i < r.size(); i++) {
+			System.out.println(r.get(i));
+		}
+		
+		return 0;
+	}
+	
+	static void testinho() {
+		Hashtable<Vector<String>, Double> table = new Hashtable<Vector<String>, Double>();
+		Vector<String> key = new Vector<String>();
+		key.add("bla");
+		table.put(key, 0.1);
+		Vector<String> k = new Vector<String>();
+		k.add("bla");
+		System.out.print(table.get(k));
 	}
 }

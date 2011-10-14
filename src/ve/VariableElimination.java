@@ -16,7 +16,9 @@ public class VariableElimination {
 	 */
 	public static void main(String[] args) {
 		System.out.println("Hi. How are you?");
-		RandomVariableTester.test();
+		FactorTester.test();
+		//FactorTester.testCartesianProduct();
+		//FactorTester.testinho();
 	}
 
 }

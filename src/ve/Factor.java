@@ -49,22 +49,80 @@ public class Factor {
 		return assignment.get(tuple);
 	}
 	
+	public double getValue(String tuple) {
+		Vector<String> t = new Vector<String>();
+		String[] tupleSplit = tuple.split(" ");
+		for (int i = 0; i < tupleSplit.length; i++) {
+			t.add(tupleSplit[i]);
+		}
+		return assignment.get(t);
+	}
+	
 	public void print() {
 		for (int i = 0; i < this.variables.size(); i++) {
-			System.out.format("%10s", this.variables.get(i).getName()); 
+			System.out.format("%10s ", this.variables.get(i).getName()); 
 		}
-		System.out.print("VALUE");
+		System.out.format("%15s\n", "VALUE");
 		System.out.println("----------------------------------------------------------------------");
 		
-		// How to create all the possible tuples? ... 
+		// Wow! The code below is really messy
 		Vector<String> tuple = new Vector<String>();
- 		for (int i = 0; i < this.variables.size(); i++) {
-			RandomVariable currentVariable = this.variables.get(i); 
-			for (int j = 0; j < currentVariable.getDomain().size(); j++) {
-				tuple.add(currentVariable.getDomain().get(j));
+		
+		Vector<Vector<String>> allDomains = new Vector<Vector<String>>();
+		
+		for (int i = 0; i < this.variables.size(); i++) {
+			allDomains.add(this.variables.get(i).getDomain()); 
+		}
+		cartesianProduct(allDomains, tuple);
+		
+		for (int i = 0; i < tuple.size(); i++) {
+			String[] assignments = tuple.get(i).split(" ");
+			for (int j = 0; j < assignments.length; j++) {
+				System.out.format("%10s ", assignments[j]);
+			}
+			System.out.format("%15s\n", getValue(tuple.get(i)));
+		}
+		System.out.println();
+	}
+	
+	/**
+	 * This cartesian product algorithm has its flaws:
+	 * 1) It is recursive
+	 * 2) Variables names are not very clear
+	 * 3) It concatenates Strings using the '+' operator (StringBuilder
+	 *    will be more effective for large sets)
+	 * 4) I am not completely satisfied with its beauty. Looks very inefficient,
+	 * 	  even though I have not tested it for large sets. 
+	 * 5) It's in the wrong class! Create an appropriate class for it.
+	 * 
+	 * There is one advantage: it works as far as I can tell.
+	 */
+	public void cartesianProduct(Vector<Vector<String>> sets, Vector<String> result) {
+		if (sets.size() > 2) {
+			Vector<String> aux = sets.remove(0);
+			Vector<String> resultAux = new Vector<String>();
+			cartesianProduct(sets, result);
+			for (int i = 0; i < aux.size(); i++) {
+				for (int j = 0; j < result.size(); j++) {
+					resultAux.add(aux.get(i) + " " + result.get(j));
+				}
+			}
+			Iterator<String> auxElement = resultAux.iterator();
+			result.clear();
+			while (auxElement.hasNext()) {
+				result.add(auxElement.next());
+			}
+		} else if (sets.size() == 2){
+			for (int i = 0; i < sets.firstElement().size(); i++) {
+				for (int j = 0; j < sets.lastElement().size(); j++) {
+					result.add(sets.firstElement().get(i) + " " + sets.lastElement().get(j));
+				}
+			}
+		} else {
+			Iterator<String> auxElement = sets.firstElement().iterator();
+			while (auxElement.hasNext()) {
+				result.add(auxElement.next());
 			}
 		}
-		
-		
 	}
 }

@@ -11,7 +11,7 @@ import java.util.Vector;
  * @author ftakiyama
  *
  */
-public class FactorOperator {
+public class FactorHandler {
 	public Factor sumOut(Factor factor, RandomVariable variable) {
 		
 		return null;

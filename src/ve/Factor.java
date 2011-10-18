@@ -4,7 +4,6 @@
 package ve;
 
 import java.util.Iterator;
-import java.util.Enumeration;
 import java.util.Vector;
 import java.util.Hashtable;
 
@@ -17,27 +16,27 @@ import java.util.Hashtable;
  */
 public class Factor {
 	private Vector<RandomVariable> variables;
-	private Hashtable<Vector<String>,Double> assignment; //each element in this object represents a line in the table 
+	private Hashtable<Tuple, Double> assignment; //each element in this object represents a line in the table 
 	
 	/**
 	 * Default constructor. Creates an empty Factor.
 	 */
 	public Factor() {
 		this.variables = new Vector<RandomVariable>();
-		this.assignment = new Hashtable<Vector<String>,Double>();
+		this.assignment = new Hashtable<Tuple, Double>();
 	}
 	
 	//TODO: how to initialize this factor in an efficient manner?
 	public Factor(Vector<RandomVariable> vars) {
 		this.variables = new Vector<RandomVariable>();
-		this.assignment = new Hashtable<Vector<String>,Double>();		
+		this.assignment = new Hashtable<Tuple, Double>();		
 		Iterator<RandomVariable> it = vars.iterator();
 		while (it.hasNext()) {
 			this.variables.add(it.next());
 		}
 	}
 	
-	public void addAssignment(Vector<String> tuple, double value) {
+	public void addAssignment(Tuple tuple, double value) {
 		this.assignment.put(tuple, value);
 	}
 	
@@ -45,84 +44,76 @@ public class Factor {
 		return variables.contains(x);
 	}
 	
-	public double getValue(Vector<String> tuple) {
+	public double getValue(Tuple tuple) {
 		return assignment.get(tuple);
 	}
 	
 	public double getValue(String tuple) {
-		Vector<String> t = new Vector<String>();
-		String[] tupleSplit = tuple.split(" ");
-		for (int i = 0; i < tupleSplit.length; i++) {
-			t.add(tupleSplit[i]);
-		}
+		Tuple t = new Tuple(tuple);
 		return assignment.get(t);
 	}
 	
-	public void print() {
-		for (int i = 0; i < this.variables.size(); i++) {
-			System.out.format("%10s ", this.variables.get(i).getName()); 
-		}
-		System.out.format("%15s\n", "VALUE");
-		System.out.println("----------------------------------------------------------------------");
-		
-		// Wow! The code below is really messy
-		Vector<String> tuple = new Vector<String>();
-		
-		Vector<Vector<String>> allDomains = new Vector<Vector<String>>();
-		
-		for (int i = 0; i < this.variables.size(); i++) {
-			allDomains.add(this.variables.get(i).getDomain()); 
-		}
-		cartesianProduct(allDomains, tuple);
-		
-		for (int i = 0; i < tuple.size(); i++) {
-			String[] assignments = tuple.get(i).split(" ");
-			for (int j = 0; j < assignments.length; j++) {
-				System.out.format("%10s ", assignments[j]);
-			}
-			System.out.format("%15s\n", getValue(tuple.get(i)));
-		}
-		System.out.println();
+	/**
+	 * Get the index of a given random variable in this factor.
+	 * @param v The random variable to be searched 
+	 * @return The index of v in this factor, or -1 if this variable does not
+	 * exist in this factor.
+	 */
+	public int getVariableIndex(RandomVariable v) {
+		return this.variables.indexOf(v); 
 	}
 	
 	/**
-	 * This cartesian product algorithm has its flaws:
-	 * 1) It is recursive
-	 * 2) Variables names are not very clear
-	 * 3) It concatenates Strings using the '+' operator (StringBuilder
-	 *    will be more effective for large sets)
-	 * 4) I am not completely satisfied with its beauty. Looks very inefficient,
-	 * 	  even though I have not tested it for large sets. 
-	 * 5) It's in the wrong class! Create an appropriate class for it.
-	 * 
-	 * There is one advantage: it works as far as I can tell.
+	 * Print the factor in a tabular form.
+	 * For now, it only prints in the console.  
 	 */
-	public void cartesianProduct(Vector<Vector<String>> sets, Vector<String> result) {
-		if (sets.size() > 2) {
-			Vector<String> aux = sets.remove(0);
-			Vector<String> resultAux = new Vector<String>();
-			cartesianProduct(sets, result);
-			for (int i = 0; i < aux.size(); i++) {
-				for (int j = 0; j < result.size(); j++) {
-					resultAux.add(aux.get(i) + " " + result.get(j));
-				}
-			}
-			Iterator<String> auxElement = resultAux.iterator();
-			result.clear();
-			while (auxElement.hasNext()) {
-				result.add(auxElement.next());
-			}
-		} else if (sets.size() == 2){
-			for (int i = 0; i < sets.firstElement().size(); i++) {
-				for (int j = 0; j < sets.lastElement().size(); j++) {
-					result.add(sets.firstElement().get(i) + " " + sets.lastElement().get(j));
-				}
-			}
-		} else {
-			Iterator<String> auxElement = sets.firstElement().iterator();
-			while (auxElement.hasNext()) {
-				result.add(auxElement.next());
-			}
+	public void print() {
+		String midRule = new String();
+		String thickRule = new String();
+		String cellFormat = "%-10s"; 
+		String valueCellFormat = "%-10s\n";
+		
+		// Create the rule - aesthetical   
+		for (int i = 0; i <= this.variables.size(); i++) {
+			midRule += String.format(cellFormat, "").replace(" ", "-");
 		}
+		thickRule = midRule.replace("-", "=");
+		
+		// Top rule
+		System.out.println(thickRule);
+		
+		// Print the variables names
+		for (int i = 0; i < this.variables.size(); i++) {
+			System.out.format(cellFormat, this.variables.get(i).getName()); 
+		}
+		
+		// Value column
+		System.out.format(cellFormat + "\n", "VALUE");
+		
+		// Mid rule
+		System.out.println(midRule);
+		
+		// Auxiliary variables to create the cartesian product
+		Vector<String> tuple = new Vector<String>();
+		Vector<Vector<String>> allDomains = new Vector<Vector<String>>();
+		for (int i = 0; i < this.variables.size(); i++) {
+			allDomains.add(this.variables.get(i).getDomain()); 
+		}
+		
+		// Create the cartesian product of all variable's domains
+		SetHandler.cartesianProduct(allDomains, tuple);
+		
+		// Finally, print the contents
+		for (int i = 0; i < tuple.size(); i++) {
+			String[] assignments = tuple.get(i).split(" ");
+			for (int j = 0; j < assignments.length; j++) {
+				System.out.format(cellFormat, assignments[j]);
+			}
+			System.out.format(valueCellFormat, getValue(tuple.get(i)));
+		}
+		
+		// Bottom rule
+		System.out.println(thickRule + "\n");
 	}
+	
 }

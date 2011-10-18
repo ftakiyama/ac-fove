@@ -9,6 +9,9 @@ package ve;
  *
  */
 public class VariableEliminationAlgorithm {
+	/**
+	 * This is the main code that will work someday, hopefully.
+	 * 
 	public Factor VariableElimination(Variable[] v, Factor[] f, Assignment[] vo, Variable q, Heuristic h) {
 		Variable[] e = Set.subtract(v, Set.union(o,q));
 		while (f.contains(e)) {
@@ -26,4 +29,5 @@ public class VariableEliminationAlgorithm {
 		fwithouty = Set.subtract(f, fy);
 		return Set.union(fwithouty, sumOut(y, multiply(fy, f)));
 	} 
+	*/
 }

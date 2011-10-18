@@ -47,59 +47,33 @@ public class FactorTester {
 		
 		// Filling the factors with values
 		// For now it is pretty manual, but I think I will do something about it
-		Vector<String> tuple = new Vector<String>();
-		tuple.add("false");
+		// later...
+		Tuple tuple = new Tuple("false");
 		f1.addAssignment(tuple, 0.8);
-		tuple = new Vector<String>();
-		tuple.add("true");
-		f1.addAssignment(tuple, 0.2);
 		
-		tuple = new Vector<String>();
-		tuple.add("false");
+		tuple = new Tuple("false");
 		f2.addAssignment(tuple, 0.6);
-		tuple = new Vector<String>();
-		tuple.add("true");
+		
+		tuple = new Tuple("true");
+		f1.addAssignment(tuple, 0.2);
+		tuple = new Tuple("true");
 		f2.addAssignment(tuple, 0.4);
 		
-		tuple = new Vector<String>();
-		tuple.add("false");
-		tuple.add("false");
-		tuple.add("false");
+		tuple = new Tuple("false false false");
 		f3.addAssignment(tuple, 1.0);
-		tuple = new Vector<String>();
-		tuple.add("false");
-		tuple.add("false");
-		tuple.add("true");
+		tuple = new Tuple("false false true");
 		f3.addAssignment(tuple, 0.0);
-		tuple = new Vector<String>();
-		tuple.add("false");
-		tuple.add("true");
-		tuple.add("false");
+		tuple = new Tuple("false true false");
 		f3.addAssignment(tuple, 0.2);
-		tuple = new Vector<String>();
-		tuple.add("false");
-		tuple.add("true");
-		tuple.add("true");
+		tuple = new Tuple("false true true");
 		f3.addAssignment(tuple, 0.8);
-		tuple = new Vector<String>();
-		tuple.add("true");
-		tuple.add("false");
-		tuple.add("false");
+		tuple = new Tuple("true false false");
 		f3.addAssignment(tuple, 0.1);
-		tuple = new Vector<String>();
-		tuple.add("true");
-		tuple.add("false");
-		tuple.add("true");
+		tuple = new Tuple("true false true");
 		f3.addAssignment(tuple, 0.9);
-		tuple = new Vector<String>();
-		tuple.add("true");
-		tuple.add("true");
-		tuple.add("false");
+		tuple = new Tuple("true true false");
 		f3.addAssignment(tuple, 0.01);
-		tuple = new Vector<String>();
-		tuple.add("true");
-		tuple.add("true");
-		tuple.add("true");
+		tuple = new Tuple("true true true");
 		f3.addAssignment(tuple, 0.99);
 		
 		System.out.println("Factors filled. I will print them now:");
@@ -111,47 +85,33 @@ public class FactorTester {
 		return 0;
 	}
 	
-	// This should not be here...
-	public static int testCartesianProduct() {
-		Vector<String> a = new Vector<String>();
-		Vector<String> b = new Vector<String>();
-		Vector<String> c = new Vector<String>();
-		Vector<String> d = new Vector<String>();
-		Vector<Vector<String>> bc = new Vector<Vector<String>>();
-		Vector<String> r = new Vector<String>();
+	
+	// error! not a good idea to use objects as keys to hashmaps
+	// immutable object? what is that?
+	public static void testinho() {
+		Tuple t1 = new Tuple ("1 2");
+		Tuple t2 = new Tuple ("1 2");
 		
-		a.add("a1");
-		a.add("a2");
-		b.add("b1");
-		b.add("b2");
-		c.add("c1");
-		c.add("c2");
-		d.add("d1");
-		d.add("d2");
+		Hashtable<Tuple, Double> a = new Hashtable<Tuple, Double>();
 		
-		bc.add(a);
-		bc.add(b);
-		bc.add(c);
-		//bc.add(d);
+		a.put(t1, 0.1);
 		
-		Factor f = new Factor();
+		//System.out.print(a.get(t1));
 		
-		f.cartesianProduct(bc, r);
+		Vector<String> x1 = new Vector<String>();
+		Vector<String> x2 = new Vector<String>();
 		
-		for (int i = 0; i < r.size(); i++) {
-			System.out.println(r.get(i));
-		}
+		x1.add("1");
+		x2.add("1");
 		
-		return 0;
+		Hashtable<Vector<String>, Double> b = new Hashtable<Vector<String>, Double>();
+		
+		b.put(x1, 0.1);
+		System.out.print(b.get(x2));
+
+		System.out.print(x1.equals(x2));
+		
+		
 	}
 	
-	static void testinho() {
-		Hashtable<Vector<String>, Double> table = new Hashtable<Vector<String>, Double>();
-		Vector<String> key = new Vector<String>();
-		key.add("bla");
-		table.put(key, 0.1);
-		Vector<String> k = new Vector<String>();
-		k.add("bla");
-		System.out.print(table.get(k));
-	}
 }

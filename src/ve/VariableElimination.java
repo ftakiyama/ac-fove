@@ -15,7 +15,8 @@ public class VariableElimination {
 	 * @param args Not used yet.
 	 */
 	public static void main(String[] args) {
-		FactorTester.testinho();
+		FactorHandlerTester.testSumOut();
+		//FactorTester.testinho();
 		//SetHandler.testCartesianProduct();
 	}
 

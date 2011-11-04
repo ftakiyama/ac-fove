@@ -16,20 +16,20 @@ import java.util.Hashtable;
  */
 public class Factor {
 	private Vector<RandomVariable> variables;
-	private Hashtable<Tuple, Double> assignment; //each element in this object represents a line in the table 
+	private Hashtable<Vector<String>, Double> assignment; //each element in this object represents a line in the table 
 	
 	/**
 	 * Default constructor. Creates an empty Factor.
 	 */
 	public Factor() {
 		this.variables = new Vector<RandomVariable>();
-		this.assignment = new Hashtable<Tuple, Double>();
+		this.assignment = new Hashtable<Vector<String>, Double>();
 	}
 	
 	//TODO: how to initialize this factor in an efficient manner?
 	public Factor(Vector<RandomVariable> vars) {
 		this.variables = new Vector<RandomVariable>();
-		this.assignment = new Hashtable<Tuple, Double>();		
+		this.assignment = new Hashtable<Vector<String>, Double>();		
 		Iterator<RandomVariable> it = vars.iterator();
 		while (it.hasNext()) {
 			this.variables.add(it.next());
@@ -37,6 +37,10 @@ public class Factor {
 	}
 	
 	public void addAssignment(Tuple tuple, double value) {
+		this.assignment.put(tuple.getTuple(), value);
+	}
+	
+	public void addAssignment(Vector<String> tuple, double value) {
 		this.assignment.put(tuple, value);
 	}
 	
@@ -45,11 +49,16 @@ public class Factor {
 	}
 	
 	public double getValue(Tuple tuple) {
-		return assignment.get(tuple);
+		return assignment.get(tuple.getTuple());
 	}
 	
+	// Very ugly
 	public double getValue(String tuple) {
-		Tuple t = new Tuple(tuple);
+		Vector<String> t = new Vector<String>();
+		String[] assignments = tuple.split(" ");
+		for (int i = 0; i < assignments.length; i++) {
+			t.add(assignments[i]);
+		}
 		return assignment.get(t);
 	}
 	
@@ -61,6 +70,19 @@ public class Factor {
 	 */
 	public int getVariableIndex(RandomVariable v) {
 		return this.variables.indexOf(v); 
+	}
+	
+	/**
+	 * Returns a copy of the vector containing the variables of this factor.
+	 * @return A copy of the vector containing the variables of this factor.
+	 */
+	@SuppressWarnings("unchecked")
+	public Vector<RandomVariable> getVariables() {
+		return (Vector<RandomVariable>) this.variables.clone();
+	}
+	
+	public void removeVariable(RandomVariable variable) {
+		this.variables.remove(variable);
 	}
 	
 	/**

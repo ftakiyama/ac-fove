@@ -96,7 +96,8 @@ public class FactorTester {
 		
 		a.put(t1, 0.1);
 		
-		//System.out.print(a.get(t1));
+		System.out.println(a.get(t2) +" " + t1 + " " + t2);
+		System.out.println(t1.equals(t2));
 		
 		Vector<String> x1 = new Vector<String>();
 		Vector<String> x2 = new Vector<String>();

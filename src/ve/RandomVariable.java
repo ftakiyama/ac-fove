@@ -53,6 +53,15 @@ public class RandomVariable {
 		return domain;
 	}
 	
+	public int getDomainSize() {
+		return domain.size();
+	}
+	
+	public String getElement(int index) {
+		return domain.elementAt(index);
+	}
+	
+	
 	/**
 	 * Prints this random variable. It simply outputs its name and the 
 	 * elements of the domain.

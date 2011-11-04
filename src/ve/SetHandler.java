@@ -78,7 +78,7 @@ public class SetHandler {
 	 * @return Cartesian product of the domains of the list of random 
 	 * variables passed as parameter.
 	 */
-	public Vector<Tuple> cartesianProduct(Vector<RandomVariable> factorVariables) {
+	public static Vector<Tuple> cartesianProduct(Vector<RandomVariable> factorVariables) {
 		Vector<Vector<String>> sets = new Vector<Vector<String>>();
 		Iterator<RandomVariable> i = factorVariables.iterator();
 		Vector<String> result = new Vector<String>();

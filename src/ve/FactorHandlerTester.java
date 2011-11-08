@@ -3,6 +3,7 @@
  */
 package ve;
 
+import java.util.Iterator;
 import java.util.Vector;
 
 /**
@@ -10,7 +11,7 @@ import java.util.Vector;
  *
  */
 public class FactorHandlerTester {
-	public static int testSumOut() {
+	public static int testSumOut () {
 		System.out.println("Creating a factor...");
 		
 		// All variables will be binary
@@ -65,6 +66,68 @@ public class FactorHandlerTester {
 		System.out.println("Summing out sprinkler...");
 		
 		Factor g = FactorHandler.sumOut(f, sprinkler);
+		
+		g.print();
+		
+		return 0;
+	}
+	
+	/**
+	 * Test the sumOut method using a large factor.
+	 * For now, I get a java heap space error thanks to my recursive method
+	 * to calculate the cross product of sets.
+	 * TODO find a way not to calculate the cross product recursively.
+	 * @return
+	 */
+	public static int bigTestSumOut () {
+		System.out.println("Creating a factor...");
+
+		// Two types of domain
+		Vector<String> d1 = new Vector<String>();
+		d1.add("v1");
+		d1.add("v2");
+		Vector<String> d2 = new Vector<String>();
+		d2.add("w1");
+		d2.add("w2");
+		d2.add("w3");
+		d2.add("w4");
+		
+		// Variables
+		Vector<RandomVariable> variable = new Vector<RandomVariable>();
+		for (int i = 0; i < 1000; i++) {
+			if (i % 2 == 0) {
+				RandomVariable rv = new RandomVariable("X" + i, d1);
+				variable.add(rv);
+			} else {
+				RandomVariable rv = new RandomVariable("X" + i, d2);
+				variable.add(rv);
+			}
+		}
+		
+		System.out.println("Variables created. Number of variables: " + variable.size());
+		
+		//Factor
+		Factor f = new Factor(variable);
+		
+		System.out.println("Factor created. Now let's fill it.");
+		
+		Vector<Tuple> tuple = new Vector<Tuple>();		
+		
+		tuple = SetHandler.cartesianProduct(variable);
+		
+		Iterator<Tuple> it = tuple.iterator();
+		
+		while (it.hasNext()) {
+			f.addAssignment(it.next(), Math.random());
+		}
+		
+		System.out.println("Factor filled. I will print it now:");
+		
+		f.print();
+		
+		System.out.println("Summing out X0...");
+		
+		Factor g = FactorHandler.sumOut(f, variable.firstElement());
 		
 		g.print();
 		

@@ -21,14 +21,15 @@ public class SetHandler {
 	 * within another Vector.
 	 * 
 	 * This cartesian product algorithm has some flaws:
-	 * 1) It is recursive
+	 * 1) It is recursive. Good to explode the memory
 	 * 2) Variables names are not very clear [solved]
 	 * 3) It concatenates Strings using the '+' operator (StringBuilder
-	 *    will be more effective for large sets)
+	 *    will be more effective for large sets) [not solved]
 	 * 4) I am not completely satisfied with its beauty. Looks very inefficient,
 	 * 	  even though I have not tested it for large sets. 
 	 * 
-	 * There is one advantage: it works as far as I can tell.
+	 * There is one advantage: it works as far as I can tell. It works only
+	 * for a small number of sets with small size, though.
 	 * 
 	 * @param sets A Vector containing the sets of strings to be processed.
 	 * @param result The result of the cartesian product. Each position in the 
@@ -43,7 +44,10 @@ public class SetHandler {
 				cartesianProduct(sets, result);
 				for (int i = 0; i < aux.size(); i++) {
 					for (int j = 0; j < result.size(); j++) {
-						resultAux.add(aux.get(i) + " " + result.get(j));
+						//resultAux.add(aux.get(i) + " " + result.get(j));
+						StringBuilder str = new StringBuilder();
+						str.append(aux.get(i)).append(" ").append(result.get(j));
+						resultAux.add(str.toString());
 					}
 				}
 				Iterator<String> auxElement = resultAux.iterator();
@@ -54,7 +58,10 @@ public class SetHandler {
 			} else if (sets.size() == 2) {
 				for (int i = 0; i < sets.firstElement().size(); i++) {
 					for (int j = 0; j < sets.lastElement().size(); j++) {
-						result.add(sets.firstElement().get(i) + " " + sets.lastElement().get(j));
+						//result.add(sets.firstElement().get(i) + " " + sets.lastElement().get(j));
+						StringBuilder str = new StringBuilder();
+						str.append(sets.firstElement().get(i)).append(" ").append(sets.lastElement().get(j));
+						result.add(str.toString());
 					}
 				}
 			} else {
@@ -64,7 +71,7 @@ public class SetHandler {
 				}
 			}
 		} catch (NoSuchElementException e) {
-			System.err.println("Parameter 'sets' is empty! Exiting program...");
+			System.err.println(System.class.getCanonicalName() + ": parameter 'sets' is empty! Exiting program...");
 			System.exit(-1);
 		}
 	}
@@ -103,35 +110,23 @@ public class SetHandler {
 	 * Tests the method cartesianProduct().
 	 */
 	public static void testCartesianProduct() {
-		Vector<String> a = new Vector<String>();
-		Vector<String> b = new Vector<String>();
-		Vector<String> c = new Vector<String>();
-		Vector<String> d = new Vector<String>();
-		Vector<Vector<String>> bc = new Vector<Vector<String>>();
-		Vector<String> r = new Vector<String>();
+		Vector<Vector<String>> sets = new Vector<Vector<String>>();
+		Vector<String> result = new Vector<String>();
 		
 		// Create the sets
-		a.add("a1");
-		a.add("a2");
-		b.add("b1");
-		b.add("b2");
-		c.add("c1");
-		c.add("c2");
-		d.add("d1");
-		d.add("d2");
-		d.add("d3");
+		for (int i = 0; i < 10; i++) {
+			Vector<String> set = new Vector<String>();
+			for (int j = 0; j < 10; j++) {
+				set.add("x" + i + "_" + j);
+			}
+			sets.add(set);
+		}
 		
-		// Put the sets into a Vector
-		bc.add(a);
-		bc.add(b);
-		//bc.add(c);
-		bc.add(d);
-		
-		cartesianProduct(bc, r);
+		cartesianProduct(sets, result);
 		
 		// Print the result
-		for (int i = 0; i < r.size(); i++) {
-			System.out.println(r.get(i));
+		for (int i = 0; i < result.size(); i++) {
+			System.out.println(result.get(i));
 		}
 	}
 }

@@ -49,4 +49,12 @@ public class Tuple {
 		return (Vector<String>) tuple.clone();
 	}
 	
+	/**
+	 * Returns the element at the specified position in this Tuple.
+	 * @param index Index of the element o return
+	 * @return The String at the specified index
+	 */
+	public String getElement(int index) {
+		return this.tuple.get(index);
+	}
 }

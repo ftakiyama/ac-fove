@@ -15,9 +15,11 @@ public class VariableElimination {
 	 * @param args Not used yet.
 	 */
 	public static void main(String[] args) {
-		FactorHandlerTester.testSumOut();
+		//Sandbox.getDigits(255, 16);
+		//FactorHandlerTester.bigTestSumOut();
 		//FactorTester.testinho();
-		//SetHandler.testCartesianProduct();
+		//FactorTester.test();
+		SetHandler.testCartesianProduct();
 	}
 
 }

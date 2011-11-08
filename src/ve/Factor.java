@@ -16,26 +16,35 @@ import java.util.Hashtable;
  */
 public class Factor {
 	private Vector<RandomVariable> variables;
-	private Hashtable<Vector<String>, Double> assignment; //each element in this object represents a line in the table 
+	//private Hashtable<Vector<String>, Double> assignment;  
+	private Hashtable<Integer, Double> assignment; //each element in this object represents a line in the table
+	private int base; // The base represents the size of the largest domain among the variables of this factor
 	
 	/**
 	 * Default constructor. Creates an empty Factor.
 	 */
 	public Factor() {
 		this.variables = new Vector<RandomVariable>();
-		this.assignment = new Hashtable<Vector<String>, Double>();
+		this.assignment = new Hashtable<Integer, Double>();
+		this.base = 0;
 	}
 	
 	//TODO: how to initialize this factor in an efficient manner?
 	public Factor(Vector<RandomVariable> vars) {
 		this.variables = new Vector<RandomVariable>();
-		this.assignment = new Hashtable<Vector<String>, Double>();		
+		this.assignment = new Hashtable<Integer, Double>();		
+		this.base = 0;
 		Iterator<RandomVariable> it = vars.iterator();
 		while (it.hasNext()) {
-			this.variables.add(it.next());
+			RandomVariable rv = it.next();
+			this.variables.add(rv);
+			if (rv.getDomainSize() > this.base) {
+				this.base = rv.getDomainSize();
+			}
 		}
 	}
 	
+	/**
 	public void addAssignment(Tuple tuple, double value) {
 		this.assignment.put(tuple.getTuple(), value);
 	}
@@ -43,23 +52,56 @@ public class Factor {
 	public void addAssignment(Vector<String> tuple, double value) {
 		this.assignment.put(tuple, value);
 	}
+	*/
+	
+	/**
+	 * Raw method to put the assignment of a value in the factor
+	 */
+	public void addAssignment(Integer key, double value) {
+		this.assignment.put(key, value);
+	}
+	
+	/**
+	 * Put an assignment in the factor.
+	 * @param tuple The tuple to be inserted
+	 * @param value The value corresponding to the tuple
+	 */
+	public void addAssignment(Tuple tuple, double value) {
+		Integer key = calculateKey(tuple);
+		this.assignment.put(key, value);
+	}
+	
+	private Integer calculateKey(Tuple tuple) {
+		Iterator<RandomVariable> it = variables.iterator();
+		int tuplePosition = 0;
+		int key = 0;
+		while (it.hasNext()) {
+			int digit = it.next().getElementIndex(tuple.getElement(tuplePosition));
+			key += digit * Math.pow(base, tuplePosition);
+			tuplePosition++;
+		}
+		return key;
+	}
+	
 	
 	public boolean contains(RandomVariable x) {
 		return variables.contains(x);
 	}
 	
 	public double getValue(Tuple tuple) {
-		return assignment.get(tuple.getTuple());
+		Integer key = calculateKey(tuple);
+		return assignment.get(key);
 	}
 	
-	// Very ugly
+	/**
+	 * Get the value corresponding to the specified tuple. 
+	 * @param tuple A space separated String of values
+	 * @return The value corresponding to the specified tuple
+	 */
 	public double getValue(String tuple) {
-		Vector<String> t = new Vector<String>();
-		String[] assignments = tuple.split(" ");
-		for (int i = 0; i < assignments.length; i++) {
-			t.add(assignments[i]);
-		}
-		return assignment.get(t);
+		Tuple t = new Tuple(tuple);
+		Integer key = calculateKey(t);
+		return assignment.get(key);
 	}
 	
 	/**

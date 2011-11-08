@@ -61,6 +61,17 @@ public class RandomVariable {
 		return domain.elementAt(index);
 	}
 	
+	/**
+	 * Returns the index of the specified element.
+	 * This method assumes that elements do not repeat in the domain, since
+	 * it is a set. It returns -1 if the element does not exist. 
+	 * @param element A String representing the element to search for
+	 * @return The index of the specified element
+	 */
+	public int getElementIndex(String element) {
+		return domain.indexOf(element);
+	}
+	
 	
 	/**
 	 * Prints this random variable. It simply outputs its name and the 

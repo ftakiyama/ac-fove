@@ -3,6 +3,7 @@
  */
 package br.usp.dml.takiyama.cfove;
 
+
 /**
  * Main class for the Variable Elimination algorithm.
  * @author ftakiyama
@@ -23,7 +24,8 @@ public class Main {
 		//Sandbox.testCartesianProduct();
 		//FactorHandler.testSetOperations();
 		//FactorHandlerTester.testMultiplication();
-		Sandbox.sumTest();
+		//Sandbox.sumTest();
+		
 	}
 
 }

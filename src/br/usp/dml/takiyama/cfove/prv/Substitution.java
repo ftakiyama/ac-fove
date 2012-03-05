@@ -9,9 +9,9 @@ class Substitution implements SubstitutionInterface {
 	private HashMap<LogicalVariable, Term> bindings;
 	
 	/**
-	 * Static factory. Returns an empty set of bindings (or a empty
-	 * substitution, if you prefer).
-	 * @return An empty substitution.
+	 * Static factory. Creates a substitution based on a list of bindings.
+	 * @param bindings A {@link List} of {@link Binding}s.
+	 * @return A new substitution built from the list given.
 	 */
 	public static Substitution getInstance(List<Binding> bindings) {
 		return new Substitution(bindings);
@@ -68,5 +68,19 @@ class Substitution implements SubstitutionInterface {
 	 */
 	public Term getReplacement(LogicalVariable substituted) {
 		return this.bindings.get(substituted);
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder result = new StringBuilder("{ ");
+		Iterator<LogicalVariable> bindings = this.bindings.keySet().iterator();
+		
+		while (bindings.hasNext()) {
+			LogicalVariable lv = bindings.next();
+			result.append("( " + lv.toString() + " " + this.bindings.get(lv) + " ) ");
+		}
+		result.append("}");
+		
+		return result.toString();
 	}
 }

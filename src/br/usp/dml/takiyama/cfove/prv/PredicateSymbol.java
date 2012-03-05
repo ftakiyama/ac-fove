@@ -36,7 +36,7 @@ class PredicateSymbol {
 	
 	@Override
 	public String toString() {
-		StringBuilder result = new StringBuilder("range( " + this.name + ") = { ");
+		StringBuilder result = new StringBuilder("range(" + this.name + ") = { ");
 		for (String value : this.range) {
 			result.append(value).append(" ");
 		}
@@ -47,5 +47,13 @@ class PredicateSymbol {
 	
 	Iterator<String> getRange() {
 		return this.range.iterator();
+	}
+	
+	/**
+	 * Returns the name of this Predicate Symbol.
+	 * @return the name of this Predicate Symbol.
+	 */
+	public String getName() {
+		return this.name;
 	}
 }

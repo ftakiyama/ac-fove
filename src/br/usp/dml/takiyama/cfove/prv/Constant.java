@@ -5,7 +5,7 @@ package br.usp.dml.takiyama.cfove.prv;
  * @author ftakiyama
  *
  */
-class Constant extends Term {
+final class Constant extends Term {
 	public Constant(String value) throws IllegalArgumentException{
 		super(value, true);
 		

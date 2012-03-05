@@ -20,16 +20,6 @@ public class ParameterizedRandomVariable implements PrvInterface {
 	
 	// this class should also represent a random variable
 	
-	// I don't know if this method is correct/good
-	public void applySubstitution(Substitution s) {
-		// substitution is a class?
-		// can I change the vector of terms directly?
-		Set<LogicalVariable> toBeReplaced = s.getLogicalVariables();
-		for (LogicalVariable v : toBeReplaced) {
-			int termIndex = parameters.indexOf(v);
-			parameters.set(termIndex, s.getReplacement(v));
-		}
-	}
 	
 	/**
 	 * Returns an Instance of this Parameterized Random Variable by applying
@@ -43,15 +33,45 @@ public class ParameterizedRandomVariable implements PrvInterface {
 	 * 
 	 * @param s A substitution that will be applied to this Parameterized
 	 * Random Variable.
-	 * @return An Instance of this Parameterized Random Variable.
+	 * @return An Instance of this Parameterized Random Variable. Note that
+	 * Instance does not have the same meaning as 'instance' in OOP (see
+	 * explanation above).
 	 */
-	public static ParameterizedRandomVariable getInstance(Substitution s) {
-		return null;
+	public ParameterizedRandomVariable getInstance(Substitution s) {
+		ParameterizedRandomVariable newInstance = 
+			new ParameterizedRandomVariable(this.functor, this.parameters);
+		
+		Set<LogicalVariable> toBeReplaced = s.getLogicalVariables();
+		for (Term v : toBeReplaced) {
+			// Well, v is not recognized as being a member of 'parameters'
+			// Maybe because it is a Term, which is not a final class
+			int termIndex = newInstance.parameters.indexOf(v);
+			newInstance.parameters.set(termIndex, s.getReplacement((LogicalVariable)v));
+		}
+		
+		return newInstance;
 	}
 	
 	/**
-	private ParameterizedRandomVariable(PredicateSymbol name, Vector<Term> parameter) {
-		return null;
+	 * Constructor.
+	 * @param functor A {@link PredicateSymbol}
+	 * @param parameters A {@link Vector} of {@link Term}s.
+	 */
+	public ParameterizedRandomVariable(PredicateSymbol functor, Vector<Term> parameters) {
+		this.functor = functor;
+		this.parameters = new Vector<Term>();
+		for (Term term : parameters) {
+			this.parameters.add(term);
+		}
 	}
-	*/
+	
+	@Override
+	public String toString() {
+		StringBuilder result = new StringBuilder(this.functor.getName() + " ( ");
+		for (Term term : this.parameters) {
+			result.append(term).append(" ");
+		}
+		result.append(")");
+		return result.toString();
+	}
 }

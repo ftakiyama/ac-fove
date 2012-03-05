@@ -6,7 +6,7 @@ package br.usp.dml.takiyama.cfove.prv;
  * @author ftakiyama
  *
  */
-public final class LogicalVariable extends Term {
+final class LogicalVariable extends Term {
 	
 	// I am not really sure if the logical variable must have a domain
 	// private Population domain;

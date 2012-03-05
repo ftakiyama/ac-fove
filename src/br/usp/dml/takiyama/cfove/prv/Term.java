@@ -41,6 +41,7 @@ abstract class Term {
 	}
 	
 	/**
+	 * DO NOT USE. THIS CLASS IS IMMUTABLE
 	 * Converts this term to a constant. If this term cannot be converted, it
 	 * will throw an IllegalArgumentException. 
 	 * @return This term converted to a {@link Constant}

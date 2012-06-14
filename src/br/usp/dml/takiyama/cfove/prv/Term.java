@@ -24,6 +24,14 @@ abstract class Term {
 		return this.value;
 	}
 	
+	@Override
+	public boolean equals(Object object) {
+		if (object.getClass().getName().endsWith("Term")) {
+			// Estou aqui!!!
+		}
+		return true;
+	}
+	
 	/**
 	 * Determines if this term is a {@link Constant}.
 	 * @return True if this term is a constant, false otherwise.

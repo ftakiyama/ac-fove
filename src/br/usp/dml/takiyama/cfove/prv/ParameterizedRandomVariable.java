@@ -1,5 +1,6 @@
 package br.usp.dml.takiyama.cfove.prv;
 
+import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
 
@@ -40,11 +41,9 @@ public class ParameterizedRandomVariable implements PrvInterface {
 	public ParameterizedRandomVariable getInstance(Substitution s) {
 		ParameterizedRandomVariable newInstance = 
 			new ParameterizedRandomVariable(this.functor, this.parameters);
-		
 		Set<LogicalVariable> toBeReplaced = s.getLogicalVariables();
+		
 		for (Term v : toBeReplaced) {
-			// Well, v is not recognized as being a member of 'parameters'
-			// Maybe because it is a Term, which is not a final class
 			int termIndex = newInstance.parameters.indexOf(v);
 			newInstance.parameters.set(termIndex, s.getReplacement((LogicalVariable)v));
 		}
@@ -73,5 +72,58 @@ public class ParameterizedRandomVariable implements PrvInterface {
 		}
 		result.append(")");
 		return result.toString();
+	}
+	
+	/**
+	 * Returns an iterator over the set of logical variables that appear in
+	 * this parameterized random variable (PRV).
+	 * @return An iterator over the set of logical variables of this PRV. 
+	 */
+	public Iterator<LogicalVariable> getParameters() {
+		Vector<LogicalVariable> parameters = new Vector<LogicalVariable>();
+		for (Term t : this.parameters) {
+			if (t.isLogicalVariable()) {
+				parameters.add((LogicalVariable) t);
+			}
+		}
+		return parameters.iterator();
+	}
+	
+	/**
+	 * Returns an iterator over the set of random variables that this
+	 * parameterized random variable represents.<br> 
+	 * A parameterized random variable f(t1,...,tk) represents a set of random 
+	 * variables, one random variable for each ground substitution to all 
+	 * logical variables in param(f(t1,...,tk)) [Kisynski, 2010].
+	 * 
+	 * @return
+	 */
+	public Iterator<ParameterizedRandomVariable> getGroundInstances() {
+		//TODO: Implement this.
+		// I think I'll need to create a Cartesian product of sets...
+		// I see... out of memory space!
+		return null;
+	}
+	
+	@Override
+	public boolean equals(Object object) {
+		if (object.getClass().getName().endsWith("ParameterizedRandomVariable")) {
+			ParameterizedRandomVariable compared = (ParameterizedRandomVariable)object;
+			boolean sameFunctor = this.functor.getName().equals(compared.functor.getName());
+			boolean sameParameters = this.parameters.equals(compared.parameters);
+			
+			// I am here. Must test if the vectors of parameters are the same.
+			for (int i = 0; i < this.parameters.size(); i++) {
+				System.out.println(this.parameters.get(i).equals(compared.parameters.get(i)));
+			}	
+			
+			if (sameFunctor) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
 	}
 }

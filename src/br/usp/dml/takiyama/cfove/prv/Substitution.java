@@ -83,4 +83,17 @@ class Substitution implements SubstitutionInterface {
 		
 		return result.toString();
 	}
+	
+	/**
+	 * Returns true if this substitution unifies v1 and v2.<br>
+	 * A substitution θ is a unifier of two parameterized random variables 
+	 * f (ti1,...,tik ) and f(tj1,...,tjk) if f(ti1,...,tik)[θ] = f(tj1,...,tjk)[θ]. 
+	 * We then say that the two parameterized random variables unify [Kisynski, 2010].
+	 * @param v1 The first {@link ParameterizedRandomVariable}.
+	 * @param v2 The second {@link ParameterizedRandomVariable}.
+	 * @return True if this substitution unifies v1 and v2, false otherwise.
+	 */
+	public boolean isUnifier(ParameterizedRandomVariable v1, ParameterizedRandomVariable v2) {		
+		return v1.getInstance(this).equals(v2.getInstance(this));
+	}
 }

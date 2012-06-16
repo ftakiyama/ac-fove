@@ -97,15 +97,11 @@ public final class Factor {
 	
 	@Override
 	public String toString() {
-		/* this method should be rewritten to organize the data in better way.
-		 * it lists the attributes of this factor, but it is quite raw.
-		 */
 		String result = this.name + "\n";
-		/*
-		result += "\n" + randomVariables.toString();
-		result += "\n" + mapping.toString();
-		return result;
-		*/
+		
+		if (this.randomVariables.isEmpty()) {
+			return this.name + " is empty.";
+		}
 		
 		String thinRule = "";
 		String thickRule = "";

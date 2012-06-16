@@ -14,32 +14,16 @@ public class FactorOperationTest {
 	private ArrayList<RandomVariable> bigListRandomVariables;
 	private Factor bigFactor;
 	
+	private ArrayList<RandomVariable> randomVariablesForAnotherFactor;
+	private Factor anotherFactor;
+	
 	@Before
 	public void initialSetup() {
+		
 		randomVariables = new ArrayList<RandomVariable>();
+		addColorRandomVariable("colors", randomVariables);
+		addBooleanRandomVariable("boolean", randomVariables);
 		
-		String name = "rv1";
-		ArrayList<String> domain = new ArrayList<String>();
-		ArrayList<BigDecimal> values = new ArrayList<BigDecimal>();
-		domain.add("blue");
-		domain.add("green");
-		domain.add("red");
-		values.add(new BigDecimal(0.2));
-		values.add(new BigDecimal(0.11111));
-		values.add(new BigDecimal(0.456));
-		
-		randomVariables.add(RandomVariable.createRandomVariable(name, domain, values));
-		
-		name = "rv2";
-		domain.clear();
-		domain.add("true");
-		domain.add("false");
-		values.clear();
-		values.add(new BigDecimal(0.02));
-		values.add(new BigDecimal(0.98));
-		
-		randomVariables.add(RandomVariable.createRandomVariable(name, domain, values));		
-	
 		ArrayList<BigDecimal> mapping = new ArrayList<BigDecimal>();
 		mapping.add(new BigDecimal(0.1));
 		mapping.add(new BigDecimal(0.2));
@@ -47,6 +31,40 @@ public class FactorOperationTest {
 		mapping.add(new BigDecimal(0.4));
 		mapping.add(new BigDecimal(0.5));
 		mapping.add(new BigDecimal(0.6));
+		
+		try {
+			factor = new Factor("MyFactor", randomVariables, mapping);
+		} catch (ArrayIndexOutOfBoundsException e) {
+			System.err.println(e.getMessage());
+			System.exit(-1);
+		} catch (Exception e) {
+			System.err.println("Unexpected error when creating the Factor.\n" + e);
+			System.exit(-1);
+		}
+		
+		randomVariablesForAnotherFactor = new ArrayList<RandomVariable>();
+		addFruitRandomVariable("fruit", randomVariablesForAnotherFactor);
+		addBooleanRandomVariable("boolean", randomVariablesForAnotherFactor);
+		
+		mapping = new ArrayList<BigDecimal>();
+		mapping.add(new BigDecimal(1));
+		mapping.add(new BigDecimal(2));
+		mapping.add(new BigDecimal(3));
+		mapping.add(new BigDecimal(4));
+		mapping.add(new BigDecimal(5));
+		mapping.add(new BigDecimal(6));
+		mapping.add(new BigDecimal(7));
+		mapping.add(new BigDecimal(8));
+		
+		try {
+			anotherFactor = new Factor("AnotherFactor", randomVariablesForAnotherFactor, mapping);
+		} catch (ArrayIndexOutOfBoundsException e) {
+			System.err.println(e.getMessage());
+			System.exit(-1);
+		} catch (Exception e) {
+			System.err.println("Unexpected error when creating the Factor.\n" + e);
+			System.exit(-1);
+		}
 		
 		// ====================================================================
 		// Creating a big factor
@@ -70,7 +88,7 @@ public class FactorOperationTest {
 		 *              22     362797056
 		 * =============================
 		 */
-		final int numberVariables = 10; // put an even value
+		final int numberVariables = 0; // put an even value
 		
 		ArrayList<String> domainForBigFactor1 = new ArrayList<String>();
 		domainForBigFactor1.add("blue");
@@ -107,9 +125,7 @@ public class FactorOperationTest {
 		}
 		
 		try {
-			factor = new Factor("MyFactor", randomVariables, mapping);
 			bigFactor = new Factor("Big Factor", bigListRandomVariables, mappingForBigFactor);
-			//System.out.println(factor.toString());
 		} catch (ArrayIndexOutOfBoundsException e) {
 			System.err.println(e.getMessage());
 			System.exit(-1);
@@ -117,6 +133,46 @@ public class FactorOperationTest {
 			System.err.println("Unexpected error when creating the Factor.\n" + e);
 			System.exit(-1);
 		}
+	}
+	
+	private void clearAttributes(ArrayList<RandomVariable> randomVariables) {
+		randomVariables = new ArrayList<RandomVariable>();
+	}
+	
+	private void addFruitRandomVariable(String name, ArrayList<RandomVariable> randomVariables) {
+		ArrayList<String> domain = new ArrayList<String>();
+		domain.add("apple");
+		domain.add("banana");
+		domain.add("grape");
+		domain.add("orange");
+		ArrayList<BigDecimal> values = new ArrayList<BigDecimal>();
+		values.add(new BigDecimal(1));
+		values.add(new BigDecimal(2));
+		values.add(new BigDecimal(3));
+		values.add(new BigDecimal(4));
+		randomVariables.add(RandomVariable.createRandomVariable(name, domain, values));		
+	}
+	
+	private void addColorRandomVariable(String name, ArrayList<RandomVariable> randomVariables) {
+		ArrayList<String> domain = new ArrayList<String>();
+		domain.add("blue");
+		domain.add("green");
+		domain.add("red");
+		ArrayList<BigDecimal> values = new ArrayList<BigDecimal>();
+		values.add(new BigDecimal(0.2));
+		values.add(new BigDecimal(0.4));
+		values.add(new BigDecimal(0.6));
+		randomVariables.add(RandomVariable.createRandomVariable(name, domain, values));
+	}
+	
+	private void addBooleanRandomVariable(String name, ArrayList<RandomVariable> randomVariables) {
+		ArrayList<String> domain = new ArrayList<String>();
+		domain.add("true");
+		domain.add("false");
+		ArrayList<BigDecimal> values = new ArrayList<BigDecimal>();
+		values.add(new BigDecimal(0.05));
+		values.add(new BigDecimal(0.10));
+		randomVariables.add(RandomVariable.createRandomVariable(name, domain, values));		
 	}
 	
 	@Test
@@ -138,7 +194,12 @@ public class FactorOperationTest {
 		
 		// Sums out rv1
 		System.out.println("SUM OUT X0:\n" + 
-				FactorOperation.sumOut(bigFactor, bigListRandomVariables.get(0)));		
+				FactorOperation.sumOut(bigFactor, randomVariables.get(0)));		
 	}
 	
+	@Test
+	public void basicTestMultiplication() {
+		System.out.println("Factor x Another Factor:\n" + 
+				FactorOperation.multiply(factor, anotherFactor));
+	}
 }

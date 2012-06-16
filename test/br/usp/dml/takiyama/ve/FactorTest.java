@@ -78,32 +78,32 @@ public class FactorTest {
 		
 		indexes.add(0);
 		indexes.add(0);
-		if (factor.getTupleIndex(indexes) != 0) allTestsOk = false;
+		if (factor.getTupleIndex(new Tuple(indexes)) != 0) allTestsOk = false;
 		
 		indexes.clear();
 		indexes.add(0);
 		indexes.add(1);
-		if (factor.getTupleIndex(indexes) != 1) allTestsOk = false;
+		if (factor.getTupleIndex(new Tuple(indexes)) != 1) allTestsOk = false;
 
 		indexes.clear();
 		indexes.add(1);
 		indexes.add(0);
-		if (factor.getTupleIndex(indexes) != 2) allTestsOk = false;
+		if (factor.getTupleIndex(new Tuple(indexes)) != 2) allTestsOk = false;
 
 		indexes.clear();
 		indexes.add(1);
 		indexes.add(1);
-		if (factor.getTupleIndex(indexes) != 3) allTestsOk = false;
+		if (factor.getTupleIndex(new Tuple(indexes)) != 3) allTestsOk = false;
 
 		indexes.clear();
 		indexes.add(2);
 		indexes.add(0);
-		if (factor.getTupleIndex(indexes) != 4) allTestsOk = false;
+		if (factor.getTupleIndex(new Tuple(indexes)) != 4) allTestsOk = false;
 
 		indexes.clear();
 		indexes.add(2);
 		indexes.add(1);
-		if (factor.getTupleIndex(indexes) != 5) allTestsOk = false;
+		if (factor.getTupleIndex(new Tuple(indexes)) != 5) allTestsOk = false;
 
 		assertTrue(allTestsOk);
 	}

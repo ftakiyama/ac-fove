@@ -85,6 +85,14 @@ public final class RandomVariable {
 		}
 	}
 	
+	/**
+	 * Returns the name of this random variable.
+	 * @return The name of this random variable.
+	 */
+	public String getName() {
+		return this.name;
+	}
+	
 	@Override
 	public String toString() {
 		

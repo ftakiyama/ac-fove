@@ -1,9 +1,13 @@
 package br.usp.dml.takiyama.ve;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Vector;
 import java.lang.ArrayIndexOutOfBoundsException;
+
+import br.usp.dml.takiyama.trash.SetHandler;
 
 /**
  * Let dom(x) denote the domain of random variable x. 
@@ -57,22 +61,20 @@ public final class Factor {
 	
 	/**
 	 * Returns the index of a tuple.
-	 * @param indexes The tuple. It must be an ArrayList of Integers, where
-	 * each position j corresponds to the index of the element in the domain
-	 * of the j-th random variable from this factor.  
-	 * @return The index of a tuple.
-	 * @throws IllegalArgumentException
+	 * @param tuple The tuple to search.   
+	 * @return The index of a tuple in this factor.
+	 * @throws IllegalArgumentException if the tuple is empty.
 	 */
-	public int getTupleIndex(ArrayList<Integer> indexes) throws IllegalArgumentException {
-		if (indexes == null || indexes.isEmpty()) {
+	public int getTupleIndex(Tuple tuple) throws IllegalArgumentException {
+		if (tuple.isEmpty()) {
 			throw new IllegalArgumentException("This tuple is empty!");
-		} else if (indexes.size() == 1) {
-			return indexes.get(0);
+		} else if (tuple.size() == 1) {
+			return tuple.get(0).intValue();
 		} else {		
-			int lastPosition = indexes.size() - 1;
-			Integer lastIndex = indexes.remove(lastPosition);
+			int lastPosition = tuple.size() - 1;
+			Integer lastIndex = tuple.get(lastPosition);
 			int domainSize = this.randomVariables.get(lastPosition).getDomainSize();
-			return lastIndex + domainSize * getTupleIndex(indexes);
+			return lastIndex + domainSize * getTupleIndex(tuple.subTuple(0, lastPosition));
 		}
 	}
 	
@@ -81,17 +83,16 @@ public final class Factor {
 	 * @param index The index of the tuple.
 	 * @return A tuple at the position specified by the parameter <b>index</b>.
 	 */
-	public ArrayList<String> getTuple(int index) {
-		ArrayList<String> tuple = new ArrayList<String>();
+	public Tuple getTuple(int index) {
+		ArrayList<Integer> tuple = new ArrayList<Integer>();
 		for (int j = randomVariables.size() - 1; j > 0; j--) {
 			int domainSize = this.randomVariables.get(j).getDomainSize();
-			int ij = index % domainSize;
-			tuple.add(this.randomVariables.get(j).getElementFromDomain(ij));
+			tuple.add(index % domainSize);
 			index = index / domainSize;	
 		}
-		tuple.add(this.randomVariables.get(0).getElementFromDomain(index));
+		tuple.add(index);
 		Collections.reverse(tuple);
-		return tuple;
+		return new Tuple(tuple);
 	}
 	
 	@Override
@@ -99,10 +100,100 @@ public final class Factor {
 		/* this method should be rewritten to organize the data in better way.
 		 * it lists the attributes of this factor, but it is quite raw.
 		 */
-		String result = this.name;
+		String result = this.name + "\n";
+		/*
 		result += "\n" + randomVariables.toString();
 		result += "\n" + mapping.toString();
 		return result;
+		*/
+		
+		String thinRule = "";
+		String thickRule = "";
+		String cellFormat = "%-10s"; 
+		String valueCellFormat = "%-10s\n";
+		
+		// Create the rules - aesthetic
+		for (int i = 0; i <= this.randomVariables.size(); i++) {
+			thinRule += String.format(cellFormat, "").replace(" ", "-");
+		}
+		thickRule = thinRule.replace("-", "=");
+		
+		// Top rule
+		result += thickRule + "\n";
+		
+		// Print the variables names
+		for (RandomVariable rv : this.randomVariables) {
+			result += String.format(cellFormat, rv.getName()); 
+		}
+		
+		// Value column
+		result += String.format(cellFormat + "\n", "VALUE");
+		
+		// Mid rule
+		result += thinRule + "\n";
+		
+		// Print the contents
+		for (int i = 0; i < this.mapping.size(); i++) {
+			Tuple tuple = this.getTuple(i);
+			for (int j = 0; j < tuple.size(); j++) {
+				RandomVariable currentRandomVariable = this.randomVariables.get(j);
+				int domainIndex = tuple.get(j);
+				String domainValue = currentRandomVariable.getElementFromDomain(domainIndex);
+				result += String.format(cellFormat, domainValue);
+			}
+			// Round the value to 6 digits
+			result += String.format(valueCellFormat, this.mapping.get(i).setScale(6, BigDecimal.ROUND_HALF_DOWN));			
+		}
+		
+		// Bottom rule
+		result += thickRule + "\n";
+		
+		return result;
+	}
+	
+	/**
+	 * Returns the number of values in this factor, which is the same as the
+	 * number of tuples in this factor.
+	 * @return The number of values in this factor.
+	 */
+	public int size() {
+		return this.mapping.size();
+	}
+	
+	/**
+	 * Returns the index of a random variable in this factor, or -1 if
+	 * there is no such random variable in this factor.
+	 * @param randomVariable The random variable to search for
+	 * @return The index of the random variable in this factor, or -1 if
+	 * this factor does not contain the random variable
+	 */
+	public int getRandomVariableIndex(RandomVariable randomVariable) {
+		return this.randomVariables.indexOf(randomVariable);
+	}
+	
+	/**
+	 * Returns the name of this factor.
+	 * @return The name of this factor.
+	 */
+	public String getName() {
+		return this.name;
+	}
+	
+	/**
+	 * Returns a copy of list of random variables in this factor.
+	 * @return A copy of list of random variables in this factor.
+	 */
+	public ArrayList<RandomVariable> getRandomVariables() {
+		return new ArrayList<RandomVariable>(this.randomVariables);
+	}
+	
+	/**
+	 * Returns the value of the tuple specified by its index.
+	 * @param index The index of the tuple in this factor.
+	 * @return The value of the tuple specified by its index.
+	 */
+	public BigDecimal getTupleValue(int index) {
+		return this.mapping.get(index);
 	}
 	
 }

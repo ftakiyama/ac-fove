@@ -1,205 +1,225 @@
 package br.usp.dml.takiyama.ve;
 
+import static org.junit.Assert.*;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.junit.Before;
 import org.junit.Test;
 
 public class FactorOperationTest {
 	
-	private ArrayList<RandomVariable> randomVariables;
-	private Factor factor;
-	
-	private ArrayList<RandomVariable> bigListRandomVariables;
-	private Factor bigFactor;
-	
-	private ArrayList<RandomVariable> randomVariablesForAnotherFactor;
-	private Factor anotherFactor;
+	private HashMap<String,RandomVariable> randomVariables;
+	private HashMap<String,Factor> factors;
 	
 	@Before
-	public void initialSetup() {
+	public void initialSetup() throws ArrayIndexOutOfBoundsException {
 		
-		randomVariables = new ArrayList<RandomVariable>();
-		addColorRandomVariable("colors", randomVariables);
-		addBooleanRandomVariable("boolean", randomVariables);
+		initializeAttributes();
 		
-		ArrayList<BigDecimal> mapping = new ArrayList<BigDecimal>();
-		mapping.add(new BigDecimal(0.1));
-		mapping.add(new BigDecimal(0.2));
-		mapping.add(new BigDecimal(0.3));
-		mapping.add(new BigDecimal(0.4));
-		mapping.add(new BigDecimal(0.5));
-		mapping.add(new BigDecimal(0.6));
+		addBooleanRandomVariable("x1");
+		addBooleanRandomVariable("x2");
+		addBooleanRandomVariable("x3");
+		addBooleanRandomVariable("x4");
 		
-		try {
-			factor = new Factor("MyFactor", randomVariables, mapping);
-		} catch (ArrayIndexOutOfBoundsException e) {
-			System.err.println(e.getMessage());
-			System.exit(-1);
-		} catch (Exception e) {
-			System.err.println("Unexpected error when creating the Factor.\n" + e);
-			System.exit(-1);
-		}
+		ArrayList<RandomVariable> v = new ArrayList<RandomVariable>();
+		v.add(randomVariables.get("x1"));
+		v.add(randomVariables.get("x2"));
 		
-		randomVariablesForAnotherFactor = new ArrayList<RandomVariable>();
-		addFruitRandomVariable("fruit", randomVariablesForAnotherFactor);
-		addBooleanRandomVariable("boolean", randomVariablesForAnotherFactor);
+		ArrayList<BigDecimal> m = new ArrayList<BigDecimal>();
+		m.add(new BigDecimal(0.1));
+		m.add(new BigDecimal(0.2));
+		m.add(new BigDecimal(0.3));
+		m.add(new BigDecimal(0.4));
 		
-		mapping = new ArrayList<BigDecimal>();
-		mapping.add(new BigDecimal(1));
-		mapping.add(new BigDecimal(2));
-		mapping.add(new BigDecimal(3));
-		mapping.add(new BigDecimal(4));
-		mapping.add(new BigDecimal(5));
-		mapping.add(new BigDecimal(6));
-		mapping.add(new BigDecimal(7));
-		mapping.add(new BigDecimal(8));
+		factors.put("f1", new Factor("f1", v, m));
 		
-		try {
-			anotherFactor = new Factor("AnotherFactor", randomVariablesForAnotherFactor, mapping);
-		} catch (ArrayIndexOutOfBoundsException e) {
-			System.err.println(e.getMessage());
-			System.exit(-1);
-		} catch (Exception e) {
-			System.err.println("Unexpected error when creating the Factor.\n" + e);
-			System.exit(-1);
-		}
 		
-		// ====================================================================
-		// Creating a big factor
-		// ====================================================================
+		v.clear();
+		v.add(randomVariables.get("x3"));
+		v.add(randomVariables.get("x4"));
 		
-		/*
-		 * This table is valid for the example created here
-		 * =============================
-		 * numberVariables   factor size
-		 * ----------------------------- 
-		 * 				 2			   6
-		 *				 4			  36
-		 *				 6			 216
-		 *				 8			1296
-		 *  		    10		    7776
-		 *              12		   46656
-		 *              14        279936
-		 *              16       1679616
-		 *              18   	10077696
-		 *              20	    60466176
-		 *              22     362797056
-		 * =============================
-		 */
-		final int numberVariables = 0; // put an even value
+		m.clear();
+		m.add(new BigDecimal(0.80));
+		m.add(new BigDecimal(0.20));
+		m.add(new BigDecimal(0.30));
+		m.add(new BigDecimal(0.60));
+
+		factors.put("f2", new Factor("f2", v, m));
 		
-		ArrayList<String> domainForBigFactor1 = new ArrayList<String>();
-		domainForBigFactor1.add("blue");
-		domainForBigFactor1.add("green");
-		domainForBigFactor1.add("red");
-		ArrayList<BigDecimal> valuesForBigFactor1 = new ArrayList<BigDecimal>();
-		valuesForBigFactor1.add(new BigDecimal(0.2));
-		valuesForBigFactor1.add(new BigDecimal(0.11111));
-		valuesForBigFactor1.add(new BigDecimal(0.456));
+		v.clear();
+		v.add(randomVariables.get("x1"));
+		v.add(randomVariables.get("x3"));
 		
-		ArrayList<String> domainForBigFactor2 = new ArrayList<String>();
-		domainForBigFactor2.add("true");
-		domainForBigFactor2.add("false");
-		ArrayList<BigDecimal> valuesForBigFactor2 = new ArrayList<BigDecimal>();
-		valuesForBigFactor2.add(new BigDecimal(0.02));
-		valuesForBigFactor2.add(new BigDecimal(0.98));
-		
-		bigListRandomVariables = new ArrayList<RandomVariable>();
-		for (int i = 0; i < numberVariables; i++) {
-			if (i % 2 == 0) {
-				bigListRandomVariables.add(RandomVariable.createRandomVariable("X" + i, domainForBigFactor1, valuesForBigFactor1));
-			} else {
-				bigListRandomVariables.add(RandomVariable.createRandomVariable("X" + i, domainForBigFactor2, valuesForBigFactor2));
-			}
-		}
-		
-		ArrayList<BigDecimal> mappingForBigFactor = new ArrayList<BigDecimal>();
-		final int sizeBigMapping = (int) (
-				Math.pow(domainForBigFactor1.size(), numberVariables/2) *
-				Math.pow(domainForBigFactor2.size(), numberVariables/2)
-			);
-		for (int i = 0; i < sizeBigMapping; i++) {
-			mappingForBigFactor.add(BigDecimal.valueOf(Math.random()));
-		}
-		
-		try {
-			bigFactor = new Factor("Big Factor", bigListRandomVariables, mappingForBigFactor);
-		} catch (ArrayIndexOutOfBoundsException e) {
-			System.err.println(e.getMessage());
-			System.exit(-1);
-		} catch (Exception e) {
-			System.err.println("Unexpected error when creating the Factor.\n" + e);
-			System.exit(-1);
-		}
+		m.clear();
+		m.add(new BigDecimal(2.0));
+		m.add(new BigDecimal(4.0));
+		m.add(new BigDecimal(6.0));
+		m.add(new BigDecimal(8.0));
+
+		factors.put("f3", new Factor("f3", v, m));
+
 	}
 	
-	private void clearAttributes(ArrayList<RandomVariable> randomVariables) {
-		randomVariables = new ArrayList<RandomVariable>();
+	private void initializeAttributes() {
+		this.factors = new HashMap<String,Factor>();
+		this.randomVariables = new HashMap<String,RandomVariable>();
 	}
 	
-	private void addFruitRandomVariable(String name, ArrayList<RandomVariable> randomVariables) {
-		ArrayList<String> domain = new ArrayList<String>();
-		domain.add("apple");
-		domain.add("banana");
-		domain.add("grape");
-		domain.add("orange");
-		ArrayList<BigDecimal> values = new ArrayList<BigDecimal>();
-		values.add(new BigDecimal(1));
-		values.add(new BigDecimal(2));
-		values.add(new BigDecimal(3));
-		values.add(new BigDecimal(4));
-		randomVariables.add(RandomVariable.createRandomVariable(name, domain, values));		
-	}
-	
-	private void addColorRandomVariable(String name, ArrayList<RandomVariable> randomVariables) {
-		ArrayList<String> domain = new ArrayList<String>();
-		domain.add("blue");
-		domain.add("green");
-		domain.add("red");
-		ArrayList<BigDecimal> values = new ArrayList<BigDecimal>();
-		values.add(new BigDecimal(0.2));
-		values.add(new BigDecimal(0.4));
-		values.add(new BigDecimal(0.6));
-		randomVariables.add(RandomVariable.createRandomVariable(name, domain, values));
-	}
-	
-	private void addBooleanRandomVariable(String name, ArrayList<RandomVariable> randomVariables) {
+	private void addBooleanRandomVariable(String name) {
 		ArrayList<String> domain = new ArrayList<String>();
 		domain.add("true");
 		domain.add("false");
 		ArrayList<BigDecimal> values = new ArrayList<BigDecimal>();
 		values.add(new BigDecimal(0.05));
 		values.add(new BigDecimal(0.10));
-		randomVariables.add(RandomVariable.createRandomVariable(name, domain, values));		
+		randomVariables.put(name, RandomVariable.createRandomVariable(name, domain, values));		
 	}
 	
 	@Test
 	public void basicTestSumOut() {
-		System.out.println("BEFORE:\n" + factor.toString());
+		System.out.println("BEFORE:\n" + factors.get("f1").toString());
 		
-		// Sums out rv1
-		System.out.println("SUM OUT rv1:\n" + 
-				FactorOperation.sumOut(factor, randomVariables.get(0)));
+		// Sums out x1
+		//System.out.println("SUM OUT x1:\n" + 
+		//		FactorOperation.sumOut(factors.get("f1"), randomVariables.get("x1")));
 		
-		// Sums out rv2
-		System.out.println("SUM OUT rv2:\n" + 
-				FactorOperation.sumOut(factor, randomVariables.get(1)));
+		// Sums out x2
+		System.out.println("SUM OUT x2:\n" + 
+				FactorOperation.sumOut(factors.get("f1"), randomVariables.get("x2")));
+				
 	}
 	
-	@Test
-	public void bigTestSumOut() {
-		System.out.println("BEFORE:\n" + bigFactor.toString());
-		
-		// Sums out rv1
-		System.out.println("SUM OUT X0:\n" + 
-				FactorOperation.sumOut(bigFactor, randomVariables.get(0)));		
-	}
 	
 	@Test
 	public void basicTestMultiplication() {
-		System.out.println("Factor x Another Factor:\n" + 
-				FactorOperation.multiply(factor, anotherFactor));
+		
+		ArrayList<RandomVariable> v = new ArrayList<RandomVariable>();
+		v.add(randomVariables.get("x1"));
+		v.add(randomVariables.get("x2"));
+		v.add(randomVariables.get("x3"));
+		v.add(randomVariables.get("x4"));
+		
+		Factor f1 = factors.get("f1");
+		Factor f2 = factors.get("f2");
+		
+		ArrayList<BigDecimal> m = new ArrayList<BigDecimal>();
+		m.add(f1.getTupleValue(0).multiply(f2.getTupleValue(0)));
+		m.add(f1.getTupleValue(0).multiply(f2.getTupleValue(1)));
+		m.add(f1.getTupleValue(0).multiply(f2.getTupleValue(2)));
+		m.add(f1.getTupleValue(0).multiply(f2.getTupleValue(3)));
+		m.add(f1.getTupleValue(1).multiply(f2.getTupleValue(0)));
+		m.add(f1.getTupleValue(1).multiply(f2.getTupleValue(1)));
+		m.add(f1.getTupleValue(1).multiply(f2.getTupleValue(2)));
+		m.add(f1.getTupleValue(1).multiply(f2.getTupleValue(3)));
+		m.add(f1.getTupleValue(2).multiply(f2.getTupleValue(0)));
+		m.add(f1.getTupleValue(2).multiply(f2.getTupleValue(1)));
+		m.add(f1.getTupleValue(2).multiply(f2.getTupleValue(2)));
+		m.add(f1.getTupleValue(2).multiply(f2.getTupleValue(3)));
+		m.add(f1.getTupleValue(3).multiply(f2.getTupleValue(0)));
+		m.add(f1.getTupleValue(3).multiply(f2.getTupleValue(1)));
+		m.add(f1.getTupleValue(3).multiply(f2.getTupleValue(2)));
+		m.add(f1.getTupleValue(3).multiply(f2.getTupleValue(3)));
+		
+		Factor correctResult = new Factor("f1*f2", v, m);
+		Factor result = FactorOperation.multiply(factors.get("f1"), factors.get("f2"));
+		
+		System.out.println("BEFORE:\n" + factors.get("f1").toString() + "\n" + factors.get("f2").toString());
+		System.out.println("AFTER:\n" + result);
+		System.out.println("CORRECT:\n" + correctResult);
+		
+		assertTrue(result.equals(correctResult));
 	}
+	
+	@Test
+	public void testSelfProduct() {
+		// Creates the factor with the correct result
+		ArrayList<RandomVariable> v = new ArrayList<RandomVariable>();
+		v.add(randomVariables.get("x1"));
+		v.add(randomVariables.get("x2"));
+		
+		Factor f1 = factors.get("f1");
+		
+		ArrayList<BigDecimal> m = new ArrayList<BigDecimal>();
+		m.add(f1.getTupleValue(0).multiply(f1.getTupleValue(0)));
+		m.add(f1.getTupleValue(1).multiply(f1.getTupleValue(1)));
+		m.add(f1.getTupleValue(2).multiply(f1.getTupleValue(2)));
+		m.add(f1.getTupleValue(3).multiply(f1.getTupleValue(3)));
+		
+		Factor correctResult = new Factor("f1*f1", v, m);
+		Factor result = FactorOperation.multiply(factors.get("f1"), factors.get("f1")); 
+		
+		System.out.println("BEFORE:\n" + factors.get("f1").toString());
+		System.out.println("f1 x f1:\n" + result);
+
+		assertTrue(result.equals(correctResult));		
+	}
+	
+	@Test
+	public void testMultiplicationWithCommonVariables() {
+		// Creates the factor with the correct result
+		ArrayList<RandomVariable> v = new ArrayList<RandomVariable>();
+		v.add(randomVariables.get("x1"));
+		v.add(randomVariables.get("x2"));
+		v.add(randomVariables.get("x3"));
+		
+		Factor f1 = factors.get("f1");
+		Factor f3 = factors.get("f3");
+		
+		ArrayList<BigDecimal> m = new ArrayList<BigDecimal>();
+		m.add(f1.getTupleValue(0).multiply(f3.getTupleValue(0)));
+		m.add(f1.getTupleValue(0).multiply(f3.getTupleValue(1)));
+		m.add(f1.getTupleValue(1).multiply(f3.getTupleValue(0)));
+		m.add(f1.getTupleValue(1).multiply(f3.getTupleValue(1)));
+		m.add(f1.getTupleValue(2).multiply(f3.getTupleValue(2)));
+		m.add(f1.getTupleValue(2).multiply(f3.getTupleValue(3)));
+		m.add(f1.getTupleValue(3).multiply(f3.getTupleValue(2)));
+		m.add(f1.getTupleValue(3).multiply(f3.getTupleValue(3)));
+		
+		Factor correctResult = new Factor("f1*f3", v, m);
+		Factor result = FactorOperation.multiply(factors.get("f1"), factors.get("f3"));
+		
+		System.out.println("BEFORE:\n" + factors.get("f1").toString() + "\n" + factors.get("f3").toString());
+		System.out.println("f1 x f3:\n" + result);
+		
+		assertTrue(result.equals(correctResult));
+	}
+	
+	@Test
+	public void testSumOutAfterMultiplication() {
+		
+		ArrayList<RandomVariable> v = new ArrayList<RandomVariable>();
+		v.add(randomVariables.get("x2"));
+		v.add(randomVariables.get("x3"));
+		
+		Factor f1 = factors.get("f1");
+		Factor f3 = factors.get("f3");
+		
+		ArrayList<BigDecimal> m = new ArrayList<BigDecimal>();
+		m.add(f1.getTupleValue(0).multiply(f3.getTupleValue(0)));
+		m.add(f1.getTupleValue(0).multiply(f3.getTupleValue(1)));
+		m.add(f1.getTupleValue(1).multiply(f3.getTupleValue(0)));
+		m.add(f1.getTupleValue(1).multiply(f3.getTupleValue(1)));
+		m.add(f1.getTupleValue(2).multiply(f3.getTupleValue(2)));
+		m.add(f1.getTupleValue(2).multiply(f3.getTupleValue(3)));
+		m.add(f1.getTupleValue(3).multiply(f3.getTupleValue(2)));
+		m.add(f1.getTupleValue(3).multiply(f3.getTupleValue(3)));
+		
+		ArrayList<BigDecimal> mSum = new ArrayList<BigDecimal>();
+		mSum.add(m.get(0).add(m.get(4)));
+		mSum.add(m.get(1).add(m.get(5)));
+		mSum.add(m.get(2).add(m.get(6)));
+		mSum.add(m.get(3).add(m.get(7)));
+		
+		Factor correctResult = new Factor("f1*f3", v, mSum);
+		Factor result = FactorOperation.sumOut(FactorOperation.multiply(factors.get("f1"), factors.get("f3")), randomVariables.get("x1"));
+		
+		System.out.println("BEFORE:\n" + factors.get("f1").toString() + "\n" + factors.get("f3").toString());
+		System.out.println("AFTER:\n" + result);
+		
+		assertTrue(result.equals(correctResult));
+	}
+	
 }

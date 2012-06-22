@@ -1,13 +1,9 @@
 package br.usp.dml.takiyama.ve;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Vector;
 import java.lang.ArrayIndexOutOfBoundsException;
-
-import br.usp.dml.takiyama.trash.SetHandler;
 
 /**
  * Let dom(x) denote the domain of random variable x. 
@@ -190,6 +186,26 @@ public final class Factor {
 	 */
 	public BigDecimal getTupleValue(int index) {
 		return this.mapping.get(index);
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		// Tests if both refer to the same object
+		if (this == other)
+	    	return true;
+		// Tests if the Object is an instance of this class
+	    if (!(other instanceof Factor))
+	    	return false;
+	    // Tests if both have the same attributes
+	    Factor targetObject = (Factor) other;
+	    return this.name.equals(targetObject.name)
+	    	&& ((this.randomVariables == null) ? targetObject.randomVariables == null : this.randomVariables.equals(targetObject.randomVariables))
+    		&& ((this.mapping == null) ? targetObject.mapping == null : this.mapping.equals(targetObject.mapping));	    		
+	}
+	
+	@Override
+	public int hashCode() {
+		return name.hashCode() + randomVariables.hashCode() + mapping.hashCode();
 	}
 	
 }

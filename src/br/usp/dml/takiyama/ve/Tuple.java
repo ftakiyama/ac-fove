@@ -63,9 +63,11 @@ public final class Tuple {
 	
 	
 	/**
+	 * Removes the element at the specified index. All values to the right
+	 * of the index will be shifted to left.
 	 * @see {@link ArrayList#remove}
-	 * @param index
-	 * @return
+	 * @param index The index of the element to be removed.
+	 * @return This tuple with the element specified removed.
 	 */
 	public Integer remove(int index) {
 		return new ArrayList<Integer>(values).remove(index);
@@ -87,9 +89,22 @@ public final class Tuple {
 		return new Tuple(temp);
 	}
 	
-	@Override
-	public String toString() {
-		return this.values.toString();
+	/**
+	 * Returns a sub-tuple of this tuple composed by the elements given
+	 * in the specified list of indexes.
+	 * <br>
+	 * For instance, let t = (0, 10, 20, 30) be a tuple. If we want the
+	 * sub-tuple given by indexes {0, 2} then this method would return 
+	 * t' = (0, 20).
+	 * @param indexes A list of indexes to extract from this tuple.
+	 * @return A sub-tuple of this tuple based on the list of indexes.
+	 */
+	public Tuple subTuple(int[] indexes) {
+		ArrayList<Integer> temp = new ArrayList<Integer>();
+		for (int i = 0; i < indexes.length; i++) {
+			temp.add(get(indexes[i]));
+		}
+		return new Tuple(temp); 
 	}
 	
 	/**
@@ -105,5 +120,28 @@ public final class Tuple {
 		ArrayList<Integer> temp = new ArrayList<Integer>(this.values);
 		temp.set(index, element);
 		return new Tuple(temp);
+	}
+	
+	@Override
+	public String toString() {
+		return this.values.toString();
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		// Tests if both refer to the same object
+		if (this == other)
+	    	return true;
+		// Tests if the Object is an instance of this class
+	    if (!(other instanceof Tuple))
+	    	return false;
+	    // Tests if both have the same attributes
+	    Tuple targetObject = (Tuple) other;
+	    return ((this.values == null) ? targetObject.values == null : this.values.equals(targetObject.values));	    		
+	}
+	
+	@Override
+	public int hashCode() {
+		return values.hashCode();
 	}
 }

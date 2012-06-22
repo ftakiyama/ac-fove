@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
- * This class represents random variables.<br>
+ * This class represents random variables.
+ * <br>
  * A random variable is a function that, given an element from its domain,
  * returns a real number.
  * @author ftakiyama
@@ -40,10 +41,17 @@ public final class RandomVariable {
 	 * @param values A mapping from the elements of the domain to the real
 	 * numbers.
 	 */
-	private RandomVariable(String name, ArrayList<String> domain, ArrayList<BigDecimal> values) {
+	private RandomVariable(String name, ArrayList<String> domain, ArrayList<BigDecimal> values) 
+			throws IllegalArgumentException {
 		this.name = name;
 		this.domain = new ArrayList<String>(domain);
 		this.values = new ArrayList<BigDecimal>(values);
+		
+		if (domain.size() != values.size()) {
+			throw new IllegalArgumentException("The domain should have the" +
+					" same number of elements as values. Domain size: " +
+					domain.size() + ", Values size: " + values.size());
+		}
 	}
 	
 	/**
@@ -131,4 +139,26 @@ public final class RandomVariable {
 		
 		return result;
 	}
+
+	@Override
+	public boolean equals(Object other) {
+		// Tests if both refer to the same object
+		if (this == other)
+	    	return true;
+		// Tests if the Object is an instance of this class
+	    if (!(other instanceof RandomVariable))
+	    	return false;
+	    // Tests if both have the same attributes
+	    RandomVariable targetObject = (RandomVariable) other;
+	    
+	    return (this.name.equals(targetObject.name)
+	    		&& ((this.domain == null) ? targetObject.domain == null : this.domain.equals(targetObject.domain))
+	    		&& ((this.values == null) ? targetObject.values == null : this.values.equals(targetObject.values)));	    		
+	}
+	
+	@Override
+	public int hashCode() {
+		return name.hashCode() + domain.hashCode() + values.hashCode();
+	}
+	
 }

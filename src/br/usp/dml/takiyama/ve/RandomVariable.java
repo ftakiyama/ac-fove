@@ -33,6 +33,15 @@ public final class RandomVariable {
 	}
 	
 	/**
+	 * Returns a copy of the specified random variable.
+	 * @param rv The random variable to be copied
+	 * @return A copy of the specified random variable.
+	 */
+	public static RandomVariable copyOf(RandomVariable rv) {
+		return new RandomVariable(rv.name, rv.domain, rv.values);
+	}
+	
+	/**
 	 * Private constructor.
 	 * Creates a random variable given its name and the mapping from the
 	 * elements of the domain to real numbers.
@@ -142,7 +151,7 @@ public final class RandomVariable {
 
 	@Override
 	public boolean equals(Object other) {
-		// Tests if both refer to the same object
+	    // Tests if both refer to the same object
 		if (this == other)
 	    	return true;
 		// Tests if the Object is an instance of this class

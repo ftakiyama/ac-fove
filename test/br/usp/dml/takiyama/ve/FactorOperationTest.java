@@ -222,4 +222,84 @@ public class FactorOperationTest {
 		assertTrue(result.equals(correctResult));
 	}
 	
+	@Test
+	public void testProdutoryWithNoFactor() {
+		Factor correctResult = new Factor("", new ArrayList<RandomVariable>(), new ArrayList<BigDecimal>());
+		Factor result = FactorOperation.product((Factor[]) null);
+
+		assertTrue(result.equals(correctResult));
+	}
+	
+	@Test
+	public void testProdutoryWithOneFactor() {
+		ArrayList<RandomVariable> v = new ArrayList<RandomVariable>();
+		v.add(randomVariables.get("x1"));
+		v.add(randomVariables.get("x2"));
+		
+		ArrayList<BigDecimal> m = new ArrayList<BigDecimal>();
+		m.add(new BigDecimal(0.1));
+		m.add(new BigDecimal(0.2));
+		m.add(new BigDecimal(0.3));
+		m.add(new BigDecimal(0.4));
+		
+		Factor correctResult = new Factor("f1", v, m);
+		Factor result = FactorOperation.product(factors.get("f1"));
+
+		assertTrue(result.equals(correctResult));
+	}
+	
+	@Test
+	public void testProdutoryWithTwoFactors() {
+		ArrayList<RandomVariable> v = new ArrayList<RandomVariable>();
+		v.add(randomVariables.get("x1"));
+		v.add(randomVariables.get("x2"));
+		v.add(randomVariables.get("x3"));
+		v.add(randomVariables.get("x4"));
+		
+		Factor f1 = factors.get("f1");
+		Factor f2 = factors.get("f2");
+		
+		ArrayList<BigDecimal> m = new ArrayList<BigDecimal>();
+		m.add(f1.getTupleValue(0).multiply(f2.getTupleValue(0)));
+		m.add(f1.getTupleValue(0).multiply(f2.getTupleValue(1)));
+		m.add(f1.getTupleValue(0).multiply(f2.getTupleValue(2)));
+		m.add(f1.getTupleValue(0).multiply(f2.getTupleValue(3)));
+		m.add(f1.getTupleValue(1).multiply(f2.getTupleValue(0)));
+		m.add(f1.getTupleValue(1).multiply(f2.getTupleValue(1)));
+		m.add(f1.getTupleValue(1).multiply(f2.getTupleValue(2)));
+		m.add(f1.getTupleValue(1).multiply(f2.getTupleValue(3)));
+		m.add(f1.getTupleValue(2).multiply(f2.getTupleValue(0)));
+		m.add(f1.getTupleValue(2).multiply(f2.getTupleValue(1)));
+		m.add(f1.getTupleValue(2).multiply(f2.getTupleValue(2)));
+		m.add(f1.getTupleValue(2).multiply(f2.getTupleValue(3)));
+		m.add(f1.getTupleValue(3).multiply(f2.getTupleValue(0)));
+		m.add(f1.getTupleValue(3).multiply(f2.getTupleValue(1)));
+		m.add(f1.getTupleValue(3).multiply(f2.getTupleValue(2)));
+		m.add(f1.getTupleValue(3).multiply(f2.getTupleValue(3)));
+		
+		Factor correctResult = new Factor("f1*f2", v, m);
+		Factor result = FactorOperation.product(factors.get("f1"), factors.get("f2"));
+		
+		assertTrue(result.equals(correctResult));
+	}
+	
+	@Test
+	public void testProdutoryWithThreeFactors() {
+		ArrayList<RandomVariable> v = new ArrayList<RandomVariable>();
+		v.add(randomVariables.get("x1"));
+		v.add(randomVariables.get("x2"));
+		
+		Factor f1 = factors.get("f1");
+		
+		ArrayList<BigDecimal> m = new ArrayList<BigDecimal>();
+		m.add(f1.getTupleValue(0).multiply(f1.getTupleValue(0)).multiply(f1.getTupleValue(0)));
+		m.add(f1.getTupleValue(1).multiply(f1.getTupleValue(1)).multiply(f1.getTupleValue(1)));
+		m.add(f1.getTupleValue(2).multiply(f1.getTupleValue(2)).multiply(f1.getTupleValue(2)));
+		m.add(f1.getTupleValue(3).multiply(f1.getTupleValue(3)).multiply(f1.getTupleValue(3)));
+		
+		Factor correctResult = new Factor("f1*f1*f1", v, m);
+		Factor result = FactorOperation.product(factors.get("f1"), factors.get("f1"), factors.get("f1")); 
+		
+		assertTrue(result.equals(correctResult));		
+	}
 }

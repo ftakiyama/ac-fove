@@ -48,7 +48,7 @@ public final class Factor {
 		for (RandomVariable rv : randomVariables) {
 			factorSize *= rv.getDomainSize();
 		}
-		if (factorSize != mapping.size()) {
+		if (mapping.size() != 0 && factorSize != mapping.size()) {
 			throw new ArrayIndexOutOfBoundsException("The mapping does " +
 					"not have the required number of values. Expected: " + 
 					factorSize + " received: " + mapping.size());
@@ -186,6 +186,23 @@ public final class Factor {
 	 */
 	public BigDecimal getTupleValue(int index) {
 		return this.mapping.get(index);
+	}
+	
+	/**
+	 * Converts the factor to a number. The conversion is possible only when
+	 * the size of the factor is 1. An exception is thrown if the size is not 1.
+	 * @return The number that represents the factor.
+	 * @throws Exception If the factor does not have size 1.
+	 */
+	public BigDecimal toBigDecimal() throws Exception {
+		if (this.mapping.size() == 1)
+			return this.mapping.get(0);
+		else {
+			throw new Exception("Cannot convert factor to number. The factor" +
+					"must have size 1, but this factor has size " + 
+					this.mapping.size());
+		}
+			
 	}
 	
 	@Override

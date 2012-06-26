@@ -1,6 +1,7 @@
 package br.usp.dml.takiyama.ve;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -13,6 +14,8 @@ import java.util.Iterator;
  *
  */
 public class FactorOperation {
+	
+	private static final int PRECISION = 8;
 	
 	/**
 	 * Sums out a random variable from a factor.
@@ -69,7 +72,13 @@ public class FactorOperation {
 		}
 		
 		// Creates the new factor
-		return new Factor(factor.getName(), newRandomVariables, newMapping);
+		return new Factor("sumOut(" 
+				+ randomVariable.getName() 
+				+ ", " 
+				+ factor.getName() 
+				+ ")", 
+				newRandomVariables, 
+				newMapping);
 	}
 	
 	/**
@@ -105,7 +114,7 @@ public class FactorOperation {
 		 */
 
 		ArrayList<RandomVariable> newVariables = union(firstFactor, secondFactor);
-		String newName = firstFactor.getName() + "*" + secondFactor.getName();
+		String newName = firstFactor.getName() + " * " + secondFactor.getName();
 		ArrayList<BigDecimal> newMapping = new ArrayList<BigDecimal>();
 		
 		int[][] commonVariablesMapping = getCommonVariablesMapping(firstFactor, secondFactor);
@@ -218,4 +227,47 @@ public class FactorOperation {
 		return result;		
 	}
 	
+	/**
+	 * Multiplies a sequence of factors in the order provided.
+	 * <br>
+	 * If no factors are provided, returns an empty factor.
+	 * @param factors A sequence of factors to be multiplied.
+	 * @return The factor resulting from the multiplication of all specified 
+	 * factors, or an empty factor if no factor is specified.
+	 */
+	public static Factor product(Factor... factors) {
+		if (factors == null) {
+			return new Factor("", 
+					new ArrayList<RandomVariable>(), 
+					new ArrayList<BigDecimal>());
+		}
+		if (factors.length == 1) {
+			return factors[0];
+		}
+		Factor result = multiply(factors[0], factors[1]);
+		for (int i = 2; i < factors.length; i++) {
+			result = multiply(result, factors[i]);
+		}
+		return result;
+	}
+	
+	/**
+	 * Divides a factor by a real number. The division consists in dividing all
+	 * values from the factor by a divisor.
+	 * @param factor The factor.
+	 * @param divisor The divisor.
+	 * @return The factor with its values divided by divisor.
+	 */
+	public static Factor divide(Factor factor, BigDecimal divisor) {
+		ArrayList<BigDecimal> newMapping = new ArrayList<BigDecimal>();
+		for (int i = 0; i < factor.size(); i++) {
+			newMapping
+				.add(factor
+					.getTupleValue(i)
+					.divide(divisor, PRECISION, RoundingMode.HALF_UP));
+		}
+		return new Factor(factor.getName(), // < the name should be different? 
+				factor.getRandomVariables(), 
+				newMapping);
+	}
 }

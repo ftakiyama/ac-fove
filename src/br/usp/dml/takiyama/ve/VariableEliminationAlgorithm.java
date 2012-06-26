@@ -1,9 +1,5 @@
-/**
- * 
- */
 package br.usp.dml.takiyama.ve;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 
 import com.google.common.collect.ImmutableSet;
@@ -12,44 +8,29 @@ import com.google.common.collect.UnmodifiableIterator;
 
 /**
  * This class implements the VE algorithm.
+ * <br>
+ * There is no special heuristic to select which random variables to eliminate,
+ * the algorithm just takes the first variable from the queue.
  * @author ftakiyama
  *
  */
 public class VariableEliminationAlgorithm {
-	/**
-	 * This is the main code that will work someday, hopefully.
-	 *
-	public Factor VariableElimination(RandomVariable[] v, Factor[] f, Assignment[] vo, Variable q, Heuristic h) {
-		RandomVariable[] e = Set.subtract(v, Set.union(o,q));  // getNonQueriedAndNonObservedRandomVariables()
-		while (f.contains(e)) { // thereIsAFactorInvolvingRandomVariableFromE
-			RandomVariable y = h.selectVariable(e);  // selectRandomVaribleAccordingToHeuristic
-			f = eliminate(f, y); // eliminateRandomVariableFromFactor(y,F)
-			e = Set.subtract(e,y); // removeRandomVariableFromE
-		}
-		f = multiply(f); // MultiplyRemainingFactors()
-		normalizingConstant = sumOut(q,f); // computeNormalizinfConstant
-		return f/normalizingConstant;  // returnResult
-	}
 	
-	private Factor[] eliminate(y, f) {
-		fy = partition(f, y);
-		fwithouty = Set.subtract(f, fy); // getFactorWithoutY
-		return Set.union(fwithouty, sumOut(y, multiply(fy, f)));  // multiply factors with y, sum out y and union with factors without y
-	} */
-	
+	// Input for the algorithm
 	private ImmutableSet<RandomVariable> randomVariables;
 	private ImmutableSet<Factor> factors;
 	private ImmutableSet<RandomVariable> observedRandomVariables;
 	private RandomVariable queryRandomVariable;
-	private Factor posteriorDistribution;
 	
+	// Auxiliary variables
 	private RandomVariable randomVariableToEliminate;
 	private ImmutableSet<Factor> factorsOnRandomVariableToEliminate;
 	private ImmutableSet<Factor> factorsWithoutRandomVariableToEliminate;
-	
 	private ImmutableSet<RandomVariable> nonQueriedNonObservedRandomVariables;
-	
 	private Factor normalizingConstant;
+	
+	// Output of the algorithm
+	private Factor posteriorDistribution;
 	
 	/**
 	 * Constructor. Initializes the parameters for the algorithm. The
@@ -57,7 +38,7 @@ public class VariableEliminationAlgorithm {
 	 * <li> The set of observed random variables must be a subset of the set of
 	 * random variables;
 	 * <li> The query random variable must not be observed;
-	 * <li> All random variables must appear at least in one factor.
+	 * <li> All random variables must appear in at least one factor.
 	 * The algorithm does not check for model consistency. If the model provided
 	 * is inconsistent, results will be unpredictable.
 	 * @param randomVariables Set of random variables
@@ -79,8 +60,8 @@ public class VariableEliminationAlgorithm {
 				.immutableCopy()
 				.isEmpty()) {
 			throw new IllegalArgumentException("The set of observed random " +
-					"variables is not a sub set of the set of random variables" +
-					"provided.");
+					"variables is not a subset of the set of random variables" +
+					" provided.");
 		}
 		
 		if (this.observedRandomVariables.contains(this.queryRandomVariable)) {
@@ -118,7 +99,7 @@ public class VariableEliminationAlgorithm {
 				);
 	}
  	 
-	/*
+	/**
 	 * Eliminates a random variable from a set of factors by multiplying those
 	 * factors that have the specified random variable and summing it out. The
 	 * result is then united with the subset of factors that did not have the

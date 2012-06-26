@@ -10,6 +10,10 @@ import org.junit.Test;
 
 import br.usp.dml.takiyama.ve.RandomVariable;
 
+/**
+ * A set of tests to check the methods of {@link RandomVariable}.
+ * @author ftakiyama
+ */
 public class RandomVariableTest {
 	
 	private RandomVariable randomVariable;

@@ -10,6 +10,11 @@ import java.util.HashMap;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * A set of tests to check the methods of {@link FactorOperation}.
+ * @author ftakiyama
+ *
+ */
 public class FactorOperationTest {
 	
 	private HashMap<String,RandomVariable> randomVariables;
@@ -382,11 +387,11 @@ public class FactorOperationTest {
 	
 	@Test(expected = IllegalArgumentException.class)
 	public void testDivisionException() {
-		Factor result = FactorOperation.divide(factors.get("f1"), factors.get("f3"));
+		FactorOperation.divide(factors.get("f1"), factors.get("f3"));
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
 	public void testDivisionByZero() {
-		Factor result = FactorOperation.divide(factors.get("f1"), factors.get("f5"));
+		FactorOperation.divide(factors.get("f1"), factors.get("f5"));
 	}
 }

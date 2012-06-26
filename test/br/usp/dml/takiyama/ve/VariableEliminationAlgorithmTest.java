@@ -4,21 +4,24 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.junit.Before;
 import org.junit.Test;
 
-
+/**
+ * A set of tests for {@link VariableEliminationAlgorithm}.
+ * The tests must be checked manually.
+ * 
+ * @author ftakiyama
+ *
+ */
 public class VariableEliminationAlgorithmTest {
 	
-	private String[] name = {"rain", "sprinkler", "wet_grass"};
-	private HashMap<String,RandomVariable> randomVariables;
-	private HashMap<String,Factor> factors;
-	
-	private void initializeAttributes() {
-		this.randomVariables = new HashMap<String,RandomVariable>();
-		this.factors = new HashMap<String,Factor>();
-	}
-	
+	/**
+	 * Creates a default boolean random variable. The domain is {false, true}
+	 * and the corresponding values are 0.5 and 0.5. One must take the ordering
+	 * of the domain into account when creating the mapping for the factors.
+	 * @param name The name of the random variable.
+	 * @return A random variable with the specified name and domain {false, true}. 
+	 */
 	private RandomVariable getDefaultBooleanRandomVariable(String name) {
 		ArrayList<String> domain = new ArrayList<String>();
 		domain.add("false");
@@ -31,10 +34,12 @@ public class VariableEliminationAlgorithmTest {
 		return RandomVariable.createRandomVariable(name, domain, values);
 	}
 	
-	@Before
-	public void initialSetup() {
+	@Test
+	public void wetGrassProblem() {
 		
-		initializeAttributes();
+		String[] name = {"rain", "sprinkler", "wet_grass"};
+		HashMap<String,RandomVariable> randomVariables = new HashMap<String,RandomVariable>();
+		HashMap<String,Factor> factors = new HashMap<String,Factor>();
 		
 		for (int i = 0; i < name.length; i++) {
 			randomVariables.put(name[i], getDefaultBooleanRandomVariable(name[i]));
@@ -68,21 +73,17 @@ public class VariableEliminationAlgorithmTest {
 		mapping.add(new BigDecimal(0.01));
 		mapping.add(new BigDecimal(0.99));
 		factors.put("f3", new Factor("f3", variables, mapping));
-	}
-	
-	@Test
-	public void testAlgorithm() {
 		
-		// ugly
-		RandomVariable[] v = new RandomVariable[name.length];
-		v[0] = randomVariables.get("rain");
-		v[1] = randomVariables.get("sprinkler");
-		v[2] = randomVariables.get("wet_grass");
+		RandomVariable[] v = new RandomVariable[randomVariables.size()];
+		for (int i = 0; i < randomVariables.size(); i++) {
+			v[i] = randomVariables.get(name[i]);
+		}
 		
-		Factor[] f = new Factor[3];
-		f[0] = factors.get("f1");
-		f[1] = factors.get("f2");
-		f[2] = factors.get("f3");
+		// Creates the array of factors
+		Factor[] f = new Factor[factors.size()];
+		for (int i = 0; i < factors.size(); i++) {
+			f[i] = factors.get("f" + (i + 1));
+		}
 		
 		RandomVariable[] o = new RandomVariable[0];
 		
@@ -98,7 +99,7 @@ public class VariableEliminationAlgorithmTest {
 	}
 	
 	@Test
-	public void testCharniakExample() {
+	public void familyOutProblem() {
 		
 		// Initialization
 		String[] name = {"light_on", "family_out", "dog_out", "bowel_problem", "hear_bark"};

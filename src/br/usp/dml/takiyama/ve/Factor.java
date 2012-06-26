@@ -12,7 +12,7 @@ import java.lang.ArrayIndexOutOfBoundsException;
  * of a function from dom(x1) x dom(x2) x ... x dom(xn) into the 
  * real numbers. [Kisynski,2010].<br>
  * This factor uses an efficient implementation, but in order to
- * do that, we require the following:<br>
+ * do that, the following is required:
  * <li> Random variables belonging to this factor are ordered
  * <li> The domain of each random variable is ordered
  * <li> The order does not change
@@ -188,23 +188,6 @@ public final class Factor {
 	public BigDecimal getTupleValue(int index) {
 		return this.mapping.get(index);
 	}
-	
-	/**
-	 * Converts the factor to a number. The conversion is possible only when
-	 * the size of the factor is 1. An exception is thrown if the size is not 1.
-	 * @return The number that represents the factor.
-	 * @throws Exception If the factor does not have size 1.
-	 */
-//	public BigDecimal toBigDecimal() throws Exception {
-//		if (this.mapping.size() == 1)
-//			return this.mapping.get(0);
-//		else {
-//			throw new Exception("Cannot convert factor to number. The factor" +
-//					" must have size 1, but this factor has size " + 
-//					this.mapping.size());
-//		}
-//			
-//	}
 	
 	/**
 	 * Returns true if the factor is a sub-factor of the specified factor.

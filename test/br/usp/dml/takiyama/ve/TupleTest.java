@@ -7,6 +7,11 @@ import java.util.ArrayList;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * A set of tests to check the methods of {@link Tuple}.
+ * @author ftakiyama
+ *
+ */
 public class TupleTest {
 
 	private Tuple tuple;

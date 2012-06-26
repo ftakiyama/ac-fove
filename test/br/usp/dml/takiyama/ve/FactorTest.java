@@ -11,7 +11,11 @@ import org.junit.Before;
 
 import br.usp.dml.takiyama.ve.Factor;
 
-
+/**
+ * A set of tests to check the methods of {@link Factor}.
+ * @author ftakiyama
+ *
+ */
 public class FactorTest {
 	
 	private ArrayList<RandomVariable> randomVariables;

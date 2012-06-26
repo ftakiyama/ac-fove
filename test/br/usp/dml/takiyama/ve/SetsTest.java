@@ -11,6 +11,13 @@ import org.junit.Test;
 
 import com.google.common.collect.*;
 
+/**
+ * A set of tests to verify how the {@link Sets} class from Guava library works.
+ * The tests in here are not "real" tests.
+ * 
+ * @author ftakiyama
+ *
+ */
 public class SetsTest {
 	
 	HashMap<String, ImmutableSet<RandomVariable>> sets;

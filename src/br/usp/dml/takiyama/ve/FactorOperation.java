@@ -15,7 +15,7 @@ import java.util.Iterator;
  */
 public class FactorOperation {
 	
-	private static final int PRECISION = 8;
+	public static final int PRECISION = 8; 
 	
 	/**
 	 * Sums out a random variable from a factor.
@@ -87,7 +87,7 @@ public class FactorOperation {
 	 * Given two factors 
 	 * 	   F<sub>1</sub>(x<sub>1</sub>,...,x<sub>n</sub>,y<sub>1</sub>,...,y<sub>j</sub>) and 
 	 *     F<sub>2</sub>(y<sub>1</sub>,...,y<sub>j</sub>,z<sub>1</sub>,...,z<sub>k</sub>) 
-	 * the resulting parfactor will be 
+	 * the resulting factor will be 
 	 * F(x<sub>1</sub>,...,x<sub>n</sub>,y<sub>1</sub>,...,
 	 *         y<sub>j</sub>,z<sub>1</sub>,...,z<sub>k</sub>) =
 	 *     F<sub>1</sub>(x<sub>1</sub>,...,x<sub>n</sub>,y<sub>1</sub>,..., 
@@ -95,8 +95,8 @@ public class FactorOperation {
 	 *     F<sub>2</sub>(y<sub>1</sub>,...,y<sub>j</sub>,z<sub>1</sub>,...,
 	 *         z<sub>k</sub>)
 	 * <br>
-	 * That is, for each assignment of values to the variables in the parfactors,
-	 * we multiply the values that have the same assignment for the common 
+	 * That is, for each assignment of values to the variables in the factors,
+	 * the method multiply the values that have the same assignment for the common 
 	 * variables. 
 	 * @param firstFactor The first factor to be multiplied
 	 * @param secondFactor The second factor to be multiplied
@@ -258,16 +258,67 @@ public class FactorOperation {
 	 * @param divisor The divisor.
 	 * @return The factor with its values divided by divisor.
 	 */
-	public static Factor divide(Factor factor, BigDecimal divisor) {
-		ArrayList<BigDecimal> newMapping = new ArrayList<BigDecimal>();
-		for (int i = 0; i < factor.size(); i++) {
-			newMapping
-				.add(factor
-					.getTupleValue(i)
-					.divide(divisor, PRECISION, RoundingMode.HALF_UP));
+	
+	/**
+	 * Divides factors by a sub-factor and returns the resulting factor.
+	 * <br>
+	 * Given two factors 
+	 * 	   F<sub>1</sub>(x<sub>1</sub>,...,x<sub>n</sub>,y<sub>1</sub>,...,y<sub>j</sub>) and 
+	 *     F<sub>2</sub>(y<sub>1</sub>,...,y<sub>j</sub>) 
+	 * the resulting factor will be 
+	 * F(x<sub>1</sub>,...,x<sub>n</sub>,y<sub>1</sub>,...,y<sub>j</sub>) =
+	 *     F<sub>1</sub>(x<sub>1</sub>,...,x<sub>n</sub>,y<sub>1</sub>,..., 
+	 *         y<sub>j</sub>) / 
+	 *     F<sub>2</sub>(y<sub>1</sub>,...,y<sub>j</sub>)
+	 * <br>
+	 * That is, for each assignment of values to the variables in the factors,
+	 * the method divides the values that have the same assignment for the 
+	 * common variables. 
+	 * @param dividend The dividend factor
+	 * @param divisor The divisor factor. Must be a sub-factor of the dividend 
+	 * and must not contain zero values.
+	 * @return The division of <code>dividend</code> by <code>divisor</code>.
+	 * @throws IllegalArgumentException If <code>divisor</code> is not a
+	 * sub-factor of <code>dividend</code>, or if <code>divisor</code> has
+	 * a tuple whose value is 0.
+	 */
+	public static Factor divide(Factor dividend, Factor divisor) 
+			throws IllegalArgumentException {
+		
+		// Checks if divisor is sub-factor of the dividend
+		if (!divisor.isSubFactorOf(dividend))
+			throw new IllegalArgumentException("The divisor is not a " +
+					"sub-factor of the dividend.");
+		
+		// Checks if divisor contains zero -- this is a weak check!
+		for (int i = 0; i < divisor.size(); i++) {
+			if (divisor.getTupleValue(i).compareTo(BigDecimal.ZERO) == 0)
+				throw new IllegalArgumentException("The divisor contains a" +
+						"tuple whose value is 0.");
 		}
-		return new Factor(factor.getName(), // < the name should be different? 
-				factor.getRandomVariables(), 
-				newMapping);
+		
+		// The algorithm is similar to the multiplication 
+		
+		ArrayList<BigDecimal> newMapping = new ArrayList<BigDecimal>();
+		
+		int[][] commonVariablesMapping = getCommonVariablesMapping(dividend, divisor);
+		
+		for (int i = 0; i < dividend.size(); i++) {
+			Tuple t1 = dividend.getTuple(i);
+			for(int j = 0; j < divisor.size(); j++) {
+				Tuple t2 = divisor.getTuple(j);
+				if (haveSameSubtuple(t1, t2, commonVariablesMapping)) {
+					newMapping
+						.add(dividend
+							.getTupleValue(i)
+							.divide(divisor
+								.getTupleValue(j), 
+								PRECISION, 
+								RoundingMode.HALF_UP));
+				}
+			}
+		}
+		return new Factor(dividend.getName(), dividend.getRandomVariables(), newMapping);
 	}
+	
 }

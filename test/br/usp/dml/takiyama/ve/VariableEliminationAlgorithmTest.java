@@ -99,7 +99,99 @@ public class VariableEliminationAlgorithmTest {
 	
 	@Test
 	public void testCharniakExample() {
-		//TODO
+		
+		// Initialization
+		String[] name = {"light_on", "family_out", "dog_out", "bowel_problem", "hear_bark"};
+		HashMap<String,RandomVariable> randomVariables = new HashMap<String,RandomVariable>();
+		HashMap<String,Factor> factors = new HashMap<String,Factor>();
+		
+		// Creates the random variables
+		for (int i = 0; i < name.length; i++) {
+			randomVariables.put(name[i], getDefaultBooleanRandomVariable(name[i]));
+		}
+		
+		// Creates the factor to "light_on"
+		ArrayList<RandomVariable> variables = new ArrayList<RandomVariable>();
+		variables.add(randomVariables.get("light_on"));
+		variables.add(randomVariables.get("family_out"));
+		ArrayList<BigDecimal> mapping = new ArrayList<BigDecimal>();
+		mapping.add(new BigDecimal(0.95));
+		mapping.add(new BigDecimal(0.4));
+		mapping.add(new BigDecimal(0.05));
+		mapping.add(new BigDecimal(0.6));
+		factors.put("f[light_on]", new Factor("f[light_on]", variables, mapping));
+		
+		// Creates the factor to "familiy_out"
+		variables.clear();
+		variables.add(randomVariables.get("family_out"));
+		mapping.clear();
+		mapping.add(new BigDecimal(0.85));
+		mapping.add(new BigDecimal(0.15));
+		factors.put("f[family_out]", new Factor("f[family_out]", variables, mapping));
+		
+		// Creates the factor to "bowel_problem"
+		variables.clear();
+		variables.add(randomVariables.get("bowel_problem"));
+		mapping.clear();
+		mapping.add(new BigDecimal(0.99));
+		mapping.add(new BigDecimal(0.01));
+		factors.put("f[bowel_problem]", new Factor("f[bowel_problem]", variables, mapping));
+		
+		// Creates the factor to "dog_out"
+		variables.clear();
+		variables.add(randomVariables.get("dog_out"));
+		variables.add(randomVariables.get("family_out"));
+		variables.add(randomVariables.get("bowel_problem"));
+		mapping.clear();
+		mapping.add(new BigDecimal(0.7));
+		mapping.add(new BigDecimal(0.03));
+		mapping.add(new BigDecimal(0.1));
+		mapping.add(new BigDecimal(0.01));
+		mapping.add(new BigDecimal(0.3));
+		mapping.add(new BigDecimal(0.97));
+		mapping.add(new BigDecimal(0.90));
+		mapping.add(new BigDecimal(0.99));
+		factors.put("f[dog_out]", new Factor("f[dog_out]", variables, mapping));
+		
+		// Creates the factor to "hear_bark"
+		variables.clear();
+		variables.add(randomVariables.get("hear_bark"));
+		variables.add(randomVariables.get("dog_out"));
+		mapping.clear();
+		mapping.add(new BigDecimal(0.99));
+		mapping.add(new BigDecimal(0.3));
+		mapping.add(new BigDecimal(0.01));
+		mapping.add(new BigDecimal(0.7));
+		factors.put("f[hear_bark]", new Factor("f[hear_bark]", variables, mapping));
+		
+		// Creates the vector of random variables
+		RandomVariable[] v = new RandomVariable[randomVariables.size()];
+		for (int i = 0; i < randomVariables.size(); i++) {
+			v[i] = randomVariables.get(name[i]);
+		}
+		
+		// Creates the array of factors
+		Factor[] f = new Factor[factors.size()];
+		for (int i = 0; i < factors.size(); i++) {
+			f[i] = factors.get("f[" + name[i] + "]");
+		}
+		
+		// Creates the array of observed variables
+		RandomVariable[] o = new RandomVariable[1];
+		o[0] = randomVariables.get("hear_bark");
+		
+		// Creates the query random variable
+		RandomVariable q = randomVariables.get("dog_out");
+		
+		// Creates a new instance of the algorithm
+		VariableEliminationAlgorithm algorithm = new VariableEliminationAlgorithm(v, f, o, q);
+		
+		// Executes the algorithm
+		try {
+			System.out.println(algorithm.execute());
+		} catch (Exception e) {
+			System.err.print(e.getMessage());
+		}
 	}
 	
 	

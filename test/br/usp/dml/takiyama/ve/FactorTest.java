@@ -303,4 +303,102 @@ public class FactorTest {
 		
 		assertFalse(factor.equals(f));
 	}
+	
+	@Test
+	public void testSubFactorWithEqualFactors() {
+		ArrayList<RandomVariable> v = new ArrayList<RandomVariable>();
+		
+		String name = "rv1";
+		ArrayList<String> domain = new ArrayList<String>();
+		ArrayList<BigDecimal> values = new ArrayList<BigDecimal>();
+		domain.add("blue");  
+		domain.add("green");
+		domain.add("red");
+		values.add(new BigDecimal(0.2));
+		values.add(new BigDecimal(0.11111));
+		values.add(new BigDecimal(0.456));
+		
+		v.add(RandomVariable.createRandomVariable(name, domain, values));
+		
+		name = "rv2";
+		domain.clear();
+		domain.add("true");
+		domain.add("false");
+		values.clear();
+		values.add(new BigDecimal(0.02));
+		values.add(new BigDecimal(0.98));
+		
+		v.add(RandomVariable.createRandomVariable(name, domain, values));		
+	
+		ArrayList<BigDecimal> mapping = new ArrayList<BigDecimal>();
+		mapping.add(new BigDecimal(0.1));
+		mapping.add(new BigDecimal(0.2));
+		mapping.add(new BigDecimal(0.3));
+		mapping.add(new BigDecimal(0.4));
+		mapping.add(new BigDecimal(0.5));
+		mapping.add(new BigDecimal(0.6));
+		
+		Factor f = new Factor("MyFactor", v, mapping);
+		
+		assertTrue(factor.isSubFactorOf(f));
+	}
+	
+	@Test
+	public void testSubFactorWithEmptyFactor() {
+		ArrayList<RandomVariable> v = new ArrayList<RandomVariable>();
+		ArrayList<BigDecimal> mapping = new ArrayList<BigDecimal>();
+		
+		Factor f = new Factor("MyFactor", v, mapping);
+		
+		assertTrue(f.isSubFactorOf(factor));
+	}
+	
+	@Test
+	public void testSubFactorWithSubFactor() {
+		ArrayList<RandomVariable> v = new ArrayList<RandomVariable>();
+		
+		String name = "rv1";
+		ArrayList<String> domain = new ArrayList<String>();
+		ArrayList<BigDecimal> values = new ArrayList<BigDecimal>();
+		domain.add("blue");  
+		domain.add("green");
+		domain.add("red");
+		values.add(new BigDecimal(0.2));
+		values.add(new BigDecimal(0.11111));
+		values.add(new BigDecimal(0.456));
+		
+		v.add(RandomVariable.createRandomVariable(name, domain, values));
+		
+		ArrayList<BigDecimal> mapping = new ArrayList<BigDecimal>();
+		mapping.add(new BigDecimal(0.1));
+		mapping.add(new BigDecimal(0.2));
+		mapping.add(new BigDecimal(0.3));
+		
+		Factor f = new Factor("MyFactor", v, mapping);
+		
+		assertTrue(f.isSubFactorOf(factor));
+	}
+	
+	@Test
+	public void testSubFactorWithNonSubFactor() {
+		ArrayList<RandomVariable> v = new ArrayList<RandomVariable>();
+		
+		String name = "rv3";
+		ArrayList<String> domain = new ArrayList<String>();
+		ArrayList<BigDecimal> values = new ArrayList<BigDecimal>();
+		domain.add("blue");  
+		domain.add("green");
+		values.add(new BigDecimal(0.2));
+		values.add(new BigDecimal(0.456));
+		
+		v.add(RandomVariable.createRandomVariable(name, domain, values));
+		
+		ArrayList<BigDecimal> mapping = new ArrayList<BigDecimal>();
+		mapping.add(new BigDecimal(0.1));
+		mapping.add(new BigDecimal(0.3));
+		
+		Factor f = new Factor("MyFactor", v, mapping);
+		
+		assertFalse(f.isSubFactorOf(factor));
+	}
 }

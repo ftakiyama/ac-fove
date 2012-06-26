@@ -49,7 +49,7 @@ public class VariableEliminationAlgorithm {
 	
 	private ImmutableSet<RandomVariable> nonQueriedNonObservedRandomVariables;
 	
-	private BigDecimal normalizingConstant;
+	private Factor normalizingConstant;
 	
 	/**
 	 * Constructor. Initializes the parameters for the algorithm. The
@@ -85,7 +85,7 @@ public class VariableEliminationAlgorithm {
 		
 		if (this.observedRandomVariables.contains(this.queryRandomVariable)) {
 			throw new IllegalArgumentException("The query random variable" +
-					"is in the set of observed random variables.");
+					" is in the set of observed random variables.");
 		}
 		
 		// should check if all random variables appear in at least on factor
@@ -224,8 +224,7 @@ public class VariableEliminationAlgorithm {
 	private void calculateNormalizingConstant() throws Exception {
 		normalizingConstant = FactorOperation
 			.sumOut(posteriorDistribution, 
-					queryRandomVariable)
-			.toBigDecimal();
+					queryRandomVariable);
 	}
 	
 	/**

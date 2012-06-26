@@ -3,6 +3,7 @@ package br.usp.dml.takiyama.ve;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.lang.ArrayIndexOutOfBoundsException;
 
 /**
@@ -134,7 +135,7 @@ public final class Factor {
 				result += String.format(cellFormat, domainValue);
 			}
 			// Round the value to 6 digits
-			result += String.format(valueCellFormat, this.mapping.get(i).setScale(6, BigDecimal.ROUND_HALF_DOWN));			
+			result += String.format(valueCellFormat, this.mapping.get(i).setScale(6, BigDecimal.ROUND_HALF_UP));			
 		}
 		
 		// Bottom rule
@@ -194,15 +195,32 @@ public final class Factor {
 	 * @return The number that represents the factor.
 	 * @throws Exception If the factor does not have size 1.
 	 */
-	public BigDecimal toBigDecimal() throws Exception {
-		if (this.mapping.size() == 1)
-			return this.mapping.get(0);
-		else {
-			throw new Exception("Cannot convert factor to number. The factor" +
-					"must have size 1, but this factor has size " + 
-					this.mapping.size());
-		}
-			
+//	public BigDecimal toBigDecimal() throws Exception {
+//		if (this.mapping.size() == 1)
+//			return this.mapping.get(0);
+//		else {
+//			throw new Exception("Cannot convert factor to number. The factor" +
+//					" must have size 1, but this factor has size " + 
+//					this.mapping.size());
+//		}
+//			
+//	}
+	
+	/**
+	 * Returns true if the factor is a sub-factor of the specified factor.
+	 * @return True if the factor is a sub-factor of the specified factor.
+	 */
+	public boolean isSubFactorOf(Factor factor) {
+		
+		// Quick check
+		if (factor.randomVariables.size() < this.randomVariables.size())
+			return false;
+		
+		Iterator<RandomVariable> it = this.randomVariables.iterator();
+		while (it.hasNext())
+			if (!factor.randomVariables.contains(it.next()))
+				return false;
+		return true;
 	}
 	
 	@Override

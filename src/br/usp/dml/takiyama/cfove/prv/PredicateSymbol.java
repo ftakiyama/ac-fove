@@ -34,6 +34,16 @@ class PredicateSymbol {
 		}
 	}
 	
+	/**
+	 * Constructor. Creates a Predicate Symbol using the same elements of
+	 * the specified predicate symbol.
+	 * @param s The predicate symbol to be copied
+	 */
+	PredicateSymbol(PredicateSymbol s) {
+		this.name = s.name;
+		this.range = new TreeSet<String>(s.range);
+	}
+	
 	@Override
 	public String toString() {
 		StringBuilder result = new StringBuilder("range(" + this.name + ") = { ");

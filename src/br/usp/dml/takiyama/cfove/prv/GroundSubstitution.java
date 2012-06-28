@@ -39,8 +39,6 @@ class GroundSubstitution implements SubstitutionInterface {
 	 * @param t A {@link Term}
 	 */
 	public void add(LogicalVariable v, Term t) {
-		if (t.isConstant()) {
-			this.bindings.put(v, (Constant)t);
-		}
+		this.bindings.put(v, (Constant)t);
 	}
 }

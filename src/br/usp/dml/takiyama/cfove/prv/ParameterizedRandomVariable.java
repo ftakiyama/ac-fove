@@ -1,6 +1,8 @@
 package br.usp.dml.takiyama.cfove.prv;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
@@ -15,12 +17,27 @@ import java.util.Vector;
  * @author ftakiyama
  *
  */
-public class ParameterizedRandomVariable implements PrvInterface {
-	private Vector<Term> parameters;
-	private PredicateSymbol functor;
+public class ParameterizedRandomVariable {
+	private final ArrayList<Term> parameters;
+	private final PredicateSymbol functor;
 	
-	// this class should also represent a random variable
+	// this class should be able to create random variable
 	
+	/*
+	 * What should this class do?
+	 * - get parameters
+	 * - get grounf instances
+	 */
+	
+	/**
+	 * Constructor.
+	 * @param functor A {@link PredicateSymbol}
+	 * @param parameters A {@link Vector} of {@link Term}s.
+	 */
+	public ParameterizedRandomVariable(PredicateSymbol functor, List<Term> parameters) {
+		this.functor = new PredicateSymbol(functor);
+		this.parameters = new ArrayList<Term>(parameters);
+	}
 	
 	/**
 	 * Returns an Instance of this Parameterized Random Variable by applying
@@ -51,19 +68,6 @@ public class ParameterizedRandomVariable implements PrvInterface {
 		return newInstance;
 	}
 	
-	/**
-	 * Constructor.
-	 * @param functor A {@link PredicateSymbol}
-	 * @param parameters A {@link Vector} of {@link Term}s.
-	 */
-	public ParameterizedRandomVariable(PredicateSymbol functor, Vector<Term> parameters) {
-		this.functor = functor;
-		this.parameters = new Vector<Term>();
-		for (Term term : parameters) {
-			this.parameters.add(term);
-		}
-	}
-	
 	@Override
 	public String toString() {
 		StringBuilder result = new StringBuilder(this.functor.getName() + " ( ");
@@ -79,15 +83,16 @@ public class ParameterizedRandomVariable implements PrvInterface {
 	 * this parameterized random variable (PRV).
 	 * @return An iterator over the set of logical variables of this PRV. 
 	 */
-	public Iterator<LogicalVariable> getParameters() {
-		Vector<LogicalVariable> parameters = new Vector<LogicalVariable>();
-		for (Term t : this.parameters) {
-			if (t.isLogicalVariable()) {
-				parameters.add((LogicalVariable) t);
-			}
-		}
-		return parameters.iterator();
-	}
+	
+//	public Iterator<LogicalVariable> getParameters() {
+//		Vector<LogicalVariable> parameters = new Vector<LogicalVariable>();
+//		for (Term t : this.parameters) {
+//			if (t  .isLogicalVariable()) {
+//				parameters.add((LogicalVariable) t);
+//			}
+//		}
+//		return parameters.iterator();
+//	}
 	
 	/**
 	 * Returns an iterator over the set of random variables that this
@@ -106,24 +111,21 @@ public class ParameterizedRandomVariable implements PrvInterface {
 	}
 	
 	@Override
-	public boolean equals(Object object) {
-		if (object.getClass().getName().endsWith("ParameterizedRandomVariable")) {
-			ParameterizedRandomVariable compared = (ParameterizedRandomVariable)object;
-			boolean sameFunctor = this.functor.getName().equals(compared.functor.getName());
-			boolean sameParameters = this.parameters.equals(compared.parameters);
-			
-			// I am here. Must test if the vectors of parameters are the same.
-			for (int i = 0; i < this.parameters.size(); i++) {
-				System.out.println(this.parameters.get(i).equals(compared.parameters.get(i)));
-			}	
-			
-			if (sameFunctor) {
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			return false;
-		}
+	public boolean equals(Object other) {
+		// Tests if both refer to the same object
+		if (this == other)
+	    	return true;
+		// Tests if the Object is an instance of this class
+	    if (!(other instanceof ParameterizedRandomVariable))
+	    	return false;
+	    // Tests if both have the same attributes
+	    ParameterizedRandomVariable targetObject = (ParameterizedRandomVariable) other;
+	    return ((this.functor == null) ? (targetObject.functor == null) : this.functor.equals(targetObject.functor))
+	    		&& ((this.parameters == null) ? (targetObject.parameters == null) : this.parameters.equals(targetObject.parameters));
+	}
+	
+	@Override
+	public int hashCode() {
+		return functor.hashCode() + parameters.hashCode();
 	}
 }

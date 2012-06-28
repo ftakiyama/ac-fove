@@ -6,59 +6,6 @@ package br.usp.dml.takiyama.cfove.prv;
  * @author ftakiyama
  *
  */
-abstract class Term {
-	private final String value;
-	private final boolean isConstant;
-	
-	Term (String value, boolean isConstant) {
-		this.value = value;
-		this.isConstant = isConstant;
-	}
-	
-	public String getValue() {
-		return this.value;
-	}
-	
-	@Override
-	public String toString() {
-		return this.value;
-	}
-	
-	@Override
-	public boolean equals(Object object) {
-		if (object.getClass().getName().endsWith("Term")) {
-			// Estou aqui!!!
-		}
-		return true;
-	}
-	
-	/**
-	 * Determines if this term is a {@link Constant}.
-	 * @return True if this term is a constant, false otherwise.
-	 */
-	public boolean isConstant() {
-		return this.isConstant;
-	}
-	
-	/**
-	 * Determines if this term is a {@link LogicalVariable}.
-	 * @return True if this term is a logical variable, false otherwise.
-	 */
-	public boolean isLogicalVariable() {
-		return !this.isConstant;
-	}
-	
-	/**
-	 * DO NOT USE. THIS CLASS IS IMMUTABLE
-	 * Converts this term to a constant. If this term cannot be converted, it
-	 * will throw an IllegalArgumentException. 
-	 * @return This term converted to a {@link Constant}
-	 * @throws IllegalArgumentException If this term cannot be converted to 
-	 * a constant (i.e., its name is invalid for a constant)
-	 */
-	/*
-	public Constant toConstant() throws IllegalArgumentException {
-		return new Constant(this.value);
-	}
-	*/
+interface Term {
+	public String getValue();
 }

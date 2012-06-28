@@ -56,10 +56,10 @@ public final class Binding {
 	 * or another {@link LogicalVariable}.
 	 * @return True if this binding is valid, false otherwise.
 	 */
-	public boolean isValid() {
-		return (firstTerm.isLogicalVariable() 
-				&& (secondTerm.isLogicalVariable() || secondTerm.isConstant()));
-	}
+//	public boolean isValid() {
+//		return (firstTerm.isLogicalVariable() 
+//				&& (secondTerm.isLogicalVariable() || secondTerm.isConstant()));
+//	}
 	
 	@Override
 	public String toString() {

@@ -19,7 +19,7 @@ public final class Binding {
 	 * @param t2 A {@link Term}
 	 * @return A binding where the first term is t1 and the second term is t2
 	 */
-	public static Binding getInstance(LogicalVariable t1, Term t2) {
+	public static Binding create(LogicalVariable t1, Term t2) {
 		return new Binding(t1, t2);
 	}
 	

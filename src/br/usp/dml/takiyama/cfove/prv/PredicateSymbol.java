@@ -44,17 +44,10 @@ class PredicateSymbol {
 		this.range = new TreeSet<String>(s.range);
 	}
 	
-	@Override
-	public String toString() {
-		StringBuilder result = new StringBuilder("range(" + this.name + ") = { ");
-		for (String value : this.range) {
-			result.append(value).append(" ");
-		}
-		result.append("}");
-		return result.toString();
-	}
-	
-	
+	/**
+	 * Returns an iterator over the range of the predicate symbol.
+	 * @return An iterator over the range of the predicate symbol.
+	 */
 	Iterator<String> getRange() {
 		return this.range.iterator();
 	}
@@ -66,4 +59,34 @@ class PredicateSymbol {
 	public String getName() {
 		return this.name;
 	}
+	
+	@Override
+	public boolean equals(Object other) {
+		// Tests if both refer to the same object
+		if (this == other)
+	    	return true;
+		// Tests if the Object is an instance of this class
+	    if (!(other instanceof PredicateSymbol))
+	    	return false;
+	    // Tests if both have the same attributes
+	    PredicateSymbol targetObject = (PredicateSymbol) other;
+	    return (this.name == targetObject.name)
+	    		&& ((this.range == null) ? (targetObject.range == null) : this.range.equals(targetObject.range));
+	}
+	
+	@Override
+	public int hashCode() {
+		return name.hashCode() + range.hashCode();
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder result = new StringBuilder("range(" + this.name + ") = { ");
+		for (String value : this.range) {
+			result.append(value).append(" ");
+		}
+		result.append("}");
+		return result.toString();
+	}
+	
 }

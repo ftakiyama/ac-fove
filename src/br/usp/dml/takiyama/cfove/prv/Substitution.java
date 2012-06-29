@@ -13,7 +13,7 @@ class Substitution implements SubstitutionInterface {
 	 * @param bindings A {@link List} of {@link Binding}s.
 	 * @return A new substitution built from the list given.
 	 */
-	public static Substitution getInstance(List<Binding> bindings) {
+	public static Substitution create(List<Binding> bindings) {
 		return new Substitution(bindings);
 	}
 	

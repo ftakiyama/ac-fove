@@ -46,5 +46,8 @@ final class Constant implements Term {
 	    return this.value.equals(targetObject.value);	    		
 	}
 	
-	
+	@Override
+	public int hashCode() {
+		return value.hashCode();
+	}
 }

@@ -2,157 +2,120 @@ package br.usp.dml.takiyama.cfove.prv;
 
 import static org.junit.Assert.*;
 
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.Vector;
 
 import org.junit.Test;
 
+import com.google.common.collect.ImmutableSet;
+
 
 public class ParameterizedRandomVariableTest {
-	@Test
-	public void createSimplePrv() {
-		System.out.println("\nTest: Create Simple Parameterized Random Variable");
-		
+	
+	/**
+	 * Creates a boolean parameterized random variable with 5 logical variables
+	 * (parameters).
+	 * @return A boolean PRV with 5 parameters
+	 */
+	private ParameterizedRandomVariable getBooleanPrv() {
 		PredicateSymbol functor = new PredicateSymbol("f", "true", "false");
-		Vector<Term> parameters = new Vector<Term>();
+		ArrayList<Term> parameters = new ArrayList<Term>();
 		for (int i = 0; i < 5; i++) {
 			parameters.add(new LogicalVariable("X" + i));
 		}
-		System.out.println("Functor: " + functor.toString());
-		ParameterizedRandomVariable prv = new ParameterizedRandomVariable(functor, parameters);
-		
-		System.out.println("PRV: " + prv.toString());
+		return new ParameterizedRandomVariable(functor, parameters);
 	}
 	
 	@Test
-	public void applySubstitution() {
+	public void applyCompleteSubstitution() {
 		System.out.println("\nTest: Apply Substitution");
 		
-		PredicateSymbol functor = new PredicateSymbol("f", "true", "false");
-		Vector<Term> parameters = new Vector<Term>();
-		for (int i = 0; i < 5; i++) {
-			parameters.add(new LogicalVariable("X" + i)); 
-		}
-		ParameterizedRandomVariable prv = new ParameterizedRandomVariable(functor, parameters);
+		ParameterizedRandomVariable prv = getBooleanPrv();
 		
 		System.out.println("PRV: " + prv.toString());
 		
-		Vector<Binding> bindings = new Vector<Binding>();
+		ArrayList<Binding> bindings = new ArrayList<Binding>();
 		for (int i = 0; i < 5; i++) {
-			bindings.add(Binding.getInstance((LogicalVariable)parameters.get(i), new LogicalVariable("Y" + i)));
+			bindings.add(Binding.create(new LogicalVariable("X" + i), new LogicalVariable("Y" + i)));
 		}
-		System.out.println("Bindings: " + bindings.toString());
 		
-		Substitution substitution = Substitution.getInstance(bindings);
+		System.out.println("Substitution: " + bindings.toString());
+		
+		Substitution substitution = Substitution.create(bindings);
 		
 		System.out.println("PRV after substitution: " + prv.getInstance(substitution));
-	}
-	
-	/**
-	 * Create a prv with 5 logical variables as parameters and test
-	 * the method getParameters.
-	 */
-	@Test
-	public void getParameters() {
-		System.out.println("\nTest: Get Parameters");
 		
 		PredicateSymbol functor = new PredicateSymbol("f", "true", "false");
-		Vector<Term> parameters = new Vector<Term>();
+		ArrayList<Term> parameters = new ArrayList<Term>();
 		for (int i = 0; i < 5; i++) {
-			parameters.add(new LogicalVariable("X" + i)); 
+			parameters.add(new LogicalVariable("Y" + i));
 		}
-		ParameterizedRandomVariable prv = new ParameterizedRandomVariable(functor, parameters);
+		ParameterizedRandomVariable correctResult = new ParameterizedRandomVariable(functor, parameters);
 		
-		System.out.println("PRV: " + prv.toString());
-		
-		Iterator<LogicalVariable> lv = prv.getParameters();
-		boolean testOk = true;
-		while (lv.hasNext()) {
-			LogicalVariable currentVariable = lv.next();
-			System.out.println("Current logical variable is: " + currentVariable.toString());
-			if (!parameters.contains(currentVariable)) {
-				testOk = false;
-				break;
-			}
-		}
-		assertTrue(testOk);
-	}
-	
-	/**
-	 * Create a prv with 5 logical variables as parameters and test
-	 * the method getParameters after applying a substitution.
-	 * Validation must be made manually 
-	 */
-	@Test
-	public void getParametersAfterSubstitution() {
-		System.out.println("\nTest: Get Parameters After Substitution");
-		
-		PredicateSymbol functor = new PredicateSymbol("f", "true", "false");
-		Vector<Term> parameters = new Vector<Term>();
-		for (int i = 0; i < 5; i++) {
-			parameters.add(new LogicalVariable("X" + i)); 
-		}
-		ParameterizedRandomVariable prv = new ParameterizedRandomVariable(functor, parameters);
-		System.out.println("PRV: " + prv.toString());
-		
-		Vector<Binding> bindings = new Vector<Binding>();
-		bindings.add(Binding.getInstance((LogicalVariable)parameters.get(2), new Constant("y2")));
-		Substitution substitution = Substitution.getInstance(bindings);
-		System.out.println("Substitution: " + substitution.toString());
-		
-		Iterator<LogicalVariable> lv = prv.getInstance(substitution).getParameters();
-		while (lv.hasNext()) {
-			LogicalVariable currentVariable = lv.next();
-			System.out.println("Current logical variable is: " + currentVariable.toString());
-		}
+		assertTrue(prv.getInstance(substitution).equals(correctResult));
 	}
 	
 	/**
 	 * Test equals. 
 	 */
 	@Test
-	public void equals() {
+	public void testEquals() {
 		System.out.println("\nTest: Equals");
 		
+		ParameterizedRandomVariable correctResult = getBooleanPrv();
+		
 		PredicateSymbol functor = new PredicateSymbol("f", "true", "false");
-		Vector<Term> parameters = new Vector<Term>();
+		ArrayList<Term> parameters = new ArrayList<Term>();
 		for (int i = 0; i < 5; i++) {
 			parameters.add(new LogicalVariable("X" + i)); 
 		}
 		ParameterizedRandomVariable prv = new ParameterizedRandomVariable(functor, parameters);
-		ParameterizedRandomVariable anotherPrv = new ParameterizedRandomVariable(functor, parameters);
-		System.out.println("PRV 1: " + prv.toString());
-		System.out.println("PRV 2: " + anotherPrv.toString());
-		System.out.println("They are equal: " + prv.equals(anotherPrv));
 		
-		assertTrue(prv.equals(anotherPrv));	
+		functor = new PredicateSymbol("f", "true", "false");
+		parameters = new ArrayList<Term>();
+		for (int i = 0; i < 5; i++) {
+			parameters.add(new LogicalVariable("X" + i)); 
+		}
+		ParameterizedRandomVariable prv2 = new ParameterizedRandomVariable(functor, parameters);
+		
+		System.out.println("PRV 1: " + prv.toString());
+		System.out.println("Correct result: " + correctResult.toString());
+		System.out.println("They are equal: " + prv.equals(correctResult));
+		System.out.println("Symmetry: " + correctResult.equals(prv));
+		System.out.println("Reflexivity: " + prv.equals(prv));
+		System.out.println("Transitivity: " + (prv.equals(prv2) ? prv2.equals(prv) : true));
+		System.out.println("Hash code: " + (prv.hashCode() == correctResult.hashCode()));
+		
+		assertTrue(prv.equals(correctResult)
+				&& correctResult.equals(prv) 		            		  // symmetry
+				&& prv.equals(prv) 				                		  // reflexivity
+				&& (prv.equals(prv2) ? prv2.equals(correctResult) : true) // transitivity
+				&& prv.hashCode() == correctResult.hashCode()); 		  // hash code
+		
 	}
 	
-	/**
-	 * Test equals. 
-	 */
 	@Test
-	public void testEqualsWithIndependentlyCreatedPrvs() {
-		System.out.println("\nTest: Equals with independently created PRVs");
+	public void testGetParameters() {
+		System.out.println("\nTest: Get Parameters");
 		
-		PredicateSymbol functor = new PredicateSymbol("f", "true", "false");
-		Vector<Term> parameters = new Vector<Term>();
-		for (int i = 0; i < 5; i++) {
-			parameters.add(new LogicalVariable("X" + i)); 
-		}
-		ParameterizedRandomVariable prv = new ParameterizedRandomVariable(functor, parameters);
+		ArrayList<Binding> bindings = new ArrayList<Binding>();
+		bindings.add(Binding.create(new LogicalVariable("X1"), new Constant("y1")));
+		bindings.add(Binding.create(new LogicalVariable("X4"), new Constant("y4")));
 		
-		PredicateSymbol functor2 = new PredicateSymbol("f", "true", "false");
-		Vector<Term> parameters2 = new Vector<Term>();
-		for (int i = 0; i < 5; i++) {
-			parameters2.add(new LogicalVariable("X" + i)); 
-		}
-		ParameterizedRandomVariable prv2 = new ParameterizedRandomVariable(functor2, parameters2);
+		System.out.println("Substitution: " + bindings.toString());
 		
-		System.out.println("PRV 1: " + prv.toString());
-		System.out.println("PRV 2: " + prv2.toString());
-		System.out.println("They are equal: " + prv.equals(prv2));
+		Substitution substitution = Substitution.create(bindings);
 		
-		assertTrue(prv.equals(prv2));
+		ParameterizedRandomVariable prv = getBooleanPrv().getInstance(substitution);
+
+		System.out.println("After substitution: " + prv.toString());
+		System.out.println("Parameters: " + prv.getParameters().toString());
+		
+		ImmutableSet<LogicalVariable> correctResult = ImmutableSet
+			.of(new LogicalVariable("X0"),
+				new LogicalVariable("X2"),
+				new LogicalVariable("X3"));
+		
+		assertTrue(prv.getParameters().equals(correctResult));
 	}
 }

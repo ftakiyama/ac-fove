@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
+import com.google.common.collect.ImmutableSet;
+
 
 /**
  * A parameterized random variable is either a logical atom or a term. 
@@ -21,12 +23,12 @@ public class ParameterizedRandomVariable {
 	private final ArrayList<Term> parameters;
 	private final PredicateSymbol functor;
 	
-	// this class should be able to create random variable
+	// this class should be able to create random variables
 	
 	/*
 	 * What should this class do?
 	 * - get parameters
-	 * - get grounf instances
+	 * - get ground instances
 	 */
 	
 	/**
@@ -68,31 +70,27 @@ public class ParameterizedRandomVariable {
 		return newInstance;
 	}
 	
-	@Override
-	public String toString() {
-		StringBuilder result = new StringBuilder(this.functor.getName() + " ( ");
-		for (Term term : this.parameters) {
-			result.append(term).append(" ");
-		}
-		result.append(")");
-		return result.toString();
-	}
+	
 	
 	/**
-	 * Returns an iterator over the set of logical variables that appear in
+	 * Returns an immutable set over the set of logical variables that appear in
 	 * this parameterized random variable (PRV).
-	 * @return An iterator over the set of logical variables of this PRV. 
+	 * @return An immutable set over the set of logical variables of this PRV. 
 	 */
-	
-//	public Iterator<LogicalVariable> getParameters() {
-//		Vector<LogicalVariable> parameters = new Vector<LogicalVariable>();
-//		for (Term t : this.parameters) {
-//			if (t  .isLogicalVariable()) {
-//				parameters.add((LogicalVariable) t);
-//			}
-//		}
-//		return parameters.iterator();
-//	}
+	public ImmutableSet<LogicalVariable> getParameters() {
+		ArrayList<LogicalVariable> parameters = new ArrayList<LogicalVariable>();
+		for (Term t : this.parameters) {
+			/*
+			 * There should be a better way to do that.
+			 * But since I know that Term can only be either a Constant or a
+			 * LogicalVariable, I believe that this is not a big problem.
+			 */
+			if (t instanceof LogicalVariable) {
+				parameters.add((LogicalVariable) t);
+			}
+		}
+		return ImmutableSet.copyOf(parameters.iterator());
+	}
 	
 	/**
 	 * Returns an iterator over the set of random variables that this
@@ -104,10 +102,18 @@ public class ParameterizedRandomVariable {
 	 * @return
 	 */
 	public Iterator<ParameterizedRandomVariable> getGroundInstances() {
-		//TODO: Implement this.
-		// I think I'll need to create a Cartesian product of sets...
-		// I see... out of memory space!
+		// Apply the same strategy used to implement factors in ve.
 		return null;
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder result = new StringBuilder(this.functor.getName() + " ( ");
+		for (Term term : this.parameters) {
+			result.append(term).append(" ");
+		}
+		result.append(")");
+		return result.toString();
 	}
 	
 	@Override

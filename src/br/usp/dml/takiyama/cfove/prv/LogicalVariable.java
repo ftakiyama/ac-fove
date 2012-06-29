@@ -56,5 +56,8 @@ final class LogicalVariable implements Term {
 	    return this.name.equals(targetObject.name);	    		
 	}
 	
-	
+	@Override
+	public int hashCode() {
+		return name.hashCode();
+	}
 }

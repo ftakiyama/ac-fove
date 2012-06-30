@@ -1,5 +1,7 @@
 package br.usp.dml.takiyama.cfove.prv;
 
+import java.util.ArrayList;
+
 /**
  * A logical variable is a word starting with an upper-case letter or the 
  * underscore. [Poole, 2010]
@@ -11,16 +13,22 @@ final class LogicalVariable implements Term {
 	// I am not really sure if the logical variable must have a domain
 	// private Population domain;
 	private final String name;
+	private final Population population;
 	
 	/**
 	 * Constructor. Creates a logical variable.
 	 * @param name The name of the logical variable. The name must start with
 	 * an upper case letter or underscore ("_").
+	 * @param individuals The individuals that constitute the population of
+	 * this logical variable
 	 * @throws IllegalArgumentException If the name requirements are not met.
 	 */
-	LogicalVariable(String name) throws IllegalArgumentException {
+	LogicalVariable(String name, ArrayList<Constant> individuals) throws IllegalArgumentException {
 		// The value of a logical variable is its name
 		this.name = new String(name);
+		
+		// Population should be ordered.
+		this.population = new Population(individuals);
 		
 		// Checks if the name of the variable is valid
 		if (!name.startsWith("_") && !Character.isUpperCase(name.charAt(0))) {
@@ -31,11 +39,19 @@ final class LogicalVariable implements Term {
 	}
 	
 	/**
-	 * Returns the value of this logical variable.
-	 * @return The value of this logical variable.
+	 * Returns the name of this logical variable.
+	 * @return The name of this logical variable.
 	 */
 	public String getValue() {
 		return new String(name);
+	}
+	
+	/**
+	 * Returns a copy of the population of this logical variable.
+	 * @return A copy of the population of this logical variable.
+	 */
+	public Population getPopulation() {
+		return Population.copyOf(population);
 	}
 	
 	@Override

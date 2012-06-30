@@ -10,7 +10,14 @@ final class Constant implements Term {
 	
 	private final String value;
 	
-	Constant(String value) throws IllegalArgumentException{
+	/**
+	 * Creates a constant. 
+	 * @param value The value of the constant. It must start with a lower-case
+	 * letter.
+	 * @throws IllegalArgumentException If <code>value</code> does not start 
+	 * with a lower-case letter.
+	 */
+	Constant(String value) throws IllegalArgumentException {
 		this.value = new String(value);
 		
 		if (Character.isUpperCase(value.charAt(0))) {

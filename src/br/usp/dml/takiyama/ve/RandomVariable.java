@@ -3,6 +3,7 @@ package br.usp.dml.takiyama.ve;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * This class represents random variables.
@@ -33,6 +34,18 @@ public final class RandomVariable {
 	}
 	
 	/**
+	 * A static factory of random variables.
+	 * Creates a random variable given its name and the mapping from the
+	 * elements of the domain to real numbers.
+	 * @param name The name of this variable
+	 * @param domain The domain of this random variable
+	 * @return A random variable.
+	 */
+	public static RandomVariable createRandomVariable(String name, List<String> domain) {
+		return new RandomVariable(name, domain);
+	}
+	
+	/**
 	 * Returns a copy of the specified random variable.
 	 * @param rv The random variable to be copied
 	 * @return A copy of the specified random variable.
@@ -49,6 +62,8 @@ public final class RandomVariable {
 	 * @param domain The domain of this random variable
 	 * @param values A mapping from the elements of the domain to the real
 	 * numbers.
+	 * @throws IllegalArgumentException if the number of values is not equal
+	 * to the size of the domain
 	 */
 	private RandomVariable(String name, ArrayList<String> domain, ArrayList<BigDecimal> values) 
 			throws IllegalArgumentException {
@@ -61,6 +76,19 @@ public final class RandomVariable {
 					" same number of elements as values. Domain size: " +
 					domain.size() + ", Values size: " + values.size());
 		}
+	}
+	
+	/**
+	 * Private constructor.
+	 * Creates a random variable given its name and the mapping from the
+	 * elements of the domain to real numbers.
+	 * @param name The name of this variable
+	 * @param domain The domain of this random variable
+	 */
+	private RandomVariable(String name, List<String> domain) {
+		this.name = name;
+		this.domain = new ArrayList<String>(domain);
+		this.values = null;
 	}
 	
 	/**
@@ -94,13 +122,13 @@ public final class RandomVariable {
 	 * @return The real number corresponding to an element from the domain.<br>
 	 * If the parameter given does not exist in the domain, then returns <b>null</b>.
 	 */
-	public BigDecimal getValue(String elementFromDomain) {
-		if (this.domain.contains(elementFromDomain)) {
-			return this.values.get(this.domain.indexOf(elementFromDomain));
-		} else {
-			return null;
-		}
-	}
+//	private BigDecimal getValue(String elementFromDomain) {
+//		if (this.domain.contains(elementFromDomain)) {
+//			return this.values.get(this.domain.indexOf(elementFromDomain));
+//		} else {
+//			return null;
+//		}
+//	}
 	
 	/**
 	 * Returns the name of this random variable.
@@ -113,40 +141,40 @@ public final class RandomVariable {
 	@Override
 	public String toString() {
 		
-		String result = "";
+//		String result = "";
+//		
+//		// Create the rule - aesthetical   
+//		int maxLength = 0;
+//		for (String elementFromDomain : this.domain) {
+//			if (elementFromDomain.length() > maxLength) {
+//				maxLength = elementFromDomain.length();
+//			}
+//		}
+//		String valueCellFormat = "%-10s\n";
+//		String cellFormat = "%-"+ Integer.toString(maxLength + 4) + "s";
+//		String midRule = String.format(cellFormat, "").replace(" ", "-") 
+//			+ String.format(valueCellFormat, "").replace(" ", "-");
+//		String thickRule = midRule.replace("-", "=");
+//		
+//		// Prints the top rule
+//		result += thickRule;
+//		
+//		// Prints the name of the variable
+//		result += this.name + "\n";
+//		
+//		// Prints the mid rule
+//		result += midRule;
+//		
+//		// Print the elements from the domain and their values
+//		for (String elementFromDomain : this.domain) {
+//			result += String.format(cellFormat, elementFromDomain);
+//			result += String.format(valueCellFormat, getValue(elementFromDomain).doubleValue());
+//		}
+//		
+//		// Prints the bottom rule
+//		result += thickRule + "\n";
 		
-		// Create the rule - aesthetical   
-		int maxLength = 0;
-		for (String elementFromDomain : this.domain) {
-			if (elementFromDomain.length() > maxLength) {
-				maxLength = elementFromDomain.length();
-			}
-		}
-		String valueCellFormat = "%-10s\n";
-		String cellFormat = "%-"+ Integer.toString(maxLength + 4) + "s";
-		String midRule = String.format(cellFormat, "").replace(" ", "-") 
-			+ String.format(valueCellFormat, "").replace(" ", "-");
-		String thickRule = midRule.replace("-", "=");
-		
-		// Prints the top rule
-		result += thickRule;
-		
-		// Prints the name of the variable
-		result += this.name + "\n";
-		
-		// Prints the mid rule
-		result += midRule;
-		
-		// Print the elements from the domain and their values
-		for (String elementFromDomain : this.domain) {
-			result += String.format(cellFormat, elementFromDomain);
-			result += String.format(valueCellFormat, getValue(elementFromDomain).doubleValue());
-		}
-		
-		// Prints the bottom rule
-		result += thickRule + "\n";
-		
-		return result;
+		return name + " # " + domain.toString();
 	}
 
 	@Override

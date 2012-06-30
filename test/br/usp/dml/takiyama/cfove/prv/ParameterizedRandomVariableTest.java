@@ -3,9 +3,10 @@ package br.usp.dml.takiyama.cfove.prv;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
-import java.util.Vector;
 
 import org.junit.Test;
+
+import br.usp.dml.takiyama.ve.RandomVariable;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -13,16 +14,31 @@ import com.google.common.collect.ImmutableSet;
 public class ParameterizedRandomVariableTest {
 	
 	/**
-	 * Creates a boolean parameterized random variable with 5 logical variables
-	 * (parameters).
-	 * @return A boolean PRV with 5 parameters
+	 * Creates a boolean parameterized random variable with 3 logical variables
+	 * (parameters). Don't change this, otherwise you will have to re-write
+	 * all the tests.
+	 * @return A boolean PRV with 3 parameters
 	 */
 	private ParameterizedRandomVariable getBooleanPrv() {
 		PredicateSymbol functor = new PredicateSymbol("f", "true", "false");
+		ArrayList<Constant> individualsForX1 = new ArrayList<Constant>();
+		ArrayList<Constant> individualsForX2 = new ArrayList<Constant>();
+		ArrayList<Constant> individualsForX3 = new ArrayList<Constant>();
+		
+		individualsForX1.add(new Constant("a1"));
+		
+		individualsForX2.add(new Constant("b1"));
+		individualsForX2.add(new Constant("b2"));
+		
+		individualsForX3.add(new Constant("c1"));
+		individualsForX3.add(new Constant("c2"));
+		individualsForX3.add(new Constant("c3"));
+		
 		ArrayList<Term> parameters = new ArrayList<Term>();
-		for (int i = 0; i < 5; i++) {
-			parameters.add(new LogicalVariable("X" + i));
-		}
+		parameters.add(new LogicalVariable("X1", individualsForX1));
+		parameters.add(new LogicalVariable("X2", individualsForX2));
+		parameters.add(new LogicalVariable("X3", individualsForX3));
+		
 		return new ParameterizedRandomVariable(functor, parameters);
 	}
 	
@@ -30,14 +46,27 @@ public class ParameterizedRandomVariableTest {
 	public void applyCompleteSubstitution() {
 		System.out.println("\nTest: Apply Substitution");
 		
+		ArrayList<Constant> individualsForX1 = new ArrayList<Constant>();
+		ArrayList<Constant> individualsForX2 = new ArrayList<Constant>();
+		ArrayList<Constant> individualsForX3 = new ArrayList<Constant>();
+		
+		individualsForX1.add(new Constant("a1"));
+		
+		individualsForX2.add(new Constant("b1"));
+		individualsForX2.add(new Constant("b2"));
+		
+		individualsForX3.add(new Constant("c1"));
+		individualsForX3.add(new Constant("c2"));
+		individualsForX3.add(new Constant("c3"));
+		
 		ParameterizedRandomVariable prv = getBooleanPrv();
 		
 		System.out.println("PRV: " + prv.toString());
 		
 		ArrayList<Binding> bindings = new ArrayList<Binding>();
-		for (int i = 0; i < 5; i++) {
-			bindings.add(Binding.create(new LogicalVariable("X" + i), new LogicalVariable("Y" + i)));
-		}
+		bindings.add(Binding.create(new LogicalVariable("X1", individualsForX1), new LogicalVariable("Y1", individualsForX1)));
+		bindings.add(Binding.create(new LogicalVariable("X2", individualsForX2), new LogicalVariable("Y2", individualsForX2)));
+		bindings.add(Binding.create(new LogicalVariable("X3", individualsForX3), new LogicalVariable("Y3", individualsForX3)));
 		
 		System.out.println("Substitution: " + bindings.toString());
 		
@@ -47,9 +76,10 @@ public class ParameterizedRandomVariableTest {
 		
 		PredicateSymbol functor = new PredicateSymbol("f", "true", "false");
 		ArrayList<Term> parameters = new ArrayList<Term>();
-		for (int i = 0; i < 5; i++) {
-			parameters.add(new LogicalVariable("Y" + i));
-		}
+		parameters.add(new LogicalVariable("Y1", individualsForX1));
+		parameters.add(new LogicalVariable("Y2", individualsForX2));
+		parameters.add(new LogicalVariable("Y3", individualsForX3));
+		
 		ParameterizedRandomVariable correctResult = new ParameterizedRandomVariable(functor, parameters);
 		
 		assertTrue(prv.getInstance(substitution).equals(correctResult));
@@ -62,20 +92,36 @@ public class ParameterizedRandomVariableTest {
 	public void testEquals() {
 		System.out.println("\nTest: Equals");
 		
+		ArrayList<Constant> individualsForX1 = new ArrayList<Constant>();
+		ArrayList<Constant> individualsForX2 = new ArrayList<Constant>();
+		ArrayList<Constant> individualsForX3 = new ArrayList<Constant>();
+		
+		individualsForX1.add(new Constant("a1"));
+		
+		individualsForX2.add(new Constant("b1"));
+		individualsForX2.add(new Constant("b2"));
+		
+		individualsForX3.add(new Constant("c1"));
+		individualsForX3.add(new Constant("c2"));
+		individualsForX3.add(new Constant("c3"));
+		
 		ParameterizedRandomVariable correctResult = getBooleanPrv();
 		
 		PredicateSymbol functor = new PredicateSymbol("f", "true", "false");
 		ArrayList<Term> parameters = new ArrayList<Term>();
-		for (int i = 0; i < 5; i++) {
-			parameters.add(new LogicalVariable("X" + i)); 
-		}
+
+		parameters.add(new LogicalVariable("X1", individualsForX1));
+		parameters.add(new LogicalVariable("X2", individualsForX2));
+		parameters.add(new LogicalVariable("X3", individualsForX3));
+		
 		ParameterizedRandomVariable prv = new ParameterizedRandomVariable(functor, parameters);
 		
 		functor = new PredicateSymbol("f", "true", "false");
 		parameters = new ArrayList<Term>();
-		for (int i = 0; i < 5; i++) {
-			parameters.add(new LogicalVariable("X" + i)); 
-		}
+		parameters.add(new LogicalVariable("X1", individualsForX1));
+		parameters.add(new LogicalVariable("X2", individualsForX2));
+		parameters.add(new LogicalVariable("X3", individualsForX3));
+		
 		ParameterizedRandomVariable prv2 = new ParameterizedRandomVariable(functor, parameters);
 		
 		System.out.println("PRV 1: " + prv.toString());
@@ -98,9 +144,23 @@ public class ParameterizedRandomVariableTest {
 	public void testGetParameters() {
 		System.out.println("\nTest: Get Parameters");
 		
+		ArrayList<Constant> individualsForX1 = new ArrayList<Constant>();
+		ArrayList<Constant> individualsForX2 = new ArrayList<Constant>();
+		ArrayList<Constant> individualsForX3 = new ArrayList<Constant>();
+		
+		individualsForX1.add(new Constant("a1"));
+		
+		individualsForX2.add(new Constant("b1"));
+		individualsForX2.add(new Constant("b2"));
+		
+		individualsForX3.add(new Constant("c1"));
+		individualsForX3.add(new Constant("c2"));
+		individualsForX3.add(new Constant("c3"));
+		
+
 		ArrayList<Binding> bindings = new ArrayList<Binding>();
-		bindings.add(Binding.create(new LogicalVariable("X1"), new Constant("y1")));
-		bindings.add(Binding.create(new LogicalVariable("X4"), new Constant("y4")));
+		bindings.add(Binding.create(new LogicalVariable("X1", individualsForX1), new Constant("y1")));
+		bindings.add(Binding.create(new LogicalVariable("X3", individualsForX3), new Constant("y4")));
 		
 		System.out.println("Substitution: " + bindings.toString());
 		
@@ -112,10 +172,85 @@ public class ParameterizedRandomVariableTest {
 		System.out.println("Parameters: " + prv.getParameters().toString());
 		
 		ImmutableSet<LogicalVariable> correctResult = ImmutableSet
-			.of(new LogicalVariable("X0"),
-				new LogicalVariable("X2"),
-				new LogicalVariable("X3"));
+			.of(new LogicalVariable("X2", individualsForX2));
 		
 		assertTrue(prv.getParameters().equals(correctResult));
+	}
+	
+	@Test
+	public void testGetGroundInstance() throws Exception {
+		System.out.println("\nTest: Get Ground Instances");
+		
+		ParameterizedRandomVariable prv = getBooleanPrv();
+		
+		for (int i = 0; i < 6; i++) {
+			System.out.println(prv.getGroundInstance(i));
+		}
+		
+		ArrayList<String> domain = new ArrayList<String>();
+		domain.add("true");
+		domain.add("false");
+		assertTrue(prv
+			.getGroundInstance(0)
+				.equals(RandomVariable
+					.createRandomVariable("f ( a1 b1 c1 )", domain))
+			&& prv
+				.getGroundInstance(1)
+					.equals(RandomVariable
+						.createRandomVariable("f ( a1 b2 c1 )", domain))
+			&& prv
+				.getGroundInstance(2)
+					.equals(RandomVariable
+						.createRandomVariable("f ( a1 b1 c2 )", domain))
+			&& prv
+				.getGroundInstance(3)
+					.equals(RandomVariable
+						.createRandomVariable("f ( a1 b2 c2 )", domain))
+			&& prv
+				.getGroundInstance(4)
+					.equals(RandomVariable
+						.createRandomVariable("f ( a1 b1 c3 )", domain))
+			&& prv
+				.getGroundInstance(5)
+					.equals(RandomVariable
+						.createRandomVariable("f ( a1 b2 c3 )", domain)));
+	}
+	
+	@Test(expected = IllegalStateException.class)
+	public void throwGetGroundInstanceIllegalStateException() {
+		
+		ArrayList<Constant> individualsForX1 = new ArrayList<Constant>();
+		ArrayList<Constant> individualsForX2 = new ArrayList<Constant>();
+		ArrayList<Constant> individualsForX3 = new ArrayList<Constant>();
+		
+		individualsForX1.add(new Constant("a1"));
+		
+		individualsForX2.add(new Constant("b1"));
+		individualsForX2.add(new Constant("b2"));
+		
+		individualsForX3.add(new Constant("c1"));
+		individualsForX3.add(new Constant("c2"));
+		individualsForX3.add(new Constant("c3"));
+		
+		ArrayList<Binding> bindings = new ArrayList<Binding>();
+		bindings.add(Binding.create(new LogicalVariable("X1", individualsForX1), new Constant("y1")));
+		bindings.add(Binding.create(new LogicalVariable("X3", individualsForX3), new Constant("y3")));
+				
+		Substitution substitution = Substitution.create(bindings);
+		
+		ParameterizedRandomVariable prv = getBooleanPrv().getInstance(substitution);
+		
+		prv.getGroundInstance(0);
+		
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void throwGetGroundInstanceIllegalArgumentException() {
+		getBooleanPrv().getGroundInstance(6);
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void getGroundInstanceWithNegativeIndex() {
+		getBooleanPrv().getGroundInstance(-1);
 	}
 }

@@ -1,10 +1,11 @@
 package br.usp.dml.takiyama.cfove.prv;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
+
+import br.usp.dml.takiyama.ve.RandomVariable;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -20,10 +21,11 @@ import com.google.common.collect.ImmutableSet;
  *
  */
 public class ParameterizedRandomVariable {
-	private final ArrayList<Term> parameters;
+	private final ArrayList<Term> parameters; // <- I must ASSURE that this is ordered in a predictable way
 	private final PredicateSymbol functor;
 	
 	// this class should be able to create random variables
+	// ground instance = random variable
 	
 	/*
 	 * What should this class do?
@@ -70,8 +72,6 @@ public class ParameterizedRandomVariable {
 		return newInstance;
 	}
 	
-	
-	
 	/**
 	 * Returns an immutable set over the set of logical variables that appear in
 	 * this parameterized random variable (PRV).
@@ -93,17 +93,86 @@ public class ParameterizedRandomVariable {
 	}
 	
 	/**
-	 * Returns an iterator over the set of random variables that this
-	 * parameterized random variable represents.<br> 
+	 * Returns a random variables that this parameterized random variable 
+	 * represents. 
+	 * <br> 
 	 * A parameterized random variable f(t1,...,tk) represents a set of random 
 	 * variables, one random variable for each ground substitution to all 
 	 * logical variables in param(f(t1,...,tk)) [Kisynski, 2010].
+	 * <br>
+	 * Each random variable is implicitly indexed according to the ordering
+	 * of logical variables and to the ordering of the population of each
+	 * logical variable. 
 	 * 
-	 * @return
+	 * @param index The index of the random variable to return.
+	 * 
+	 * @return The random variable indexed by the specified <code>index</code>.
+	 * 
+	 * @throws IllegalStateException If there are constants in this 
+	 * parameterized random variable.
+	 * @throws IllegalArgumentException If there is no ground instance indexed 
+	 * by <code>index</code>. 
 	 */
-	public Iterator<ParameterizedRandomVariable> getGroundInstances() {
-		// Apply the same strategy used to implement factors in ve.
-		return null;
+	public RandomVariable getGroundInstance(int index) 
+			throws 	IllegalStateException, 
+					IllegalArgumentException {
+		ArrayList<Integer> termsIndexes = new ArrayList<Integer>();
+		
+		int copyIndex = index; // this is not nice
+		
+		if (index < 0) {
+			throw new IllegalArgumentException("Index " + index + " is not " +
+					"valid. It must be a non-negative value.");
+		}
+		
+		// Get the individual for each logical variable
+		// The individual is represented by its index in the population	
+		for (Term t : this.parameters) {
+			if (t instanceof Constant) {
+				throw new IllegalStateException("For now, I can only return ground " +
+						"instances of parameterized random variables whose " +
+						"terms are all logical variables. I found " +
+						t.getValue() + ", which is a constant.");
+			}
+			termsIndexes.add(index % ((LogicalVariable) t).getPopulation().size());
+			index = index / ((LogicalVariable) t).getPopulation().size();
+		}
+		
+		// Checks if index is within the allowed bounds - ugly
+		int maxIndex = 1;
+		for (Term t : this.parameters) {
+			maxIndex *= ((LogicalVariable) t).getPopulation().size();
+		}
+		if (copyIndex >= maxIndex) {
+			throw new IllegalArgumentException("Index " + copyIndex + " is not " +
+					"valid. Maximum valid value is " + (maxIndex - 1) + ".");
+		}
+		
+		return createRandomVariableFromConstantIndexes(termsIndexes);	
+	}
+	
+	/**
+	 * Creates a random variable with the specified indexes. I think I should
+	 * explain this better...
+	 * @param termsIndexes The indexes that define the random variable.
+	 * @return A random variable specified by the indexes.
+	 */
+	private RandomVariable createRandomVariableFromConstantIndexes(List<Integer> termsIndexes) {
+		//System.out.println(termsIndexes);
+		StringBuilder name = new StringBuilder(this.functor.getName() + " ( ");
+		for (int index = 0; index < termsIndexes.size(); index++) { // long way down to convert indexes to constant values...
+			name
+				.append(((LogicalVariable) parameters.get(index))
+					.getPopulation()
+						.getIndividual(termsIndexes
+							.get(index))
+								.getValue())
+				.append(" ");
+		}
+		name.append(")");
+		return RandomVariable.createRandomVariable(
+				name.toString(), 
+				functor.getRange()); 
 	}
 	
 	@Override

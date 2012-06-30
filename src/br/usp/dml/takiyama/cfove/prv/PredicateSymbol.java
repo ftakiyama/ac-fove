@@ -1,5 +1,7 @@
 package br.usp.dml.takiyama.cfove.prv;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.TreeSet;
 
@@ -14,7 +16,7 @@ import java.util.TreeSet;
  */
 class PredicateSymbol {
 	private final String name;
-	private final TreeSet<String> range;
+	private final ArrayList<String> range;
 	
 	/**
 	 * Constructor. Creates a Predicate Symbol.
@@ -27,10 +29,7 @@ class PredicateSymbol {
 					"lowercase letter.");
 		} else {
 			this.name = name;
-			this.range = new TreeSet<String>();
-			for (String value : rangeValues) {
-				this.range.add(value);
-			}
+			this.range = new ArrayList<String>(Arrays.asList(rangeValues));
 		}
 	}
 	
@@ -41,15 +40,23 @@ class PredicateSymbol {
 	 */
 	PredicateSymbol(PredicateSymbol s) {
 		this.name = s.name;
-		this.range = new TreeSet<String>(s.range);
+		this.range = new ArrayList<String>(s.range);
 	}
 	
 	/**
 	 * Returns an iterator over the range of the predicate symbol.
 	 * @return An iterator over the range of the predicate symbol.
 	 */
-	Iterator<String> getRange() {
+	Iterator<String> getRangeIterator() {
 		return this.range.iterator();
+	}
+	
+	/**
+	 * Returns a copy of the range of the predicate symbol.
+	 * @return A copy of the range of the predicate symbol.
+	 */
+	ArrayList<String> getRange() {
+		return new ArrayList<String>(range);
 	}
 	
 	/**

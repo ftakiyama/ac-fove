@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.lang.ArrayIndexOutOfBoundsException;
 
 /**
@@ -39,8 +40,11 @@ public final class Factor {
 	 * @throws ArrayIndexOutOfBoundsException if there is an inconsistency
 	 * between the size of the factor and the set of random variables.
 	 */
-	public Factor(String name, ArrayList<RandomVariable> randomVariables,
-			ArrayList<BigDecimal> mapping) throws ArrayIndexOutOfBoundsException {
+	public Factor(
+			String name, 
+			List<RandomVariable> randomVariables,
+			List<BigDecimal> mapping) 
+			throws ArrayIndexOutOfBoundsException {
 		this.name = name;
 		this.randomVariables = new ArrayList<RandomVariable>(randomVariables);
 		this.mapping = new ArrayList<BigDecimal>(mapping);
@@ -194,7 +198,6 @@ public final class Factor {
 	 * @return True if the factor is a sub-factor of the specified factor.
 	 */
 	public boolean isSubFactorOf(Factor factor) {
-		
 		// Quick check
 		if (factor.randomVariables.size() < this.randomVariables.size())
 			return false;
@@ -204,6 +207,14 @@ public final class Factor {
 			if (!factor.randomVariables.contains(it.next()))
 				return false;
 		return true;
+	}
+	
+	/**
+	 * Returns a copy of the factor.
+	 * @return A copy of the factor.
+	 */
+	public Factor copy() {
+		return new Factor(this.name, this.randomVariables, this.mapping);
 	}
 	
 	@Override

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
+import br.usp.dml.takiyama.cfove.Constraint;
 import br.usp.dml.takiyama.ve.RandomVariable;
 
 import com.google.common.collect.ImmutableSet;
@@ -73,11 +74,11 @@ public class ParameterizedRandomVariable {
 	}
 	
 	/**
-	 * Returns an immutable set over the set of logical variables that appear in
+	 * Returns a set over the logical variables that appear in
 	 * this parameterized random variable (PRV).
-	 * @return An immutable set over the set of logical variables of this PRV. 
+	 * @return A set over the logical variables of this PRV. 
 	 */
-	public ImmutableSet<LogicalVariable> getParameters() {
+	public Set<LogicalVariable> getParameters() {
 		ArrayList<LogicalVariable> parameters = new ArrayList<LogicalVariable>();
 		for (Term t : this.parameters) {
 			/*
@@ -139,13 +140,14 @@ public class ParameterizedRandomVariable {
 		}
 		
 		// Checks if index is within the allowed bounds - ugly
-		int maxIndex = 1;
-		for (Term t : this.parameters) {
-			maxIndex *= ((LogicalVariable) t).getPopulation().size();
-		}
-		if (copyIndex >= maxIndex) {
-			throw new IllegalArgumentException("Index " + copyIndex + " is not " +
-					"valid. Maximum valid value is " + (maxIndex - 1) + ".");
+//		int maxIndex = 1;
+//		for (Term t : this.parameters) {
+//			maxIndex *= ((LogicalVariable) t).getPopulation().size();
+//		}
+		if (copyIndex >= getNumberOfGroundInstances()) {
+			throw new IllegalArgumentException("Index " + copyIndex + " is not "
+					+ "valid. Maximum valid value is " 
+					+ (getNumberOfGroundInstances() - 1) + ".");
 		}
 		
 		return createRandomVariableFromConstantIndexes(termsIndexes);	
@@ -173,6 +175,96 @@ public class ParameterizedRandomVariable {
 		return RandomVariable.createRandomVariable(
 				name.toString(), 
 				functor.getRange()); 
+	}
+	
+	
+	/**
+	 * Returns a random variable that this parameterized random variable 
+	 * represents satisfying a set of constraints.
+	 * <br>
+	 * Each random variable is implicitly indexed according to the ordering
+	 * of logical variables and to the ordering of the population of each
+	 * logical variable. 
+	 * 
+	 * @param index The index of the random variable to return.
+	 * @param constraints A set of constraints that the ground instance must
+	 * follow
+	 * 
+	 * @return The random variable indexed by the specified <code>index</code>.
+	 * 
+	 * @throws IllegalStateException If there are constants in this 
+	 * parameterized random variable.
+	 * @throws IllegalArgumentException If there is no ground instance indexed 
+	 * by <code>index</code>. 
+	 */
+	private RandomVariable getGroundInstanceSatisfyingConstraints(
+			int index, 
+			List<Constraint> constraints)  
+			throws 	IllegalStateException, 
+					IllegalArgumentException {
+		
+		// TODO: satisfy constraints 
+		
+		return getGroundInstance(index);
+	}
+	
+	/**
+	 * Returns the set of ground instances of the parameterized random variable 
+	 * that satisfy a set of {@link Constraint}s.
+	 * @param constraints A set of constraints that the ground instances 
+	 * must follow
+	 * @return The set of ground instances that satisfy the constraints in
+	 * <code>constraints</code>
+	 */
+	public List<RandomVariable> getGroundInstancesSatisfyingConstraints(List<Constraint> constraints) {
+		ArrayList<RandomVariable> groundInstances = new ArrayList<RandomVariable>();
+		for (int i = 0; i < getNumberOfGroundInstances(); i++) {
+			groundInstances.add(getGroundInstanceSatisfyingConstraints(i, constraints));
+		}
+		return groundInstances;
+	}
+	
+	/**
+	 * Returns the number of ground instances of the parameterized random 
+	 * variable.
+	 * TODO Should I make it an attribute? It is pretty inefficient implementation.
+	 * TODO The implementation do not take into account mixed PRVs.
+	 * @return The number of ground instances of the parameterized random 
+	 * variable.
+	 */
+	public int getNumberOfGroundInstances() {
+		int maxIndex = 1;
+		for (Term t : this.parameters) {
+			maxIndex *= ((LogicalVariable) t).getPopulation().size();
+		}
+		return maxIndex;
+	}
+	
+	/**
+	 * <b>WARNING</b>: I have created this method in order to use factors with 
+	 * parameterized random variables. I mask a PRV into a RV using the
+	 * functor. A more appropriate implementation would extend the class
+	 * Factor to accommodate PRVs instead of RVs. Developers are lazy
+	 * sometimes... 
+	 * <br>
+	 * <br>
+	 * This method returns an "abstract" representation of this parameterized
+	 * random variable in the form of a random variable. In fact, they represent
+	 * different things, but there is an analogy:
+	 * <li>"Functor" of PRV is analogous to the "name" of RV
+	 * <li>"Range" of PRV is analogous to the "domain" of RV
+	 * <br>
+	 * <br>
+	 * I use this analogy to camouflage PRVs from the point of view of Factors.
+	 * This method should be used to create factors for Parfactors and to
+	 * sum out a variable from a factor that belongs to a parfactor.
+	 * <br>
+	 * <b>ONCE AGAIN</b>: correct this ASAP!  
+	 * @return A {@link RandomVariable} that "represents" this parameterized
+	 * random variable.
+	 */
+	public RandomVariable getRandomVariableRepresetantion() {
+		return RandomVariable.createRandomVariable(this.functor.getName(), this.functor.getRange());
 	}
 	
 	@Override

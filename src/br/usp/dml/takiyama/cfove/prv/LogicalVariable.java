@@ -8,7 +8,7 @@ import java.util.ArrayList;
  * @author ftakiyama
  *
  */
-final class LogicalVariable implements Term {
+public final class LogicalVariable implements Term {
 	
 	// I am not really sure if the logical variable must have a domain
 	// private Population domain;

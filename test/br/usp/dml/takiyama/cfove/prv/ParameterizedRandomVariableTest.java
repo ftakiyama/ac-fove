@@ -253,4 +253,48 @@ public class ParameterizedRandomVariableTest {
 	public void getGroundInstanceWithNegativeIndex() {
 		getBooleanPrv().getGroundInstance(-1);
 	}
+	
+	@Test
+	public void testGetGroundInstanceWithOneLogicalVariable() {
+		System.out.println("\nTest: Get Ground Instances");
+		
+		PredicateSymbol functor = new PredicateSymbol("f", "true", "false");
+		ArrayList<Constant> individualsForX1 = new ArrayList<Constant>();
+		
+		individualsForX1.add(new Constant("a1"));
+		individualsForX1.add(new Constant("a2"));
+		individualsForX1.add(new Constant("a3"));
+		individualsForX1.add(new Constant("a4"));
+		
+		ArrayList<Term> parameters = new ArrayList<Term>();
+		parameters.add(new LogicalVariable("X1", individualsForX1));
+		
+		ParameterizedRandomVariable prv = new ParameterizedRandomVariable(functor, parameters);
+		
+		for (int i = 0; i < 4; i++) {
+			System.out.println(prv.getGroundInstance(i));
+		}
+		
+		ArrayList<String> domain = new ArrayList<String>();
+		domain.add("true");
+		domain.add("false");
+		
+		assertTrue(prv
+			.getGroundInstance(0)
+				.equals(RandomVariable
+					.createRandomVariable("f ( a1 )", domain))
+			&& prv
+				.getGroundInstance(1)
+					.equals(RandomVariable
+						.createRandomVariable("f ( a2 )", domain))
+			&& prv
+				.getGroundInstance(2)
+					.equals(RandomVariable
+						.createRandomVariable("f ( a3 )", domain))
+			&& prv
+				.getGroundInstance(3)
+					.equals(RandomVariable
+						.createRandomVariable("f ( a4 )", domain))
+		);
+	}
 }

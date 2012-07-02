@@ -251,13 +251,6 @@ public class FactorOperation {
 		return result;
 	}
 	
-	/**
-	 * Divides a factor by a real number. The division consists in dividing all
-	 * values from the factor by a divisor.
-	 * @param factor The factor.
-	 * @param divisor The divisor.
-	 * @return The factor with its values divided by divisor.
-	 */
 	
 	/**
 	 * Divides factors by a sub-factor and returns the resulting factor.
@@ -321,4 +314,27 @@ public class FactorOperation {
 		return new Factor(dividend.getName(), dividend.getRandomVariables(), newMapping);
 	}
 	
+	/**
+	 * Returns a factor raised by the value specified.
+	 * <br>
+	 * Raising a factor to some exponent is the same as raising its values to
+	 * that exponent.  
+	 * <br>
+	 * The current implementation makes totally worthless the use of BigDecimal.
+	 * There is no method that raises a BigDecimal to another BigDecimal, so 
+	 * the algorithm must be implemented. Currently, the method is converting
+	 * BigDecimal to double so I can use {@link Math#pow}.
+	 * @param factor The "base"
+	 * @param exponent The exponent
+	 * @return The value of <code>factor<code><sup>exponent</sup>
+	 */
+	public static Factor pow(Factor factor, BigDecimal exponent) {
+		ArrayList<BigDecimal> newMapping = new ArrayList<BigDecimal>();
+		
+		for (int i = 0; i < factor.size(); i++) {
+			newMapping.add(new BigDecimal(Math.pow(factor.getTupleValue(i).doubleValue(), exponent.doubleValue())));
+		}
+		
+		return new Factor(factor.getName(), factor.getRandomVariables(), newMapping);
+	}
 }

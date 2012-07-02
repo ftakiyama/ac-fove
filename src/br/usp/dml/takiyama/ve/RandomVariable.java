@@ -6,8 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * This class represents random variables.
- * <br>
  * A random variable is a function that, given an element from its domain,
  * returns a real number.
  * @author ftakiyama

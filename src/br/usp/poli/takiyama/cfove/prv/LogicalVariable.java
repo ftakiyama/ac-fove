@@ -8,7 +8,7 @@ import java.util.ArrayList;
  * @author ftakiyama
  *
  */
-final class LogicalVariable implements Term {
+public final class LogicalVariable implements Term {
 	
 	private final String name;
 	private final Population population;

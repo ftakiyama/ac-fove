@@ -366,4 +366,75 @@ public class ParameterizedFactorTest {
 		
 		assertTrue(subFactor.isSubFactorOf(factor));
 	}
+	
+	
+	/***************************************************************************
+	 * SUM OUT
+	 **************************************************************************/
+	
+	@Test
+	public void testSumOutFirstVariable() {
+		System.out.println("\nTest: Sum out f0 from factor2");
+		
+		String name = "factor2";
+		ArrayList<ParameterizedRandomVariable> prvs = new ArrayList<ParameterizedRandomVariable>();
+		prvs.add(variables.get("g0"));
+		ArrayList<Number> mapping = new ArrayList<Number>();
+		mapping.add(1.0);
+		mapping.add(0.56);
+		ParameterizedFactor correctResult = ParameterizedFactor.getInstance(name, prvs, mapping);
+		
+		ParameterizedFactor factor = factors.get("factor2");
+		factor = factor.sumOut(variables.get("f0"));
+		
+		System.out.println("After summing out: " + factor.toString());
+		System.out.println("Correct result: " + correctResult.toString());
+		
+		assertTrue(factor.equals(correctResult));
+	}
+	
+	@Test
+	public void testSumOutSecondVariable() {
+		System.out.println("\nTest: Sum out g0 from factor2");
+		
+		String name = "factor2";
+		ArrayList<ParameterizedRandomVariable> prvs = new ArrayList<ParameterizedRandomVariable>();
+		prvs.add(variables.get("f0"));
+		ArrayList<Number> mapping = new ArrayList<Number>();
+		mapping.add(0.6);
+		mapping.add(0.96);
+		ParameterizedFactor correctResult = ParameterizedFactor.getInstance(name, prvs, mapping);
+		
+		ParameterizedFactor factor = factors.get("factor2");
+		factor = factor.sumOut(variables.get("g0"));
+		
+		System.out.println("After summing out: " + factor.toString());
+		System.out.println("Correct result: " + correctResult.toString());
+		
+		assertTrue(factor.equals(correctResult));
+	}
+	
+	@Test
+	public void testBasicMultiplication() {
+		System.out.println("\nTest: factor1 x factor2");
+		
+		String name = "factor1";
+		ArrayList<ParameterizedRandomVariable> prvs = new ArrayList<ParameterizedRandomVariable>();
+		prvs.add(variables.get("f0"));
+		prvs.add(variables.get("g0"));
+		ArrayList<Number> mapping = new ArrayList<Number>();
+		mapping.add(0.1 * 0.1);
+		mapping.add(0.1 * 0.2);
+		mapping.add(0.2 * 0.3);
+		mapping.add(0.2 * 0.4);
+		ParameterizedFactor correctResult = ParameterizedFactor.getInstance(name, prvs, mapping);
+		
+		ParameterizedFactor factor = factors.get("factor1").multiply(factors.get("factor2"));
+		
+		System.out.println("After multiplication: " + factor.toString());
+		System.out.println("Correct result: " + correctResult.toString());
+		
+		assertTrue(factor.equals(correctResult));
+	}
+	
 }

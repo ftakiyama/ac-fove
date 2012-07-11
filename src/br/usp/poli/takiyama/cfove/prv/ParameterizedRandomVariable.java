@@ -250,7 +250,7 @@ public class ParameterizedRandomVariable {
 	 * @return The set of ground instances that satisfy the constraints in
 	 * <code>constraints</code>
 	 */
-	public List<RandomVariable> getGroundInstancesSatisfyingConstraints(List<Constraint> constraints) {
+	public List<RandomVariable> getGroundInstancesSatisfying(List<Constraint> constraints) {
 		ArrayList<RandomVariable> groundInstances = new ArrayList<RandomVariable>();
 		for (int i = 0; i < getNumberOfGroundInstances(); i++) {
 			groundInstances.add(getGroundInstanceSatisfyingConstraints(i, constraints));

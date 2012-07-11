@@ -1,5 +1,6 @@
 package br.usp.poli.takiyama.cfove;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import br.usp.poli.takiyama.cfove.prv.ParameterizedRandomVariable;
@@ -25,7 +26,7 @@ public final class MacroOperations {
 	 * @param variable
 	 * @param setOfConstraints
 	 */
-	public static void globalSumOut(List<Parfactor> setOfParfactors, 
+	public static List<Parfactor> globalSumOut(List<Parfactor> setOfParfactors, 
 			ParameterizedRandomVariable variable, 
 			List<Constraint> setOfConstraints) {
 		
@@ -39,9 +40,22 @@ public final class MacroOperations {
 		 * for each parfactor p in Phi
 		 *     if p contains PRV v such that ground(v):C = ground(f):C
 		 *         product := product * p
+		 *         remove p from Phi
 		 * if product satisfies pre-condition for elimination
 		 *     result := eliminate f from product
 		 * return result
 		 */
+		
+		ArrayList<Parfactor> newSetOfParfactors = new ArrayList<Parfactor>(setOfParfactors);
+		Parfactor product = Parfactor.getConstantInstance();
+		for (Parfactor p : setOfParfactors) {
+			if (p.getParameterizedRandomVariables().contains(variable)) {
+				newSetOfParfactors = new ArrayList<Parfactor>(Operations.multiplication(newSetOfParfactors, product, p));
+				product = newSetOfParfactors.get(newSetOfParfactors.size() - 1); //ugly
+			}
+		}
+		newSetOfParfactors = new ArrayList<Parfactor>(Operations.liftedElimination(newSetOfParfactors, product, variable));
+		
+		return newSetOfParfactors;
 	}
 }

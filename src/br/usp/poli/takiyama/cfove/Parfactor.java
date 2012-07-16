@@ -17,7 +17,7 @@ import br.usp.poli.takiyama.cfove.prv.ParameterizedRandomVariable;
 public final class Parfactor {
 	
 	private final ArrayList<Constraint> constraints;
-	private final ArrayList<ParameterizedRandomVariable> variables;
+	//private final ArrayList<ParameterizedRandomVariable> variables;
 	private final ParameterizedFactor factor;
 	
 	// this class should be able to return factors.
@@ -32,12 +32,12 @@ public final class Parfactor {
 	 */
 	private Parfactor(
 			List<Constraint> constraints, 
-			List<ParameterizedRandomVariable> variables, 
+			//List<ParameterizedRandomVariable> variables, 
 			ParameterizedFactor factor) 
 			throws IllegalArgumentException {
 		
 		this.constraints = new ArrayList<Constraint>(constraints);
-		this.variables = new ArrayList<ParameterizedRandomVariable>(variables);
+		//this.variables = new ArrayList<ParameterizedRandomVariable>(variables);
 		this.factor = factor;
 		
 		// check if the factor is consistent with the list of variables
@@ -51,10 +51,10 @@ public final class Parfactor {
 	
 	public static Parfactor getInstance(
 			List<Constraint> constraints, 
-			List<ParameterizedRandomVariable> variables, 
+			//List<ParameterizedRandomVariable> variables, 
 			ParameterizedFactor factor) 
 			throws IllegalArgumentException {
-		return new Parfactor(constraints, variables, factor);
+		return new Parfactor(constraints, factor);
 	}
 	
 	/**
@@ -68,12 +68,9 @@ public final class Parfactor {
 			throws IllegalArgumentException {
 		
 		return new Parfactor(new ArrayList<Constraint>(), 
-							 factor.getParameterizedRandomVariables(), 
 							 factor);
 	}
 	
-	// I think getInstance does not need the argument variables, since the
-	// argument factor already contains them
 	
 	public static Parfactor getConstantInstance() {
 		
@@ -81,7 +78,6 @@ public final class Parfactor {
 		mapping.add(Double.valueOf("1.0"));
 		
 		return new Parfactor(new ArrayList<Constraint>(), 
-				 			 new ArrayList<ParameterizedRandomVariable>(), 
 				 			 ParameterizedFactor.getInstance(
 				 					 "1", 
 				 					 new ArrayList<ParameterizedRandomVariable>(), 
@@ -89,12 +85,13 @@ public final class Parfactor {
 	}
 	
 	public List<ParameterizedRandomVariable> getParameterizedRandomVariables() {
-		return new ArrayList<ParameterizedRandomVariable>(this.variables);
+		return this.factor.getParameterizedRandomVariables();
 	}
 	
 	public List<Constraint> getConstraints() {
 		return new ArrayList<Constraint>(this.constraints);
 	}
+	
 	
 	public ParameterizedFactor getFactor() {
 		return this.factor;
@@ -119,7 +116,7 @@ public final class Parfactor {
 		
 		int size = 1;
 		HashSet<LogicalVariable> read = new HashSet<LogicalVariable>(); // is it the best thing to do? 
-		for (ParameterizedRandomVariable v : variables) {
+		for (ParameterizedRandomVariable v : factor.getParameterizedRandomVariables()) {
 			for (LogicalVariable lv : v.getParameters()) {
 				if (!read.contains(lv)) {
 					size = size * lv.getPopulation().size();
@@ -136,7 +133,7 @@ public final class Parfactor {
 	
 	public List<LogicalVariable> getLogicalVariables() {
 		HashSet<LogicalVariable> logicalVariables = new HashSet<LogicalVariable>();
-		for (ParameterizedRandomVariable prv : variables) {
+		for (ParameterizedRandomVariable prv : factor.getParameterizedRandomVariables()) {
 			logicalVariables.addAll(prv.getParameters());
 		}
 		return new ArrayList<LogicalVariable>(logicalVariables);
@@ -144,8 +141,7 @@ public final class Parfactor {
 	
 	@Override
 	public String toString() {
-		String result = "< ";
-		return "\n<\n" + constraints + ",\n" + variables + ",\n" + factor + ">\n";
+		return "\n<\n" + constraints + ",\n" + factor.getParameterizedRandomVariables() + ",\n" + factor + ">\n";
 	}
 	
 	@Override
@@ -161,9 +157,6 @@ public final class Parfactor {
 	    return ((this.constraints == null) ? 
 	    		 targetObject.constraints == null : 
 		    		 this.constraints.equals(targetObject.constraints)) &&
-		       ((this.variables == null) ? 
-	    		 targetObject.variables == null : 
-	    		 this.variables.equals(targetObject.variables)) &&
     		   ((this.factor == null) ? 
     		     targetObject.factor == null : 
     		     this.factor.equals(targetObject.factor));	    		
@@ -173,7 +166,6 @@ public final class Parfactor {
 	public int hashCode() { // Algorithm extracted from Bloch,J. Effective Java
 		int result = 17;
 		result = 31 + result + Arrays.hashCode(constraints.toArray(new Constraint[constraints.size()]));
-		result = 31 + result + Arrays.hashCode(variables.toArray(new ParameterizedRandomVariable[variables.size()]));
 		result = 31 + result + factor.hashCode();
 		return result;
 	}

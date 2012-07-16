@@ -1,6 +1,5 @@
 package br.usp.poli.takiyama.cfove;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -30,19 +29,13 @@ public final class Operations {
 		if (allPreConditionsForLiftedEliminationAreOk(setOfParfactors, parfactor, variable)
 				&& checkFirstConditionForLiftedElimination(setOfParfactors, parfactor, variable)
 				&& checkSecondConditionForLiftedElimination(parfactor, variable)) {
-			
-			ArrayList<ParameterizedRandomVariable> newSetOfParameterizedRandomVariables = 
-				new ArrayList<ParameterizedRandomVariable>(parfactor.getParameterizedRandomVariables());
-		
-			newSetOfParameterizedRandomVariables.remove(variable);	
-			
+				
 			ParameterizedFactor newFactor = parfactor.getFactor().sumOut(variable);
 			
 			parfactors.remove(parfactor);
 			
 			Parfactor newParfactor = Parfactor.getInstance(
 					parfactor.getConstraints(), 
-					newSetOfParameterizedRandomVariables,
 					newFactor);
 			
 			double size1 = (double) parfactor.size();
@@ -51,7 +44,6 @@ public final class Operations {
 			
 			newParfactor = Parfactor.getInstance(
 					parfactor.getConstraints(), 
-					newSetOfParameterizedRandomVariables,
 					newFactor.pow(exponent));
 			
 			parfactors.add(newParfactor);
@@ -111,14 +103,6 @@ public final class Operations {
 				
 				if (Sets.intersection(targetGroundInstances,
 									  currentGroundInstances)
-//						ImmutableSet
-//						.copyOf(targetGroundInstances
-//							.toArray(new RandomVariable[targetGroundInstances
-//							                            .size()])), 
-//					    ImmutableSet
-//						.copyOf(currentGroundInstances
-//							.toArray(new RandomVariable[currentGroundInstances
-//							                            .size()])))
                     .isEmpty() == false) return false;
 			}
 		}
@@ -179,7 +163,6 @@ public final class Operations {
 		if (conditionsForMultiplicationAreSatisfied(firstParfactor, secondParfactor)) {
 			Parfactor g = Parfactor.getInstance(
 					Sets.union(firstParfactor.getConstraints(), secondParfactor.getConstraints()),
-					Sets.union(firstParfactor.getParameterizedRandomVariables(), secondParfactor.getParameterizedRandomVariables()),
 					firstParfactor.getFactor().multiply(secondParfactor.getFactor()));
 			
 			double firstExponent = ((double) firstParfactor.size()) / g.size();
@@ -190,7 +173,6 @@ public final class Operations {
 			
 			Parfactor product = Parfactor.getInstance(
 					Sets.union(firstParfactor.getConstraints(), secondParfactor.getConstraints()),
-					Sets.union(firstParfactor.getParameterizedRandomVariables(), secondParfactor.getParameterizedRandomVariables()),
 					firstParfactor.getFactor().pow(firstExponent).multiply(secondParfactor.getFactor().pow(secondExponent)));
 			
 			newSetOfParfactors.add(product);

@@ -63,6 +63,16 @@ public final class PRV {
 		return getPrv(functorName, range, parameters, populationSizes);
 	}
 	
+	public static ParameterizedRandomVariable getBooleanPrvWithoutParameter(
+			String functorName) 
+			throws IllegalArgumentException {
+		
+		ArrayList<String> parameters = new ArrayList<String>();
+		ArrayList<Integer> populationSizes = new ArrayList<Integer>();
+		
+		return getBooleanPrv(functorName, parameters, populationSizes);
+	}
+	
 	public static ParameterizedRandomVariable getBooleanPrvWithOneParameter(
 			String functorName,
 			int populationSize) 

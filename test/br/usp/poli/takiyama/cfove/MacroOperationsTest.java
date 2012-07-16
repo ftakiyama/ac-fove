@@ -258,5 +258,34 @@ public class MacroOperationsTest {
 							  new ArrayList<Constraint>()));
 		
 		System.out.println("After GLOBAL-SUM-OUT(hasWineColorRed(X)): \n" + setOfParfactors);
+		
+
+		setOfParfactors = new ArrayList<Parfactor>(MacroOperations
+				.globalSumOut(setOfParfactors, 
+							  variables.get("hasWineBodyFull"), 
+							  new ArrayList<Constraint>()));
+		
+		setOfParfactors = new ArrayList<Parfactor>(MacroOperations
+				.globalSumOut(setOfParfactors, 
+							  variables.get("hasWineFlavourStrong"), 
+							  new ArrayList<Constraint>()));
+		
+		setOfParfactors = new ArrayList<Parfactor>(MacroOperations
+				.globalSumOut(setOfParfactors, 
+							  variables.get("hasWineSugarSweet"), 
+							  new ArrayList<Constraint>()));
+		
+		setOfParfactors = new ArrayList<Parfactor>(MacroOperations
+				.globalSumOut(setOfParfactors, 
+							  variables.get("locatedInPortugalRegion"), 
+							  new ArrayList<Constraint>()));
+		
+		setOfParfactors = new ArrayList<Parfactor>(MacroOperations
+				.globalSumOut(setOfParfactors, 
+							  variables.get("redWine"), 
+							  new ArrayList<Constraint>()));
+		
+		System.out.println("After Everything: \n" + setOfParfactors);
+		
 	}
 }

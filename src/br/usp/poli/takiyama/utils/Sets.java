@@ -41,7 +41,7 @@ public final class Sets {
 		List<T> list = new ArrayList<T>();
 
         for (T t : list1) {
-            if(list2.contains(t)) {
+            if (list2.contains(t)) {
                 list.add(t);
             }
         }

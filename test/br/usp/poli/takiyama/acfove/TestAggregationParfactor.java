@@ -29,6 +29,8 @@ public class TestAggregationParfactor {
 		
 		variables.put("p", PRV.getBooleanPrvWithOneParameter("p", 10));
 		variables.put("c", PRV.getBooleanPrvWithoutParameter("c"));
+		variables.put("matched_6", PRV.getBooleanPrvWithOneParameter("matched_6", 5));
+		variables.put("jackpot_won", PRV.getBooleanPrvWithoutParameter("jackpot_won"));
 		
 		
 		// Creates a simple parfactor
@@ -41,6 +43,17 @@ public class TestAggregationParfactor {
 		factors.put(name, ParameterizedFactor.getInstance(name, v, m));
 		parfactors.put(name, Parfactor.getInstanceWithoutConstraints(factors.get(name)));
 		
+		// Creates another simple parfactor
+		name = "Cousin";
+		v.clear();
+		v.add(variables.get("c"));
+		m.clear();
+		m.add(Double.valueOf("0.2"));
+		m.add(Double.valueOf("0.8"));
+		factors.put(name, ParameterizedFactor.getInstance(name, v, m));
+		parfactors.put(name, Parfactor.getInstanceWithoutConstraints(factors.get(name)));
+		
+		
 		// Creates a simple aggregation parfactor
 		name = "Child";
 		v.clear();
@@ -50,19 +63,47 @@ public class TestAggregationParfactor {
 		m.add(Double.valueOf("0.8"));
 		factors.put(name, ParameterizedFactor.getInstance(name, v, m));
 		HashSet<Constraint> emptySet = new HashSet<Constraint>();
-		Operator op = new Operator();
+		Operator op = Operator.valueOf("or");
 		aggParfactors.put("agg1", AggregationParfactor.getInstance(emptySet, 
 				variables.get("p"), 
 				variables.get("c"), 
 				factors.get("Parent"), 
 				op, 
 				emptySet));	
+		
+		
+		// Creates a simple aggregation parfactor Fsum
+		name = "Fsum";
+		v.clear();
+		v.add(variables.get("matched_6"));
+		m.clear();
+		m.add(Double.valueOf("0.9999999965"));
+		m.add(Double.valueOf("0.0000000035"));
+		factors.put(name, ParameterizedFactor.getInstance(name, v, m));
+		aggParfactors.put("agg2", AggregationParfactor.getInstance(emptySet, 
+				variables.get("matched_6"), 
+				variables.get("jackpot_won"), 
+				factors.get("Fsum"), 
+				op, 
+				emptySet));	
+		
 	}
 	
 	@Test
 	public void testSimpleMultiplication() {
 		System.out.println("\nTest: Simple Multiplication");
 		System.out.println(aggParfactors.get("agg1").multiply(parfactors.get("Parent")));
-		
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testMultiplicationConditions() {
+		aggParfactors.get("agg1").multiply(parfactors.get("Cousin"));
+	}
+	
+	@Test
+	public void testFactorCalculationForSumOut() {
+		System.out.println("\nTest: Factor calculation for sum out");
+		int[] m = {1, 0, 1};  
+		System.out.println(aggParfactors.get("agg2").getFactorValue("true", 2, m));
 	}
 }

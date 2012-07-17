@@ -1,11 +1,11 @@
 package br.usp.poli.takiyama.acfove;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
 import br.usp.poli.takiyama.cfove.Constraint;
 import br.usp.poli.takiyama.cfove.ParameterizedFactor;
+import br.usp.poli.takiyama.cfove.ParametricFactor;
 import br.usp.poli.takiyama.cfove.Parfactor;
 import br.usp.poli.takiyama.cfove.prv.ParameterizedRandomVariable;
 import br.usp.poli.takiyama.utils.Sets;
@@ -27,7 +27,7 @@ import br.usp.poli.takiyama.utils.Sets;
  * @author ftakiyama
  *
  */
-public class AggregationParfactor {
+public class AggregationParfactor implements ParametricFactor {
 	
 	ParameterizedRandomVariable parent;
 	ParameterizedRandomVariable child;
@@ -117,8 +117,107 @@ public class AggregationParfactor {
 		
 	}
 
-	public AggregationParfactor sumOut() {
+	
+	
+	public Set<ParametricFactor> sumOut() {
+		
+		/*
+		 * INPUT: set of parfactors and aggregation parfactors Phi
+		 *        aggregation parfactor gA from Phi
+		 * OUTPUT: Phi \ {gA} U <C, {c}, Fm>
+		 * 
+		 * if conditions to sum out are met
+		 *     m := floor( log2( |D(A):CA| ) )
+		 *     bm....b0 := binary representation of |D(A):CA|
+		 *     Fm := calculateF(m)
+		 *     g := <C, {c}, Fm>
+		 *     return Phi \ {gA} U g
+		 * 
+		 * procedure calculateF(String x, int k, bit[] binRepresentation) 
+		 *     if k = 0
+		 *         if x in range(p)
+		 *             return Fp(x)
+		 *         else
+		 *             return 0
+		 *     else
+		 *         sum := 0 
+		 *         if b_(m-k) = 0
+		 *         	   for each y in range(c)
+		 *                 for each z in range(c)
+		 *                     if (y OPERATOR z == x)
+		 *                         sum += calculateF(y, k-1, binRep) * calculateF(z, k-1, binRep)  
+		 *             return sum
+		 *         else
+		 *             for each w in range(c)
+		 *                 for each y in range(c)
+		 *                     for each z in range(c)
+		 *                         if (w OPERATOR y OPERATOR z == x)
+		 *                             sum += Fp(w) * calculateF(y, k-1, binRep) * calculateF(z, k-1, binRep)  
+		 *             return sum
+		 * 
+		 */
+		
+		// checks if C U CA is in normal form
+		
+		// checks if param(c) = param(p) \ A
+
+		// checks if that no other parfactor or aggregation parfactor in Phi 
+		// involves parameterized random variables that represent random 
+		// variables from ground(p(...,A,...)).
+		
+		
+		
 		return null;
+	}
+	
+	/**
+	 * Reference: [Kisynski, 2010], page 89.
+	 * <br>
+	 * Calculates the resulting factor value when summing out the aggregation
+	 * parfactor.
+	 * @param x A value in range(c)
+	 * @param k The index of the factor to calculate
+	 * @param binaryRepresentation The binary representation of |D(A):C<sub>A</sub>|
+	 * @return The value of F<sub>k</sub>(x).
+	 */
+	public Number getFactorValue(String x, int k, int[] binaryRepresentation) { // very ugly
+		if (k == 0) {
+			for (int i = 0; i < parent.getRangeSize(); i++) {
+				if (x.equals(parent.getElementFromRange(i))) {
+					return parentFactor.getTupleValue(i);
+				}
+			}
+			return 0;
+		} else {
+			Double sum = Double.valueOf("0");
+			if (binaryRepresentation[binaryRepresentation.length - k - 1] == 0) {
+				for (int y = 0; y < child.getRangeSize(); y++) {
+					for (int z = 0; z < child.getRangeSize(); z++) {
+						if (operator.applyOn(child.getElementFromRange(y), child.getElementFromRange(z)).equals(x)) {
+							double fy = getFactorValue(child.getElementFromRange(y), k - 1, binaryRepresentation).doubleValue();
+							double fz = getFactorValue(child.getElementFromRange(z), k - 1, binaryRepresentation).doubleValue(); 
+							sum +=  fy * fz; 
+								   
+						}
+					}
+				}
+				return sum;
+			} else {
+				for (int w = 0; w < child.getRangeSize(); w++) {
+					for (int y = 0; y < child.getRangeSize(); y++) {
+						for (int z = 0; z < child.getRangeSize(); z++) {
+							if (operator.applyOn(child.getElementFromRange(w), child.getElementFromRange(y), child.getElementFromRange(z)).equals(x)) {
+								sum += parentFactor.getTupleValue(w) *
+									   getFactorValue(child.getElementFromRange(y), k - 1, binaryRepresentation).doubleValue() *
+									   getFactorValue(child.getElementFromRange(z), k - 1, binaryRepresentation).doubleValue();
+							}
+						}
+					}
+				}
+				return sum;
+				
+			}
+		}
 	}
 	
 	@Override

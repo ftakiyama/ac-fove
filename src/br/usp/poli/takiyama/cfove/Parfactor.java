@@ -14,7 +14,7 @@ import br.usp.poli.takiyama.cfove.prv.ParameterizedRandomVariable;
  * @author ftakiyama
  *
  */
-public final class Parfactor {
+public final class Parfactor implements ParametricFactor {
 	
 	private final ArrayList<Constraint> constraints;
 	//private final ArrayList<ParameterizedRandomVariable> variables;

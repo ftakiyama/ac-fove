@@ -1,4 +1,4 @@
-package br.usp.poli.takiyama.cfove.prv;
+package br.usp.poli.takiyama.prv;
 
 import static org.junit.Assert.*;
 

@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import br.usp.poli.takiyama.cfove.prv.ParameterizedRandomVariable;
+import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 import br.usp.poli.takiyama.ve.Tuple;
 
 public final class ParameterizedFactor {

@@ -8,8 +8,8 @@ import java.util.HashMap;
 import org.junit.Before;
 import org.junit.Test;
 
-import br.usp.poli.takiyama.cfove.prv.ParameterizedRandomVariable;
-import br.usp.poli.takiyama.cfove.prv.PRV;
+import br.usp.poli.takiyama.prv.PRV;
+import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 import br.usp.poli.takiyama.ve.Tuple;
 
 public class ParameterizedFactorTest {

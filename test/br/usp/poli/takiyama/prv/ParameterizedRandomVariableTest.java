@@ -1,4 +1,4 @@
-package br.usp.poli.takiyama.cfove.prv;
+package br.usp.poli.takiyama.prv;
 
 import static org.junit.Assert.*;
 
@@ -6,13 +6,13 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
-import br.usp.poli.takiyama.cfove.prv.Binding;
-import br.usp.poli.takiyama.cfove.prv.Constant;
-import br.usp.poli.takiyama.cfove.prv.LogicalVariable;
-import br.usp.poli.takiyama.cfove.prv.ParameterizedRandomVariable;
-import br.usp.poli.takiyama.cfove.prv.PredicateSymbol;
-import br.usp.poli.takiyama.cfove.prv.Substitution;
-import br.usp.poli.takiyama.cfove.prv.Term;
+import br.usp.poli.takiyama.prv.Binding;
+import br.usp.poli.takiyama.prv.Constant;
+import br.usp.poli.takiyama.prv.LogicalVariable;
+import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
+import br.usp.poli.takiyama.prv.PredicateSymbol;
+import br.usp.poli.takiyama.prv.Substitution;
+import br.usp.poli.takiyama.prv.Term;
 import br.usp.poli.takiyama.ve.RandomVariable;
 
 import com.google.common.collect.ImmutableSet;

@@ -1,4 +1,4 @@
-package br.usp.poli.takiyama.cfove.prv;
+package br.usp.poli.takiyama.prv;
 
 /**
  * A binding is an ordered pair of terms (t1, t2). The first term (t1) must be a 

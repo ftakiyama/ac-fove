@@ -1,4 +1,4 @@
-package br.usp.poli.takiyama.cfove.prv;
+package br.usp.poli.takiyama.prv;
 
 /**
  * Individuals are things in the world that is being described (e.g., a 

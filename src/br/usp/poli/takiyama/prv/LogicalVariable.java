@@ -1,6 +1,9 @@
-package br.usp.poli.takiyama.cfove.prv;
+package br.usp.poli.takiyama.prv;
 
 import java.util.ArrayList;
+import java.util.Set;
+
+import br.usp.poli.takiyama.cfove.Constraint;
 
 /**
  * A logical variable is a word starting with an upper-case letter or the 
@@ -49,6 +52,11 @@ public final class LogicalVariable implements Term {
 	 * @return A copy of the population of this logical variable.
 	 */
 	public Population getPopulation() {
+		return Population.copyOf(population);
+	}
+	
+	// TODO: put constraint processing
+	public Population getIndividualsSatisfying(Set<Constraint> constraints) {
 		return Population.copyOf(population);
 	}
 	

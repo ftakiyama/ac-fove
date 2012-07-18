@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-import br.usp.poli.takiyama.cfove.prv.LogicalVariable;
-import br.usp.poli.takiyama.cfove.prv.ParameterizedRandomVariable;
+import br.usp.poli.takiyama.common.ParametricFactor;
+import br.usp.poli.takiyama.prv.LogicalVariable;
+import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 
 /**
  * Parfactors, also known as Parametric Factors, represent the joint distribution 
@@ -49,12 +51,38 @@ public final class Parfactor implements ParametricFactor {
 //		}
 	}
 	
+
+	/**
+	 * @deprecated
+	 * Returns an instance of Parfactor.
+	 * @param constraints A list of constraints
+	 * @param factor A factor on parameterized random variables
+	 * @return The parfactor corresponding to arguments specified.
+	 * @throws IllegalArgumentException If the counting formulas in the factor
+	 * are not in normal form.
+	 */
 	public static Parfactor getInstance(
 			List<Constraint> constraints, 
 			//List<ParameterizedRandomVariable> variables, 
 			ParameterizedFactor factor) 
 			throws IllegalArgumentException {
 		return new Parfactor(constraints, factor);
+	}
+	
+	/**
+	 * Returns an instance of Parfactor.
+	 * @param constraints A set of constraints
+	 * @param factor A factor on parameterized random variables
+	 * @return The parfactor corresponding to arguments specified.
+	 * @throws IllegalArgumentException If the counting formulas in the factor
+	 * are not in normal form.
+	 */
+	public static Parfactor getInstance(
+			Set<Constraint> constraints, 
+			//List<ParameterizedRandomVariable> variables, 
+			ParameterizedFactor factor) 
+			throws IllegalArgumentException {
+		return new Parfactor(new ArrayList<Constraint>(constraints), factor);
 	}
 	
 	/**

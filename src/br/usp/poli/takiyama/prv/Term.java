@@ -1,4 +1,4 @@
-package br.usp.poli.takiyama.cfove.prv;
+package br.usp.poli.takiyama.prv;
 
 /**
  * A term is either a variable or a constant.

@@ -3,6 +3,7 @@ package br.usp.poli.takiyama.acfove;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -10,8 +11,8 @@ import org.junit.Test;
 import br.usp.poli.takiyama.cfove.Constraint;
 import br.usp.poli.takiyama.cfove.ParameterizedFactor;
 import br.usp.poli.takiyama.cfove.Parfactor;
-import br.usp.poli.takiyama.cfove.prv.PRV;
-import br.usp.poli.takiyama.cfove.prv.ParameterizedRandomVariable;
+import br.usp.poli.takiyama.prv.PRV;
+import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 
 public class TestAggregationParfactor {
 	
@@ -100,10 +101,27 @@ public class TestAggregationParfactor {
 		aggParfactors.get("agg1").multiply(parfactors.get("Cousin"));
 	}
 	
-	@Test
-	public void testFactorCalculationForSumOut() {
-		System.out.println("\nTest: Factor calculation for sum out");
-		int[] m = {1, 0, 1};  
-		System.out.println(aggParfactors.get("agg2").getFactorValue("true", 2, m));
-	}
+//	@Test
+//	public void testFactorCalculationForSumOut() {
+//		System.out.println("\nTest (Manual): Factor calculation for sum out");
+//		int[] m = {1, 0, 1};  
+//		System.out.println(aggParfactors.get("agg2").getFactorValue("true", 2, m));
+//	}
+	
+//	@Test
+//	public void testIntToBinConversion() {
+//		System.out.println("\nTest (Manual): Factor calculation for sum out");
+//		for (int i = 0; i < 20; i++) {
+//			System.out.println(i + " = " + printArray(aggParfactors.get("agg2").getBinaryRepresentationOf(i)));
+//		}
+//	}
+//	
+//	private String printArray(Integer[] list) {
+//		String result = "";
+//		for (Integer x : list) {
+//			result += x.toString() + " ";
+//		}
+//		return result;
+//	}
+	
 }

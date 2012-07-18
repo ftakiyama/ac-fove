@@ -1,13 +1,16 @@
 package br.usp.poli.takiyama.acfove;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 import br.usp.poli.takiyama.cfove.Constraint;
 import br.usp.poli.takiyama.cfove.ParameterizedFactor;
-import br.usp.poli.takiyama.cfove.ParametricFactor;
 import br.usp.poli.takiyama.cfove.Parfactor;
-import br.usp.poli.takiyama.cfove.prv.ParameterizedRandomVariable;
+import br.usp.poli.takiyama.common.ParametricFactor;
+import br.usp.poli.takiyama.prv.LogicalVariable;
+import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 import br.usp.poli.takiyama.utils.Sets;
 
 /**
@@ -29,18 +32,22 @@ import br.usp.poli.takiyama.utils.Sets;
  */
 public class AggregationParfactor implements ParametricFactor {
 	
-	ParameterizedRandomVariable parent;
-	ParameterizedRandomVariable child;
+	private ParameterizedRandomVariable parent;
+	private ParameterizedRandomVariable child;
 	
-	ParameterizedFactor parentFactor;
+	private ParameterizedFactor parentFactor;
 	
-	Operator operator;
+	private Operator operator;
 	 
-	HashSet<Constraint> constraintsInA; // I must guarantee that Constraint has a good hashCode() method
-	HashSet<Constraint> constraintsNotInA;
+	private HashSet<Constraint> constraintsInA; // I must guarantee that Constraint has a good hashCode() method
+	private HashSet<Constraint> constraintsNotInA;
 	
+	private LogicalVariable extraVariableInParent;
+	
+	private String name;
 	
 	private AggregationParfactor(
+			String name,
 			Set<Constraint> constraintsInA,
 			ParameterizedRandomVariable parent,
 			ParameterizedRandomVariable child,
@@ -48,12 +55,17 @@ public class AggregationParfactor implements ParametricFactor {
 			Operator operator,
 			Set<Constraint> constraintsNotInA) {
 		
+		this.name = name;
 		this.parent = parent;
 		this.child = child;
 		this.parentFactor = factor;
 		this.operator = operator;
 		this.constraintsInA = new HashSet<Constraint>(constraintsInA);
 		this.constraintsNotInA = new HashSet<Constraint>(constraintsNotInA);
+		Set<LogicalVariable> parameters = new HashSet<LogicalVariable>(parent.getParameters());
+		parameters.removeAll(child.getParameters());
+		LogicalVariable[] extraParameter = parameters.toArray(new LogicalVariable[1]);
+		this.extraVariableInParent = extraParameter[0];
 	}
 	
 	public static AggregationParfactor getInstance(
@@ -64,7 +76,19 @@ public class AggregationParfactor implements ParametricFactor {
 			Operator operator,
 			Set<Constraint> constraintsNotInA) {
 		
-		return new AggregationParfactor(constraintsInA, parent, child, factor, operator, constraintsNotInA);
+		return new AggregationParfactor("", constraintsInA, parent, child, factor, operator, constraintsNotInA);
+	}
+	
+	public static AggregationParfactor getInstance(
+			String name,
+			Set<Constraint> constraintsInA,
+			ParameterizedRandomVariable parent,
+			ParameterizedRandomVariable child,
+			ParameterizedFactor factor,
+			Operator operator,
+			Set<Constraint> constraintsNotInA) {
+		
+		return new AggregationParfactor(name, constraintsInA, parent, child, factor, operator, constraintsNotInA);
 	}
 	
 	
@@ -119,7 +143,7 @@ public class AggregationParfactor implements ParametricFactor {
 
 	
 	
-	public Set<ParametricFactor> sumOut() {
+	public Set<ParametricFactor> sumOut(Set<ParametricFactor> setOfParfactors) {
 		
 		/*
 		 * INPUT: set of parfactors and aggregation parfactors Phi
@@ -165,9 +189,52 @@ public class AggregationParfactor implements ParametricFactor {
 		// involves parameterized random variables that represent random 
 		// variables from ground(p(...,A,...)).
 		
-		
+		if (conditionsToSumOutAreMet(setOfParfactors)) {
+			Integer[] sizeOfDomainAsBinary = getBinaryRepresentationOf(extraVariableInParent.getIndividualsSatisfying(constraintsInA).size());
+			
+			ArrayList<ParameterizedRandomVariable> variables = new ArrayList<ParameterizedRandomVariable>();
+			variables.add(child);
+			
+			ArrayList<Number> mapping = new ArrayList<Number>();
+			for (int i = 0; i < child.getRangeSize(); i++) {
+				mapping.add(getFactorValue(child.getElementFromRange(i), 
+										   sizeOfDomainAsBinary.length, 
+										   sizeOfDomainAsBinary));
+			}
+			
+			setOfParfactors.remove(this);
+			setOfParfactors.add(
+					Parfactor.getInstance(constraintsNotInA, 
+							              ParameterizedFactor.getInstance(this.name, 
+							            		                          variables, 
+							            		                          mapping)));
+			
+		}
 		
 		return null;
+	}
+	
+	//TODO: implement this
+	private boolean conditionsToSumOutAreMet(Set<ParametricFactor> setOfParfactors) {
+		return true;
+	}
+	
+	/**
+	 * Returns the binary representation of a positive integer as an array
+	 * of Integers.
+	 * @param number The number to be converted
+	 * @return The binary representation of a positive integer
+	 */
+	private Integer[] getBinaryRepresentationOf(int number) { //TODO: rewrite this ugly thing
+		ArrayList<Integer> binaryRepresentation = new ArrayList<Integer>();
+		binaryRepresentation.add(number % 2);
+		number = number / 2;
+		while (number != 0) {
+			binaryRepresentation.add(number % 2);
+			number = number / 2;
+		}
+		Collections.reverse(binaryRepresentation);
+		return binaryRepresentation.toArray(new Integer[binaryRepresentation.size()]);
 	}
 	
 	/**
@@ -180,7 +247,7 @@ public class AggregationParfactor implements ParametricFactor {
 	 * @param binaryRepresentation The binary representation of |D(A):C<sub>A</sub>|
 	 * @return The value of F<sub>k</sub>(x).
 	 */
-	public Number getFactorValue(String x, int k, int[] binaryRepresentation) { // very ugly
+	private Number getFactorValue(String x, int k, Integer[] binaryRepresentation) { //TODO: rewrite this ugly thing
 		if (k == 0) {
 			for (int i = 0; i < parent.getRangeSize(); i++) {
 				if (x.equals(parent.getElementFromRange(i))) {

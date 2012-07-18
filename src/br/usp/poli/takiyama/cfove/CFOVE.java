@@ -1,6 +1,6 @@
 package br.usp.poli.takiyama.cfove;
 
-import br.usp.poli.takiyama.ve.RandomVariable;
+import br.usp.poli.takiyama.common.RandomVariable;
 
 import com.google.common.collect.ImmutableSet;
 

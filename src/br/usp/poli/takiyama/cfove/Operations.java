@@ -7,7 +7,7 @@ import java.util.List;
 //import com.google.common.collect.ImmutableSet;
 //import com.google.common.collect.Sets;
 
-import br.usp.poli.takiyama.ve.RandomVariable;
+import br.usp.poli.takiyama.common.RandomVariable;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 import br.usp.poli.takiyama.utils.Sets;

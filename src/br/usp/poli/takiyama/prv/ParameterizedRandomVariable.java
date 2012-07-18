@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
-import br.usp.poli.takiyama.cfove.Constraint;
-import br.usp.poli.takiyama.ve.RandomVariable;
+import br.usp.poli.takiyama.common.Constraint;
+import br.usp.poli.takiyama.common.RandomVariable;
 
 import com.google.common.collect.ImmutableSet;
 

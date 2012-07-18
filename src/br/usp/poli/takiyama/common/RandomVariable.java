@@ -1,4 +1,4 @@
-package br.usp.poli.takiyama.ve;
+package br.usp.poli.takiyama.common;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

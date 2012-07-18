@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import org.junit.Before;
 import org.junit.Test;
 
-import br.usp.poli.takiyama.ve.Tuple;
+import br.usp.poli.takiyama.common.Tuple;
 
 /**
  * A set of tests to check the methods of {@link Tuple}.

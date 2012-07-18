@@ -2,6 +2,8 @@ package br.usp.poli.takiyama.ve;
 
 import java.util.ArrayList;
 
+import br.usp.poli.takiyama.common.RandomVariable;
+
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.collect.UnmodifiableIterator;

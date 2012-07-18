@@ -6,8 +6,8 @@ import java.util.HashMap;
 
 import org.junit.Test;
 
+import br.usp.poli.takiyama.common.RandomVariable;
 import br.usp.poli.takiyama.ve.Factor;
-import br.usp.poli.takiyama.ve.RandomVariable;
 import br.usp.poli.takiyama.ve.VariableEliminationAlgorithm;
 
 /**

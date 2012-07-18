@@ -1,6 +1,7 @@
-package br.usp.poli.takiyama.ve;
+package br.usp.poli.takiyama.common;
 
 import java.util.ArrayList;
+
 
 /**
  * A tuple is any combination of values of random variables.

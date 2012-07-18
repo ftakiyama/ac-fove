@@ -7,6 +7,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.lang.ArrayIndexOutOfBoundsException;
 
+import br.usp.poli.takiyama.common.RandomVariable;
+import br.usp.poli.takiyama.common.Tuple;
+
 /**
  * Let dom(x) denote the domain of random variable x. 
  * A factor on random variables x1,x2,...,xn is a representation 

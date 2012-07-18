@@ -3,6 +3,7 @@ package br.usp.poli.takiyama.cfove;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 
 public final class MacroOperations {

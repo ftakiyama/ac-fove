@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import br.usp.poli.takiyama.cfove.Constraint;
+import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.cfove.ParameterizedFactor;
 import br.usp.poli.takiyama.cfove.Parfactor;
 import br.usp.poli.takiyama.common.ParametricFactor;

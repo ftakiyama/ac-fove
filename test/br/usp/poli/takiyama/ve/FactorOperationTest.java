@@ -10,9 +10,9 @@ import java.util.HashMap;
 import org.junit.Before;
 import org.junit.Test;
 
+import br.usp.poli.takiyama.common.RandomVariable;
 import br.usp.poli.takiyama.ve.Factor;
 import br.usp.poli.takiyama.ve.FactorOperation;
-import br.usp.poli.takiyama.ve.RandomVariable;
 
 /**
  * A set of tests to check the methods of {@link FactorOperation}.

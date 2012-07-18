@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
+import br.usp.poli.takiyama.common.RandomVariable;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.LogicalVariable;
@@ -13,7 +14,6 @@ import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 import br.usp.poli.takiyama.prv.PredicateSymbol;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
-import br.usp.poli.takiyama.ve.RandomVariable;
 
 import com.google.common.collect.ImmutableSet;
 

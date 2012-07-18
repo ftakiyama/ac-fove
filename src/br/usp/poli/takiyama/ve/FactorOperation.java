@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 
+import br.usp.poli.takiyama.common.RandomVariable;
+import br.usp.poli.takiyama.common.Tuple;
+
 
 /**
  * This class makes operations over {@link Factor}s such as sum out and 

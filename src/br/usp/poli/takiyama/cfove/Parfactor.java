@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.ParametricFactor;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;

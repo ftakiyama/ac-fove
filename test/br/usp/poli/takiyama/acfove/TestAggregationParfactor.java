@@ -8,7 +8,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import br.usp.poli.takiyama.cfove.Constraint;
+import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.cfove.ParameterizedFactor;
 import br.usp.poli.takiyama.cfove.Parfactor;
 import br.usp.poli.takiyama.prv.PRV;

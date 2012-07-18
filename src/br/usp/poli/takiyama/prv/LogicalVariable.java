@@ -3,7 +3,7 @@ package br.usp.poli.takiyama.prv;
 import java.util.ArrayList;
 import java.util.Set;
 
-import br.usp.poli.takiyama.cfove.Constraint;
+import br.usp.poli.takiyama.common.Constraint;
 
 /**
  * A logical variable is a word starting with an upper-case letter or the 

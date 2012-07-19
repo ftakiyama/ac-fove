@@ -148,7 +148,7 @@ public final class ParameterizedFactor {
 		
 		String thinRule = "";
 		String thickRule = "";
-		String cellFormat = "%-10s"; 
+		String cellFormat = "%-10s"; //TODO: change to something more dynamic
 		String valueCellFormat = "%-10s\n";
 		
 		// Create the rules - aesthetic

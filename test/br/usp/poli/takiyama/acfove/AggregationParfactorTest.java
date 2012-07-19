@@ -9,12 +9,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import br.usp.poli.takiyama.common.Constraint;
+import br.usp.poli.takiyama.common.ParametricFactor;
 import br.usp.poli.takiyama.cfove.ParameterizedFactor;
 import br.usp.poli.takiyama.cfove.Parfactor;
 import br.usp.poli.takiyama.prv.PRV;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 
-public class TestAggregationParfactor {
+public class AggregationParfactorTest {
 	
 	private HashMap<String, ParameterizedRandomVariable> variables;
 	private HashMap<String, ParameterizedFactor> factors;
@@ -64,7 +65,7 @@ public class TestAggregationParfactor {
 		m.add(Double.valueOf("0.8"));
 		factors.put(name, ParameterizedFactor.getInstance(name, v, m));
 		HashSet<Constraint> emptySet = new HashSet<Constraint>();
-		Operator op = Operator.valueOf("or");
+		Or op = Or.getInstance();
 		aggParfactors.put("agg1", AggregationParfactor.getInstance(emptySet, 
 				variables.get("p"), 
 				variables.get("c"), 
@@ -123,5 +124,14 @@ public class TestAggregationParfactor {
 //		}
 //		return result;
 //	}
+	
+	@Test
+	public void testSumOut() {
+		System.out.println("\nTest (Manual): Sum out");
+		HashSet<ParametricFactor> setOfParfactors = new HashSet<ParametricFactor>();
+		setOfParfactors.add(aggParfactors.get("agg1"));
+		setOfParfactors.add(aggParfactors.get("agg2"));
+		System.out.println(aggParfactors.get("agg2").sumOut(setOfParfactors));
+	}
 	
 }

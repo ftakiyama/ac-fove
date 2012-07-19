@@ -37,7 +37,7 @@ public class AggregationParfactor implements ParametricFactor {
 	
 	private ParameterizedFactor parentFactor;
 	
-	private Operator operator;
+	private Or operator;
 	 
 	private HashSet<Constraint> constraintsInA; // I must guarantee that Constraint has a good hashCode() method
 	private HashSet<Constraint> constraintsNotInA;
@@ -52,7 +52,7 @@ public class AggregationParfactor implements ParametricFactor {
 			ParameterizedRandomVariable parent,
 			ParameterizedRandomVariable child,
 			ParameterizedFactor factor,
-			Operator operator,
+			Or operator,
 			Set<Constraint> constraintsNotInA) {
 		
 		this.name = name;
@@ -73,7 +73,7 @@ public class AggregationParfactor implements ParametricFactor {
 			ParameterizedRandomVariable parent,
 			ParameterizedRandomVariable child,
 			ParameterizedFactor factor,
-			Operator operator,
+			Or operator,
 			Set<Constraint> constraintsNotInA) {
 		
 		return new AggregationParfactor("", constraintsInA, parent, child, factor, operator, constraintsNotInA);
@@ -85,7 +85,7 @@ public class AggregationParfactor implements ParametricFactor {
 			ParameterizedRandomVariable parent,
 			ParameterizedRandomVariable child,
 			ParameterizedFactor factor,
-			Operator operator,
+			Or operator,
 			Set<Constraint> constraintsNotInA) {
 		
 		return new AggregationParfactor(name, constraintsInA, parent, child, factor, operator, constraintsNotInA);
@@ -198,7 +198,7 @@ public class AggregationParfactor implements ParametricFactor {
 			ArrayList<Number> mapping = new ArrayList<Number>();
 			for (int i = 0; i < child.getRangeSize(); i++) {
 				mapping.add(getFactorValue(child.getElementFromRange(i), 
-										   sizeOfDomainAsBinary.length, 
+										   sizeOfDomainAsBinary.length - 1, 
 										   sizeOfDomainAsBinary));
 			}
 			
@@ -211,7 +211,7 @@ public class AggregationParfactor implements ParametricFactor {
 			
 		}
 		
-		return null;
+		return setOfParfactors;
 	}
 	
 	//TODO: implement this
@@ -247,7 +247,7 @@ public class AggregationParfactor implements ParametricFactor {
 	 * @param binaryRepresentation The binary representation of |D(A):C<sub>A</sub>|
 	 * @return The value of F<sub>k</sub>(x).
 	 */
-	private Number getFactorValue(String x, int k, Integer[] binaryRepresentation) { //TODO: rewrite this ugly thing
+	private Number getFactorValue(String x, int k, Integer[] binaryRepresentation) { //TODO: rewrite this ugly thing TODO: cache results
 		if (k == 0) {
 			for (int i = 0; i < parent.getRangeSize(); i++) {
 				if (x.equals(parent.getElementFromRange(i))) {

@@ -1,6 +1,7 @@
 package br.usp.poli.takiyama.prv;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
@@ -233,7 +234,7 @@ public class ParameterizedRandomVariable {
 	 */
 	private RandomVariable getGroundInstanceSatisfyingConstraints(
 			int index, 
-			List<Constraint> constraints)  
+			Set<Constraint> constraints)  
 			throws 	IllegalStateException, 
 					IllegalArgumentException {
 		
@@ -250,8 +251,8 @@ public class ParameterizedRandomVariable {
 	 * @return The set of ground instances that satisfy the constraints in
 	 * <code>constraints</code>
 	 */
-	public List<RandomVariable> getGroundInstancesSatisfying(List<Constraint> constraints) {
-		ArrayList<RandomVariable> groundInstances = new ArrayList<RandomVariable>();
+	public Set<RandomVariable> getGroundInstancesSatisfying(Set<Constraint> constraints) {
+		HashSet<RandomVariable> groundInstances = new HashSet<RandomVariable>();
 		for (int i = 0; i < getNumberOfGroundInstances(); i++) {
 			groundInstances.add(getGroundInstanceSatisfyingConstraints(i, constraints));
 		}

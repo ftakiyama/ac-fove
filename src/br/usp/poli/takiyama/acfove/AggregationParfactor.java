@@ -3,12 +3,13 @@ package br.usp.poli.takiyama.acfove;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.cfove.ParameterizedFactor;
-import br.usp.poli.takiyama.cfove.Parfactor;
-import br.usp.poli.takiyama.common.ParametricFactor;
+import br.usp.poli.takiyama.cfove.SimpleParfactor;
+import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 import br.usp.poli.takiyama.utils.Sets;
@@ -30,7 +31,7 @@ import br.usp.poli.takiyama.utils.Sets;
  * @author ftakiyama
  *
  */
-public class AggregationParfactor implements ParametricFactor {
+public class AggregationParfactor implements Parfactor {
 	
 	private ParameterizedRandomVariable parent;
 	private ParameterizedRandomVariable child;
@@ -92,6 +93,33 @@ public class AggregationParfactor implements ParametricFactor {
 	}
 	
 	
+	public boolean contains(ParameterizedRandomVariable variable) {
+		return variable.equals(parent);
+	}
+	
+	public ParameterizedFactor getFactor() {
+		return this.parentFactor;
+	}
+	
+	@Override
+	public List<ParameterizedRandomVariable> getParameterizedRandomVariables() {
+		return this.parentFactor.getParameterizedRandomVariables();
+	}
+
+	@Override
+	public Set<Constraint> getConstraints() {
+		return this.constraintsInA; // TODO correct this
+	}
+	
+	
+	/*
+	 ***************************************************************************
+	 *
+	 * OPERATIONS
+	 * 
+	 ***************************************************************************
+	 */
+	
 	/**
 	 * Multiplies the aggregation parfactor by specified parfactor.
 	 * <br>
@@ -118,32 +146,44 @@ public class AggregationParfactor implements ParametricFactor {
 	 * @throws IllegalArgumentException If the parfactor provided does not
 	 * obey the constraints listed above.
 	 */
-	public AggregationParfactor multiply(Parfactor parfactor) 
+	public Set<Parfactor> multiply(Set<Parfactor> setOfParfactors, Parfactor parfactor) 
 			throws IllegalArgumentException {
 		
-		if (Sets.union(this.constraintsInA, 
-					   this.constraintsNotInA)
-				.equals(new HashSet<Constraint>(parfactor.getConstraints())) &&
-			parfactor.getParameterizedRandomVariables().size() == 1 &&
-			parfactor.getParameterizedRandomVariables().get(0).equals(this.parent)) {
-		
-			return getInstance(this.constraintsInA,
-							   this.parent,
-							   this.child,
-							   this.parentFactor.multiply(parfactor.getFactor()),
-							   this.operator,
-							   this.constraintsNotInA);
+		if (conditionsToMultiplicationAreMet(parfactor)) {
+			
+			setOfParfactors.remove(parfactor);
+			setOfParfactors.add(
+					getInstance(this.constraintsInA,
+								this.parent,
+								this.child,
+								this.parentFactor.multiply(parfactor.getFactor()),
+								this.operator,
+								this.constraintsNotInA));
+			
+			return setOfParfactors;
+			
 		} else {
 			throw new IllegalArgumentException("Cannot multiply because " +
 					"pre-requisites are not met.");
 		}
+	}
+	
+	private boolean conditionsToMultiplicationAreMet(Parfactor parfactor) {
+		if (!(parfactor instanceof SimpleParfactor)) {
+			return false;
+		}
+		SimpleParfactor p = (SimpleParfactor) parfactor;
 		
-		
+		return Sets.union(this.constraintsInA, 
+				   		  this.constraintsNotInA)
+				   .equals(new HashSet<Constraint>(p.getConstraints())) &&
+			   p.getParameterizedRandomVariables().size() == 1 &&
+			   p.getParameterizedRandomVariables().get(0).equals(this.parent);
 	}
 
 	
 	
-	public Set<ParametricFactor> sumOut(Set<ParametricFactor> setOfParfactors) {
+	public Set<Parfactor> sumOut(Set<Parfactor> setOfParfactors, ParameterizedRandomVariable variable) {
 		
 		/*
 		 * INPUT: set of parfactors and aggregation parfactors Phi
@@ -180,15 +220,7 @@ public class AggregationParfactor implements ParametricFactor {
 		 *             return sum
 		 * 
 		 */
-		
-		// checks if C U CA is in normal form
-		
-		// checks if param(c) = param(p) \ A
-
-		// checks if that no other parfactor or aggregation parfactor in Phi 
-		// involves parameterized random variables that represent random 
-		// variables from ground(p(...,A,...)).
-		
+			
 		if (conditionsToSumOutAreMet(setOfParfactors)) {
 			Integer[] sizeOfDomainAsBinary = getBinaryRepresentationOf(extraVariableInParent.getIndividualsSatisfying(constraintsInA).size());
 			
@@ -204,7 +236,7 @@ public class AggregationParfactor implements ParametricFactor {
 			
 			setOfParfactors.remove(this);
 			setOfParfactors.add(
-					Parfactor.getInstance(constraintsNotInA, 
+					SimpleParfactor.getInstance(constraintsNotInA, 
 							              ParameterizedFactor.getInstance(this.name, 
 							            		                          variables, 
 							            		                          mapping)));
@@ -215,7 +247,14 @@ public class AggregationParfactor implements ParametricFactor {
 	}
 	
 	//TODO: implement this
-	private boolean conditionsToSumOutAreMet(Set<ParametricFactor> setOfParfactors) {
+	private boolean conditionsToSumOutAreMet(Set<Parfactor> setOfParfactors) {
+		// checks if C U CA is in normal form
+		
+		// checks if param(c) = param(p) \ A
+
+		// checks if that no other parfactor or aggregation parfactor in Phi 
+		// involves parameterized random variables that represent random 
+		// variables from ground(p(...,A,...)).
 		return true;
 	}
 	
@@ -242,6 +281,8 @@ public class AggregationParfactor implements ParametricFactor {
 	 * <br>
 	 * Calculates the resulting factor value when summing out the aggregation
 	 * parfactor.
+	 * <br>
+	 * TODO: this method is recursive. Make it non-recursive. 
 	 * @param x A value in range(c)
 	 * @param k The index of the factor to calculate
 	 * @param binaryRepresentation The binary representation of |D(A):C<sub>A</sub>|
@@ -298,4 +339,6 @@ public class AggregationParfactor implements ParametricFactor {
 			   constraintsInA.toString() + ",\n" +
 			   ">\n";
 	}
+
+	
 }

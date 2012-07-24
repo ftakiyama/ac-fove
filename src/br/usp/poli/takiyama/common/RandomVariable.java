@@ -193,7 +193,7 @@ public final class RandomVariable {
 	
 	@Override
 	public int hashCode() {
-		return name.hashCode() + domain.hashCode() + values.hashCode();
+		return name.hashCode() + domain.hashCode();
 	}
 	
 }

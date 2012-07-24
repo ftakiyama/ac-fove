@@ -2,11 +2,13 @@ package br.usp.poli.takiyama.cfove;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import br.usp.poli.takiyama.common.Constraint;
+import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.prv.PRV;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 
@@ -15,7 +17,7 @@ public class MacroOperationsTest {
 	
 	private HashMap<String, ParameterizedRandomVariable> variables;
 	private HashMap<String, ParameterizedFactor> factors;
-	private HashMap<String, Parfactor> parfactors;
+	private HashMap<String, SimpleParfactor> parfactors;
 	
 	
 	@Before
@@ -90,13 +92,13 @@ public class MacroOperationsTest {
 		factors.put(name, ParameterizedFactor.getInstance(name, prvs, mapping));
 		
 		// Pool of parfactors
-		parfactors = new HashMap<String, Parfactor>(); 
-		parfactors.put("parfactor1", Parfactor.getInstanceWithoutConstraints(factors.get("factor1")));
-		parfactors.put("parfactor2", Parfactor.getInstanceWithoutConstraints(factors.get("factor2")));
-		parfactors.put("parfactor3", Parfactor.getInstanceWithoutConstraints(factors.get("factor3")));
-		parfactors.put("parfactor4", Parfactor.getInstanceWithoutConstraints(factors.get("factor4")));
-		parfactors.put("parfactor5", Parfactor.getInstanceWithoutConstraints(factors.get("factor5")));
-		parfactors.put("empty_parfactor", Parfactor.getInstanceWithoutConstraints(factors.get("empty_factor")));
+		parfactors = new HashMap<String, SimpleParfactor>(); 
+		parfactors.put("parfactor1", SimpleParfactor.getInstanceWithoutConstraints(factors.get("factor1")));
+		parfactors.put("parfactor2", SimpleParfactor.getInstanceWithoutConstraints(factors.get("factor2")));
+		parfactors.put("parfactor3", SimpleParfactor.getInstanceWithoutConstraints(factors.get("factor3")));
+		parfactors.put("parfactor4", SimpleParfactor.getInstanceWithoutConstraints(factors.get("factor4")));
+		parfactors.put("parfactor5", SimpleParfactor.getInstanceWithoutConstraints(factors.get("factor5")));
+		parfactors.put("empty_parfactor", SimpleParfactor.getInstanceWithoutConstraints(factors.get("empty_factor")));
 	}
 	
 	// Example 1 from ENIA'2012 paper
@@ -201,9 +203,9 @@ public class MacroOperationsTest {
 		mapping.add(Double.valueOf("1.0"));
 		factors.put(name, ParameterizedFactor.getInstance(name, prvs, mapping));
 		
-		parfactors = new HashMap<String, Parfactor>(); 
+		parfactors = new HashMap<String, SimpleParfactor>(); 
 		for (String node : nodes) {
-			parfactors.put(node, Parfactor.getInstanceWithoutConstraints(factors.get(node)));
+			parfactors.put(node, SimpleParfactor.getInstanceWithoutConstraints(factors.get(node)));
 		}
 	}
 	
@@ -212,16 +214,16 @@ public class MacroOperationsTest {
 	public void testBasicGlobalSumOut() {
 		System.out.println("\nTest: Basic GLOBAL-SUM-OUT");
 		
-		ArrayList<Parfactor> setOfParfactors = new ArrayList<Parfactor>();
+		HashSet<Parfactor> setOfParfactors = new HashSet<Parfactor>();
 		setOfParfactors.add(parfactors.get("parfactor1"));
-		setOfParfactors.add(parfactors.get("parfactor4"));
+		setOfParfactors.add(parfactors.get("parfactor2"));
 		
 		System.out.println("Before GLOBAL-SUM-OUT: \n" + setOfParfactors);
 		
 		System.out.println("After GLOBAL-SUM-OUT: \n" + MacroOperations
 				.globalSumOut(setOfParfactors, 
-							  variables.get("f0"), 
-							  new ArrayList<Constraint>()));		
+							  variables.get("g0"), 
+							  new HashSet<Constraint>()));		
 	}
 	
 	@Test
@@ -230,7 +232,7 @@ public class MacroOperationsTest {
 		
 		createPortWineOntology();
 		
-		ArrayList<Parfactor> setOfParfactors = new ArrayList<Parfactor>();
+		HashSet<Parfactor> setOfParfactors = new HashSet<Parfactor>();
 		String[] nodes = {"wine",
 						  "hasWineColorRed",
 						  "redWine",
@@ -245,46 +247,46 @@ public class MacroOperationsTest {
 		
 		System.out.println("Before GLOBAL-SUM-OUT: \n" + setOfParfactors);
 		
-		setOfParfactors = new ArrayList<Parfactor>(MacroOperations
+		setOfParfactors = new HashSet<Parfactor>(MacroOperations
 				.globalSumOut(setOfParfactors, 
 							  variables.get("wine"), 
-							  new ArrayList<Constraint>()));
+							  new HashSet<Constraint>()));
 		
 		System.out.println("After GLOBAL-SUM-OUT(wine(X)): \n" + setOfParfactors);
 
 		
-		setOfParfactors = new ArrayList<Parfactor>(MacroOperations
+		setOfParfactors = new HashSet<Parfactor>(MacroOperations
 				.globalSumOut(setOfParfactors, 
 							  variables.get("hasWineColorRed"), 
-							  new ArrayList<Constraint>()));
+							  new HashSet<Constraint>()));
 		
 		System.out.println("After GLOBAL-SUM-OUT(hasWineColorRed(X)): \n" + setOfParfactors);
 		
 
-		setOfParfactors = new ArrayList<Parfactor>(MacroOperations
+		setOfParfactors = new HashSet<Parfactor>(MacroOperations
 				.globalSumOut(setOfParfactors, 
 							  variables.get("hasWineBodyFull"), 
-							  new ArrayList<Constraint>()));
+							  new HashSet<Constraint>()));
 		
-		setOfParfactors = new ArrayList<Parfactor>(MacroOperations
+		setOfParfactors = new HashSet<Parfactor>(MacroOperations
 				.globalSumOut(setOfParfactors, 
 							  variables.get("hasWineFlavourStrong"), 
-							  new ArrayList<Constraint>()));
+							  new HashSet<Constraint>()));
 		
-		setOfParfactors = new ArrayList<Parfactor>(MacroOperations
+		setOfParfactors = new HashSet<Parfactor>(MacroOperations
 				.globalSumOut(setOfParfactors, 
 							  variables.get("hasWineSugarSweet"), 
-							  new ArrayList<Constraint>()));
+							  new HashSet<Constraint>()));
 		
-		setOfParfactors = new ArrayList<Parfactor>(MacroOperations
+		setOfParfactors = new HashSet<Parfactor>(MacroOperations
 				.globalSumOut(setOfParfactors, 
 							  variables.get("locatedInPortugalRegion"), 
-							  new ArrayList<Constraint>()));
+							  new HashSet<Constraint>()));
 		
-		setOfParfactors = new ArrayList<Parfactor>(MacroOperations
+		setOfParfactors = new HashSet<Parfactor>(MacroOperations
 				.globalSumOut(setOfParfactors, 
 							  variables.get("redWine"), 
-							  new ArrayList<Constraint>()));
+							  new HashSet<Constraint>()));
 		
 		System.out.println("After Everything: \n" + setOfParfactors);
 		

@@ -8,7 +8,7 @@ public class CFOVE {
 	
 	// Input
 	private ImmutableSet<RandomVariable> queryRandomVariables;
-	private ImmutableSet<Parfactor> setOfParfactors;
+	private ImmutableSet<SimpleParfactor> setOfParfactors;
 	
 	// Output
 	private ParameterizedFactor marginalDistribution;

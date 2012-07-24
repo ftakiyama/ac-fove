@@ -1,9 +1,10 @@
 package br.usp.poli.takiyama.cfove;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import br.usp.poli.takiyama.common.Constraint;
+import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 
 public final class MacroOperations {
@@ -27,9 +28,9 @@ public final class MacroOperations {
 	 * @param variable
 	 * @param setOfConstraints
 	 */
-	public static List<Parfactor> globalSumOut(List<Parfactor> setOfParfactors, 
+	public static Set<Parfactor> globalSumOut(Set<Parfactor> setOfParfactors, 
 			ParameterizedRandomVariable variable, 
-			List<Constraint> setOfConstraints) {
+			Set<Constraint> setOfConstraints) {
 		
 		/*
 		 * Input:  set of parfactors Phi
@@ -47,15 +48,21 @@ public final class MacroOperations {
 		 * return result
 		 */
 		
-		ArrayList<Parfactor> newSetOfParfactors = new ArrayList<Parfactor>(setOfParfactors);
-		Parfactor product = Parfactor.getConstantInstance();
+		HashSet<Parfactor> newSetOfParfactors = new HashSet<Parfactor>(setOfParfactors);
+		Parfactor product = SimpleParfactor.getConstantInstance();
 		for (Parfactor p : setOfParfactors) {
 			if (p.getParameterizedRandomVariables().contains(variable)) {
-				newSetOfParfactors = new ArrayList<Parfactor>(Operations.multiplication(newSetOfParfactors, product, p));
-				product = newSetOfParfactors.get(newSetOfParfactors.size() - 1); //ugly
+				newSetOfParfactors = new HashSet<Parfactor>(p.multiply(newSetOfParfactors, product));
+				HashSet<Parfactor> copyOfNewSet = new HashSet<Parfactor>(newSetOfParfactors);
+				copyOfNewSet.removeAll(setOfParfactors);
+				product = copyOfNewSet.iterator().hasNext() ? copyOfNewSet.iterator().next() : null;
+				
+				if (product == null) {
+					throw new NullPointerException("The new set is empty!: " + copyOfNewSet);
+				}
 			}
 		}
-		newSetOfParfactors = new ArrayList<Parfactor>(Operations.liftedElimination(newSetOfParfactors, product, variable));
+		newSetOfParfactors = new HashSet<Parfactor>(product.sumOut(newSetOfParfactors, variable));
 		
 		return newSetOfParfactors;
 	}

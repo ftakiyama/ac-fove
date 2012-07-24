@@ -3,15 +3,14 @@ package br.usp.poli.takiyama.acfove;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import br.usp.poli.takiyama.common.Constraint;
-import br.usp.poli.takiyama.common.ParametricFactor;
+import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.cfove.ParameterizedFactor;
-import br.usp.poli.takiyama.cfove.Parfactor;
+import br.usp.poli.takiyama.cfove.SimpleParfactor;
 import br.usp.poli.takiyama.prv.PRV;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 
@@ -19,14 +18,14 @@ public class AggregationParfactorTest {
 	
 	private HashMap<String, ParameterizedRandomVariable> variables;
 	private HashMap<String, ParameterizedFactor> factors;
-	private HashMap<String, Parfactor> parfactors;
+	private HashMap<String, SimpleParfactor> parfactors;
 	private HashMap<String, AggregationParfactor> aggParfactors;
 	
 	@Before
 	public void initialSetup() {
 		variables = new HashMap<String, ParameterizedRandomVariable>();
 		factors = new HashMap<String, ParameterizedFactor>();
-		parfactors = new HashMap<String, Parfactor>();
+		parfactors = new HashMap<String, SimpleParfactor>();
 		aggParfactors = new HashMap<String, AggregationParfactor>();
 		
 		variables.put("p", PRV.getBooleanPrvWithOneParameter("p", 10));
@@ -43,7 +42,7 @@ public class AggregationParfactorTest {
 		m.add(Double.valueOf("0.2"));
 		m.add(Double.valueOf("0.8"));
 		factors.put(name, ParameterizedFactor.getInstance(name, v, m));
-		parfactors.put(name, Parfactor.getInstanceWithoutConstraints(factors.get(name)));
+		parfactors.put(name, SimpleParfactor.getInstanceWithoutConstraints(factors.get(name)));
 		
 		// Creates another simple parfactor
 		name = "Cousin";
@@ -53,7 +52,7 @@ public class AggregationParfactorTest {
 		m.add(Double.valueOf("0.2"));
 		m.add(Double.valueOf("0.8"));
 		factors.put(name, ParameterizedFactor.getInstance(name, v, m));
-		parfactors.put(name, Parfactor.getInstanceWithoutConstraints(factors.get(name)));
+		parfactors.put(name, SimpleParfactor.getInstanceWithoutConstraints(factors.get(name)));
 		
 		
 		// Creates a simple aggregation parfactor
@@ -94,12 +93,16 @@ public class AggregationParfactorTest {
 	@Test
 	public void testSimpleMultiplication() {
 		System.out.println("\nTest: Simple Multiplication");
-		System.out.println(aggParfactors.get("agg1").multiply(parfactors.get("Parent")));
+		HashSet<Parfactor> setOfParfactors = new HashSet<Parfactor>();
+		setOfParfactors.add(aggParfactors.get("agg1"));
+		System.out.println(aggParfactors.get("agg1").multiply(setOfParfactors, parfactors.get("Parent")));
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
 	public void testMultiplicationConditions() {
-		aggParfactors.get("agg1").multiply(parfactors.get("Cousin"));
+		HashSet<Parfactor> setOfParfactors = new HashSet<Parfactor>();
+		setOfParfactors.add(aggParfactors.get("agg1"));
+		aggParfactors.get("agg1").multiply(setOfParfactors, parfactors.get("Cousin"));
 	}
 	
 //	@Test
@@ -128,10 +131,10 @@ public class AggregationParfactorTest {
 	@Test
 	public void testSumOut() {
 		System.out.println("\nTest (Manual): Sum out");
-		HashSet<ParametricFactor> setOfParfactors = new HashSet<ParametricFactor>();
+		HashSet<Parfactor> setOfParfactors = new HashSet<Parfactor>();
 		setOfParfactors.add(aggParfactors.get("agg1"));
 		setOfParfactors.add(aggParfactors.get("agg2"));
-		System.out.println(aggParfactors.get("agg2").sumOut(setOfParfactors));
+		System.out.println(aggParfactors.get("agg2").sumOut(setOfParfactors, variables.get("matched_6")));
 	}
 	
 }

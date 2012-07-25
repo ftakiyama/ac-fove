@@ -49,7 +49,7 @@ public final class MacroOperations {
 		 */
 		
 		HashSet<Parfactor> newSetOfParfactors = new HashSet<Parfactor>(setOfParfactors);
-		Parfactor product = SimpleParfactor.getConstantInstance();
+		Parfactor product = SimpleParfactor.getConstantInstance(); //TODO: it would be better to do the first multiplication outside the loop
 		for (Parfactor p : setOfParfactors) {
 			if (p.getParameterizedRandomVariables().contains(variable)) {
 				newSetOfParfactors = new HashSet<Parfactor>(p.multiply(newSetOfParfactors, product));
@@ -65,5 +65,14 @@ public final class MacroOperations {
 		newSetOfParfactors = new HashSet<Parfactor>(product.sumOut(newSetOfParfactors, variable));
 		
 		return newSetOfParfactors;
+	}
+	
+	
+	public static boolean conditionsForGlobalSumOutAreMet(Set<Parfactor> setOfParfactors, 
+			ParameterizedRandomVariable variable, 
+			Set<Constraint> setOfConstraints) {
+		// remember that multiplication may be over aggregations or simple
+		// how can i check the sum out condition without doing the multiplication?
+		return true;
 	}
 }

@@ -38,7 +38,7 @@ public class AggregationParfactor implements Parfactor {
 	
 	private ParameterizedFactor parentFactor;
 	
-	private Or operator;
+	private Operator operator;
 	 
 	private HashSet<Constraint> constraintsInA; // I must guarantee that Constraint has a good hashCode() method
 	private HashSet<Constraint> constraintsNotInA;
@@ -53,7 +53,7 @@ public class AggregationParfactor implements Parfactor {
 			ParameterizedRandomVariable parent,
 			ParameterizedRandomVariable child,
 			ParameterizedFactor factor,
-			Or operator,
+			Operator operator,
 			Set<Constraint> constraintsNotInA) {
 		
 		this.name = name;
@@ -74,7 +74,7 @@ public class AggregationParfactor implements Parfactor {
 			ParameterizedRandomVariable parent,
 			ParameterizedRandomVariable child,
 			ParameterizedFactor factor,
-			Or operator,
+			Operator operator,
 			Set<Constraint> constraintsNotInA) {
 		
 		return new AggregationParfactor("", constraintsInA, parent, child, factor, operator, constraintsNotInA);
@@ -86,15 +86,24 @@ public class AggregationParfactor implements Parfactor {
 			ParameterizedRandomVariable parent,
 			ParameterizedRandomVariable child,
 			ParameterizedFactor factor,
-			Or operator,
+			Operator operator,
 			Set<Constraint> constraintsNotInA) {
 		
 		return new AggregationParfactor(name, constraintsInA, parent, child, factor, operator, constraintsNotInA);
 	}
 	
+	public static AggregationParfactor getInstanceWithoutConstraints(
+			ParameterizedRandomVariable parent,
+			ParameterizedRandomVariable child,
+			ParameterizedFactor factor,
+			Operator operator) {
+
+		return new AggregationParfactor("", new HashSet<Constraint>(), parent, child, factor, operator, new HashSet<Constraint>());
+	}
+	
 	
 	public boolean contains(ParameterizedRandomVariable variable) {
-		return variable.equals(parent);
+		return variable.equals(parent) || variable.equals(child);
 	}
 	
 	public ParameterizedFactor getFactor() {
@@ -104,6 +113,11 @@ public class AggregationParfactor implements Parfactor {
 	@Override
 	public List<ParameterizedRandomVariable> getParameterizedRandomVariables() {
 		return this.parentFactor.getParameterizedRandomVariables();
+	}
+	
+	@Override
+	public ParameterizedRandomVariable getChildVariable() {
+		return this.child;
 	}
 
 	@Override
@@ -149,7 +163,7 @@ public class AggregationParfactor implements Parfactor {
 	public Set<Parfactor> multiply(Set<Parfactor> setOfParfactors, Parfactor parfactor) 
 			throws IllegalArgumentException {
 		
-		if (conditionsToMultiplicationAreMet(parfactor)) {
+		if (this.canBeMultipliedBy(parfactor)) {
 			
 			setOfParfactors.remove(parfactor);
 			setOfParfactors.add(
@@ -164,11 +178,11 @@ public class AggregationParfactor implements Parfactor {
 			
 		} else {
 			throw new IllegalArgumentException("Cannot multiply because " +
-					"pre-requisites are not met.");
+					"pre-requisites are not met. " + this.toString() + "\n\n" + parfactor.toString());
 		}
 	}
 	
-	private boolean conditionsToMultiplicationAreMet(Parfactor parfactor) {
+	public boolean canBeMultipliedBy(Parfactor parfactor) {
 		if (!(parfactor instanceof SimpleParfactor)) {
 			return false;
 		}

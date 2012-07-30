@@ -1,6 +1,5 @@
 package br.usp.poli.takiyama.acfove;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -18,8 +17,8 @@ import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
  * <br>
  * As the GLOBAL-SUM-OUT operations always reduce the size of the parfactors,
  * the cost of this operation tend to be the smallest. The number of random
- * variables criteria is used only to tie-breaking. If the draw persists, the
- * first operation with the smallest cost is chosen.
+ * variables criteria is used only for tie-breaking. If the draw persists, the
+ * first operation evaluated with the smallest cost is chosen.
  * <br>
  * This class stores all the arguments necessary to execute the given operation,
  * and only those necessary to execute it.
@@ -27,7 +26,7 @@ import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
  * @author ftakiyama
  *
  */
-public class Operation {
+public class Evaluator {
 	private Parfactor parfactor;
 	private HashSet<Parfactor> setOfParfactors;
 	private HashSet<Constraint> setOfConstraints;
@@ -45,7 +44,11 @@ public class Operation {
 		PROPOSITIONALIZE, FULL_EXPAND};
 	
 	// TODO: change it later
-	public Operation() {
+	public Evaluator() {
+		clear();
+	}
+	
+	public void clear() {
 		this.parfactor = null;
 		this.setOfParfactors = new HashSet<Parfactor>();
 		this.setOfConstraints = new HashSet<Constraint>();
@@ -56,6 +59,21 @@ public class Operation {
 		this.numberOfVariablesEliminated = 0;
 	}
 	
+	public ParameterizedRandomVariable getVariable() {
+		return this.parameterizedRandomVariable;
+	}
+ 	
+	/**
+	 * Checks the cost of GLOBAL-SUM-OUT.
+	 * <br>
+	 * If this operation is possible, evaluates the cost of the operation and
+	 * stores the relevant data if the cost is smaller than the previous
+	 * costs.
+	 * @param parfactors A set of parfactors
+	 * @param prv The parameterized random varible to be eliminated from the
+	 * set of parfactors.
+	 * @param constraints A set of constraints.
+	 */
 	public void checkCostOfGlobalSumOut(Set<Parfactor> parfactors, ParameterizedRandomVariable prv, Set<Constraint> constraints) {
 		//TODO: implement
 		/*
@@ -81,10 +99,12 @@ public class Operation {
 			if (size < createdParfactorSize ||
 					(size == createdParfactorSize && 
 							prv.getGroundInstancesSatisfying(constraints).size() > numberOfVariablesEliminated)) {
-				this.currentOperation = Operation.MacroOperation.GLOBAL_SUM_OUT;
+				this.currentOperation = Evaluator.MacroOperation.GLOBAL_SUM_OUT;
 				this.setOfParfactors = new HashSet<Parfactor>(parfactors);
 				this.parameterizedRandomVariable = prv;
 				this.setOfConstraints = new HashSet<Constraint>(constraints);
+				this.createdParfactorSize = size;
+				this.numberOfVariablesEliminated = prv.getGroundInstancesSatisfying(constraints).size();
 			} 
 		}
 	}
@@ -102,17 +122,37 @@ public class Operation {
 	}
 	
 	public Set<Parfactor> executeCurrentOperation() {
-		if (currentOperation.equals(Operation.MacroOperation.GLOBAL_SUM_OUT)) {
-			return MacroOperations.globalSumOut(setOfParfactors, parameterizedRandomVariable, setOfConstraints);
-		} else if (currentOperation.equals(Operation.MacroOperation.COUNTING_CONVERT)) {
+		if (currentOperation.equals(Evaluator.MacroOperation.GLOBAL_SUM_OUT)) {
+			HashSet<Parfactor> result = new HashSet<Parfactor>(MacroOperations.globalSumOut(setOfParfactors, parameterizedRandomVariable, setOfConstraints));
+			this.clear();
+			return result;
+		} else if (currentOperation.equals(Evaluator.MacroOperation.COUNTING_CONVERT)) {
 			
-		} else if (currentOperation.equals(Operation.MacroOperation.PROPOSITIONALIZE)) {
+		} else if (currentOperation.equals(Evaluator.MacroOperation.PROPOSITIONALIZE)) {
 			
-		} else if (currentOperation.equals(Operation.MacroOperation.FULL_EXPAND)) {
+		} else if (currentOperation.equals(Evaluator.MacroOperation.FULL_EXPAND)) {
 			
 		} else {
 			// throw exception?
+			return new HashSet<Parfactor>();
 		}
 		return null;
+	}
+	
+	@Override
+	public String toString() {
+		if (currentOperation.equals(Evaluator.MacroOperation.GLOBAL_SUM_OUT)) {
+			return Evaluator.MacroOperation.GLOBAL_SUM_OUT.toString() + ": " + parameterizedRandomVariable.toString() + ", " + setOfConstraints.toString() + "\n";
+		} else if (currentOperation.equals(Evaluator.MacroOperation.COUNTING_CONVERT)) {
+			
+		} else if (currentOperation.equals(Evaluator.MacroOperation.PROPOSITIONALIZE)) {
+			
+		} else if (currentOperation.equals(Evaluator.MacroOperation.FULL_EXPAND)) {
+			
+		} else {
+			// throw exception?
+			return "No current operation";
+		}
+		return "No current operation"; 
 	}
 }

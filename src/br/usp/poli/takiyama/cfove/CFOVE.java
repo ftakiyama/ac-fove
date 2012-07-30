@@ -1,17 +1,17 @@
 package br.usp.poli.takiyama.cfove;
 
-import br.usp.poli.takiyama.common.RandomVariable;
+import java.util.TreeSet;
 
-import com.google.common.collect.ImmutableSet;
+import br.usp.poli.takiyama.common.RandomVariable;
 
 public class CFOVE {
 	
 	// Input
-	private ImmutableSet<RandomVariable> queryRandomVariables;
-	private ImmutableSet<SimpleParfactor> setOfParfactors;
+	private TreeSet<RandomVariable> queryRandomVariables;
+	private TreeSet<SimpleParfactor> setOfParfactors;
 	
 	// Output
-	private ParameterizedFactor marginalDistribution;
+	private SimpleParfactor marginalDistribution;
 	
 	
 	private boolean thereAreNonQueriedRandomVariables() {

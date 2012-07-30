@@ -1,10 +1,13 @@
 package br.usp.poli.takiyama.cfove;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import br.usp.poli.takiyama.acfove.AggregationParfactor;
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.Parfactor;
+import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 
 public final class MacroOperations {
@@ -19,14 +22,23 @@ public final class MacroOperations {
 	 * &Phi; containing parameterized random variables that represent 
 	 * ground(f(...)) : C and eliminates random variables ground(f(...)) : C 
 	 * from the product; the macro-operation is only applicable if the product 
-	 * satisfies the pre-conditions for Lifted Elimination.
+	 * satisfies the pre-conditions for Lifted Elimination. This method does
+	 * not verify those pre-conditions, they must be checked separately using
+	 * the appropriate method from this class.
+	 * <br>
 	 * <br>
 	 * Multiplication operations can always be performed because of initial shattering. 
 	 * <br>
+	 * <br>
 	 * This is the only macro-operation that eliminates random variables from J(&Phi;).
-	 * @param setOfParfactors
-	 * @param variable
-	 * @param setOfConstraints
+	 * <br>
+	 * <br>
+	 * 
+	 * @param setOfParfactors The set of parfactors from which the variable
+	 * will be eliminated
+	 * @param variable The parameterized random variable to eliminate
+	 * @param setOfConstraints A set of constraints the given variable must
+	 * obey
 	 */
 	public static Set<Parfactor> globalSumOut(Set<Parfactor> setOfParfactors, 
 			ParameterizedRandomVariable variable, 
@@ -67,12 +79,123 @@ public final class MacroOperations {
 		return newSetOfParfactors;
 	}
 	
-	
-	public static boolean conditionsForGlobalSumOutAreMet(Set<Parfactor> setOfParfactors, 
+	/**
+	 * Checks if it is possible to apply the method  
+	 * {@link MacroOperations#globalSumOut(Set, ParameterizedRandomVariable, Set)}
+	 * to eliminate a parameterized random variable from a set of parfactors.
+	 * <br>
+	 * This method must be used before the aforementioned method to check the
+	 * validity of the operation. One may get unexpected results if the
+	 * verification is not made.
+	 * @param setOfParfactors The set of parfactors from which the variable
+	 * will be eliminated
+	 * @param variable The parameterized random variable to eliminate
+	 * @param setOfConstraints A set of constraints the given variable must
+	 * obey
+	 * @return True if GLOBAL-SUM-OUT is possible for the given parameters, 
+	 * false otherwise 
+	 */
+	public static boolean conditionsForGlobalSumOutAreMet(
+			Set<Parfactor> setOfParfactors, 
 			ParameterizedRandomVariable variable, 
 			Set<Constraint> setOfConstraints) {
 		// remember that multiplication may be over aggregations or simple
 		// how can i check the sum out condition without doing the multiplication?
-		return true;
+		
+		/*
+		 * for each parfactor p in set of parfactors P
+		 *     if p contains PRV v
+		 *         add p to pool
+		 * all_vars := empty set
+		 * for each parfactor p in pool
+		 *     if p can be multiplied by next parfactor np in pool
+		 *         all_vars := PRVs from p union PRVs from np union all_vars
+		 *     else
+		 *         all_vars := empty set
+		 *         break
+		 * if all_vars = empty set
+		 *     return false
+		 * if sumOutIsPossible(all_vars, v)
+		 *     return true
+		 * return false
+		 * 
+		 */
+		
+		AggregationParfactor agg = null;
+		ArrayList<Parfactor> candidateParfactors = new ArrayList<Parfactor>();
+		for (Parfactor parfactor : setOfParfactors) {
+			if (parfactor.contains(variable)) {
+				candidateParfactors.add(parfactor);
+				if (parfactor instanceof AggregationParfactor) {
+					agg = (AggregationParfactor) parfactor;
+				}
+			}
+		}
+		
+		// check if multiplication is possible
+		// it only makes sense when there is an Aggregation Parfactor in the set
+		if (agg != null) {
+			for (Parfactor parfactor : candidateParfactors) {
+				if (!parfactor.canBeMultipliedBy(agg)) {
+					return false;
+				}
+			}
+		}
+		
+		HashSet<ParameterizedRandomVariable> variablesFromMultiplication = 
+			new HashSet<ParameterizedRandomVariable>(candidateParfactors.get(0).getParameterizedRandomVariables());
+		
+		// TODO: this is ugly
+		ParameterizedRandomVariable childVariable = candidateParfactors.get(0).getChildVariable();
+		
+		for (int i = 0; i < candidateParfactors.size() - 1; i++) {
+			if (candidateParfactors.get(i).canBeMultipliedBy(candidateParfactors.get(i + 1))) {
+				variablesFromMultiplication.addAll(candidateParfactors.get(i + 1).getParameterizedRandomVariables());
+			} else {
+				return false;
+			}
+		}
+		
+		if (sumOutIsPossible(variablesFromMultiplication, variable, childVariable)) {
+			return true;
+		}
+		return false;
+		
+	}
+	
+	/**
+	 * Returns true if it is possible to sum out the <code>variableToSumOut</code>
+	 * given the all parameterized random variables in the factor from the
+	 * parfactor and its child variable, if any.
+	 * <br>
+	 * The <code>childVariable</code> must be provided separately when the
+	 * parfactor is actually an aggregation parfactor, otherwise it must be set
+	 * to <code>null</code>.
+	 * 
+	 * @param variablesFromMultiplication The variables present in the factor
+	 * @param variableToSumOut The parameterized random variable to be summed
+	 * out
+	 * @param childVariable The child parameterized random variable from the
+	 * parfactor, set to null if the is no such variable.
+	 * @return True if summing out the given variable is possible, false
+	 * otherwise.
+	 */
+	private static boolean sumOutIsPossible(
+			Set<ParameterizedRandomVariable> variablesFromMultiplication, 
+			ParameterizedRandomVariable variableToSumOut,
+			ParameterizedRandomVariable childVariable) {
+		
+		if (childVariable != null) { // Product is an aggregation parfactor
+			HashSet<LogicalVariable> parentParameters = new HashSet<LogicalVariable>(variableToSumOut.getParameters());
+			parentParameters.removeAll(childVariable.getParameters());
+			return (parentParameters.size() == 1);
+		} else { // Product is simple parfactor
+			variablesFromMultiplication.remove(variableToSumOut);
+			HashSet<LogicalVariable> allLogicalVariables = new HashSet<LogicalVariable>();
+			for (ParameterizedRandomVariable variable : variablesFromMultiplication) {
+				allLogicalVariables.addAll(variable.getParameters());
+			}
+			return variableToSumOut.getParameters().containsAll(allLogicalVariables);
+		}
 	}
 }

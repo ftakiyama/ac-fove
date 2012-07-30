@@ -24,12 +24,24 @@ public interface Parfactor {
 	
 	public Set<Parfactor> sumOut(Set<Parfactor> setOfParfactors, ParameterizedRandomVariable variable);
 	
+	public boolean canBeMultipliedBy(Parfactor parfactor);
+	
 	public Set<Parfactor> multiply(Set<Parfactor> setOfParfactors, Parfactor parfactor);
 	
 	public ParameterizedFactor getFactor();
 	
 	// should i enforce getPRV and getConstraints?
 	public List<ParameterizedRandomVariable> getParameterizedRandomVariables();
+	
+	/**
+	 * Returns the child parameterized random variable of this parfactor. This
+	 * method is applicable only for aggregation parfactors. If the parfactor
+	 * is not an aggregation parfactor, this method should return null.
+	 * <br>
+	 * Not the best solution, but useful as a first solution.
+	 * @return The child parameterized random variable of the parfactor.
+	 */
+	public ParameterizedRandomVariable getChildVariable();
 	
 	public Set<Constraint> getConstraints();
 }

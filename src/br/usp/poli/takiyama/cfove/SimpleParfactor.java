@@ -175,6 +175,11 @@ public final class SimpleParfactor implements Parfactor {
 		return this.factor.getParameterizedRandomVariables().contains(variable);
 	}
 
+	@Override
+	public ParameterizedRandomVariable getChildVariable() {
+		return null;
+	}
+	
 	/*
 	 ***************************************************************************
 	 *
@@ -320,7 +325,7 @@ public final class SimpleParfactor implements Parfactor {
 		 */
 		
 		HashSet<Parfactor> newSetOfParfactors = new HashSet<Parfactor>(setOfParfactors);
-		if (conditionsForMultiplicationAreSatisfied(parfactor)) {
+		if (this.canBeMultipliedBy(parfactor)) {
 			SimpleParfactor p = (SimpleParfactor) parfactor;
 			Set<Constraint> union = p.getConstraints();
 			union.addAll(this.getConstraints());
@@ -343,8 +348,7 @@ public final class SimpleParfactor implements Parfactor {
 		return newSetOfParfactors;
 	}
 	
-	private boolean conditionsForMultiplicationAreSatisfied( 
-			Parfactor parfactor) {
+	public boolean canBeMultipliedBy(Parfactor parfactor) {
 		if (!(parfactor instanceof SimpleParfactor)) {
 			return false;
 		}

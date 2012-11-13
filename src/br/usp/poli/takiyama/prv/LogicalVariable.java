@@ -24,7 +24,7 @@ public final class LogicalVariable implements Term {
 	 * this logical variable
 	 * @throws IllegalArgumentException If the name requirements are not met.
 	 */
-	LogicalVariable(String name, ArrayList<Constant> individuals) throws IllegalArgumentException {
+	public LogicalVariable(String name, ArrayList<Constant> individuals) throws IllegalArgumentException {
 		// The value of a logical variable is its name
 		this.name = new String(name);
 		

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import br.usp.poli.takiyama.cfove.ParameterizedFactor;
+import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 
 /**
@@ -22,11 +23,11 @@ public interface Parfactor {
 	
 	public boolean contains(ParameterizedRandomVariable variable); // I think I will use it on global sum out.
 	
-	public Set<Parfactor> sumOut(Set<Parfactor> setOfParfactors, ParameterizedRandomVariable variable);
+	//public Set<Parfactor> sumOut(Set<Parfactor> setOfParfactors, ParameterizedRandomVariable variable);
 	
-	public boolean canBeMultipliedBy(Parfactor parfactor);
+	//public boolean canBeMultipliedBy(Parfactor parfactor);
 	
-	public Set<Parfactor> multiply(Set<Parfactor> setOfParfactors, Parfactor parfactor);
+	//public Set<Parfactor> multiply(Set<Parfactor> setOfParfactors, Parfactor parfactor);
 	
 	public ParameterizedFactor getFactor();
 	
@@ -44,4 +45,11 @@ public interface Parfactor {
 	public ParameterizedRandomVariable getChildVariable();
 	
 	public Set<Constraint> getConstraints();
+	
+	
+	/* ************************************************************************
+	 *   ENABLING OPERATIONS
+	 * ************************************************************************/
+	
+	public Set<Parfactor> split(Binding substitution);
 }

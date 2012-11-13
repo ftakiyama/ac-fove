@@ -1,16 +1,19 @@
 package br.usp.poli.takiyama.cfove;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import br.usp.poli.takiyama.common.Constraint;
+//import br.usp.poli.takiyama.common.Constraints;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.RandomVariable;
+import br.usp.poli.takiyama.prv.Binding;
+import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
+import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.utils.Sets;
 
 /**
@@ -21,7 +24,7 @@ import br.usp.poli.takiyama.utils.Sets;
  */
 public final class SimpleParfactor implements Parfactor {
 	
-	private final ArrayList<Constraint> constraints;
+	private final HashSet<Constraint> constraints;
 	//private final ArrayList<ParameterizedRandomVariable> variables;
 	private final ParameterizedFactor factor;
 	
@@ -36,12 +39,12 @@ public final class SimpleParfactor implements Parfactor {
 	 * @throws IllegalArgumentException
 	 */
 	private SimpleParfactor(
-			List<Constraint> constraints, 
+			Set<Constraint> constraints, 
 			//List<ParameterizedRandomVariable> variables, 
 			ParameterizedFactor factor) 
 			throws IllegalArgumentException {
 		
-		this.constraints = new ArrayList<Constraint>(constraints);
+		this.constraints = new HashSet<Constraint>(constraints);
 		//this.variables = new ArrayList<ParameterizedRandomVariable>(variables);
 		this.factor = factor;
 		
@@ -69,7 +72,7 @@ public final class SimpleParfactor implements Parfactor {
 			//List<ParameterizedRandomVariable> variables, 
 			ParameterizedFactor factor) 
 			throws IllegalArgumentException {
-		return new SimpleParfactor(constraints, factor);
+		return new SimpleParfactor(new HashSet<Constraint>(constraints), factor);
 	}
 	
 	/**
@@ -82,13 +85,13 @@ public final class SimpleParfactor implements Parfactor {
 	 */
 	public static SimpleParfactor getInstance(
 			Set<Constraint> constraints, 
-			//List<ParameterizedRandomVariable> variables, 
 			ParameterizedFactor factor) 
 			throws IllegalArgumentException {
-		return new SimpleParfactor(new ArrayList<Constraint>(constraints), factor);
+		return new SimpleParfactor(constraints, factor);
 	}
 	
 	/**
+	 * @deprecated
 	 * For tests purposes.
 	 * Returns a factor without constraints.
 	 * @param factor
@@ -98,17 +101,26 @@ public final class SimpleParfactor implements Parfactor {
 	public static SimpleParfactor getInstanceWithoutConstraints(ParameterizedFactor factor) 
 			throws IllegalArgumentException {
 		
-		return new SimpleParfactor(new ArrayList<Constraint>(), 
+		return new SimpleParfactor(new HashSet<Constraint>(), 
 							 factor);
 	}
 	
-	
+	/**
+	 * Returns a constant parfactor, the neutral factor for multiplications. 
+	 * That is, any parfactor multiplied by the parfactor returned by this 
+	 * method does not change.
+	 * <br>
+	 * The constant parfactor contains only one value, 1. There are no
+	 * parameterized random variables or constraints in this parfactor. 
+	 *  
+	 * @return The constant parfactor.
+	 */
 	public static SimpleParfactor getConstantInstance() {
 		
 		ArrayList<Number> mapping = new ArrayList<Number>();
 		mapping.add(Double.valueOf("1.0"));
 		
-		return new SimpleParfactor(new ArrayList<Constraint>(), 
+		return new SimpleParfactor(new HashSet<Constraint>(), 
 				 			 ParameterizedFactor.getInstance(
 				 					 "1", 
 				 					 new ArrayList<ParameterizedRandomVariable>(), 
@@ -189,11 +201,11 @@ public final class SimpleParfactor implements Parfactor {
 	 */
 	
 	
-	public Set<Parfactor> sumOut(
-			Set<Parfactor> setOfParfactors, 
+	public Set<SimpleParfactor> sumOut(
+			Set<SimpleParfactor> setOfParfactors, 
 			ParameterizedRandomVariable variable) {
 		
-		HashSet<Parfactor> parfactors = new HashSet<Parfactor>(setOfParfactors);
+		HashSet<SimpleParfactor> parfactors = new HashSet<SimpleParfactor>(setOfParfactors);
 		
 		if (allPreConditionsForLiftedEliminationAreOk(setOfParfactors, variable)
 				&& checkFirstConditionForLiftedElimination(setOfParfactors, variable)
@@ -226,7 +238,7 @@ public final class SimpleParfactor implements Parfactor {
 	
 	
 	private boolean allPreConditionsForLiftedEliminationAreOk(
-			Set<Parfactor> setOfParfactors, 
+			Set<SimpleParfactor> setOfParfactors, 
 			ParameterizedRandomVariable variable) {
 		
 		/*
@@ -249,15 +261,15 @@ public final class SimpleParfactor implements Parfactor {
 	 * represented by <code>variable</code>, false otherwise.
 	 */
 	private boolean checkFirstConditionForLiftedElimination(
-			Set<Parfactor> setOfParfactors, 
+			Set<SimpleParfactor> setOfParfactors, 
 			ParameterizedRandomVariable variable) {
 		
-		Set<Parfactor> setOfParfactorsWithoutTarget = 
-				new HashSet<Parfactor>(setOfParfactors);
+		Set<SimpleParfactor> setOfParfactorsWithoutTarget = 
+				new HashSet<SimpleParfactor>(setOfParfactors);
 		
 		setOfParfactorsWithoutTarget.remove(this);
 		
-		for (Parfactor currentParfactor : setOfParfactorsWithoutTarget) {
+		for (SimpleParfactor currentParfactor : setOfParfactorsWithoutTarget) {
 			
 			Set<RandomVariable> targetGroundInstances = variable
 				.getGroundInstancesSatisfying(getConstraints());
@@ -310,9 +322,9 @@ public final class SimpleParfactor implements Parfactor {
 	 *    MULTIPLICATION
 	 * ************************************************************************/
 	
-	public Set<Parfactor> multiply(
-			Set<Parfactor> setOfParfactors, 
-			Parfactor parfactor) {
+	public Set<SimpleParfactor> multiply(
+			Set<SimpleParfactor> setOfParfactors, 
+			SimpleParfactor parfactor) {
 		/*
 		 * if conditions are met
 		 *     calculate g = <Ci U Cj, Vi U Vj, Fi x Fj>
@@ -324,7 +336,7 @@ public final class SimpleParfactor implements Parfactor {
 		 * return set of parfactors    
 		 */
 		
-		HashSet<Parfactor> newSetOfParfactors = new HashSet<Parfactor>(setOfParfactors);
+		HashSet<SimpleParfactor> newSetOfParfactors = new HashSet<SimpleParfactor>(setOfParfactors);
 		if (this.canBeMultipliedBy(parfactor)) {
 			SimpleParfactor p = (SimpleParfactor) parfactor;
 			Set<Constraint> union = p.getConstraints();
@@ -348,9 +360,10 @@ public final class SimpleParfactor implements Parfactor {
 		return newSetOfParfactors;
 	}
 	
-	public boolean canBeMultipliedBy(Parfactor parfactor) {
+	// TODO: check when parfactor is an agg parfactor...
+	public boolean canBeMultipliedBy(SimpleParfactor parfactor) {
 		if (!(parfactor instanceof SimpleParfactor)) {
-			return false;
+			return parfactor.canBeMultipliedBy(this);
 		}
 		SimpleParfactor p = (SimpleParfactor) parfactor;
 		
@@ -422,9 +435,159 @@ public final class SimpleParfactor implements Parfactor {
 	
 	
 	
+	/* ************************************************************************
+	 *    Split
+	 * ************************************************************************/
 	
 	
+	/**
+	 * Let g<sub>i</sub> = &lt; C<sub>i</sub>, V<sub>i</sub>, F<sub>i</sub> &gt; 
+	 * be a parfactor and X a logical variable present in it.
+	 * Let {X/t} be a substitution such that:
+	 * <li> t is term that is not in any constraints of g<sub>i</sub>;
+	 * <li> t is a constant such that t &in; D(x) <b>or</b> t is logical
+	 * variable present in g<sub>i</sub> such that D(t) = D(X).
+	 * <br>
+	 * <br>
+	 * This method returns the result of splitting g<sub>i</sub> on substitution
+	 * {X/t}. It thus returns two parfactors:
+	 * <li> g<sub>i</sub>[X/t], the parfactor g<sub>i</sub> after
+	 * applying substitution {X/t};
+	 * <li> g<sub>i</sub>' = &lt; C<sub>i</sub> U {X &ne; t}, V<sub>i</sub>,
+	 * F<sub>i</sub> &gt;, the residual parfactor.
+	 * <br>
+	 * @param substitution The substitution upon which the parfactor is split.
+	 * @return A set of parfactors with two parfactors, as specified above.
+	 */
+	public Set<Parfactor> split(Binding substitution) {
+		// TODO
+		// substitution is actually a binding
+		Set<Parfactor> result = new HashSet<Parfactor>();
+		if (firstTermIsPresent(substitution) 
+				&& secondTermIsNotInConstraints(substitution)
+				&& (secondTermIsConstantBelongingToFirstTermPopulation(substitution) 
+						|| (secondTermIsPresent(substitution) 
+								&& secondTermHasSameDomainOfFirstTerm(substitution)))) {
+			result.add(this.addConstraint(Constraint.getInequalityConstraintFromBinding(substitution)));
+			result.add(this.applySubstitution(substitution));
+		}
+		return result;
+	}
 	
+	/**
+	 * Checks if the first term of the given substitution belongs to the set
+	 * of logical variables of this factor 
+	 * @param substitution The substitution from which the first term will
+	 * be searched for.
+	 * @return True if the first term of the substitution is present in this
+	 * parfactor, false otherwise.
+	 */
+	private boolean firstTermIsPresent(Binding substitution) {		
+		return getLogicalVariables().contains(substitution.getFirstTerm());
+	}
+	
+	/**
+	 * Checks if the second term of the given substitution is absent from the
+	 * set of constraints in this parfactor.
+	 * @param substitution The substitution from which the second term will
+	 * be searched for.
+	 * @return True if the second term of the given substitution is not in 
+	 * any constraint from this parfactor, false otherwise.
+	 */
+	private boolean secondTermIsNotInConstraints(Binding substitution) {
+		for (Constraint constraint : this.constraints) {
+			if (constraint.contains(substitution.getSecondTerm())) {  
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * Checks if the second term of the given substitution is a constant
+	 * belonging to first term's population.
+	 * @param substitution The substitution on which the terms will be checked.
+	 * @return True if the second term is a constant belonging to first term's
+	 * population, false otherwise.
+	 */
+	private boolean secondTermIsConstantBelongingToFirstTermPopulation(Binding substitution) {
+		if (substitution.getSecondTerm() instanceof LogicalVariable) { // ugly
+			return false;
+		}
+		return substitution
+					.getFirstTerm()
+					.getPopulation()
+					.contains((Constant) substitution.getSecondTerm());
+	}
+	
+	/**
+	 * Checks if the second term of the given substitution belongs to the set
+	 * of logical variables of this factor 
+	 * @param substitution The substitution from which the second term will
+	 * be searched for.
+	 * @return True if the second term of the substitution is present in this
+	 * parfactor, false otherwise.
+	 */
+	private boolean secondTermIsPresent(Binding substitution) {
+		return getLogicalVariables().contains(substitution.getSecondTerm());
+	}
+	
+	/**
+	 * Checks if the second term has the same domain of the first term.
+	 * @param substitution The substitution on which the terms will be checked.
+	 * @return True if the second term has the same domain of the first term,
+	 * false otherwise.
+	 */
+	private boolean secondTermHasSameDomainOfFirstTerm(Binding substitution) {
+		return substitution
+					.getFirstTerm()
+					.getPopulation()
+					.equals(
+							((LogicalVariable) substitution.getSecondTerm()) // I can cast here because I know it is a logical variable
+															  .getPopulation());
+	}
+	
+	/**
+	 * Returns this parfactor with an additional constraint.
+	 * @param constraint
+	 * @return
+	 */
+	private SimpleParfactor addConstraint(Constraint constraint) {
+		HashSet<Constraint> residualConstraints = new HashSet<Constraint>(this.constraints);
+		residualConstraints.add(constraint);
+		return new SimpleParfactor(residualConstraints, this.factor);
+	}
+	
+	/**
+	 * Apply a substitution on this parfactor, replacing the matching occurrences
+	 * in all constraints and variables from the factor.
+	 * @param substitution
+	 * @return
+	 */
+	private SimpleParfactor applySubstitution(Binding substitution) {
+		HashSet<Constraint> substitutedConstraints = new HashSet<Constraint>();
+		for (Constraint constraint : this.constraints) {
+			substitutedConstraints.add(constraint.applySubstitution(substitution));
+		}
+		
+		ArrayList<ParameterizedRandomVariable> substitutedVariables = new ArrayList<ParameterizedRandomVariable>();
+		ArrayList<Binding> bindings = new ArrayList<Binding>();
+		bindings.add(substitution);
+		for (ParameterizedRandomVariable prv : this.factor.getParameterizedRandomVariables()) {
+			substitutedVariables.add(prv.applySubstitution(Substitution.create(bindings)));
+		}
+		
+		// TODO: correct the model: List<Number> is not a super-type of List<Double>
+		ArrayList<Number> values = new ArrayList<Number>();
+		for (Double d : this.factor.getAllValues()) {
+			values.add(d);
+		}
+		
+		return new SimpleParfactor(substitutedConstraints, ParameterizedFactor.getInstance(this.factor.getName(), substitutedVariables, values));
+		
+	}
+	
+	/**************************************************************************/
 	
 	@Override
 	public String toString() {
@@ -452,7 +615,7 @@ public final class SimpleParfactor implements Parfactor {
 	@Override
 	public int hashCode() { // Algorithm extracted from Bloch,J. Effective Java
 		int result = 17;
-		result = 31 + result + Arrays.hashCode(constraints.toArray(new Constraint[constraints.size()]));
+		result = 31 + result + constraints.hashCode();
 		result = 31 + result + factor.hashCode();
 		return result;
 	}

@@ -6,6 +6,6 @@ package br.usp.poli.takiyama.prv;
  * @author ftakiyama
  *
  */
-interface Term {
+public interface Term {
 	public String getValue();
 }

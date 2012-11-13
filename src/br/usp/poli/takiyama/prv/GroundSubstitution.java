@@ -10,7 +10,7 @@ import java.util.List;
  * @author ftakiyama
  *
  */
-class GroundSubstitution implements SubstitutionInterface {
+class GroundSubstitution {
 	private HashMap<LogicalVariable, Constant> bindings;
 	
 	/**

@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-class Substitution implements SubstitutionInterface {
+public class Substitution {
 	private HashMap<LogicalVariable, Term> bindings;
 	
 	/**

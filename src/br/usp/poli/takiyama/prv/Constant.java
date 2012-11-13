@@ -6,7 +6,7 @@ package br.usp.poli.takiyama.prv;
  * @author ftakiyama
  *
  */
-final class Constant implements Term {
+public final class Constant implements Term {
 	
 	private final String value;
 	
@@ -17,7 +17,7 @@ final class Constant implements Term {
 	 * @throws IllegalArgumentException If <code>value</code> does not start 
 	 * with a lower-case letter.
 	 */
-	Constant(String value) throws IllegalArgumentException {
+	public Constant(String value) throws IllegalArgumentException {
 		this.value = new String(value);
 		
 		if (Character.isUpperCase(value.charAt(0))) {

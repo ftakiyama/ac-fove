@@ -63,6 +63,25 @@ public final class PRV {
 		return getPrv(functorName, range, parameters, populationSizes);
 	}
 	
+	public static ParameterizedRandomVariable getBooleanPrv(
+			String functorName,
+			LogicalVariable... parameters) 
+			throws IllegalArgumentException {
+		
+		ArrayList<String> range = new ArrayList<String>();
+		range.add("false");
+		range.add("true");
+		
+		PredicateSymbol functor = new PredicateSymbol(functorName, range.toArray(new String[range.size()]));
+		ArrayList<Term> terms = new ArrayList<Term>();
+		for (LogicalVariable v : parameters) {
+			terms.add(v);
+		}
+
+		return ParameterizedRandomVariable.getInstance(functor, terms);
+		
+	}
+	
 	public static ParameterizedRandomVariable getBooleanPrvWithoutParameter(
 			String functorName) 
 			throws IllegalArgumentException {

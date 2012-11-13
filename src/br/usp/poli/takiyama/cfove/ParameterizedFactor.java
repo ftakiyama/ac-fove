@@ -236,6 +236,14 @@ public final class ParameterizedFactor {
 	}
 	
 	/**
+	 * Returns the value of all tuples, in the order they were created.
+	 * @return A list containing all values of the factor, in order.
+	 */
+	public ArrayList<Double> getAllValues() {
+		return new ArrayList<Double>(this.mapping);
+	}
+	
+	/**
 	 * Returns true if the factor is a sub-factor of the specified factor.
 	 * @return True if the factor is a sub-factor of the specified factor.
 	 */

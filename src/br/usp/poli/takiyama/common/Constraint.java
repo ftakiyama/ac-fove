@@ -57,6 +57,14 @@ public class Constraint {
 		}
 	}
 	
+	public LogicalVariable getFirstTerm() {
+		return this.firstTerm;
+	}
+	
+	public Term getSecondTerm() {
+		return this.secondTerm;
+	}
+	
 	/**
 	 * Apply the substitution in this inequality.
 	 * The following rules apply:<br>
@@ -98,6 +106,19 @@ public class Constraint {
 	 */
 	public boolean contains(Term term) {
 		return (firstTerm.equals(term) || secondTerm.equals(term));
+	}
+	
+	/**
+	 * Checks if this constraint and the constraint given as parameter have
+	 * a common term.
+	 * @param constraint The constraint to compare to.
+	 * @return True if the constraints have a common term, false otherwise.
+	 */
+	public boolean hasCommonTerm(Constraint constraint) {
+		return (this.firstTerm.equals(constraint.firstTerm)) 
+			|| (this.firstTerm.equals(constraint.secondTerm))
+			|| (this.secondTerm.equals(constraint.firstTerm))
+			|| (this.secondTerm.equals(constraint.secondTerm));
 	}
 	
 	@Override

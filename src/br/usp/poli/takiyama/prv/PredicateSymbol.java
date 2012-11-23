@@ -3,7 +3,6 @@ package br.usp.poli.takiyama.prv;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.TreeSet;
 
 /**
  * A predicate symbol is a word that starts with a lower-case letter. 

@@ -11,9 +11,11 @@ import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.RandomVariable;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.Constant;
+import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 import br.usp.poli.takiyama.prv.Substitution;
+import br.usp.poli.takiyama.prv.Term;
 import br.usp.poli.takiyama.utils.Sets;
 
 /**
@@ -588,6 +590,168 @@ public final class SimpleParfactor implements Parfactor {
 	}
 	
 	/**************************************************************************/
+	
+	
+	/* ************************************************************************
+	 *    Expansion
+	 * ************************************************************************/
+	
+	// TODO: hey! what if n = 2?
+	public Parfactor expand(CountingFormula countingFormula, Term term) {
+		if (this.isInNormalForm()
+				&& belongsToParfactor(countingFormula) 
+				&& termIsNotInConstraintsFromCountingFormula(countingFormula, term) 
+				&& termAppearsInConstraintsForAllLogicalVariablesInCountingFormula(countingFormula, term)) {
+
+			// Creates the new set of parameterized random variables:
+			// V' = V \ {#_A:CA [f(...,A,...)]} U {f(...,t,...), #_A:(CA U {A != t}) [f(...,A,...)]}
+			
+			ArrayList<ParameterizedRandomVariable> newVariables = this.factor.getParameterizedRandomVariables();
+			
+			CountingFormula newCountingFormula = 
+				countingFormula.addConstraint(
+					Constraint.getInstance(
+						countingFormula.getBoundVariable(), 
+						term
+					)
+				);
+			
+			newVariables.set(newVariables.indexOf(countingFormula), newCountingFormula);
+			newVariables.add(
+				newVariables.indexOf(
+					newCountingFormula) + 1, 
+					newCountingFormula.applyOneSubstitution(
+						Binding.create(
+							newCountingFormula.getBoundVariable(), 
+							term
+						)
+					)
+				);
+			
+			
+			// Creates the new Factor
+			ArrayList<Number> newValues = new ArrayList<Number>();
+			
+			// maybe there is a smarter way to do this
+			newValues.add(this.factor.getTupleValue(0));
+			newValues.add(this.factor.getTupleValue(1));
+			for (int i = 2; i < this.factor.getAllValues().size() - 2; i = i + 2) {
+				newValues.add(this.factor.getAllValues().get(i));
+				newValues.add(this.factor.getAllValues().get(i + 1));
+				newValues.add(this.factor.getAllValues().get(i));
+				newValues.add(this.factor.getAllValues().get(i + 1));
+			}
+			newValues.add(this.factor.getTupleValue(this.factor.getAllValues().size() - 2));
+			newValues.add(this.factor.getTupleValue(this.factor.getAllValues().size() - 1));
+
+			return SimpleParfactor.getInstance(this.constraints, ParameterizedFactor.getInstance(this.factor.getName(), newVariables, newValues));
+		} else {
+			return this;
+		}
+	}
+	
+	/**
+	 * Checks if this parfactor is in normal form.
+	 * <br>
+	 * A parfactor is in normal form if for each inequality constraint 
+	 * (X &ne; Y) &in; C we have &epsilon;<sub>X</sub><sup>C</sup>\{Y} = 
+	 *  &epsilon;<sub>Y</sub><sup>C</sup>\{X}. X and Y are logical variables.
+	 * @return
+	 */
+	private boolean isInNormalForm() {
+		// i dont know if this will be useful, so the code is ugly
+		for (Constraint constraint : this.constraints) {
+			if (constraint.getSecondTerm() instanceof LogicalVariable) {
+				Set<Term> firstSet = getExcludedSet(constraint.getFirstTerm());
+				firstSet.remove(constraint.getSecondTerm());
+				Set<Term> secondSet = getExcludedSet((LogicalVariable) constraint.getSecondTerm());
+				secondSet.remove(constraint.getFirstTerm());
+				if (! firstSet.equals(secondSet)) {
+					return false;
+				}
+			}
+ 		}
+		return true;
+	}
+	
+	/**
+	 * Returns the excluded set for logical variable X, that is, the set of
+	 * terms t such that (X &ne; t) &in; C.
+	 * @param x The logical variable.
+	 * @return The excluded set for logical variable X.
+	 */
+	private Set<Term> getExcludedSet(LogicalVariable x) {
+		HashSet<Term> excludedSet = new HashSet<Term>();
+		for (Constraint constraint : this.constraints) {
+			if (constraint.contains(x)) {
+				excludedSet.add(constraint.getSecondTerm()); // i do not verify if the other term is in fact the second term of the constraint...
+			}
+		}
+		return excludedSet;
+	}
+	
+	/**
+	 * Checks if the given counting formula belongs to the set of parameterized
+	 * random variables of this parfactor.
+	 * @param countingFormula The counting formula to verify
+	 * @return True if the counting formula is in this parfactor, false 
+	 * otherwise.
+	 */
+	private boolean belongsToParfactor(CountingFormula countingFormula) {
+		return this.factor.getParameterizedRandomVariables().contains(countingFormula);
+	}
+	
+	/**
+	 * Checks if the term t does not appear in any constraint from the counting
+	 * formula, that is, given a counting formula 
+	 * #<sub>A:C<sub>A</sub></sub>[f(...,A,...)]
+	 * and a term t, checks if 
+	 * t &notin; &epsilon;<sub>A</sub><sup>C<sub>A</sub></sup>
+	 * @param countingFormula A counting formula
+	 * @param term The term to check
+	 * @return True if t &notin; &epsilon;<sub>A</sub><sup>C<sub>A</sub></sup>,
+	 * false otherwise.
+	 */
+	private boolean termIsNotInConstraintsFromCountingFormula(CountingFormula countingFormula, Term term) {
+		for (Constraint c : countingFormula.getConstraints()) {
+			if (c.contains(term)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * Checks if t &in; &epsilon;<sub>Y</sub><sup>C<sub>i</sub></sup> for each
+	 * logical variable Y &in; &epsilon;<sub>A</sub><sup>C<sub>A</sub></sup>.
+	 * In other words, for each logical variable Y that appears in constraints 
+	 * C<sub>A</sub>, checks if the constraint Y &ne; t appears in C<sub>i</sub>.
+	 * If there is a logical variable Y that does not satisfy it, returns false.
+	 * @param countingFormula A counting formula 
+	 * #<sub>A:C<sub>A</sub></sub>[f(...,A,...)]
+	 * @param term The term to check
+	 * @return True if t &in; &epsilon;<sub>Y</sub><sup>C<sub>i</sub></sup> for 
+	 * each logical variable Y &in; &epsilon;<sub>A</sub><sup>C<sub>A</sub></sup>,
+	 * false otherwise.
+	 */
+	private boolean termAppearsInConstraintsForAllLogicalVariablesInCountingFormula(CountingFormula countingFormula, Term term) {
+		for (Constraint countingFormulaConstraint : countingFormula.getConstraints()) {
+			boolean foundMatch = false;
+			for (Constraint parfactorConstraint : this.constraints) {
+				if (parfactorConstraint.hasCommonTerm(countingFormulaConstraint)) {
+					foundMatch = true;
+					break;
+				}
+			}
+			if (!foundMatch && this.constraints.size() > 0) {
+				return false;
+			}
+		}	
+		return true;
+	}
+	
+	/**************************************************************************/
+	
 	
 	@Override
 	public String toString() {

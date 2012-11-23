@@ -1,6 +1,7 @@
 package br.usp.poli.takiyama.prv;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -56,6 +57,31 @@ public class Population {
 	 */
 	public Constant getIndividual(int index) {
 		return new Constant(individuals.get(index).getValue());
+	}
+	
+	@Override
+	public String toString() {
+		return this.individuals.toString();
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if (this == other)
+			return true;
+		if (!(other instanceof Population))
+			return false;
+		Population target = (Population) other;
+		return (this.individuals == null) ? 
+				(target.individuals == null) : 
+				(this.individuals.equals(target.individuals));
+		
+	}
+	
+	@Override
+	public int hashCode() {
+		int result = 17;
+		result = result * 31 + Arrays.hashCode((Constant[]) this.individuals.toArray());
+		return result;
 	}
 	
 }

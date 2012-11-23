@@ -29,6 +29,8 @@ public class ParameterizedRandomVariable {
 	// this class should be able to create random variables
 	// ground instance = random variable
 	
+	// TODO Erase deprecated methods
+	
 	/*
 	 * What should this class do?
 	 * - get parameters
@@ -43,6 +45,15 @@ public class ParameterizedRandomVariable {
 	private ParameterizedRandomVariable(PredicateSymbol functor, List<Term> parameters) {
 		this.functor = new PredicateSymbol(functor);
 		this.parameters = new ArrayList<Term>(parameters);
+	}
+	
+	/**
+	 * Constructor. Created so I can use it in CountingFormula.
+	 * @param prv A parameterized random variable
+	 */
+	protected ParameterizedRandomVariable(ParameterizedRandomVariable prv) {
+		this.functor = prv.functor;
+		this.parameters = prv.parameters;
 	}
 	
 	/**
@@ -105,6 +116,22 @@ public class ParameterizedRandomVariable {
 	}
 	
 	/**
+	 * Convenience method to apply one single substitution to this parameterized
+	 * random variable.
+	 * @param s A binding that will be applied to this Parameterized Random
+	 * Variable.
+	 * @return An instance of this Parameterized Random Variable. Note that
+	 * instance does not have the same meaning as 'instance' in Java.
+	 * @see #applySubstitution(Substitution)
+	 */
+	public ParameterizedRandomVariable applyOneSubstitution(Binding s) {
+		ParameterizedRandomVariable newInstance =
+			new ParameterizedRandomVariable(this.functor, this.parameters);
+		newInstance.parameters.set(newInstance.parameters.indexOf(s.getFirstTerm()), s.getSecondTerm());
+		return newInstance;
+	}
+	
+	/**
 	 * Returns a set over the logical variables that appear in
 	 * this parameterized random variable (PRV).
 	 * @return A set over the logical variables of this PRV. 
@@ -129,6 +156,7 @@ public class ParameterizedRandomVariable {
 	}
 	
 	/**
+	 * @deprecated
 	 * Returns a random variables that this parameterized random variable 
 	 * represents. 
 	 * <br> 
@@ -189,6 +217,7 @@ public class ParameterizedRandomVariable {
 	}
 	
 	/**
+	 * @deprecated
 	 * Creates a random variable with the specified indexes. I think I should
 	 * explain this better...
 	 * @param termsIndexes The indexes that define the random variable.
@@ -214,6 +243,7 @@ public class ParameterizedRandomVariable {
 	
 	
 	/**
+	 * @deprecated
 	 * Returns a random variable that this parameterized random variable 
 	 * represents satisfying a set of constraints.
 	 * <br>
@@ -244,6 +274,7 @@ public class ParameterizedRandomVariable {
 	}
 	
 	/**
+	 * @deprecated
 	 * Returns the set of ground instances of the parameterized random variable 
 	 * that satisfy a set of {@link Constraint}s.
 	 * @param constraints A set of constraints that the ground instances 
@@ -260,6 +291,7 @@ public class ParameterizedRandomVariable {
 	}
 	
 	/**
+	 * @deprecated
 	 * Returns the number of ground instances of the parameterized random 
 	 * variable.
 	 * TODO Should I make it an attribute? It is pretty inefficient implementation.
@@ -293,6 +325,7 @@ public class ParameterizedRandomVariable {
 	}
 	
 	/**
+	 * @deprecated
 	 * <b>WARNING</b>: I have created this method in order to use factors with 
 	 * parameterized random variables. I mask a PRV into a RV using the
 	 * functor. A more appropriate implementation would extend the class

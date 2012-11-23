@@ -10,7 +10,7 @@ import br.usp.poli.takiyama.common.Tuple;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 
 public final class ParameterizedFactor {
-	private final String name;
+	private final String name; // this should be an optional attribute
 	private final ArrayList<ParameterizedRandomVariable> variables;
 	private final ArrayList<Double> mapping;
 	
@@ -269,7 +269,7 @@ public final class ParameterizedFactor {
 	    	return false;
 	    // Tests if both have the same attributes
 	    ParameterizedFactor targetObject = (ParameterizedFactor) other;
-	    return this.name.equals(targetObject.name) &&
+	    return //this.name.equals(targetObject.name) &&  // 23/11/2012 Decided to take out the name of the factor when comparing it. 
 	    	   ((this.variables == null) ? 
 	    		 targetObject.variables == null : 
 	    		 this.variables.equals(targetObject.variables)) &&
@@ -281,7 +281,7 @@ public final class ParameterizedFactor {
 	@Override
 	public int hashCode() { // Algorithm extracted from Bloch,J. Effective Java
 		int result = 17;
-		result = 31 + result + name.hashCode();
+		// result = 31 + result + name.hashCode();   // 23/11/2012 Decided to take out the name of the factor when comparing it.
 		result = 31 + result + Arrays.hashCode(variables.toArray(new ParameterizedRandomVariable[variables.size()]));
 		result = 31 + result + Arrays.hashCode(mapping.toArray(new Double[mapping.size()]));
 		return result;

@@ -121,6 +121,50 @@ public class Constraint {
 			|| (this.secondTerm.equals(constraint.secondTerm));
 	}
 	
+	/**
+	 * Returns true if the second term is Constant, false otherwise.
+	 * @return True if the second term is Constant, false otherwise.
+	 */
+	public boolean secondTermIsConstant() {
+		return (this.secondTerm instanceof Constant);
+	}
+	
+	/**
+	 * Returns true if the second term is a LogicalVariable, false otherwise.
+	 * @return True if the second term is a LogicalVariable, false otherwise.
+	 */
+	public boolean secondTermIsLogicalVariable() {
+		return (this.secondTerm instanceof LogicalVariable);
+	}
+	
+	/**
+	 * Returns the Binding corresponding to this constraint. That is,
+	 * if this constraint is t1 &ne; t2, then this method returns the
+	 * binding t1/t2.
+	 * @return The Binding corresponding to this constraint.
+	 */
+	public Binding toBinding() {
+		return Binding.create(this.firstTerm, this.secondTerm);
+	}
+	
+	/**
+	 * Returns the binding obtained by inverting the terms of this constraint.
+	 * That is, if this constraint is t2 &ne; t2, then this method returns
+	 * the binding t2/t1.
+	 * @return The inverse binding corresponding to this constraint.
+	 * @throws IllegalArgumentException If the second term is not a Logical
+	 * Variable. In this case it is not possible to create the binding.
+	 */
+	public Binding toInverseBinding() throws IllegalArgumentException {
+		if (this.secondTermIsLogicalVariable()) {
+			return Binding.create((LogicalVariable) this.secondTerm, this.firstTerm);
+		} else {
+			throw new IllegalArgumentException("The second term of the " +
+					this.toString() + " is not a Logical Variable!");
+			
+		}
+	}
+	
 	@Override
 	public String toString() {
 		return firstTerm.toString() + "!=" + secondTerm.toString();

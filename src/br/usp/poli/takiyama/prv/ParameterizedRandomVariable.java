@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Stack;
 import java.util.Vector;
 
 import br.usp.poli.takiyama.common.Constraint;
@@ -109,7 +110,9 @@ public class ParameterizedRandomVariable {
 		
 		for (Term v : toBeReplaced) {
 			int termIndex = newInstance.parameters.indexOf(v);
-			newInstance.parameters.set(termIndex, s.getReplacement((LogicalVariable)v));
+			if (termIndex != -1) {
+				newInstance.parameters.set(termIndex, s.getReplacement((LogicalVariable)v));
+			}
 		}
 		
 		return newInstance;
@@ -125,6 +128,9 @@ public class ParameterizedRandomVariable {
 	 * @see #applySubstitution(Substitution)
 	 */
 	public ParameterizedRandomVariable applyOneSubstitution(Binding s) {
+		if (this.parameters.indexOf(s.getFirstTerm()) == -1) {
+			return this;
+		}
 		ParameterizedRandomVariable newInstance =
 			new ParameterizedRandomVariable(this.functor, this.parameters);
 		newInstance.parameters.set(newInstance.parameters.indexOf(s.getFirstTerm()), s.getSecondTerm());
@@ -153,6 +159,180 @@ public class ParameterizedRandomVariable {
 	
 	public String getName() {
 		return this.functor.getName();
+	}
+	
+	/**
+	 * This class represent equations of the form ti = tj, where ti and tj are
+	 * parameters of a parameterized random variable.
+	 * <br>
+	 * This class is used in the algorithm to find the MGU between two 
+	 * parameterized random variables. 
+	 * <br>
+	 * This class is mutable since it is intended to change of state.
+	 * 
+	 * @author ftakiyama
+	 *
+	 */
+    private class Equation {
+		private Term firstTerm;
+		private Term secondTerm;
+		
+		/**
+		 * Constructor. Creates a new Equation.
+		 * @param t1 The first Term
+		 * @param t2 The second Term
+		 */
+		public Equation(Term t1, Term t2) {
+			this.firstTerm = t1;
+			this.secondTerm = t2;
+		}
+		
+		/**
+		 * Applies a substitution to this Equation. Given an equation ti = tj
+		 * and a simple substitution {tk/t}, this method replaces all the terms
+		 * equal to tk with t. For instance, if ti = tk, then the equation
+		 * becomes t = tj.
+		 * @param substitution A simple substitution (Binding) to be applied
+		 * to this equation. 
+		 */
+		public void applySubstitution(Binding substitution) {
+			if (firstTerm.equals(substitution.getFirstTerm())) {
+				this.firstTerm = substitution.getSecondTerm();
+			} else if (secondTerm.equals(substitution.getFirstTerm())) {
+				this.secondTerm = substitution.getSecondTerm();
+			} 
+		}
+		
+		/**
+		 * Returns true if the first term is a logical variable, false otherwise.
+		 * @return true if the first term is a logical variable, false otherwise.
+		 */
+		public boolean firstTermIsLogicalVariable() {
+			return firstTerm.isLogicalVariable();
+		}
+		
+		/**
+		 * Returns true if the second term is a logical variable, false otherwise.
+		 * @return true if the second term is a logical variable, false otherwise.
+		 */
+		public boolean secondTermIsLogicalVariable() {
+			return secondTerm.isLogicalVariable();
+		}
+		
+		/**
+		 * Returns true if the first term is equal to the second term, false
+		 * otherwise.
+		 * @return True if the first term is equal to the second term, false
+		 * otherwise.
+		 */
+		public boolean haveIdenticalTerms() {
+			return firstTerm.equals(secondTerm);
+		}
+		
+		/**
+		 * Converts this Equation to a Binding.
+		 * That is, if this equation is ti = tj, then returns the correspondinf
+		 * Binding ti/tj.
+		 * @return The Binding that corresponds to this Equation
+		 * @throws IllegalArgumentException if the first term is not a logical
+		 * variable, thus making it impossible to convert.
+		 */
+		public Binding toBinding() throws IllegalArgumentException {
+			if (firstTermIsLogicalVariable()) {
+				return Binding.create((LogicalVariable) firstTerm, secondTerm);
+			} else {
+				throw new IllegalArgumentException("The Equation " 
+						+ this.toString()
+						+ " could not be converted to a Binding object. The" 
+						+ " first term must be a LogicalVariable.");
+			}
+		}
+		
+		@Override
+		public String toString() {
+			return firstTerm.toString() + " = " + secondTerm.toString();
+		}
+		
+	}
+	
+	/**
+	 * Returns the Most General Unifier (MGU) between this parameterized
+	 * random variable and the specified random variable.
+	 * Both variables must have the same name and have the same number of
+	 * parameters. In case these conditions are not met, this method throws
+	 * an IllegalArgumentException.
+	 * <br>
+	 * If the PRVs do not unify, throws an IllegalArgumentException.
+	 * <br>
+	 * The algorithm used was adapted by Kisynski (2010) from Sterling and
+	 * Shapiro (1994).
+	 * 
+	 * @param other The parameterized random variable from which the MGU will
+	 * be obtained.
+	 * @return The MGU as a Substitution.
+	 * @throws IllegalArgumentException If the PRVs do not have the same name
+	 * or do not have the same number of parameters or do not unify.
+	 */
+	public Substitution getMgu(ParameterizedRandomVariable other) throws IllegalArgumentException {
+		if (this.parameters.size() != other.parameters.size()
+				|| this.getName() != other.getName()) {
+			throw new IllegalArgumentException();
+		}
+		
+		HashSet<Equation> temporaryMgu = new HashSet<Equation>();
+		Stack<Equation> buffer = new Stack<Equation>();
+		for (int i = 0; i < this.parameters.size(); i++) {
+			buffer.push(new Equation(this.parameters.get(i), other.parameters.get(i)));
+		}
+		ArrayList<Binding> mgu = new ArrayList<Binding>();
+		
+		while (!buffer.isEmpty()) {
+			Equation equation = buffer.pop();
+			if (equation.haveIdenticalTerms()) {
+				// do nothing
+			} else if (equation.firstTermIsLogicalVariable()) {
+				Binding substitution = Binding
+					.create((LogicalVariable) equation.firstTerm, 
+							equation.secondTerm);
+				for (Equation e : buffer) {
+					e.applySubstitution(substitution);
+				}
+				for (Equation s : temporaryMgu) {
+					s.applySubstitution(substitution);
+				}
+				// add {ti/tj} to mgu
+				//temporaryMgu.add(equation);
+				mgu.add(substitution);
+			} else if (equation.secondTermIsLogicalVariable()) {
+				Binding substitution = Binding
+					.create((LogicalVariable) equation.secondTerm,
+							equation.firstTerm);
+				for (Equation e : buffer) {
+					e.applySubstitution(substitution);
+				}
+				for (Equation s : temporaryMgu) {
+					s.applySubstitution(substitution);
+				}
+				// add {tj/ti} to mgu
+				mgu.add(substitution);
+			} else {
+				throw new IllegalArgumentException();
+			}
+		}
+		
+		return Substitution.create(new ArrayList<Binding>(mgu));
+		
+	}
+	
+	/**
+	 * Returns true if the Term specified is present in this parameterized
+	 * random variable
+	 * @param t The term to search for.
+	 * @return True if this parameterized random variable contains the 
+	 * term specified.
+	 */
+	public boolean contains(Term t) {
+		return this.parameters.contains(t);
 	}
 	
 	/**

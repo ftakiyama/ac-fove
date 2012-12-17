@@ -3,7 +3,10 @@ package br.usp.poli.takiyama.prv;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
+
+import br.usp.poli.takiyama.prv.LogicalVariable;
 
 public class Substitution {
 	private HashMap<LogicalVariable, Term> bindings;
@@ -70,6 +73,42 @@ public class Substitution {
 		return this.bindings.get(substituted);
 	}
 	
+	/**
+	 * Returns true if this substitution contains the binding specified, false
+	 * otherwise.
+	 * @param binding The binding to search for.
+	 * @return True if this substitution contaisn the binding specified, false
+	 * otherwise.
+	 */
+	public boolean contains(Binding binding) {
+		if (this.bindings.containsKey(binding.getFirstTerm())) {
+			return this.bindings.get(binding.getFirstTerm()).equals(binding);
+		} else {
+			return false;
+		}
+	}
+	
+	/**
+	 * Returns true if the specified logical variables have the same replacement
+	 * in this substitution. That is, if the specified variables are X and Y,
+	 * this method returns true if there is a term t such that X/t and Y/t are
+	 * both in this substitution. 
+	 * <br>
+	 * If such term is not found, or if one or both logical variables have no
+	 * replacements in this substitution, this method returns false.
+	 * @param firstVariable The first variable to compare
+	 * @param secondVariable The second variable to compare
+	 * @return True if the specified logical variables have a common replacement,
+	 * false otherwise.
+	 */
+	public boolean haveCommonReplacement(LogicalVariable firstVariable, LogicalVariable secondVariable) {
+		if (this.bindings.containsKey(firstVariable) && this.bindings.containsKey(secondVariable)) {
+			return this.bindings.get(firstVariable).equals(this.bindings.get(secondVariable));
+		} else {
+			return false;
+		}
+	}
+	
 	@Override
 	public String toString() {
 		StringBuilder result = new StringBuilder("{ ");
@@ -77,11 +116,31 @@ public class Substitution {
 		
 		while (bindings.hasNext()) {
 			LogicalVariable lv = bindings.next();
-			result.append("( " + lv.toString() + " " + this.bindings.get(lv) + " ) ");
+			result.append("( " + lv.toString() + "/" + this.bindings.get(lv) + " ) ");
 		}
 		result.append("}");
 		
 		return result.toString();
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if (this == other)
+			return true;
+		if (!(other instanceof Substitution))
+			return false;
+		Substitution otherSubstitution = (Substitution) other;
+		return this.bindings.equals(otherSubstitution.bindings);
+	}
+	
+	@Override
+	public int hashCode() {
+		int result = 17;
+		for (Entry<LogicalVariable, Term> entry : this.bindings.entrySet()) {
+			result = 31 * result + entry.getKey().hashCode();
+			result = 31 * result + entry.getValue().hashCode();
+		}
+		return result;
 	}
 	
 	/**
@@ -96,4 +155,6 @@ public class Substitution {
 	public boolean isUnifier(ParameterizedRandomVariable v1, ParameterizedRandomVariable v2) {		
 		return v1.applySubstitution(this).equals(v2.applySubstitution(this));
 	}
+
+	
 }

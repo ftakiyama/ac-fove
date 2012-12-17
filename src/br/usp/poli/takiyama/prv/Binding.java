@@ -74,6 +74,6 @@ public class Binding {
 	
 	@Override
 	public String toString() {
-		return "( " + firstTerm.toString() + " " + secondTerm.toString() + " )";
+		return "( " + firstTerm.toString() + " / " + secondTerm.toString() + " )";
 	}
 }

@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import br.usp.poli.takiyama.cfove.ParameterizedFactor;
 import br.usp.poli.takiyama.cfove.SimpleParfactor;
@@ -14,6 +16,7 @@ import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.PRV;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 import br.usp.poli.takiyama.prv.Substitution;
+import br.usp.poli.takiyama.prv.Term;
 
 /**
  * This class generates structures for testing purposes. 
@@ -29,6 +32,7 @@ public class Pool {
 	private HashMap<String, Constraint> constraintsPool;
 	private HashMap<String, ParameterizedRandomVariable> prvPool;
 	private HashMap<String, SimpleParfactor> simpleParfactorPool;
+	private HashMap<String, Substitution> substitutionPool;
 	
 	// maybe I could separate factors in a separated pool.
 	
@@ -40,11 +44,13 @@ public class Pool {
 		constraintsPool = new HashMap<String, Constraint>();
 		prvPool = new HashMap<String, ParameterizedRandomVariable>();
 		simpleParfactorPool = new HashMap<String, SimpleParfactor>();
+		substitutionPool = new HashMap<String, Substitution>();
 	}
 	
 	/**
 	 * Creates an instance of LogicalVariable and puts it in the logical
 	 * variables pool.
+	 * Indexes from individuals starts on 0.
 	 * @param name The name of the logical variable
 	 * @param prefix The prefix used to name individuals from population
 	 * @param populationSize The size of the population
@@ -64,30 +70,64 @@ public class Pool {
 	}
 	
 	/**
+	 * Creates an instance of ParameterizedRandomVariable and puts it in the 
+	 * PRV pool.
+	 * <br>
+	 * This method accepts a mixed list of parameters (constants and logical
+	 * variables). Constants must be bound to a logical variable, in the 
+	 * following format: "LogicalVariableName=Index", where LogicalVariableName
+	 * is the name of some logical variable in the pool and Index is the
+	 * index of the individual in the logical variable's population.
+	 * 
+	 * @param name The name of the parametierzed random variable.
+	 * @param parameters An array of logical variables or constants that will
+	 * be the parameters of this PRV.
+	 */
+	private void createPrv(String name, String ... parameters) {
+		if (parameters == null) 
+			throw new IllegalArgumentException("Parameter list must be at" +
+					" least an empty string.");
+		ArrayList<Term> terms = new ArrayList<Term>();
+		for (String parameter : parameters) {
+			if (variablesPool.containsKey(parameter)) {
+				terms.add(variablesPool.get(parameter));	
+			} else if (variablesPool.containsKey(parameter.split("=")[0])) {
+				terms.add(variablesPool
+						.get(parameter.split("=")[0])
+						.getPopulation()
+						.getIndividual(Integer
+								.parseInt(parameter
+										.split("=")[1])));
+			} else {
+				throw new IllegalArgumentException("There no such logical " +
+						" variable in pool: " + parameter.split("=")[0]);
+			}
+		}
+		
+		prvPool.put(name, PRV.getBooleanPrv(name, terms.toArray(new Term[terms.size()])));
+	}
+	
+	/**
 	 * Creates an instance of ParameterizedRandomVariable and puts it in the
 	 * PRV pool. The variable is created using an existing variable and 
-	 * applying a substitution to it.
+	 * applying a substitution to it. The key of the new variable will be 
+	 * the old variable's name concatenated with the list of substitutions in
+	 * the form [A/B, C/1, ...].
+	 * <br>
+	 * For instance, suppose the following substitutions will be made on
+	 * variable f(A,B,C): {A/x1, B/D}. Then the new variable will be
+	 * f(x1,D,C) and the key to get it from the pool is f[A/0, B/D].
 	 * 
 	 * @param prvName The name o the PRV where to apply the substitution
 	 * @param substitutions A list of substitutions of the form X/n, where
 	 * X is the name of an existing logical variable and n is a number
 	 * indicating the index of the individual that will replace X.
 	 */
-	private void createPrvFromSubstitution(String prvName, String ... substitutions) {
-		ArrayList<Binding> bindings = new ArrayList<Binding>();
-		for (String substitution : substitutions) {
-			String firstTerm = substitution.split("/")[0];
-			String secondTerm = substitution.split("/")[1];
-			bindings.add(
-					Binding.create(
-							variablesPool.get(firstTerm), 
-							variablesPool.get(firstTerm)
-										 .getPopulation()
-										 .getIndividual(
-												 Integer.parseInt(secondTerm))));
-		}
-		Substitution substitution = Substitution.create(bindings);
-		prvPool.put(prvName + Arrays.toString(substitutions), prvPool.get(prvName).applySubstitution(substitution));
+	private void createPrvFromSubstitution(String prvName, String ... substitution) {
+		createSubstitution("temporary substitution", substitution);
+		Substitution sub = substitutionPool.get("temporary substitution");
+		prvPool.put(prvName + Arrays.toString(substitution), prvPool.get(prvName).applySubstitution(sub));
+		substitutionPool.remove("temporary substitution");
 	}
 	
 	/**
@@ -148,28 +188,28 @@ public class Pool {
 	 * Creates an instance of SimpleParfactor and puts it in the simple parfactor
 	 * pool.
 	 * @param name The name of the parfactor.
-	 * @param constraints A list of constraints, separated by comma
-	 * @param prvs A list of PRVs, separated by comma
+	 * @param constraints A list of constraints, separated by semicolon
+	 * @param prvs A list of PRVs, separated by semicolon
 	 * @param factorName The name of the factor
 	 * @param values A list of factor values ordered according to the order of
-	 * ths list of PRVs
+	 * ths list of PRVs, separated by semicolon
 	 */
 	private void createSimpleParfactor(String name, String constraints, String prvs, String factorName, String values) {
 		
 		Set<Constraint> constraintsSet = new HashSet<Constraint>();
 		if (constraints.length() > 0) {
-			for (String constraint : constraints.split(",")) {
+			for (String constraint : constraints.split(";")) {
 				constraintsSet.add(constraintsPool.get(constraint));
 			}
 		}
 		
 		ArrayList<ParameterizedRandomVariable> variablesSet = new ArrayList<ParameterizedRandomVariable>();
-		for (String variable : prvs.split(",")) {
+		for (String variable : prvs.split(";")) {
 			variablesSet.add(prvPool.get(variable));
 		}
 
 		ArrayList<Number> factorValues = new ArrayList<Number>();
-		for (String value : values.split(",")) {
+		for (String value : values.split(";")) {
 			factorValues.add(Double.valueOf(value));
 		}
 		
@@ -183,6 +223,39 @@ public class Pool {
 								factorValues)));
 	}
 	
+	/**
+	 * Creates a substitution based on a list of strings given in the form
+	 * X/Y, where X must be a string starting with upper case letter and Y 
+	 * can start either with a upper case letter or be a number that indicates
+	 * the index of the individual in the population of the first term.
+	 * @param setName The name of the substitution. Used as a key to retrieve
+	 * it later.
+	 * @param substitution A list of substitutions
+	 */
+	private void createSubstitution(String setName, String ... substitution) {
+		ArrayList<Binding> bindings = new ArrayList<Binding>();
+		for (String binding : substitution) {
+			String firstTerm = binding.split("/")[0];
+			String secondTerm = binding.split("/")[1];
+			Matcher matcher = Pattern.compile("^\\d+").matcher(secondTerm); // maybe this regular expression is incorrect.
+			if (matcher.find()) {
+				bindings.add(
+						Binding.create(
+								variablesPool.get(firstTerm), 
+								variablesPool.get(firstTerm)
+											 .getPopulation()
+											 .getIndividual(
+													 Integer.parseInt(secondTerm))));
+			} else {
+				bindings.add(
+						Binding.create(
+								variablesPool.get(firstTerm), 
+								variablesPool.get(secondTerm)));
+				
+			}
+		}
+		substitutionPool.put(setName, Substitution.create(bindings));
+	}
 	
 	
 	/* ************************************************************************
@@ -208,13 +281,13 @@ public class Pool {
 		createConstraint("B", "0"); 
 		
 		// Initial parfactor
-		createSimpleParfactor("g1", "A != B", "f,h", "F", "0.2,0.3,0.5,0.7");
+		createSimpleParfactor("g1", "A != B", "f;h", "F", "0.2;0.3;0.5;0.7");
 		
 		// Resulting parfactor
-		createSimpleParfactor("g1[B/0]", "A != 0", "f[B/0],h[B/0]", "F", "0.2,0.3,0.5,0.7");
+		createSimpleParfactor("g1[B/0]", "A != 0", "f[B/0];h[B/0]", "F", "0.2;0.3;0.5;0.7");
 		
 		// Residual parfactor
-		createSimpleParfactor("g1'", "A != B,B != 0", "f,h", "F", "0.2,0.3,0.5,0.7");
+		createSimpleParfactor("g1'", "A != B;B != 0", "f;h", "F", "0.2;0.3;0.5;0.7");
 		
 	}
 	
@@ -235,14 +308,208 @@ public class Pool {
 		createConstraint("A", "1");
 		
 		createCountingFormula("#.A:{A!=B}[f(A)]", "A", "f", "A != B");
-		createCountingFormula("#.A:{A!=B;A!=x1}[f(A)]", "A", "f", "A != B", "A != 1"); // << be careful! use semicolon to separate constraints in the name of counting formula
+		createCountingFormula("#.A:{A!=B,A!=x1}[f(A)]", "A", "f", "A != B", "A != 1"); 
 		
 		// Initial parfactor
-		createSimpleParfactor("g1", "", "#.A:{A!=B}[f(A)],h", "F", "0.2,0.3,0.5,0.7,0.11,0.13");
+		createSimpleParfactor("g1", "", "#.A:{A!=B}[f(A)];h", "F", "0.2;0.3;0.5;0.7;0.11;0.13");
 		
 		// Parfactor resulting from expanding g1 on term x1
-		createSimpleParfactor("g1'", "", "#.A:{A!=B;A!=x1}[f(A)],f[A/1],h", "F'", "0.2,0.3,0.5,0.7,0.5,0.7,0.11,0.13");
+		createSimpleParfactor("g1'", "", "#.A:{A!=B,A!=x1}[f(A)];f[A/1];h", "F'", "0.2;0.3;0.5;0.7;0.5;0.7;0.11;0.13");
 	}
+	
+	/**
+	 * Creates data structures for example 2.18 of Kisynski, 2010.
+	 */
+	public void setExample2_18() {
+		
+		createLogicalVariable("A", "x", 4);
+		createLogicalVariable("B", "x", 4);
+		createLogicalVariable("C", "x", 4);
+		
+		createPrv("f", variablesPool.get("A"), variablesPool.get("B"), variablesPool.get("C"));
+		createPrvFromSubstitution("f", "A/3", "B/1");
+		
+		createConstraint("A", "0");
+		createConstraint("A", "1");
+		createConstraint("A", "2");
+		createConstraint("A", "B");
+		createConstraint("A", "C");
+		createConstraint("B", "0");
+		createConstraint("B", "2");
+		createConstraint("B", "C");
+		createConstraint("C", "1");
+		createConstraint("C", "3");
+		
+		createSimpleParfactor(
+				"g1", 
+				"A != 0;A != 1;A != 2;A != B;A != C;B != 0;B != 2;B != C", 
+				"f", 
+				"F", 
+				"0.2;0.3");
+		createSimpleParfactor("g2", "C != 1;C != 3", "f[A/3, B/1]", "F", "0.2;0.3");
+	}
+	
+	/**
+	 * Creates data structures for example 2.19 of Kisynski, 2010.
+	 * I've changed it slightly to make implementation easier.
+	 * Instead of constraint Z != x1, I'm doing Z != y1. I've also replaced
+	 * PRV f(x1,Z) with f(X,Z).
+	 */
+	public void setExample2_19() {
+		
+		// parfactor [1]
+		createLogicalVariable("X", "x", 5);
+		createLogicalVariable("Y", "y", 6);
+		
+		createPrv("f", variablesPool.get("X"), variablesPool.get("Y"));
+		createPrv("q", variablesPool.get("Y"));
+		
+		createConstraint("X", "1");
+		
+		createSimpleParfactor("g1", "X != 1", "f;q", "F", "0.2;0.3;0.5;0.7");
+		
+		// parfactor [2]
+		createLogicalVariable("X", "y", 6); 
+		createLogicalVariable("Z", "y", 6);
+		
+		createPrv("p", variablesPool.get("X"));
+		createPrv("f", variablesPool.get("X"), variablesPool.get("Z"));
+		
+		createConstraint("X", "Z");
+		createConstraint("Z", "0");
+		
+		createSimpleParfactor("g2", "X != Z;Z != 0", "p;f", "F", "0.2;0.3;0.5;0.7");
+		
+		// parfactor [3] - changed slightly because of implementation used
+		createLogicalVariable("X2", "x", 5);
+		createLogicalVariable("X1", "y", 6);
+		
+		createPrv("f", variablesPool.get("X2"), variablesPool.get("X1"));
+		createPrv("q", variablesPool.get("X1"));
+		
+		createConstraint("X2", "1");
+		
+		createSimpleParfactor("g1'", "X2 != 1", "f;q", "F", "0.2;0.3;0.5;0.7");
+		
+		// parfactor [4]
+		createLogicalVariable("X3", "y", 6);
+		createLogicalVariable("X4", "y", 6);
+		
+		createPrv("p", variablesPool.get("X3"));
+		createPrv("f", variablesPool.get("X3"), variablesPool.get("X4"));
+		
+		createConstraint("X3", "X4");
+		createConstraint("X4", "0");
+		
+		createSimpleParfactor("g2'", "X3 != X4;X4 != 0", "p;f", "F", "0.2;0.3;0.5;0.7");
+		
+	}
+	
+	/**
+	 * Creates data structures for example 2.20 of Kisynski (2010).
+	 */
+	public void setExample2_20() {
+		createLogicalVariable("X1", "y", 10);
+		createLogicalVariable("X2", "x", 10);
+		createLogicalVariable("X3", "y", 10);
+		createLogicalVariable("X4", "y", 10);
+		
+		createPrv("f", variablesPool.get("X1"), variablesPool.get("X2"));
+		createPrvFromSubstitution("f", "X1/1", "X2/X4");
+		
+		createSubstitution("answer", "X1/1", "X2/X4");
+		
+		// Constraints to test compatibility against the mgu
+		createConstraint("X1", "1");
+		createConstraint("X3", "X4");
+		createConstraint("X4", "0");		
+	}
+	
+	/**
+	 * Creates data structures for example 2.21 of Kisynski (2010).
+	 */
+	public void setExample2_21() {
+		
+		// mgu
+		createLogicalVariable("X1", "x", 5);
+		createLogicalVariable("X2", "y", 6);
+		createLogicalVariable("X3", "y", 6);
+		createLogicalVariable("X4", "y", 6);
+		createSubstitution("mgu", "X1/0", "X2/X4");
+		
+		// parfactor [3] - changed slightly because of implementation used
+		createPrv("f", variablesPool.get("X1"), variablesPool.get("X2"));
+		createPrv("q", variablesPool.get("X2"));
+		
+		createConstraint("X1", "1");
+		
+		createSimpleParfactor("g3", "X1 != 1", "f;q", "F1", "0.2;0.3;0.5;0.7");
+		
+		// parfactor [4]
+		createPrv("p", variablesPool.get("X3"));
+		createPrv("f", "X2=0", "X4");
+		
+		createConstraint("X3", "X4");
+		createConstraint("X4", "0");
+		
+		createSimpleParfactor("g4", "X3 != X4;X4 != 0", "p;f", "F2", "0.2;0.3;0.5;0.7");
+		
+		// parfactor [5]
+		createPrv("f", "X1=0", "X4");
+		createPrv("q", "X4");
+		createSimpleParfactor("g5", "", "f;q", "F1", "0.2;0.3;0.5;0.7");
+		
+		//parfactor [6]
+		createPrv("f", "X1", "X2");
+		createPrv("q", "X2");
+		createConstraint("X1", "0");
+		createConstraint("X1", "1");
+		createSimpleParfactor("g6", "X1 != 0;X1 != 1", "f;q", "F1", "0.2;0.3;0.5;0.7");
+	}
+	
+	/**
+	 * Creates data structures for example 2.22 of Kisynski (2010).
+	 * The example has been changed to become more consistent.
+	 */
+	public void setExample2_22() {
+		
+		createLogicalVariable("X1", "x", 5);
+		createLogicalVariable("X2", "y", 6);
+		createLogicalVariable("X3", "y", 6);
+		createLogicalVariable("X4", "y", 6);
+		
+		// parfactor [4]
+		createPrv("p", variablesPool.get("X3"));
+		createPrv("f", "X2=1", "X4"); // f(y1,X4) and not f(x1,X4)
+		createConstraint("X3", "X4");
+		createConstraint("X4", "1"); // X4 != y1, and not x1
+		createSimpleParfactor("g4", "X3 != X4;X4 != 1", "p;f", "F2", "0.2;0.3;0.5;0.7");
+		
+		// parfactor [5]
+		createPrv("q", "X4");
+		createSimpleParfactor("g5", "", "f;q", "F1", "0.2;0.3;0.5;0.7");
+		
+		// parfactor [6]
+		createPrv("f", "X1", "X2");
+		createPrv("q", "X2");
+		createConstraint("X1", "2");
+		createSimpleParfactor("g6", "X1 != 2", "f;q", "F1", "0.2;0.3;0.5;0.7");
+		
+		// parfactor [7]
+		createPrv("f", "X2=1", "X4=1"); // f(y1,y1) and not f(x1,x1)
+		createPrv("q", "X4=1");
+		createSimpleParfactor("g7", "", "f;q", "F1", "0.2;0.3;0.5;0.7");
+		
+		// parfactor [8]
+		createPrv("f", "X2=1", "X4"); // f(y1,X4) and not f(x1,X4)
+		createPrv("q", "X4");
+		createSimpleParfactor("g8", "X4 != 1", "f;q", "F1", "0.2;0.3;0.5;0.7");
+		
+	}
+	
+	/* ************************************************************************
+	 *      Exposed methods
+	 * ************************************************************************/
 	
 	/**
 	 * Returns a simple parfactor from the pool, or null if the parfactor does
@@ -277,5 +544,44 @@ public class Pool {
 	 */
 	public CountingFormula getCountingFormula(String name) {
 		return (CountingFormula) prvPool.get(name);
+	}
+	
+	/**
+	 * Returns a substitution set from the pool, or null if the set does not
+	 * exist.
+	 * @param name The name of the substitution.
+	 * @return A substitution set from the pool, or null if the set does not
+	 * exist.
+	 */
+	public Substitution getSubstitution(String name) {
+		return substitutionPool.get(name);
+	}
+	
+	/**
+	 * Returns a parameterized random variable from the pool, or null if the
+	 * parameterized random variable does not exist. 
+	 * @param name The name of the parameterized random variable
+	 * @return A parameterized random variable from the pool, or null if the
+	 * parameterized random variable does not exist. 
+	 */
+	public ParameterizedRandomVariable getParameterizedRandomVariable(String name) {
+		return prvPool.get(name);
+	}
+	
+	/**
+	 * Returns a constraint from the pool
+	 * @param name The name of the constraint. It has the format "t != k", where
+	 * t and k are terms.
+	 * @return A constraint from the pool with the specified name.
+	 * @throws IllegalArgumentException If the constraint with the given name
+	 * does not exist in the pool.
+	 */
+	public Constraint getConstraint(String name) throws IllegalArgumentException {
+		if (constraintsPool.containsKey(name)) {
+			return constraintsPool.get(name);
+		} else {
+			throw new IllegalArgumentException("There is no such constraint in " +
+					"the pool: " + name);
+		}
 	}
 }

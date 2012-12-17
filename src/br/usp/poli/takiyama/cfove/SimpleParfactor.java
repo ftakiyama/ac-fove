@@ -2,8 +2,11 @@ package br.usp.poli.takiyama.cfove;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import br.usp.poli.takiyama.common.Constraint;
 //import br.usp.poli.takiyama.common.Constraints;
@@ -13,7 +16,9 @@ import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
+import br.usp.poli.takiyama.prv.LogicalVariableNameGenerator;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
+import br.usp.poli.takiyama.prv.Population;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
 import br.usp.poli.takiyama.utils.Sets;
@@ -459,12 +464,13 @@ public final class SimpleParfactor implements Parfactor {
 	 * F<sub>i</sub> &gt;, the residual parfactor.
 	 * <br>
 	 * @param substitution The substitution upon which the parfactor is split.
-	 * @return A set of parfactors with two parfactors, as specified above.
+	 * @return A list of parfactors with two parfactors, as specified above.
+	 * The first parfactor is the residual parfactor, and the second is the
+	 * result from the split. If the conditions for splitting are not met, 
+	 * returns an EMPTY list.
 	 */
-	public Set<Parfactor> split(Binding substitution) {
-		// TODO
-		// substitution is actually a binding
-		Set<Parfactor> result = new HashSet<Parfactor>();
+	public List<Parfactor> split(Binding substitution) {
+		List<Parfactor> result = new ArrayList<Parfactor>();
 		if (firstTermIsPresent(substitution) 
 				&& secondTermIsNotInConstraints(substitution)
 				&& (secondTermIsConstantBelongingToFirstTermPopulation(substitution) 
@@ -563,20 +569,24 @@ public final class SimpleParfactor implements Parfactor {
 	/**
 	 * Apply a substitution on this parfactor, replacing the matching occurrences
 	 * in all constraints and variables from the factor.
-	 * @param substitution
-	 * @return
+	 * @param substitution The substitution to apply. Note it is not a set,
+	 * but one single substitution of the form X/t, where X is a LogicalVariable
+	 * and t is either a LogicalVariable or a Constant.
+	 * @return A new parfactor that is identical to this one with the
+	 * substitution applied.
 	 */
 	private SimpleParfactor applySubstitution(Binding substitution) {
 		HashSet<Constraint> substitutedConstraints = new HashSet<Constraint>();
 		for (Constraint constraint : this.constraints) {
-			substitutedConstraints.add(constraint.applySubstitution(substitution));
+			Constraint result = constraint.applySubstitution(substitution);
+			if (result != null) { // there must be something more elegant
+				substitutedConstraints.add(constraint.applySubstitution(substitution));
+			}
 		}
 		
 		ArrayList<ParameterizedRandomVariable> substitutedVariables = new ArrayList<ParameterizedRandomVariable>();
-		ArrayList<Binding> bindings = new ArrayList<Binding>();
-		bindings.add(substitution);
 		for (ParameterizedRandomVariable prv : this.factor.getParameterizedRandomVariables()) {
-			substitutedVariables.add(prv.applySubstitution(Substitution.create(bindings)));
+			substitutedVariables.add(prv.applyOneSubstitution(substitution));
 		}
 		
 		// TODO: correct the model: List<Number> is not a super-type of List<Double>
@@ -748,6 +758,179 @@ public final class SimpleParfactor implements Parfactor {
 			}
 		}	
 		return true;
+	}
+	
+	/**************************************************************************/
+	
+	
+	/* ************************************************************************
+	 *    Unification
+	 * ************************************************************************/
+	
+	/**
+	 * TODO: should be private.
+	 * Returns a parfactor replacing all LogicalVariables from this parfactor 
+	 * that are constrained to one single Constant with this Constant. 
+	 * If this parfactor represents 0 factors, returns null.
+	 * If this parfactor does not contain any LogicalVariables under the
+	 * conditions above, this method returns this parfactor unmodified.
+	 * <br>
+	 * <br>
+	 * Example: suppose X is a logical variable with population {x1,x2} and
+	 * that the set of constraints C is given by {X &ne; x1}. Then X is 
+	 * constrained to one single constant: x2. All occurrences of X are replaced
+	 * with x2.
+	 * <br>
+	 * <br>
+	 * The algorithm used is based on the work of Mackworth (1977) and
+	 * Kisysnki (2010).
+	 */
+	public Parfactor replaceLogicalVariablesConstrainedToSingleConstant() {
+		
+		LinkedList<LogicalVariable> queue = new LinkedList<LogicalVariable>();
+		for (Constraint constraint : this.constraints) {
+			queue.offer(constraint.getFirstTerm());
+			if (constraint.secondTermIsLogicalVariable()) {
+				queue.offer((LogicalVariable) constraint.getSecondTerm());
+			}
+		}
+		
+		SimpleParfactor newParfactor = this;
+		
+		while (!queue.isEmpty()) {
+			
+			LogicalVariable logicalVariable = queue.poll();
+			Population populationSatisfyingConstraints = logicalVariable.getPopulation();
+			HashSet<Constraint> newConstraints = new HashSet<Constraint>(newParfactor.getConstraints()); //safe copy
+			
+			for (Constraint constraint : newParfactor.getConstraints()) {
+				if (constraint.getFirstTerm().equals(logicalVariable) 
+						&& constraint.secondTermIsConstant()) {
+					populationSatisfyingConstraints.removeIndividual((Constant) constraint.getSecondTerm());
+				}
+			}
+			
+			if (populationSatisfyingConstraints.size() == 0) {
+				return null;
+			} else if (populationSatisfyingConstraints.size() == 1) {
+				for (Constraint constraint : newConstraints) {
+					if (constraint.getFirstTerm().equals(logicalVariable)) {
+						if (constraint.secondTermIsConstant()) {
+							newParfactor.constraints.remove(constraint);
+						} else {
+							queue.offer((LogicalVariable) constraint.getFirstTerm());
+						}
+					}
+				}
+				Binding substitution = Binding.create(logicalVariable, populationSatisfyingConstraints.getIndividual(0));
+				newParfactor = newParfactor.applySubstitution(substitution);
+			} else {
+				//do nothing
+			}
+		}
+		return newParfactor;                            
+	}
+	
+	/**
+	 * Renames all logical variables in this parfactor so that no name 
+	 * conflict occurs. Returns the modified parfactor.
+	 * @TODO make it privates
+	 * @return This parfactor with all its logical variables renamed.
+	 */
+	public Parfactor renameLogicalVariables() {
+		// Using hash set because I don't need repetition
+		HashSet<LogicalVariable> logicalVariables = new HashSet<LogicalVariable>();
+		for (ParameterizedRandomVariable prv : this.factor.getParameterizedRandomVariables()) {
+			for (LogicalVariable lv : prv.getParameters()) {
+				logicalVariables.add(lv);
+			}
+		}
+		
+		SimpleParfactor newParfactor = this;
+		for (LogicalVariable lv : logicalVariables) {
+			newParfactor = newParfactor.applySubstitution(
+					Binding.create(
+							lv, 
+							LogicalVariableNameGenerator.rename(lv) 
+					)
+			);
+		}
+		return newParfactor;
+	}
+	
+	
+	/**
+	 * When the MGU is consistent with a set of inequality constraints,
+	 * parameterized random variables represent non-disjoint and possibly
+	 * non-identical sets of random variables. To make then identical, we 
+	 * split the parfactor involved on the MGU.
+	 * <br>
+	 * This method splits this parfactor in all substitutions present in
+	 * the MGU.
+	 * 
+	 * @param mgu The Most General Unifier to split this parfactor.
+	 * @return A list of parfactors. The first element is the parfactor
+	 * obtained by spliting this parfactor on the MGU. The remaining elements
+	 * are the residual parfactors from the split.
+	 */
+	public List<Parfactor> splitOnMgu(Substitution mgu) throws ArrayIndexOutOfBoundsException {
+		SimpleParfactor result = this;
+		ArrayList<Parfactor> residualParfactors = new ArrayList<Parfactor>();
+		Iterator<LogicalVariable> mguIterator = mgu.getSubstitutedIterator();
+		
+		while (mguIterator.hasNext()) {
+			LogicalVariable replaced = mguIterator.next();
+			if (result.factor.contains(replaced)) {
+				Binding binding =  Binding.create(replaced, mgu.getReplacement(replaced));
+				Term replacement = mgu.getReplacement(replaced);
+				if (replacement.isConstant() || result.factor.contains((LogicalVariable) mgu.getReplacement(replaced))) {
+					List<Parfactor> resultSplit = result.split(binding);
+					if (resultSplit.size() == 2) { 
+						result = (SimpleParfactor) resultSplit.get(1);
+						residualParfactors.add(resultSplit.get(0));
+					} else {
+						System.out.print("Splitting resulted in " + 
+								resultSplit.size() + " parfactors.");
+					}
+				} else {
+					result = result.applySubstitution(binding);
+				}
+			}
+		}
+		residualParfactors.add(0, result);
+		return residualParfactors;
+	}
+	
+	/**
+	 * Splits a parfactor on a set of constraints.
+	 * <br>
+	 * This method is necessary to process parfactors that contain constraints
+	 * and that are under the process of unification. This method is used
+	 * on the last step to make two parameterized random variables represent
+	 * the same set of random variables.
+	 * 
+	 * @param constraints The constraints to split this parfactor on.
+	 * @return A list of parfactors. The first parfactor is the result of
+	 * splitting this parfactor on the set of specified constraints. The
+	 * remaining parfactors are the by-product parfactors.
+	 */
+	public List<Parfactor> splitOnConstraints(Set<Constraint> constraints) {
+		SimpleParfactor residue = this;
+		ArrayList<Parfactor> byProductParfactors = new ArrayList<Parfactor>();
+		for (Constraint constraint : constraints) {
+			if (!this.constraints.contains(constraint)
+					&& residue.factor.contains(constraint.getFirstTerm())
+					&& (constraint.secondTermIsConstant() 
+							|| residue.factor.contains((LogicalVariable) constraint.getSecondTerm()))) {
+				List<Parfactor> resultSplit = residue.split(constraint.toBinding());
+				if (resultSplit.size() == 2) { 
+					residue = (SimpleParfactor) resultSplit.get(0);
+					byProductParfactors.add(resultSplit.get(1));
+				}
+			}
+		}
+		byProductParfactors.add(0, residue);
+		return byProductParfactors;
 	}
 	
 	/**************************************************************************/

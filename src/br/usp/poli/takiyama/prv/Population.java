@@ -7,12 +7,13 @@ import java.util.List;
 /**
  * A population is a set of individuals. Individuals instances of the class
  * {@link Constant}. 
+ * This class is mutable.
  * TODO Check duplicity of individuals
  * @author ftakiyama
  *
  */
 public class Population {
-	private final ArrayList<Constant> individuals;
+	private ArrayList<Constant> individuals;
 	
 	/**
 	 * Creates a population. Individuals are inserted in the given order.
@@ -57,6 +58,14 @@ public class Population {
 	 */
 	public Constant getIndividual(int index) {
 		return new Constant(individuals.get(index).getValue());
+	}
+	
+	/**
+	 * Removes the individual specified from the population.
+	 * @param individual The individual to be removed.
+	 */
+	public void removeIndividual(Constant individual) {
+		this.individuals.remove(individual);
 	}
 	
 	@Override

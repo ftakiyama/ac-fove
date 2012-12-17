@@ -7,7 +7,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import br.usp.poli.takiyama.common.Tuple;
+import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
+import br.usp.poli.takiyama.prv.Term;
 
 public final class ParameterizedFactor {
 	private final String name; // this should be an optional attribute
@@ -219,11 +221,42 @@ public final class ParameterizedFactor {
 	}
 	
 	/**
+	 * @deprecated
 	 * Returns a copy of list of random variables in this factor.
 	 * @return A copy of list of random variables in this factor.
 	 */
 	public ArrayList<ParameterizedRandomVariable> getParameterizedRandomVariables() {
 		return new ArrayList<ParameterizedRandomVariable>(this.variables);
+	}
+	
+	/**
+	 * Returns true if the logical variable specified is present in the
+	 * parameterized factor.
+	 * @param logicalVariable The LogicalVariable to search for.
+	 * @return True if the logical variable specified is present in the
+	 * parameterized factor.
+	 */
+	public boolean contains(LogicalVariable logicalVariable) {
+		for (ParameterizedRandomVariable prv : this.variables) {
+			if (prv.getParameters().contains(logicalVariable)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Returns true if the Term specified is in this factor.
+	 * @param term The term to search for.
+	 * @return True if the term specified is in this factor, false otherwise.
+	 */
+	public boolean contains(Term term) {
+		for (ParameterizedRandomVariable prv : this.variables) {
+			if (prv.contains(term)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	/**

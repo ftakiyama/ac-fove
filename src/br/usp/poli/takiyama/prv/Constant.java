@@ -36,6 +36,16 @@ public final class Constant implements Term {
 	}
 	
 	@Override
+	public boolean isLogicalVariable() {
+		return false;
+	}
+	
+	@Override
+	public boolean isConstant() {
+		return true;
+	}
+	
+	@Override
 	public String toString() {
 		return this.value;
 	}

@@ -1,6 +1,7 @@
 package br.usp.poli.takiyama.prv;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -80,6 +81,33 @@ public final class PRV {
 
 		return ParameterizedRandomVariable.getInstance(functor, terms);
 		
+	}
+	
+	/**
+	 * Returns a parameterized random variable with boolean range, with the
+	 * specified name and terms.
+	 * <br>
+	 * This method supports creation of parameterized random variables with
+	 * mixed parameters, that is, the specified parameters can be either 
+	 * logical variables or constants.
+	 * <br>
+	 * Please be aware that, if a constant is specified as a parameter, there
+	 * will be no information regarding the population to which it belongs.
+	 * 
+	 * @param functorName The name of the functor
+	 * @param terms A list of terms, can be LogicalVaribles or Constants.
+	 * @return A parameterized random variable with boolean range, with the
+	 * specified name and terms.
+	 */
+	public static ParameterizedRandomVariable getBooleanPrv(
+			String functorName,
+			Term...terms) {
+		String [] range = new String[2];
+		range[0] = "false";
+		range[1] = "true";
+		PredicateSymbol functor = new PredicateSymbol(functorName, range);
+		
+		return ParameterizedRandomVariable.getInstance(functor, Arrays.asList(terms));
 	}
 	
 	public static ParameterizedRandomVariable getBooleanPrvWithoutParameter(

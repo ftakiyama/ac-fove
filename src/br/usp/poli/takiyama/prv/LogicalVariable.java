@@ -40,6 +40,24 @@ public final class LogicalVariable implements Term {
 	}
 	
 	/**
+	 * Constructor. Creates a logical variable.
+	 * @param name The name of the logical variable
+	 * @param population The population of the logical variable. The new variable
+	 * will have a copy of the population specified. 
+	 * @throws IllegalArgumentException If the name of the variable does not
+	 * start with a upper case letter or underscore.
+	 */
+	private LogicalVariable(String name, Population population) throws IllegalArgumentException {
+		this.name = new String(name);
+		this.population = Population.copyOf(population);
+		if (!name.startsWith("_") && !Character.isUpperCase(name.charAt(0))) {
+			throw new IllegalArgumentException("Exception while creating " +
+					"Logical Variable: '" + name + "' must start with " +
+					"uppercase letter or underscore.");
+		}
+	}
+	
+	/**
 	 * Returns the name of this logical variable.
 	 * @return The name of this logical variable.
 	 */
@@ -55,9 +73,33 @@ public final class LogicalVariable implements Term {
 		return Population.copyOf(population);
 	}
 	
+	/**
+	 * Not implemented yet
+	 * @param constraints
+	 * @return
+	 */
 	// TODO: put constraint processing
 	public Population getIndividualsSatisfying(Set<Constraint> constraints) {
 		return Population.copyOf(population);
+	}
+	
+	/**
+	 * Renames this logical variable. 
+	 * A new instance of LogicalVariable will be created.
+	 * @param newName The new name
+	 */
+	LogicalVariable rename(String newName) {
+		return new LogicalVariable(newName, this.population);
+	}
+	
+	@Override
+	public boolean isLogicalVariable() {
+		return true;
+	}
+	
+	@Override
+	public boolean isConstant() {
+		return false;
 	}
 	
 	@Override

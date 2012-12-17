@@ -4,8 +4,10 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 
+import org.junit.Before;
 import org.junit.Test;
 
+import br.usp.poli.takiyama.common.Pool;
 import br.usp.poli.takiyama.common.RandomVariable;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.Constant;
@@ -19,7 +21,14 @@ import com.google.common.collect.ImmutableSet;
 
 
 public class ParameterizedRandomVariableTest {
-	
+
+	private Pool objects;
+		
+	@Before
+	public void setUp() {
+		objects = new Pool();
+	}
+		
 	/**
 	 * Creates a boolean parameterized random variable with 3 logical variables
 	 * (parameters). Don't change this, otherwise you will have to re-write
@@ -304,4 +313,26 @@ public class ParameterizedRandomVariableTest {
 						.createRandomVariable("f ( a4 )", domain))
 		);
 	}
+	
+	
+	/**
+	 * Example 2.20 from Kisynski, 2010.
+	 */
+	@Test
+	public void findMostGeneralUnifier() {
+		
+		objects.setExample2_20();
+		
+		// Find the MGU
+		Substitution mgu = objects
+			.getParameterizedRandomVariable("f")
+			.getMgu(objects
+					.getParameterizedRandomVariable("f[X1/1, X2/X4]"));
+		
+		Substitution answer = objects.getSubstitution("answer");
+		
+		assertTrue(mgu.equals(answer));
+	}
+	
+	
 }

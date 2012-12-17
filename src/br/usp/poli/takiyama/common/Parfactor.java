@@ -6,6 +6,7 @@ import java.util.Set;
 import br.usp.poli.takiyama.cfove.ParameterizedFactor;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
+import br.usp.poli.takiyama.prv.Substitution;
 
 /**
  * A parfactor represents a set of factors. This set is obtained by applying
@@ -51,5 +52,6 @@ public interface Parfactor {
 	 *   ENABLING OPERATIONS
 	 * ************************************************************************/
 	
-	public Set<Parfactor> split(Binding substitution);
+	public List<Parfactor> split(Binding substitution);
+	public List<Parfactor> splitOnMgu(Substitution mgu);
 }

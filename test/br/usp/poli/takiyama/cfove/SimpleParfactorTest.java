@@ -3,7 +3,6 @@ package br.usp.poli.takiyama.cfove;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -16,6 +15,7 @@ import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.CountingFormula;
+import br.usp.poli.takiyama.prv.LogicalVariableNameGenerator;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
 
@@ -205,4 +205,95 @@ public class SimpleParfactorTest {
 		assertTrue(splitParfactors.equals(answer));
 		
 	}
+	
+	/**
+	 * Example 2.19 through 2.22 from Kisynski (2010).
+	 * I've changed it slightly to make it more consistent.
+	 * <br>
+	 * Instead of X4 &ne; x1, I'm using X4 &ne; y1.
+	 * <br>
+	 * Instead of f(x1,X4), I'm using f(y1,X4).
+	 * <br>
+	 * These changes also imply including inequality X1 &ne; y1 in parfactor
+	 * [6], but since the inequality will always be true, I've taken it out
+	 * of the parfactor. In the original version there is inequality X1 &ne; x1,
+	 * which is not always true, thus necessary.
+	 */
+	@Test
+	public void unify() {
+		
+		objects.setExample2_19To2_22();
+		
+		LogicalVariableNameGenerator.reset();
+		
+		HashSet<Parfactor> splitParfactors = new HashSet<Parfactor>();
+		splitParfactors.addAll(objects.getSimpleParfactor("g1").unify(objects.getSimpleParfactor("g2")));
+		
+		HashSet<SimpleParfactor> answer = new HashSet<SimpleParfactor>();
+		answer.add(objects.getSimpleParfactor("g4"));
+		answer.add(objects.getSimpleParfactor("g6"));
+		answer.add(objects.getSimpleParfactor("g7"));
+		answer.add(objects.getSimpleParfactor("g8"));
+		
+		assertTrue(splitParfactors.equals(answer));
+		
+	}
+	
+	@Test
+	public void countOnSimpleParfactorWithoutConstraints() {
+		
+		objects.setCountingTestWithoutConstraints();
+		
+		Parfactor result = objects.getSimpleParfactor("g1").count(objects.getLogicalVariable("A"));
+		Parfactor answer = objects.getSimpleParfactor("g2");
+		
+		assertTrue(result.equals(answer));
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testExceptionOnCouting() {
+		objects.setCountingTestWithoutConstraints();
+		objects.getSimpleParfactor("g1").count(objects.getLogicalVariable("B"));
+	}
+	
+	@Test
+	public void countOnSimpleParfactorWithConstraints() {
+		
+		objects.setCountingTestWithConstraint();
+		
+		Parfactor result = objects.getSimpleParfactor("g1").count(objects.getLogicalVariable("A"));
+		Parfactor answer = objects.getSimpleParfactor("g2");
+		
+		assertTrue(result.equals(answer));
+	}
+	
+	/**
+	 * Example 2.17 from Kisynski, 2010 modified. In this test, there are no
+	 * constraints in the parfactor.
+	 */
+	@Test
+	public void countOnParfactorWithoutConstraintsAndTwoVariables() {
+		
+		objects.setExample2_17WithoutConstraints();
+		
+		Parfactor result = objects.getSimpleParfactor("g1").count(objects.getLogicalVariable("A"));
+		Parfactor answer = objects.getSimpleParfactor("g2");
+		
+		assertTrue(result.equals(answer));
+	}
+	
+	/**
+	 * Example 2.17 from Kisynski, 2010.
+	 */
+	@Test
+	public void countLogicalVariable() {
+		
+		objects.setExample2_17();
+		
+		Parfactor result = objects.getSimpleParfactor("g1").count(objects.getLogicalVariable("A"));
+		Parfactor answer = objects.getSimpleParfactor("g2");
+		
+		assertTrue(result.equals(answer));
+	}
+	
 }

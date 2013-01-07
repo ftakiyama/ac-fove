@@ -40,4 +40,12 @@ public final class LogicalVariableNameGenerator {
 		mapping.put(("X" + count), old.getValue());
 		return old.rename(("X" + count)); 
 	}
+	
+	/**
+	 * Resets the count and the mapping of logical variables.
+	 */
+	public static void reset() {
+		count = 0;
+		mapping.clear();
+	}
 }

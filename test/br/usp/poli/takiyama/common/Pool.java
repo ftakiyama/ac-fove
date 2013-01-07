@@ -79,7 +79,7 @@ public class Pool {
 	 * is the name of some logical variable in the pool and Index is the
 	 * index of the individual in the logical variable's population.
 	 * 
-	 * @param name The name of the parametierzed random variable.
+	 * @param name The name of the parameterized random variable.
 	 * @param parameters An array of logical variables or constants that will
 	 * be the parameters of this PRV.
 	 */
@@ -154,6 +154,50 @@ public class Pool {
 										 .getIndividual(
 												 Integer.parseInt(secondTerm))));
 		}
+	}
+	
+	/**
+	 * Creates an instance of Constraint and puts it in the Constraint pool.
+	 * The key to get the constraint is [firstTerm] != [secondTerm].
+	 * <br>
+	 * This method allows the creation of inconsistent constraints, such as
+	 * X &ne; y1, where D(X) = {x1,x2,...,xn}. Note that, in this example, the
+	 * individual y1 does not belong to X's population, thus the constraint
+	 * will always be true.
+	 * <br>
+	 * The constraint must be of the form [LogicalVariable] &ne; [Constant], and
+	 * [Constant] must be bound to another logical variable using the format
+	 * [LogicalVariable]=[Index], where [LogicalVariable] is a valid logical
+	 * variable from the pool and [Index] is a number smaller than the logical
+	 * variable population. 
+	 * 
+	 * @param firstTerm The first term. Must be a logical variable name in the
+	 * pool.
+	 * @param secondTerm The second term. Must be a Constant bound to another
+	 * logical variable in the pool.
+	 * 
+	 * @throws IllegalArgumentException if terms specified are not in the pool
+	 * of variables, or the second argument is not a valid expression.
+	 */
+	private void createInconsistentConstraint(String firstTerm, String secondTerm) 
+			throws IllegalArgumentException {
+		if (!variablesPool.containsKey(firstTerm)
+				|| !variablesPool.containsKey(secondTerm.split("=")[0])
+				|| secondTerm.split("=").length != 2) {
+			throw new IllegalArgumentException("I cannot create the " +
+					"constraint.\n Either " + firstTerm + 
+					" is not in the pool, or " + secondTerm.split("=") + 
+					" is not in the pool, or " + secondTerm + 
+					" is not a valid expression.");
+		}
+		constraintsPool.put(
+				firstTerm + " != " + secondTerm.split("=")[1], 
+				Constraint.getInstance(
+						variablesPool.get(firstTerm), 
+						variablesPool.get(secondTerm.split("=")[0])
+									 .getPopulation()
+									 .getIndividual(
+											 Integer.parseInt(secondTerm.split("=")[1]))));
 	}
 	
 	/**
@@ -505,6 +549,110 @@ public class Pool {
 		createPrv("q", "X4");
 		createSimpleParfactor("g8", "X4 != 1", "f;q", "F1", "0.2;0.3;0.5;0.7");
 		
+	}
+	
+	/**
+	 * Creates data structures for example 2.19 of Kisynski (2010).
+	 * The intention is to run all unification related methods until we get
+	 * the result obtained in example 2.22 of Kisynski (2010).
+	 * The example has been changed to become more consistent.
+	 */
+	public void setExample2_19To2_22() {
+		
+		// parfactor [1]
+		createLogicalVariable("X", "x", 5);
+		createLogicalVariable("Y", "y", 6);
+		createPrv("f", variablesPool.get("X"), variablesPool.get("Y"));
+		createPrv("q", variablesPool.get("Y"));
+		createConstraint("X", "2");
+		createSimpleParfactor("g1", "X != 2", "f;q", "F", "0.2;0.3;0.5;0.7");
+		
+		// parfactor [2]
+		createLogicalVariable("Z", "y", 6);
+		createPrv("f", "X=1", "Z");
+		createInconsistentConstraint("Z", "X=1");
+		createLogicalVariable("X", "y", 6); 
+		createPrv("p", variablesPool.get("X"));
+		createConstraint("X", "Z");
+		createSimpleParfactor("g2", "X != Z;Z != 1", "p;f", "F", "0.2;0.3;0.5;0.7");
+		
+		// Sets the correct result
+		
+		createLogicalVariable("X1", "x", 5);
+		createLogicalVariable("X2", "y", 6);
+		createLogicalVariable("X3", "y", 6);
+		createLogicalVariable("X4", "y", 6);
+		
+		// parfactor [4]
+		createPrv("p", variablesPool.get("X3"));
+		createPrv("f", "X1=1", "X4"); 
+		createConstraint("X3", "X4");
+		createInconsistentConstraint("X4", "X1=1"); 
+		createSimpleParfactor("g4", "X3 != X4;X4 != 1", "p;f", "F2", "0.2;0.3;0.5;0.7");
+		
+		// parfactor [6]
+		createPrv("f", "X1", "X2");
+		createPrv("q", "X2");
+		createConstraint("X1", "2");
+		createSimpleParfactor("g6", "X1 != 2", "f;q", "F1", "0.2;0.3;0.5;0.7");
+		
+		// parfactor [7]
+		createPrv("f", "X1=1", "X1=1"); 
+		createPrv("q", "X1=1");
+		createSimpleParfactor("g7", "", "f;q", "F1", "0.2;0.3;0.5;0.7");
+		
+		// parfactor [8]
+		createPrv("f", "X1=1", "X4"); 
+		createPrv("q", "X4");
+		createSimpleParfactor("g8", "X4 != 1", "f;q", "F1", "0.2;0.3;0.5;0.7");
+	}
+	
+	public void setCountingTestWithoutConstraints() {
+		createLogicalVariable("A", "x", 3);
+		createPrv("f", "A");
+		createSimpleParfactor("g1", "", "f", "F", "2;3");
+		
+		createCountingFormula("#.A[f]", "A", "f");
+		createSimpleParfactor("g2", "", "#.A[f]", "F", "8;12;18;27");
+		
+	}
+	
+	public void setCountingTestWithConstraint() {
+
+		createLogicalVariable("A", "x", 3);
+		createPrv("f", "A");
+		createConstraint("A", "0");
+		createSimpleParfactor("g1", "A != 0", "f", "F", "2;3");
+		
+		createCountingFormula("#.A[f]", "A", "f", "A != 0");
+		createSimpleParfactor("g2", "", "#.A[f]", "F", "4;6;9");
+	}
+	
+	public void setExample2_17WithoutConstraints() {
+		
+		createLogicalVariable("A", "x", 3);
+		createLogicalVariable("B", "x", 3);
+		createPrv("f", "A");
+		createPrv("h", "B");
+		createSimpleParfactor("g1", "", "f;h", "F", "2;3;5;7");
+		
+		createCountingFormula("#.A[f]", "A", "f");
+		createSimpleParfactor("g2", "", "#.A[f];h", "F", "8;27;20;63;50;147;125;343");
+	}
+	
+	/**
+	 * Creates data structures for example 2.17 of Kisynski (2010).
+	 */
+	public void setExample2_17() {
+		
+		createLogicalVariable("A", "x", 3);
+		createLogicalVariable("B", "x", 3);
+		createPrv("f", "A");
+		createPrv("h", "B");
+		createConstraint("A", "B");
+		createSimpleParfactor("g1", "A != B", "f;h", "F", "2;3;5;7");
+		createCountingFormula("#.A[f]", "A", "f","A != B");
+		createSimpleParfactor("g2", "", "#.A[f];h", "F", "4;9;10;21;25;49");
 	}
 	
 	/* ************************************************************************

@@ -109,6 +109,14 @@ public class Substitution {
 		}
 	}
 	
+	/**
+	 * Returns true if there are no elements in this set.
+	 * @return True if this set is empty (it has no bindings), false otherwise.
+	 */
+	public boolean isEmpty() {
+		return this.bindings.isEmpty();
+	}
+	
 	@Override
 	public String toString() {
 		StringBuilder result = new StringBuilder("{ ");

@@ -53,5 +53,9 @@ public interface Parfactor {
 	 * ************************************************************************/
 	
 	public List<Parfactor> split(Binding substitution);
+	
+	public Parfactor replaceLogicalVariablesConstrainedToSingleConstant();
+	public Parfactor renameLogicalVariables();
 	public List<Parfactor> splitOnMgu(Substitution mgu);
+	public List<Parfactor> splitOnConstraints(Set<Constraint> constraints);
 }

@@ -221,7 +221,6 @@ public final class ParameterizedFactor {
 	}
 	
 	/**
-	 * @deprecated
 	 * Returns a copy of list of random variables in this factor.
 	 * @return A copy of list of random variables in this factor.
 	 */
@@ -290,6 +289,66 @@ public final class ParameterizedFactor {
 			if (!factor.variables.contains(it.next()))
 				return false;
 		return true;
+	}
+	
+	/**
+	 * Returns true if the specified logical variable is present in only
+	 * one parameterized random variable in this factor.
+	 * @param logicalVariable The logical variable to search for.
+	 * @return True if the logical variable specified is unique in this
+	 * factor, false otherwise.
+	 */
+	public boolean isUnique(LogicalVariable logicalVariable) {
+		int logicalVariableCount = 0;
+		for (ParameterizedRandomVariable prv : variables) {
+			if (prv.contains(logicalVariable)) {
+				logicalVariableCount++;
+			}
+		}
+		return (logicalVariableCount == 1);
+	}
+	
+	/**
+	 * Returns the parameterized random variable that has the specified 
+	 * logical variable as a parameter. If there are more than one parameterized
+	 * random variable satisfying the condition, returns the first occurrence
+	 * of a PRV that uses the logical variable as parameter, according to
+	 * the order returned by the iterator of variables of this factor.
+	 * @param logicalVariable The logical variable used as parameter.
+	 * @return The parameterized random variable that has the specified 
+	 * logical variable as parameter.
+	 */
+	public ParameterizedRandomVariable getVariableToCount(LogicalVariable logicalVariable) {
+		for (ParameterizedRandomVariable prv : variables) {
+			if (prv.contains(logicalVariable)) {
+				return prv;
+			}
+		}
+		return ParameterizedRandomVariable.getEmptyInstance();
+	}
+	
+	/**
+	 * Returns the value of a tuple.
+	 * It takes a model tuple and modifies it to use the specified value of
+	 * the range of the given parameterized random variable. 
+	 * <br>
+	 * Do you understand that? I don't.
+	 * 
+	 * @param prv
+	 * @param rangeValueIndex
+	 * @param model
+	 * @return
+	 */
+	public int getTupleValueOnVariable(
+			ParameterizedRandomVariable prv, 
+			int rangeValueIndex, 
+			int modelIndex) {
+		return 
+		getTupleIndex(
+				getTuple(modelIndex)
+				.getModifiedTuple(
+						this.getParameterizedRandomVariableIndex(prv), 
+						rangeValueIndex));
 	}
 	
 	@Override

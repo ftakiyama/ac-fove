@@ -88,6 +88,17 @@ public class ParameterizedRandomVariable {
 	}
 	
 	/**
+	 * Returns an empty parameterized random variable. It has a nameless 
+	 * functor and an empty set of parameters.
+	 * @return 
+	 */
+	public static ParameterizedRandomVariable getEmptyInstance() {
+		return new ParameterizedRandomVariable(
+				new PredicateSymbol(""), 
+				new ArrayList<Term>());
+	}
+	
+	/**
 	 * Returns an Instance of this Parameterized Random Variable by applying
 	 * a substitution.
 	 * The application of a substitution θ ={X1/ti1....,Xl/til} to a 

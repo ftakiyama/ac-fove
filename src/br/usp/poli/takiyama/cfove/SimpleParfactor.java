@@ -11,6 +11,7 @@ import java.util.TreeSet;
 import br.usp.poli.takiyama.common.Constraint;
 //import br.usp.poli.takiyama.common.Constraints;
 import br.usp.poli.takiyama.common.Parfactor;
+import br.usp.poli.takiyama.common.Parfactors;
 import br.usp.poli.takiyama.common.RandomVariable;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.Constant;
@@ -883,7 +884,7 @@ public final class SimpleParfactor implements Parfactor {
 			if (result.factor.contains(replaced)) {
 				Binding binding =  Binding.create(replaced, mgu.getReplacement(replaced));
 				Term replacement = mgu.getReplacement(replaced);
-				if (replacement.isConstant() || result.factor.contains((LogicalVariable) mgu.getReplacement(replaced))) {
+				if (replacement.isConstant() || result.factor.contains((LogicalVariable) replacement)) {
 					List<Parfactor> resultSplit = result.split(binding);
 					if (resultSplit.size() == 2) { 
 						result = (SimpleParfactor) resultSplit.get(1);
@@ -933,8 +934,156 @@ public final class SimpleParfactor implements Parfactor {
 		return byProductParfactors;
 	}
 	
+	/**
+	 * Returns a set of parfactors in which for every pair of parameterized 
+	 * random variables from parfactors of this set, the set of random
+	 * variables represented by them are either identical or disjoint.
+	 * <br>
+	 * This set is generated using unification, as described by Kisynski (2010).
+	 * This method is used in SHATTER macro operation to guarantee that all
+	 * parameterized random variables from parfactors of a set represent
+	 * identical or disjoint sets of random variables.
+	 * 
+	 * @param parfactor The parfactor to unify with.
+	 * @return A set of shattered parfactors.
+	 */
+	public Set<Parfactor> unify(Parfactor parfactor) {
+		Parfactor g1 = this.replaceLogicalVariablesConstrainedToSingleConstant();
+		Parfactor g2 = parfactor.replaceLogicalVariablesConstrainedToSingleConstant();
+		g1 = g1.renameLogicalVariables();
+		g2 = g2.renameLogicalVariables();
+		
+		Set<Parfactor> unifiedSet = new HashSet<Parfactor>();
+		unifiedSet.add(g1);
+		unifiedSet.add(g2);
+		boolean updatedSet = true;
+		while (updatedSet) {
+			updatedSet = false;
+			for (ParameterizedRandomVariable firstVariable : g1.getParameterizedRandomVariables()) {
+				for (ParameterizedRandomVariable secondVariable : g2.getParameterizedRandomVariables()) {
+					Substitution mgu = null;
+					try {
+						mgu = firstVariable.getMgu(secondVariable);
+					} catch (IllegalArgumentException e) {
+						// firstVariable and secondVariable represent disjoint sets
+						continue;
+					}
+					if (mgu.isEmpty()) {
+						// firstVariable and secondVariable represent the same set
+					} else {
+						Set<Constraint> allConstraints = g1.getConstraints();
+						allConstraints.addAll(g2.getConstraints());
+						if (Parfactors.checkMguAgainstConstraints(mgu, allConstraints)) {
+							List<Parfactor> firstSplitOnMgu = g1.splitOnMgu(mgu);
+							List<Parfactor> secondSplitOnMgu = g2.splitOnMgu(mgu);
+							Parfactor firstResult = firstSplitOnMgu.remove(0);
+							Parfactor secondResult = secondSplitOnMgu.remove(0);
+							List<Parfactor> firstSplitOnConstraints = firstResult.splitOnConstraints(secondResult.getConstraints());
+							List<Parfactor> secondSplitOnConstraints = secondResult.splitOnConstraints(firstResult.getConstraints());
+							unifiedSet.remove(g1);
+							unifiedSet.remove(g2);
+							unifiedSet.addAll(firstSplitOnMgu);
+							unifiedSet.addAll(secondSplitOnMgu);
+							unifiedSet.addAll(firstSplitOnConstraints);
+							unifiedSet.addAll(secondSplitOnConstraints);
+							updatedSet = true;
+							break;
+						} else {
+							// firstVariable and secondVariable represent disjoint sets
+						}
+					}
+				}
+			}
+			if (updatedSet) {
+				break;
+			}
+		}
+		
+		return unifiedSet;
+	}
+	
 	/**************************************************************************/
 	
+	
+	/* ************************************************************************
+	 *    Counting
+	 * ************************************************************************/
+	
+	public Parfactor count(LogicalVariable logicalVariable) 
+			throws IllegalArgumentException {
+		
+		if (canBeCounted(logicalVariable)) {
+			
+			// get constratints in A
+			HashSet<Constraint> constraintsOnCounted = new HashSet<Constraint>();
+			for (Constraint constraint : this.constraints) {
+				if (constraint.contains(logicalVariable)) {
+					constraintsOnCounted.add(constraint);
+				}
+			}
+			
+			// get prv in A
+			ParameterizedRandomVariable prv = this.factor.getVariableToCount(logicalVariable);
+			
+			// create counting formula
+			CountingFormula countingFormula = 
+				CountingFormula
+				.getInstance(logicalVariable, constraintsOnCounted, prv);
+			
+			// create new set of constraitns
+			HashSet<Constraint> newConstraints = new HashSet<Constraint>(this.constraints);
+			newConstraints.removeAll(constraintsOnCounted);
+			
+			// create new set of prvs
+			ArrayList<ParameterizedRandomVariable> newVariables =
+				this.factor.getParameterizedRandomVariables();
+			newVariables.set(newVariables.indexOf(prv), countingFormula);
+			
+			// create new factor
+			ArrayList<Number> newValues = new ArrayList<Number>();
+			for (int cfIndex = 0; cfIndex < countingFormula.getRangeSize(); cfIndex++) {
+				ArrayList<Integer> processedIndexes = new ArrayList<Integer>();
+				for (int fIndex = 0; fIndex < this.factor.size() && !processedIndexes.contains(fIndex); fIndex++) { // this is wrong >> should eliminate f(A) first
+					double newValue = 1.0;
+					for (int prvIndex = 0; prvIndex < prv.getRangeSize(); prvIndex++) {
+						int tupleIndex = this.factor.getTupleValueOnVariable(prv, prvIndex, fIndex); // the tuple being processed
+						newValue *= Math
+							.pow(this.factor.getTupleValue(tupleIndex),
+								countingFormula.getCount(cfIndex, prvIndex));
+						processedIndexes.add(tupleIndex);
+					}
+					newValues.add(newValue);
+				}
+			}
+			
+			return new SimpleParfactor(
+					newConstraints, 
+					ParameterizedFactor.getInstance(
+							this.factor.getName(),
+							newVariables, 
+							newValues));
+			
+		} else {
+			throw new IllegalArgumentException("Logical variable " 
+					+ logicalVariable 
+					+ " does not satisfy conditions to counted.");
+		}
+	}
+	
+	/**
+	 * Returns true if the specified logical variable can be counted in this
+	 * parfactor, false otherwise.
+	 * <br>
+	 * A logical variable is 'countable' when it occurs free in only one 
+	 * parameterized random variable in the parfactor.
+	 * @param logicalVariable The candidate logical variable to be counted.
+	 * @return True if the logical variable is countable, false otherwise.
+	 */
+	public boolean canBeCounted(LogicalVariable logicalVariable) {
+		return this.factor.isUnique(logicalVariable);
+	}
+	
+	/**************************************************************************/
 	
 	@Override
 	public String toString() {

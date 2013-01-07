@@ -124,11 +124,11 @@ public class CountingFormula extends ParameterizedRandomVariable {
 		return "(#." 
 			+ this.prv.getElementFromRange(0) 
 			+ " = " 
-			+ (this.getRangeSize() - index) 
+			+ (this.getRangeSize() - index - 1) 
 			+ ", #." 
 			+ this.prv.getElementFromRange(1) 
 			+ " = " 
-			+ index 
+			+ index
 			+ ")";
 	}
 	
@@ -163,6 +163,17 @@ public class CountingFormula extends ParameterizedRandomVariable {
 	 */
 	public Set<Constraint> getConstraints() {
 		return this.constraints;
+	}
+	
+	public int getCount(int rangeIndex, int bucketIndex) 
+			throws IllegalArgumentException {
+		if (bucketIndex == 0) {
+			return (getRangeSize() - rangeIndex - 1);
+		} else if (bucketIndex == 1) {
+			return rangeIndex;
+		} else {
+			throw new IllegalArgumentException("Only boolean PRVs are valid.");
+		}
 	}
 	
 	@Override

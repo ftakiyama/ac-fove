@@ -2,25 +2,33 @@ package br.usp.poli.takiyama.prv;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A population is a set of individuals. Individuals instances of the class
- * {@link Constant}. 
+ * {@link Constant}.
  * This class is mutable.
- * TODO Check duplicity of individuals
+ * I am considering if it is worth maintaining this class.
  * @author ftakiyama
  *
  */
 public class Population {
-	private ArrayList<Constant> individuals;
+	private ArrayList<Constant> individuals; //why am I using List instead of Set?
 	
 	/**
-	 * Creates a population. Individuals are inserted in the given order.
+	 * Creates a population. All specified individuals that are repeated are
+	 * inserted only once. 
 	 * @param individuals The individuals of the population. 
 	 */
 	public Population(List<Constant> individuals) {
-		this.individuals = new ArrayList<Constant>(individuals);
+		this.individuals = new ArrayList<Constant>();
+		for (Constant c : individuals) {
+			if (!this.individuals.contains(c)) {
+				this.individuals.add(c);
+			}
+		}
 	}
 	
 	/**
@@ -61,11 +69,25 @@ public class Population {
 	}
 	
 	/**
-	 * Removes the individual specified from the population.
+	 * Removes the individual specified from the population. If the individual
+	 * does not exist, the population remains unchanged.
 	 * @param individual The individual to be removed.
 	 */
 	public void removeIndividual(Constant individual) {
 		this.individuals.remove(individual);
+	}
+	
+	/**
+	 * Returns the individuals of the population as a set.
+	 * <b>Attention!</b> If there are repeated individuals, one of them will
+	 * be lost! I am assuming that all individuals are unique. 
+	 * <br>
+	 * The order of the individuals in the set is not guaranteed to be the same
+	 * as the one returned by the getIndividual method.
+	 * @return A set of containing all individuals of the population.
+	 */
+	public Set<Constant> toSet() {
+		return new HashSet<Constant>(this.individuals);
 	}
 	
 	@Override

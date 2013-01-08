@@ -1,6 +1,7 @@
 package br.usp.poli.takiyama.prv;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 
 import br.usp.poli.takiyama.common.Constraint;
@@ -74,13 +75,21 @@ public final class LogicalVariable implements Term {
 	}
 	
 	/**
-	 * Not implemented yet
-	 * @param constraints
-	 * @return
+	 * Returns all individuals of the population of this logical variable that
+	 * satisfy the specified set of constraints.
+	 * @param constraints A set of constraints that restricts the individuals
+	 * of the population from this logical variable
+	 * @return A set containing all individuals satisfying the specified set
+	 * of constraints.
 	 */
-	// TODO: put constraint processing
-	public Population getIndividualsSatisfying(Set<Constraint> constraints) {
-		return Population.copyOf(population);
+	public Set<Constant> getIndividualsSatisfying(Set<Constraint> constraints) {
+		Population population = Population.copyOf(this.population);
+		for (Constraint constraint : constraints) {
+			if (constraint.secondTermIsConstant()) {
+				population.removeIndividual((Constant) constraint.getSecondTerm());
+			}
+		}
+		return population.toSet();
 	}
 	
 	/**

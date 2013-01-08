@@ -47,6 +47,12 @@ public interface Parfactor {
 	
 	public Set<Constraint> getConstraints();
 	
+	/**
+	 * Returns true if the parfactor is constant, that is, the neutral
+	 * term in multiplication.
+	 * @return True if the parfactor is constant, false otherwise.
+	 */
+	public boolean isConstant();
 	
 	/* ************************************************************************
 	 *   ENABLING OPERATIONS

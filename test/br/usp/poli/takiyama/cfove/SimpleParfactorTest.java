@@ -3,6 +3,7 @@ package br.usp.poli.takiyama.cfove;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -296,4 +297,23 @@ public class SimpleParfactorTest {
 		assertTrue(result.equals(answer));
 	}
 	
+	/**
+	 * Propositionalization test derived from example 2.15 of Kisynski (2010).
+	 * The parfactor is the same, and the answer is obtained by 
+	 * propositionalizing it on logical variable A.
+	 */
+	@Test
+	public void propositionalize() {
+		
+		objects.setPropositionalizationTest();
+		
+		Set<Parfactor> result = objects.getSimpleParfactor("g").propositionalize(objects.getLogicalVariable("A"));
+		
+		Set<Parfactor> answer = new HashSet<Parfactor>();
+		answer.add(objects.getSimpleParfactor("g1"));
+		answer.add(objects.getSimpleParfactor("g2"));
+		answer.add(objects.getSimpleParfactor("g3"));
+		
+		assertTrue(result.equals(answer));
+	}
 }

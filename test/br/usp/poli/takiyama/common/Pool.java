@@ -655,6 +655,30 @@ public class Pool {
 		createSimpleParfactor("g2", "", "#.A[f];h", "F", "4;9;10;21;25;49");
 	}
 	
+	/**
+	 * Creates data structures for propositionalization test.
+	 */
+	public void setPropositionalizationTest() {
+		createLogicalVariable("A", "x", 3);
+		createLogicalVariable("B", "x", 3);
+		createPrv("f", "A", "B");
+		createPrv("h", "B");
+		createConstraint("A", "B");
+		createSimpleParfactor("g", "A != B", "f;h", "F", "2;3;5;7");
+		
+		createPrv("f", "A=0", "B");
+		createConstraint("B", "0");
+		createSimpleParfactor("g1", "B != 0", "f;h", "F", "2;3;5;7");
+		
+		createPrv("f", "A=1", "B");
+		createConstraint("B", "1");
+		createSimpleParfactor("g2", "B != 1", "f;h", "F", "2;3;5;7");
+
+		createPrv("f", "A=2", "B");
+		createConstraint("B", "2");
+		createSimpleParfactor("g3", "B != 2", "f;h", "F", "2;3;5;7");
+	}
+	
 	/* ************************************************************************
 	 *      Exposed methods
 	 * ************************************************************************/

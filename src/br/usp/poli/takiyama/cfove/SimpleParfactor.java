@@ -200,6 +200,14 @@ public final class SimpleParfactor implements Parfactor {
 		return null;
 	}
 	
+	@Override
+	public boolean isConstant() {
+		return (this.constraints.isEmpty()
+				&& this.factor.getParameterizedRandomVariables().isEmpty()
+				&& this.factor.getAllValues().size() == 1
+				&& this.factor.getAllValues().get(0).doubleValue() == 1);
+	}
+	
 	/*
 	 ***************************************************************************
 	 *
@@ -604,6 +612,41 @@ public final class SimpleParfactor implements Parfactor {
 	
 	
 	/* ************************************************************************
+	 *    Propositionalization
+	 * ************************************************************************/
+	
+	/**
+	 * Propositionalizes this factor on the specified logical variable.
+	 * <br>
+	 * Given a parfactor g = <C,V,F> and a logical variable X, this operation
+	 * returns a set of parfactors that are the result of splitting g for all
+	 * substitutions {X/c} that satisfy c &in; D(X):C.
+	 * 
+	 * @param logicalVariable The logical variable to propositionalize
+	 * @return This parfactor propositionalized on the specified logical
+	 * variable.
+	 */
+	public Set<Parfactor> propositionalize(LogicalVariable logicalVariable) {
+		Set<Parfactor> result = new HashSet<Parfactor>();
+		Parfactor parfactorToSplit = this;
+		for (Constant individual : logicalVariable.getIndividualsSatisfying(this.constraints)) {
+			List<Parfactor> splitResult = parfactorToSplit.split(Binding.create(logicalVariable, individual));
+			result.add(splitResult.get(1));
+			parfactorToSplit = splitResult.get(0);
+		}
+		
+		// I'm not sure if this is necessary
+		Parfactor residue = parfactorToSplit.replaceLogicalVariablesConstrainedToSingleConstant();
+		if (!residue.isConstant()) {
+			result.add(residue);
+		}
+		return result;
+	}
+	
+	/**************************************************************************/
+	
+	
+	/* ************************************************************************
 	 *    Expansion
 	 * ************************************************************************/
 	
@@ -772,7 +815,10 @@ public final class SimpleParfactor implements Parfactor {
 	 * TODO: should be private.
 	 * Returns a parfactor replacing all LogicalVariables from this parfactor 
 	 * that are constrained to one single Constant with this Constant. 
-	 * If this parfactor represents 0 factors, returns null.
+	 * <br>
+	 * If this parfactor represents 0 factors, returns the constant parfactor
+	 * (neutral element in multiplications).
+	 * <br>
 	 * If this parfactor does not contain any LogicalVariables under the
 	 * conditions above, this method returns this parfactor unmodified.
 	 * <br>
@@ -812,7 +858,7 @@ public final class SimpleParfactor implements Parfactor {
 			}
 			
 			if (populationSatisfyingConstraints.size() == 0) {
-				return null;
+				return SimpleParfactor.getConstantInstance();
 			} else if (populationSatisfyingConstraints.size() == 1) {
 				for (Constraint constraint : newConstraints) {
 					if (constraint.getFirstTerm().equals(logicalVariable)) {
@@ -1043,7 +1089,7 @@ public final class SimpleParfactor implements Parfactor {
 			ArrayList<Number> newValues = new ArrayList<Number>();
 			for (int cfIndex = 0; cfIndex < countingFormula.getRangeSize(); cfIndex++) {
 				ArrayList<Integer> processedIndexes = new ArrayList<Integer>();
-				for (int fIndex = 0; fIndex < this.factor.size() && !processedIndexes.contains(fIndex); fIndex++) { // this is wrong >> should eliminate f(A) first
+				for (int fIndex = 0; fIndex < this.factor.size() && !processedIndexes.contains(fIndex); fIndex++) { 
 					double newValue = 1.0;
 					for (int prvIndex = 0; prvIndex < prv.getRangeSize(); prvIndex++) {
 						int tupleIndex = this.factor.getTupleValueOnVariable(prv, prvIndex, fIndex); // the tuple being processed

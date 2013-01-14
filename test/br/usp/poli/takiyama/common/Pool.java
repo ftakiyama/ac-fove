@@ -555,7 +555,29 @@ public class Pool {
 	 * Creates data structures for example 2.19 of Kisynski (2010).
 	 * The intention is to run all unification related methods until we get
 	 * the result obtained in example 2.22 of Kisynski (2010).
-	 * The example has been changed to become more consistent.
+	 * The example has been changed to become more consistent:
+	 * <br>
+	 * <br>
+	 * &Phi;<sub>0</sub> = {
+	 * < { X &ne; x2 }, { f(X, Y), q(Y) }, F1 >, [1] <br>
+	 * < { X &ne; x1, Z &ne; y1 }, { p(X), f(x1, Z) }, F2 > } [2] <br>
+	 * <br>
+	 * The result will be:
+	 * <br>
+	 * <br>
+	 * &Phi;<sub>3</sub> = {
+	 * < { X3 &ne; x1, X4 &ne; y1 }, { p(X3), f(x1, X4) }, F2 >, [3] <br>
+	 * < { X1 &ne; x1, X1 &ne; x2 }, { f(X1, X2), q(X2) }, F1 >, [4] <br>
+	 * < {  }, { f(x1, y1), q(y1) }, F1 >, [5] <br>
+	 * < { X4 &ne; y1 }, { f(x1, X4), q(X4) }, F1 >, [6] <br>
+	 * <br>
+	 * Parfactor [4] can also be <br>
+	 * < { X1 &ne; x1, X1 &ne; x2 }, { f(X1, X4), q(X4) }, F1 >, [4'] <br>
+	 * depending on the order that the split is made.
+	 * <br>
+	 * <br>
+	 * The objective is to make f(X, Y) in [1] and f(x1, Z) in [2] 
+	 * represent the same set of random variables.
 	 */
 	public void setExample2_19To2_22() {
 		
@@ -570,41 +592,43 @@ public class Pool {
 		// parfactor [2]
 		createLogicalVariable("Z", "y", 6);
 		createPrv("f", "X=1", "Z");
-		createInconsistentConstraint("Z", "X=1");
-		createLogicalVariable("X", "y", 6); 
 		createPrv("p", variablesPool.get("X"));
-		createConstraint("X", "Z");
-		createSimpleParfactor("g2", "X != Z;Z != 1", "p;f", "F", "0.2;0.3;0.5;0.7");
+		createConstraint("Z", "1");
+		createConstraint("X", "1");
+		createSimpleParfactor("g2", "X != 1;Z != 1", "p;f", "F", "0.2;0.3;0.5;0.7");
 		
 		// Sets the correct result
 		
-		createLogicalVariable("X1", "x", 5);
-		createLogicalVariable("X2", "y", 6);
-		createLogicalVariable("X3", "y", 6);
+		createLogicalVariable("X2", "x", 5);
+		createLogicalVariable("X1", "y", 6); // changed names so the test coincides with name generator
+		createLogicalVariable("X3", "x", 5);
 		createLogicalVariable("X4", "y", 6);
 		
+		// parfactor [3]
+		createConstraint("X3", "1");
+		createConstraint("X4", "1");
+		createPrv("p", "X3");
+		createPrv("f", "X2=1", "X4");
+		createSimpleParfactor("g3", "X3 != 1;X4 != 1", "p;f", "F2", "0.2;0.3;0.5;0.7");
+		
 		// parfactor [4]
-		createPrv("p", variablesPool.get("X3"));
-		createPrv("f", "X1=1", "X4"); 
-		createConstraint("X3", "X4");
-		createInconsistentConstraint("X4", "X1=1"); 
-		createSimpleParfactor("g4", "X3 != X4;X4 != 1", "p;f", "F2", "0.2;0.3;0.5;0.7");
+		createConstraint("X2", "1");
+		createConstraint("X2", "2");
+		createPrv("f", "X2", "X4");
+		createPrv("q", "X4");
+		createSimpleParfactor("g4", "X2 != 1;X2 != 2", "f;q", "F1", "0.2;0.3;0.5;0.7");
+		
+		// parfactor [5]
+		createPrv("f", "X2=1", "X1=1");
+		createPrv("q", "X1=1");
+		createSimpleParfactor("g5", "", "f;q", "F1", "0.2;0.3;0.5;0.7");
 		
 		// parfactor [6]
-		createPrv("f", "X1", "X2");
-		createPrv("q", "X2");
-		createConstraint("X1", "2");
-		createSimpleParfactor("g6", "X1 != 2", "f;q", "F1", "0.2;0.3;0.5;0.7");
-		
-		// parfactor [7]
-		createPrv("f", "X1=1", "X1=1"); 
-		createPrv("q", "X1=1");
-		createSimpleParfactor("g7", "", "f;q", "F1", "0.2;0.3;0.5;0.7");
-		
-		// parfactor [8]
-		createPrv("f", "X1=1", "X4"); 
+		createConstraint("X4", "1");
+		createPrv("f", "X2=1", "X4");
 		createPrv("q", "X4");
-		createSimpleParfactor("g8", "X4 != 1", "f;q", "F1", "0.2;0.3;0.5;0.7");
+		createSimpleParfactor("g6", "X4 != 1", "f;q", "F1", "0.2;0.3;0.5;0.7");
+		
 	}
 	
 	public void setCountingTestWithoutConstraints() {
@@ -677,6 +701,50 @@ public class Pool {
 		createPrv("f", "A=2", "B");
 		createConstraint("B", "2");
 		createSimpleParfactor("g3", "B != 2", "f;h", "F", "2;3;5;7");
+	}
+	
+	public void setSumOutCountingFormulaWithCardinality1Test() {
+		createLogicalVariable("A", "x", 1);
+		createLogicalVariable("B", "x", 3);
+		createPrv("f", "A");
+		createPrv("h", "B");
+		createCountingFormula("#.A[f]", "A", "f");
+		createSimpleParfactor("g", "", "#.A[f];h", "F", "1;10;100;1000");
+		createSimpleParfactor("g_answer", "", "h", "F", "101;1010");
+	}
+	
+	public void setSumOutCountingFormulaWithCardinality2Test() {
+		createLogicalVariable("A", "x", 2);
+		createLogicalVariable("B", "x", 3);
+		createPrv("f", "A");
+		createPrv("h", "B");
+		createCountingFormula("#.A[f]", "A", "f");
+		createSimpleParfactor("g", "", "#.A[f];h", "F", "1;10;100;1000;10000;100000");
+		createSimpleParfactor("g_answer", "", "h", "F", "10201;102010");
+	}
+	
+	public void setSumOutCountingFormulaWithCardinality10Test() {
+		createLogicalVariable("A", "x", 10);
+		createLogicalVariable("B", "x", 3);
+		createPrv("f", "A");
+		createPrv("h", "B");
+		createCountingFormula("#.A[f]", "A", "f");
+		createSimpleParfactor("g", "", "#.A[f];h", "F", "1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1");
+		createSimpleParfactor("g_answer", "", "h", "F", "1024;1024");
+	}
+	
+	/**
+	 * Creates data structures for example 2.13 of Kisynski (2010).
+	 */
+	public void setExample2_13() {
+		createLogicalVariable("A", "x", 3);
+		createLogicalVariable("B", "x", 3);
+		createPrv("f", "A");
+		createPrv("h", "B");
+		createConstraint("A", "B");
+		createCountingFormula("#.A[f]", "A", "f", "A != B");
+		createSimpleParfactor("g", "", "#.A[f];h", "F", "1;10;100;1000;10000;100000");
+		createSimpleParfactor("g_answer", "", "h", "F", "10201;102010");
 	}
 	
 	/* ************************************************************************

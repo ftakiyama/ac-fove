@@ -153,25 +153,15 @@ public final class SimpleParfactor implements Parfactor {
 	 * @return The number of factors this parfactor represents.
 	 */
 	public int size() {
-		// TODO: check constraints
-		
-		/*
-		 * size := 1
-		 * for each PRV prv in variables
-		 *     for each parameter p in prv
-		 *         if p has not been read
-		 *             size := size * p.population
-		 *             mark p as read
-		 * return size
-		 */
-		
 		int size = 1;
 		HashSet<LogicalVariable> read = new HashSet<LogicalVariable>(); // is it the best thing to do? 
 		for (ParameterizedRandomVariable v : factor.getParameterizedRandomVariables()) {
-			for (LogicalVariable lv : v.getParameters()) {
-				if (!read.contains(lv)) {
-					size = size * lv.getPopulation().size();
-					read.add(lv);
+			if (!(v instanceof CountingFormula)) {
+				for (LogicalVariable lv : v.getParameters()) {
+					if (!read.contains(lv)) {
+						size = size * lv.getSizeOfPopulationSatisfying(constraints);
+						read.add(lv);
+					}
 				}
 			}
 		}
@@ -216,6 +206,10 @@ public final class SimpleParfactor implements Parfactor {
 	 ***************************************************************************
 	 */
 	
+
+	/* ************************************************************************
+	 *    Lifted elimination
+	 * ************************************************************************/
 	
 	public Set<SimpleParfactor> sumOut(
 			Set<SimpleParfactor> setOfParfactors, 
@@ -332,7 +326,35 @@ public final class SimpleParfactor implements Parfactor {
 		
 		return variable.getParameters().containsAll(allLogicalVariables);		
 	}
+
 	
+	// Sum out counting formula
+	
+	public Parfactor sumOut(CountingFormula countingFormula) {
+		
+		List<ParameterizedRandomVariable> newVariables = this.factor.getParameterizedRandomVariables();
+		newVariables.remove(countingFormula);
+		
+		ParameterizedFactor newFactor = getFactor().sumOut(countingFormula);
+		
+		SimpleParfactor newParfactor = SimpleParfactor.getInstance(
+				getConstraints(), 
+				newFactor);
+		
+		double size1 = (double) this.size();
+		double size2 = (double) newParfactor.size();
+		double exponent = size1 / size2;
+		
+		newParfactor = SimpleParfactor.getInstance(
+				getConstraints(), 
+				newFactor.pow(exponent));
+						
+		return newParfactor;
+	}
+	
+	
+	/**************************************************************************/
+
 	
 	/* ************************************************************************
 	 *    MULTIPLICATION
@@ -449,7 +471,8 @@ public final class SimpleParfactor implements Parfactor {
 		}
 	}
 	
-	
+	/**************************************************************************/
+
 	
 	/* ************************************************************************
 	 *    Split

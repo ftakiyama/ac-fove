@@ -213,12 +213,12 @@ public class SimpleParfactorTest {
 	 * <br>
 	 * Instead of X4 &ne; x1, I'm using X4 &ne; y1.
 	 * <br>
-	 * Instead of f(x1,X4), I'm using f(y1,X4).
+	 * Instead of X3 &ne; X4, I'm using X3 &ne; x1.
 	 * <br>
-	 * These changes also imply including inequality X1 &ne; y1 in parfactor
-	 * [6], but since the inequality will always be true, I've taken it out
-	 * of the parfactor. In the original version there is inequality X1 &ne; x1,
-	 * which is not always true, thus necessary.
+	 * Instead of D(X) = {y1,...,ym} in parfactor [2], I'm using 
+	 * D(X) = {x1,....,xn}, since parameterized random variables are
+	 * typed to their logical variables and having X with two different
+	 * populations would make no sense.
 	 */
 	@Test
 	public void unify() {
@@ -231,10 +231,10 @@ public class SimpleParfactorTest {
 		splitParfactors.addAll(objects.getSimpleParfactor("g1").unify(objects.getSimpleParfactor("g2")));
 		
 		HashSet<SimpleParfactor> answer = new HashSet<SimpleParfactor>();
+		answer.add(objects.getSimpleParfactor("g3"));
 		answer.add(objects.getSimpleParfactor("g4"));
+		answer.add(objects.getSimpleParfactor("g5"));
 		answer.add(objects.getSimpleParfactor("g6"));
-		answer.add(objects.getSimpleParfactor("g7"));
-		answer.add(objects.getSimpleParfactor("g8"));
 		
 		assertTrue(splitParfactors.equals(answer));
 		
@@ -313,6 +313,56 @@ public class SimpleParfactorTest {
 		answer.add(objects.getSimpleParfactor("g1"));
 		answer.add(objects.getSimpleParfactor("g2"));
 		answer.add(objects.getSimpleParfactor("g3"));
+		
+		assertTrue(result.equals(answer));
+	}
+	
+	@Test
+	public void sumOutCountingFormulaWithCardinality1() {
+		
+		objects.setSumOutCountingFormulaWithCardinality1Test();
+		
+		Parfactor result = objects.getSimpleParfactor("g").sumOut(objects.getCountingFormula("#.A[f]"));
+		Parfactor answer = objects.getSimpleParfactor("g_answer");
+		
+		assertTrue(result.equals(answer));
+	}
+	
+	@Test
+	public void sumOutCountingFormulaWithCardinality2() {
+		
+		objects.setSumOutCountingFormulaWithCardinality2Test();
+		
+		Parfactor result = objects.getSimpleParfactor("g").sumOut(objects.getCountingFormula("#.A[f]"));
+		Parfactor answer = objects.getSimpleParfactor("g_answer");
+		
+		assertTrue(result.equals(answer));
+	}
+
+	@Test
+	public void sumOutCountingFormulaWithCardinality10() {
+		
+		objects.setSumOutCountingFormulaWithCardinality10Test();
+		
+		Parfactor result = objects.getSimpleParfactor("g").sumOut(objects.getCountingFormula("#.A[f]"));
+		Parfactor answer = objects.getSimpleParfactor("g_answer");
+		
+		assertTrue(result.equals(answer));
+	}
+	
+	/**
+	 * Example 2.13 from Kisynski (2010). 
+	 * The objective of this test is to verify the elimination of counting
+	 * formulas. I took out parfactor [2] because I'm not checking
+	 * conditions yet.
+	 */
+	@Test
+	public void sumOutCountingFormulaWithConstraint() {
+		
+		objects.setExample2_13();
+		
+		Parfactor result = objects.getSimpleParfactor("g").sumOut(objects.getCountingFormula("#.A[f]"));
+		Parfactor answer = objects.getSimpleParfactor("g_answer");
 		
 		assertTrue(result.equals(answer));
 	}

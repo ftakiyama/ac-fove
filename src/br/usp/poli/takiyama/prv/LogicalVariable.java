@@ -76,7 +76,16 @@ public final class LogicalVariable implements Term {
 	
 	/**
 	 * Returns all individuals of the population of this logical variable that
-	 * satisfy the specified set of constraints.
+	 * satisfy the specified set of constraints of the form X != t.
+	 * <br>
+	 * t must be a constant.
+	 * <br>
+	 * Note that, if t is a logical variable, then there is no way of finding
+	 * out which value to constrain in the population. 
+	 * <br>
+	 * This method does not check whether the constraints are consistent, that
+	 * is, if the second term is a constant representing an individual from 
+	 * this logical variable population.
 	 * @param constraints A set of constraints that restricts the individuals
 	 * of the population from this logical variable
 	 * @return A set containing all individuals satisfying the specified set
@@ -85,11 +94,34 @@ public final class LogicalVariable implements Term {
 	public Set<Constant> getIndividualsSatisfying(Set<Constraint> constraints) {
 		Population population = Population.copyOf(this.population);
 		for (Constraint constraint : constraints) {
-			if (constraint.secondTermIsConstant()) {
+			if (constraint.getFirstTerm().equals(this) 
+					&& constraint.secondTermIsConstant()) {
 				population.removeIndividual((Constant) constraint.getSecondTerm());
 			}
 		}
 		return population.toSet();
+	}
+	
+	/**
+	 * Returns the size of the population of this logical variable that
+	 * satisfies the given set of constraints.
+	 * <br>
+	 * This method only checks if this logical variable is part of the
+	 * constraint. Other validations, such as consistency of individuals and
+	 * populations, must be done in the specified set of constraints before
+	 * calling this method.
+	 * @param constraints A set of consistent constraints.
+	 * @return The size of the population of this logical variable that
+	 * satisfies the given set of constraints.
+	 */
+	public int getSizeOfPopulationSatisfying(Set<Constraint> constraints) {
+		HashSet<Constraint> consistentConstraints = new HashSet<Constraint> (constraints);
+		for (Constraint constraint : consistentConstraints) {
+			if (!constraint.contains(this)) {
+				consistentConstraints.remove(constraint);
+			}
+		}
+		return (this.population.size() - consistentConstraints.size());
 	}
 	
 	/**

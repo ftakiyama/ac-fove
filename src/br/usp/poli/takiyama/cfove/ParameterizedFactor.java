@@ -6,7 +6,9 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import br.usp.poli.takiyama.common.MathUtils;
 import br.usp.poli.takiyama.common.Tuple;
+import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 import br.usp.poli.takiyama.prv.Term;
@@ -442,6 +444,71 @@ public final class ParameterizedFactor {
 		
 		// Creates the new factor
 		return getInstance(this.getName(), newRandomVariables, newMapping);
+	}
+	
+	public ParameterizedFactor sumOut(CountingFormula randomVariable) {
+		
+		// Checks if the random variable exists
+		if (getParameterizedRandomVariableIndex(randomVariable) == -1) {
+			return this;
+		}
+		
+		// Creates a flag for the mappings in the factor that were already processed
+		int[] marks = new int[this.size()];
+		Arrays.fill(marks, 0);
+		
+		// Removes the random variable
+		ArrayList<ParameterizedRandomVariable> newRandomVariables = this.getParameterizedRandomVariables();
+		newRandomVariables.remove(randomVariable);
+		
+		// Creates the new mapping, summing out the random variable
+		ArrayList<Number> newMapping = new ArrayList<Number>();
+		for (int factorCursor = 0; factorCursor < this.size(); factorCursor++) {
+			if (marks[factorCursor] == 0) {
+				Tuple currentTuple = this.getTuple(factorCursor); 
+				Double sum = new Double(0);
+				int tupleIndex;
+				int currentRandomVariableIndex = this.getParameterizedRandomVariableIndex(randomVariable);
+				for (int domainCursor = 0; domainCursor < randomVariable.getRangeSize(); domainCursor++) {
+					Tuple nextTuple = currentTuple.getModifiedTuple(currentRandomVariableIndex, domainCursor);
+					tupleIndex = this.getTupleIndex(nextTuple);
+					marks[tupleIndex] = 1;
+					sum = Double.valueOf(Double.valueOf(sum) 
+							+ getCorrectionForCountingFormula(randomVariable, domainCursor) * this.getTupleValue(tupleIndex));
+				}
+				newMapping.add(sum);
+			}
+		}
+		
+		// Creates the new factor
+		return getInstance(this.getName(), newRandomVariables, newMapping);
+	}
+	
+	/**
+	 * Returns the correction factor used in sum out of counting formulas.
+	 * <br>
+	 * <b>This method does not work for big populations (> 20).</b>
+	 * @param countingFormula
+	 * @param histogramIndex
+	 * @return
+	 */
+	private double getCorrectionForCountingFormula(CountingFormula countingFormula, int histogramIndex) {
+		int productOfValuesInHistogram = 1;
+		for (int rangeIndex = 0; 
+				rangeIndex < countingFormula.getCountedVariableRangeSize(); 
+				rangeIndex++) {
+			productOfValuesInHistogram *= MathUtils
+					.factorial(countingFormula
+							.getCount(histogramIndex, rangeIndex));
+		}
+		double correction = MathUtils
+				.factorial(countingFormula
+						.getBoundVariable()
+						.getSizeOfPopulationSatisfying(countingFormula
+								.getConstraints()));
+		correction = correction / productOfValuesInHistogram;
+		
+		return correction;
 	}
 	
 	/**

@@ -165,6 +165,18 @@ public class CountingFormula extends ParameterizedRandomVariable {
 		return this.constraints;
 	}
 	
+	/**
+	 * Returns the count of a value from range(f), given the element from the
+	 * range of this counting formula.
+	 * This function only works when f is boolean.
+	 * @param rangeIndex The index of the element in the range of this 
+	 * counting formula.
+	 * @param bucketIndex The index of the bucket in the histogram.
+	 * @return The count of the specified value from range(f) for the
+	 * specified element from this counting formula.
+	 * @throws IllegalArgumentException If f is not a binary parameterized
+	 * random variable
+	 */
 	public int getCount(int rangeIndex, int bucketIndex) 
 			throws IllegalArgumentException {
 		if (bucketIndex == 0) {
@@ -174,6 +186,10 @@ public class CountingFormula extends ParameterizedRandomVariable {
 		} else {
 			throw new IllegalArgumentException("Only boolean PRVs are valid.");
 		}
+	}
+	
+	public int getCountedVariableRangeSize() {
+		return this.prv.getRangeSize();
 	}
 	
 	@Override

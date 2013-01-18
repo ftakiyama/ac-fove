@@ -631,6 +631,91 @@ public class Pool {
 		
 	}
 	
+	/**
+	 * Creates data structures to test unification between two counting
+	 * formulas.
+	 * <br>
+	 * The input is
+	 * <br>
+	 * &Phi;<sub>0</sub> = {<br>
+	 * < { }, { #<sub>A:{A &ne; x1}</sub>[f(A)], h(A) }, F1 >, [1] <br>
+	 * < { }, { #<sub>A:{A &ne; x2}</sub>[f(A)] }, F2 > } [2] <br>
+	 * <br>
+	 * The result is
+	 * <br>
+	 * &Phi;<sub>1</sub> = {<br>
+	 * < { }, { #<sub>X2:{X2 &ne; x1, X2 &ne; x2}</sub>[f(X2)], f(x1) }, F2' >, [3] <br>
+	 * < { }, { #<sub>X2:{X2 &ne; x1, X2 &ne; x2}</sub>[f(X2)], f(x2), h(X3) }, F1' > } [4] <br>
+	 * 
+	 */
+	public void setUnificationTestWithTwoCountingFormulas() {
+		createLogicalVariable("A", "x", 3);
+		createConstraint("A", "1");
+		createPrv("f", "A");
+		createCountingFormula("#.A[f]", "A", "f", "A != 1");
+		createPrv("h", "A");
+		createSimpleParfactor("g1", "", "#.A[f];h", "F1", "2;3;5;7;11;13");
+		
+		createConstraint("A", "2");
+		createCountingFormula("#.A[f]", "A", "f", "A != 2");
+		createSimpleParfactor("g2", "", "#.A[f]", "F2", "2;3;5");
+
+		createLogicalVariable("X2", "x", 3);
+		createConstraint("X2", "1");
+		createConstraint("X2", "2");
+		createPrv("f", "X2");
+		createCountingFormula("#.X2[f]", "X2", "f", "X2 != 1", "X2 != 2");
+		createPrv("f", "X2=1");
+		createSimpleParfactor("g3", "", "#.X2[f];f", "F2", "2;3;3;5");
+		
+		createPrv("f", "X2=2");
+		createPrv("h", "X2");
+		createSimpleParfactor("g4", "X2 != 2", "#.X2[f];f;h", "F1", "2;3;5;7;5;7;11;13");
+		
+		createPrv("h", "X2=2");
+		createSimpleParfactor("g5", "", "#.X2[f];f;h", "F1", "2;3;5;7;5;7;11;13");
+	}
+
+	/**
+	 * Creates data structures to test unification between a counting formula
+	 * and a standard parameterized random variable.
+	 * <br>
+	 * The input is
+	 * <br>
+	 * &Phi;<sub>0</sub> = {<br>
+	 * < { }, { #<sub>A:{A &ne; x1}</sub>[f(A)], h(A) }, F1 >, [1] <br>
+	 * < { }, { f(A) }, F2 > } [2] <br>
+	 * <br>
+	 * The result is
+	 * <br>
+	 * &Phi;<sub>1</sub> = {<br>
+	 * < { }, { #<sub>X2:{X2 &ne; x1}</sub>[f(X2)], h(X2) }, F1 >, [3] <br>
+	 * < { }, { f(x1) }, F2 >, [4] <br>
+	 * < { X2 &ne; x1 }, { f(X2) }, F2 > } [5] <br>
+	 * 
+	 */
+	public void setUnificationTestWithCountingFormulaAndPrv() {
+		createLogicalVariable("A", "x", 3);
+		createConstraint("A", "1");
+		createPrv("f", "A");
+		createPrv("h", "A");
+		createCountingFormula("#.A[f]", "A", "f", "A != 1");
+		createSimpleParfactor("g1", "", "#.A[f];h", "F1", "2;3;5;7;11;13");
+		createSimpleParfactor("g2", "", "f", "F2", "2;3");
+		
+		createLogicalVariable( "X2", "x", 3);
+		createConstraint("X2", "1");
+		createPrv("f", "X2");
+		createPrv("h", "X2");
+		createCountingFormula("#.X2[f]", "X2", "f", "X2 != 1");
+		createSimpleParfactor("g3", "", "#.X2[f];h", "F1", "2;3;5;7;11;13");
+		createPrv("f", "X2=1");
+		createSimpleParfactor("g4", "", "f", "F2", "2;3");
+		createPrv("f", "X2");
+		createSimpleParfactor("g5", "X2 != 1", "f", "F2", "2;3");		
+	}
+	
+	
 	public void setCountingTestWithoutConstraints() {
 		createLogicalVariable("A", "x", 3);
 		createPrv("f", "A");

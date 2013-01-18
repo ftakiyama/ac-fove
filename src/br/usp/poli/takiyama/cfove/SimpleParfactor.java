@@ -143,7 +143,6 @@ public final class SimpleParfactor implements Parfactor {
 		return new HashSet<Constraint>(this.constraints);
 	}
 	
-	
 	public ParameterizedFactor getFactor() {
 		return this.factor;
 	}
@@ -695,15 +694,14 @@ public final class SimpleParfactor implements Parfactor {
 			
 			newVariables.set(newVariables.indexOf(countingFormula), newCountingFormula);
 			newVariables.add(
-				newVariables.indexOf(
-					newCountingFormula) + 1, 
-					newCountingFormula.applyOneSubstitution(
-						Binding.create(
-							newCountingFormula.getBoundVariable(), 
-							term
-						)
+				newVariables.indexOf(newCountingFormula) + 1, 
+				newCountingFormula.applySubstitutionToPrv(
+					Binding.create(
+						newCountingFormula.getBoundVariable(), 
+						term
 					)
-				);
+				)
+			);
 			
 			
 			// Creates the new Factor
@@ -825,6 +823,30 @@ public final class SimpleParfactor implements Parfactor {
 			}
 		}	
 		return true;
+	}
+	
+	/**
+	 * Checks if this parfactor has the specified counting formula and if it can
+	 * be expanded on the specified term.
+	 * <br>
+	 * More specifically, this method checks the following conditions:
+	 * <li> This parfactor is in normal form
+	 * <li> The specified term does not belong to the excluded set for A on 
+	 * C<sub>A</sub>
+	 * <li> The specified term belongs to the excluded set for Y on constraints
+	 * of this parfactor, for each Y in the excluded set for A on C<sub>A</sub>.
+	 * <li> The specified term is a constant.
+	 * @param countingFormula The counting formula to be expanded
+	 * @param term The term to expand the counting formula on
+	 * @return True if the specified counting formula can be expanded on the
+	 * specified term in this parfactor, false otherwise.
+	 */
+	public boolean canExpandOn(CountingFormula countingFormula, Term term) {
+		return this.isInNormalForm()
+				&& belongsToParfactor(countingFormula) 
+				&& termIsNotInConstraintsFromCountingFormula(countingFormula, term) 
+				&& termAppearsInConstraintsForAllLogicalVariablesInCountingFormula(countingFormula, term)
+				&& term.isConstant();
 	}
 	
 	/**************************************************************************/
@@ -953,7 +975,18 @@ public final class SimpleParfactor implements Parfactor {
 			if (result.factor.contains(replaced)) {
 				Binding binding =  Binding.create(replaced, mgu.getReplacement(replaced));
 				Term replacement = mgu.getReplacement(replaced);
-				if (replacement.isConstant() || result.factor.contains((LogicalVariable) replacement)) {
+				
+				// counting formula
+				if (result.hasCountingFormula()) {
+					for (CountingFormula countingFormula : result.getCountingFormulas()) {
+						if (replaced.equals(countingFormula.getBoundVariable())
+								&& result.canExpandOn(countingFormula, replacement)) {
+							result = (SimpleParfactor) result.expand(countingFormula, replacement);
+						}
+					}
+				}
+				
+				if (replacement.isConstant() || result.factor.contains((LogicalVariable) replacement)) { //TODO replace it by split conditions
 					List<Parfactor> resultSplit = result.split(binding);
 					if (resultSplit.size() == 2) { 
 						result = (SimpleParfactor) resultSplit.get(1);
@@ -972,6 +1005,37 @@ public final class SimpleParfactor implements Parfactor {
 	}
 	
 	/**
+	 * Returns true if this parfactor contains a counting formula, false
+	 * otherwise.
+	 * @return true if this parfactor contains a counting formula, false
+	 * otherwise.
+	 */
+	private boolean hasCountingFormula() {
+		for (ParameterizedRandomVariable prv : this.factor.getParameterizedRandomVariables()) {
+			if (prv instanceof CountingFormula) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Returns a list of all counting formulas in the parfactor. 
+	 * If no counting formulas are found, returns an empty list.
+	 * @return a list of all counting formulas in the parfactor. 
+	 */
+	private List<CountingFormula> getCountingFormulas() {
+		ArrayList<CountingFormula> allCountingFormulas = new ArrayList<CountingFormula>();
+		for (ParameterizedRandomVariable prv : this.factor.getParameterizedRandomVariables()) {
+			if (prv instanceof CountingFormula) {
+				allCountingFormulas.add((CountingFormula) prv);
+			}
+		}
+		return allCountingFormulas;
+	}
+	
+	
+	/**
 	 * Splits a parfactor on a set of constraints.
 	 * <br>
 	 * This method is necessary to process parfactors that contain constraints
@@ -988,8 +1052,20 @@ public final class SimpleParfactor implements Parfactor {
 		SimpleParfactor residue = this;
 		ArrayList<Parfactor> byProductParfactors = new ArrayList<Parfactor>();
 		for (Constraint constraint : constraints) {
+			
+			// counting formula
+			if (residue.hasCountingFormula()) {
+				for (CountingFormula countingFormula : residue.getCountingFormulas()) {
+					if (constraint.getFirstTerm().equals(countingFormula.getBoundVariable())
+							&& residue.canExpandOn(countingFormula, constraint.getSecondTerm())) {
+						residue = (SimpleParfactor) residue.expand(countingFormula, constraint.getSecondTerm());
+					}
+				}
+			}
+			
 			if (!this.constraints.contains(constraint)
 					&& residue.factor.contains(constraint.getFirstTerm())
+					&& residue.factor.isInStandardPrv(constraint.getFirstTerm())
 					&& (constraint.secondTermIsConstant() 
 							|| residue.factor.contains((LogicalVariable) constraint.getSecondTerm()))) {
 				List<Parfactor> resultSplit = residue.split(constraint.toBinding());
@@ -1042,13 +1118,55 @@ public final class SimpleParfactor implements Parfactor {
 					} else {
 						Set<Constraint> allConstraints = g1.getConstraints();
 						allConstraints.addAll(g2.getConstraints());
+						
+						// Includes constraints from counting formulas
+						if (firstVariable instanceof CountingFormula) {
+							allConstraints.addAll(((CountingFormula) firstVariable).getConstraints());
+						}
+						if (secondVariable instanceof CountingFormula) {
+							allConstraints.addAll(((CountingFormula) secondVariable).getConstraints());
+						}
+						
+						int firstVariableIndex = g1.getFactor().getParameterizedRandomVariableIndex(firstVariable);
+						int secondVariableIndex = g2.getFactor().getParameterizedRandomVariableIndex(secondVariable);
+						
 						if (Parfactors.checkMguAgainstConstraints(mgu, allConstraints)) {
 							List<Parfactor> firstSplitOnMgu = g1.splitOnMgu(mgu);
 							List<Parfactor> secondSplitOnMgu = g2.splitOnMgu(mgu);
 							Parfactor firstResult = firstSplitOnMgu.remove(0);
 							Parfactor secondResult = secondSplitOnMgu.remove(0);
-							List<Parfactor> firstSplitOnConstraints = firstResult.splitOnConstraints(secondResult.getConstraints());
-							List<Parfactor> secondSplitOnConstraints = secondResult.splitOnConstraints(firstResult.getConstraints());
+							
+							HashSet<Constraint> constraintsFromFirstResult =
+								new HashSet<Constraint>(
+										firstResult.getConstraints());
+							HashSet<Constraint> constraintsFromSecondResult =
+								new HashSet<Constraint>(
+										secondResult.getConstraints());
+							
+							// Includes constraints from counting formulas
+							if (firstVariable instanceof CountingFormula) {
+								constraintsFromFirstResult.addAll(
+										((CountingFormula) firstResult
+												.getFactor()
+												.getParameterizedRandomVariables()
+												.get(firstVariableIndex))
+										.getConstraints());
+							}
+							if (secondVariable instanceof CountingFormula) {
+								constraintsFromSecondResult.addAll(
+										((CountingFormula) secondResult
+												.getFactor()
+												.getParameterizedRandomVariables()
+												.get(secondVariableIndex))
+										.getConstraints());
+							}
+							
+							List<Parfactor> firstSplitOnConstraints = 
+								firstResult.splitOnConstraints(
+										constraintsFromSecondResult);
+							List<Parfactor> secondSplitOnConstraints = 
+								secondResult.splitOnConstraints(
+										constraintsFromFirstResult);
 							unifiedSet.remove(g1);
 							unifiedSet.remove(g2);
 							unifiedSet.addAll(firstSplitOnMgu);

@@ -240,6 +240,50 @@ public class SimpleParfactorTest {
 		
 	}
 	
+	/**
+	 * Unification test using two counting formulas.
+	 */
+	@Test
+	public void unifyCountingFormulas() {
+		
+		objects.setUnificationTestWithTwoCountingFormulas();
+		
+		LogicalVariableNameGenerator.reset();
+		
+		HashSet<Parfactor> unifiedParfactors = new HashSet<Parfactor>();
+		unifiedParfactors.addAll(objects.getSimpleParfactor("g1").unify(objects.getSimpleParfactor("g2")));
+		
+		HashSet<SimpleParfactor> answer = new HashSet<SimpleParfactor>();
+		answer.add(objects.getSimpleParfactor("g3"));
+		answer.add(objects.getSimpleParfactor("g4"));
+		answer.add(objects.getSimpleParfactor("g5"));
+		
+		assertTrue(unifiedParfactors.equals(answer));
+	}
+	
+	/**
+	 * Unification test using one counting formula and a standard parameterized
+	 * random variable.
+	 */
+	@Test
+	public void unifyCountingFormulaWithPrv() {
+		
+		objects.setUnificationTestWithCountingFormulaAndPrv();
+		
+		LogicalVariableNameGenerator.reset();
+		
+		HashSet<Parfactor> unifiedParfactors = new HashSet<Parfactor>();
+		unifiedParfactors.addAll(objects.getSimpleParfactor("g1").unify(objects.getSimpleParfactor("g2")));
+		
+		HashSet<SimpleParfactor> answer = new HashSet<SimpleParfactor>();
+		answer.add(objects.getSimpleParfactor("g3"));
+		answer.add(objects.getSimpleParfactor("g4"));
+		answer.add(objects.getSimpleParfactor("g5"));
+		
+		assertTrue(unifiedParfactors.equals(answer));
+		
+	}
+	
 	@Test
 	public void countOnSimpleParfactorWithoutConstraints() {
 		

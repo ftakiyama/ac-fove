@@ -253,7 +253,16 @@ public final class ParameterizedFactor {
 	 */
 	public boolean contains(Term term) {
 		for (ParameterizedRandomVariable prv : this.variables) {
-			if (prv.contains(term)) {
+			if (prv.contains(term)) { 
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean isInStandardPrv(Term term) {
+		for (ParameterizedRandomVariable prv : this.variables) {
+			if (prv.contains(term) && !(prv instanceof CountingFormula)) { // argh
 				return true;
 			}
 		}

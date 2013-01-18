@@ -86,7 +86,40 @@ public class CountingFormula extends ParameterizedRandomVariable {
 	}
 	
 	public ParameterizedRandomVariable applySubstitution(Substitution s) {
+		System.err.println("Not implemented!");
+		System.exit(-1);
 		return null;
+	}
+	
+	@Override
+	public ParameterizedRandomVariable applyOneSubstitution(Binding s) {
+		if (s.getSecondTerm().isConstant()) {
+			System.out.println(
+					"WARN " 
+					+ s.toString()
+					+ " is not a valid substitution for "
+					+ this.toString());
+			return this;
+		}
+		
+		ParameterizedRandomVariable newPrv = this.prv.applyOneSubstitution(s);
+		HashSet<Constraint> newConstraints = new HashSet<Constraint>();
+		for (Constraint constraint : this.constraints)  {
+			newConstraints.add(constraint.applySubstitution(s));
+		}
+		
+		return new CountingFormula((LogicalVariable) s.getSecondTerm(), newConstraints, newPrv);
+	}
+	
+	/**
+	 * Returns the result of applying a substitution to the parameterized
+	 * random variable of this counting formula.
+	 * @param s The substitution to be made.
+	 * @return The parameterized random variable associated with this 
+	 * counting formula with the specified substitution applied.
+	 */
+	public ParameterizedRandomVariable applySubstitutionToPrv(Binding s) {
+		return this.prv.applyOneSubstitution(s);
 	}
 	
 	/**
@@ -130,6 +163,13 @@ public class CountingFormula extends ParameterizedRandomVariable {
 			+ " = " 
 			+ index
 			+ ")";
+	}
+	
+	@Override
+	public boolean contains(Term t) {
+		System.out.println("WARN Calling method CountingFormula.contains()" +
+				", which always returns false.");
+		return false;
 	}
 	
 	/* ************************************************************************

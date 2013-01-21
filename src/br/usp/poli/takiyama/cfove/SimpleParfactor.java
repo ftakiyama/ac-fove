@@ -992,8 +992,13 @@ public final class SimpleParfactor implements Parfactor {
 						result = (SimpleParfactor) resultSplit.get(1);
 						residualParfactors.add(resultSplit.get(0));
 					} else {
-						System.out.print("Splitting resulted in " + 
-								resultSplit.size() + " parfactors.");
+						System.out.println("Splitting "
+								+ result
+								+ "on " 
+								+ binding.toString()
+								+ " resulted in " 
+								+ resultSplit.size() 
+								+ " parfactors.");
 					}
 				} else {
 					result = result.applySubstitution(binding);
@@ -1186,7 +1191,31 @@ public final class SimpleParfactor implements Parfactor {
 			}
 		}
 		
+		unifiedSet = Parfactors.restoreLogicalVariableNames(unifiedSet);
+		
 		return unifiedSet;
+	}
+	
+	public Parfactor restoreLogicalVariableNames() {
+		
+		HashSet<LogicalVariable> logicalVariables = new HashSet<LogicalVariable>();
+		for (ParameterizedRandomVariable prv : this.factor.getParameterizedRandomVariables()) {
+			for (LogicalVariable lv : prv.getParameters()) {
+				logicalVariables.add(lv);
+			}
+		}
+		
+		SimpleParfactor newParfactor = this;
+		for (LogicalVariable lv : logicalVariables) {
+			newParfactor = newParfactor.applySubstitution(
+					Binding.create(
+							lv, 
+							LogicalVariableNameGenerator.restore(lv) 
+					)
+			);
+		}
+		
+		return newParfactor;
 	}
 	
 	/**************************************************************************/

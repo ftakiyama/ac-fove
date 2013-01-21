@@ -1,3 +1,85 @@
+package br.usp.poli.takiyama.cfove;
+
+import java.util.EmptyStackException;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Stack;
+
+import br.usp.poli.takiyama.common.Parfactor;
+
+public final class MacroOperations {
+	
+	/**
+	 * Empty constructor that enforces non-instantiability
+	 */
+	private MacroOperations() { }
+	
+	/**
+	 * This operation makes all the necessary splits and expansions to 
+	 * guarantee that the sets of random variables represented by parameterized
+	 * random variables in each parfactor of the given set are equal or 
+	 * disjoint.
+	 * <br>
+	 * In other words, for any parameterized random variables p and q from
+	 * parfactors of the specified set, p and q represent identical or
+	 * disjoint sets of random variables.
+	 * <br>
+	 * This operation is used before multiplication and elimination 
+	 * on parfactors.
+	 * <br>
+	 * If the specified set is empty, returns an empty set.
+	 * 
+	 * @param parfactors The set of parfactors to shatter.
+	 * @return The specified set of parfactors shattered, or an empty set if
+	 * the specified set is also empty.
+	 */
+	public static Set<Parfactor> shatter(Set<Parfactor> parfactors) {
+		
+		if (parfactors.isEmpty()) 
+			return parfactors;
+		
+		Stack<Parfactor> parfactorsToProcess = new Stack<Parfactor>();
+		parfactorsToProcess.addAll(parfactors);
+		parfactors = null;
+		
+		Set<Parfactor> shatteredSet = new HashSet<Parfactor>();
+		Set<Parfactor> shatteredPool = new HashSet<Parfactor>();
+		
+		while (!parfactorsToProcess.isEmpty()) {
+			Parfactor p1 = parfactorsToProcess.pop();
+			while (!parfactorsToProcess.isEmpty()) {
+				Parfactor p2;
+				try {
+					p2 = parfactorsToProcess.pop();
+				} catch (EmptyStackException e) {
+					continue;
+				}
+				Set<Parfactor> unifiedSet = p1.unify(p2);
+				if (unifiedSet.size() == 2
+						&& unifiedSet.contains(p1)
+						&& unifiedSet.contains(p2)) {
+					shatteredPool.add(p2);
+				} else {
+					parfactorsToProcess.addAll(unifiedSet);
+					parfactorsToProcess.addAll(shatteredPool);
+					parfactorsToProcess.addAll(shatteredSet);
+					unifiedSet.clear();
+					shatteredPool.clear();
+					shatteredSet.clear();
+					p1 = parfactorsToProcess.pop();
+				}
+			}
+			shatteredSet.add(p1);
+			parfactorsToProcess.addAll(shatteredPool);
+			shatteredPool.clear();
+		}
+		
+		return shatteredSet;
+	}
+	
+}
+
+
 //package br.usp.poli.takiyama.cfove;
 //
 //import java.util.ArrayList;

@@ -48,4 +48,21 @@ public final class LogicalVariableNameGenerator {
 		count = 0;
 		mapping.clear();
 	}
+	
+	/**
+	 * Restore the old name of the specified logical variable.
+	 * If the specified logical variable does not exist in the mapping, then
+	 * returns the specified logical variable, unchanged.
+	 * @param lv The logical variable to restore.
+	 * @return A new instance of the specified logical variable with its name
+	 * changed to the old one, according to the internal mapping, or the 
+	 * specified logical variable if there is no mapping that matches it.
+	 */
+	public static LogicalVariable restore(LogicalVariable lv) {
+		if (mapping.containsKey(lv.getValue())) {
+			return lv.rename(mapping.get(lv.getValue()));
+		} else {
+			return lv;
+		}
+	}
 }

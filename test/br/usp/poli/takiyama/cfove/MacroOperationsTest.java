@@ -1,4 +1,57 @@
-//package br.usp.poli.takiyama.cfove;
+package br.usp.poli.takiyama.cfove;
+
+import static org.junit.Assert.*;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import br.usp.poli.takiyama.cfove.MacroOperations;
+import br.usp.poli.takiyama.common.Parfactor;
+import br.usp.poli.takiyama.common.Pool;
+
+/**
+ * JUnit tests for macro operations.
+ * 
+ * @author ftakiyama
+ *
+ */
+public class MacroOperationsTest {
+	
+	private Pool objects;
+	
+	@Before
+	public void setUp() {
+		objects = new Pool();
+	}
+	
+	@Test
+	public void shatter() {
+		
+		objects.setExample2_5_2_7forShattering();
+		
+		HashSet<Parfactor> toShatter = new HashSet<Parfactor>();
+		toShatter.add(objects.getSimpleParfactor("g1"));
+		toShatter.add(objects.getSimpleParfactor("g2"));
+		toShatter.add(objects.getSimpleParfactor("g3"));
+		toShatter.add(objects.getSimpleParfactor("g4"));
+		
+		Set<Parfactor> result = MacroOperations.shatter(toShatter);
+		
+		HashSet<Parfactor> answer = new HashSet<Parfactor>();
+		answer.add(objects.getSimpleParfactor("g1"));
+		answer.add(objects.getSimpleParfactor("g4"));
+		answer.add(objects.getSimpleParfactor("g5"));
+		answer.add(objects.getSimpleParfactor("g6"));
+		answer.add(objects.getSimpleParfactor("g7"));
+		answer.add(objects.getSimpleParfactor("g8"));
+		
+		assertTrue(result.equals(answer));
+	}
+}
+
 //
 //import java.util.ArrayList;
 //import java.util.HashMap;

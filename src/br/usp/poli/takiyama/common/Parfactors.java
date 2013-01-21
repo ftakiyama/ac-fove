@@ -1,5 +1,6 @@
 package br.usp.poli.takiyama.common;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import br.usp.poli.takiyama.prv.LogicalVariable;
@@ -28,6 +29,14 @@ public class Parfactors {
 			}
 		}
 		return true;
+	}
+	
+	public static Set<Parfactor> restoreLogicalVariableNames(Set<Parfactor> parfactors) {
+		Set<Parfactor> renamedParfactors = new HashSet<Parfactor>();
+		for (Parfactor p : parfactors) {
+			renamedParfactors.add(p.restoreLogicalVariableNames());
+		}
+		return renamedParfactors;
 	}
 
 }

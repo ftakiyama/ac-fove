@@ -98,6 +98,8 @@ public class Pool {
 						.getIndividual(Integer
 								.parseInt(parameter
 										.split("=")[1])));
+			} else if (parameter == "") {
+				// PRV without parameters
 			} else {
 				throw new IllegalArgumentException("There no such logical " +
 						" variable in pool: " + parameter.split("=")[0]);
@@ -830,6 +832,49 @@ public class Pool {
 		createCountingFormula("#.A[f]", "A", "f", "A != B");
 		createSimpleParfactor("g", "", "#.A[f];h", "F", "1;10;100;1000;10000;100000");
 		createSimpleParfactor("g_answer", "", "h", "F", "10201;102010");
+	}
+	
+	
+	/**
+	 * Creates data structures for example in section 2.5.2.7 of Kisynski (2010).
+	 * Only sets &Phi; and &Phi;<sub>1</sub> are put in the pool.
+	 */
+	public void setExample2_5_2_7forShattering() {
+		createLogicalVariable("Lot", "lot", 15);
+		
+		// parfactor [01]
+		createPrv("rain", "");
+		createSimpleParfactor("g1", "", "rain", "F1", "0.8;0.2");
+				
+		// parfactor [02]
+		createPrv("sprinkler", "Lot");
+		createSimpleParfactor("g2", "", "sprinkler", "F2", "0.6;0.4");
+		
+		// parfactor [03]
+		createPrv("wet_grass", "Lot");
+		createSimpleParfactor("g3", "", "rain;sprinkler;wet_grass", "F3", "1.0;0.0;0.2;0.8;0.1;0.9;0.01;0.99");
+		
+		// parfactor [04]
+		createPrv("wet_grass", "Lot=1");
+		createSimpleParfactor("g4", "", "wet_grass", "F4", "0;1");
+		
+		// parfactor [05]
+		createPrv("sprinkler", "Lot=1");
+		createSimpleParfactor("g5", "", "rain;sprinkler;wet_grass", "F3", "1.0;0.0;0.2;0.8;0.1;0.9;0.01;0.99");
+				
+		// parfactor [06]
+		createPrv("sprinkler", "Lot");
+		createPrv("wet_grass", "Lot");
+		createConstraint("Lot", "1");
+		createSimpleParfactor("g6", "Lot != 1", "rain;sprinkler;wet_grass", "F3", "1.0;0.0;0.2;0.8;0.1;0.9;0.01;0.99");
+		
+		// parfactor [07]
+		createPrv("sprinkler", "Lot=1");
+		createSimpleParfactor("g7", "", "sprinkler", "F2", "0.6;0.4");
+				
+		// parfactor [08]
+		createPrv("sprinkler", "Lot");
+		createSimpleParfactor("g8", "Lot != 1", "sprinkler", "F2", "0.6;0.4");		
 	}
 	
 	/* ************************************************************************

@@ -54,6 +54,14 @@ public interface Parfactor {
 	 */
 	public boolean isConstant();
 	
+	/**
+	 * Restores the names of all logical variables in the parfactor that
+	 * were changed using {@link LogicalVariableNameGenerator}.
+	 * @return A new instance of this parfactor, with all logical variables
+	 * restored to their old names.
+	 */
+	public Parfactor restoreLogicalVariableNames();
+	
 	/* ************************************************************************
 	 *   ENABLING OPERATIONS
 	 * ************************************************************************/
@@ -64,4 +72,6 @@ public interface Parfactor {
 	public Parfactor renameLogicalVariables();
 	public List<Parfactor> splitOnMgu(Substitution mgu);
 	public List<Parfactor> splitOnConstraints(Set<Constraint> constraints);
+	
+	public Set<Parfactor> unify(Parfactor parfactor);
 }

@@ -13,6 +13,7 @@ import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.Parfactors;
 import br.usp.poli.takiyama.common.RandomVariable;
+import br.usp.poli.takiyama.common.Tuple;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.CountingFormula;
@@ -1255,21 +1256,27 @@ public final class SimpleParfactor implements Parfactor {
 				this.factor.getParameterizedRandomVariables();
 			newVariables.set(newVariables.indexOf(prv), countingFormula);
 			
-			// create new factor
+			// calculate the values of the new parfactor
 			ArrayList<Number> newValues = new ArrayList<Number>();
-			for (int cfIndex = 0; cfIndex < countingFormula.getRangeSize(); cfIndex++) {
-				ArrayList<Integer> processedIndexes = new ArrayList<Integer>();
-				for (int fIndex = 0; fIndex < this.factor.size() && !processedIndexes.contains(fIndex); fIndex++) { 
-					double newValue = 1.0;
-					for (int prvIndex = 0; prvIndex < prv.getRangeSize(); prvIndex++) {
-						int tupleIndex = this.factor.getTupleValueOnVariable(prv, prvIndex, fIndex); // the tuple being processed
-						newValue *= Math
-							.pow(this.factor.getTupleValue(tupleIndex),
-								countingFormula.getCount(cfIndex, prvIndex));
-						processedIndexes.add(tupleIndex);
-					}
-					newValues.add(newValue);
+			Iterator<Tuple> newTuplesIterator = 
+					ParameterizedFactor.getIteratorOverTuples(newVariables);
+			Tuple tupleOfNewParfactor = null;
+			while (newTuplesIterator.hasNext()) {
+				tupleOfNewParfactor = newTuplesIterator.next();
+				double tupleValue = 1.0;
+				for (int prvRangeIndex = 0; prvRangeIndex < prv.getRangeSize(); prvRangeIndex++) {
+					tupleValue *= Math.pow(
+							factor.getTupleValue(
+									factor.getTupleIndex(
+											tupleOfNewParfactor.getModifiedTuple(
+													newVariables.indexOf(countingFormula), 
+													prvRangeIndex))), 
+							countingFormula.getCount(
+									tupleOfNewParfactor.get(
+											newVariables.indexOf(countingFormula)),
+									prvRangeIndex));
 				}
+				newValues.add(tupleValue);
 			}
 			
 			return new SimpleParfactor(

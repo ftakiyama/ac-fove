@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.Stack;
 
 import br.usp.poli.takiyama.common.Parfactor;
+import br.usp.poli.takiyama.prv.LogicalVariable;
 
 public final class MacroOperations {
 	
@@ -77,6 +78,37 @@ public final class MacroOperations {
 		return shatteredSet;
 	}
 	
+	/**
+	 * This operation eliminates the specified Logical Variable in the 
+	 * specified parfactor. This is done using the Counting operation.
+	 * <br>
+	 * Conditions to call this method:
+	 * <li> The specified parfactor must belong to the specified set of
+	 * Parfactors
+	 * <li> The specified logical variable must appear free in on single
+	 * parameterized random variable in the specified Parfactor.
+	 * <br>
+	 * This method does not check for the conditions outlined above. They
+	 *  must be verified in the caller method.
+	 * 
+	 * @param parfactors A set of parfactors
+	 * @param parfactorToProcess The parfactor where the logical variable to
+	 * eliminate resides. This parfactor must be in the specified set of 
+	 * parfactors.
+	 * @param lv The free logical variable to eliminate. It must satisfy the 
+	 * conditions specified above.
+	 * @return The specified set of parfactors modified so that the logical
+	 * variable no longer appears free in the specified parfactor.
+	 */
+	public static Set<Parfactor> countingConvert(
+			Set<Parfactor> parfactors, 
+			Parfactor parfactorToProcess, 
+			LogicalVariable lv) {
+		Parfactor result = parfactorToProcess.count(lv);
+		parfactors.add(result);
+		parfactors.remove(parfactorToProcess);
+		return parfactors;
+	}
 }
 
 

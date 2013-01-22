@@ -5,6 +5,7 @@ import java.util.Set;
 
 import br.usp.poli.takiyama.cfove.ParameterizedFactor;
 import br.usp.poli.takiyama.prv.Binding;
+import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 import br.usp.poli.takiyama.prv.Substitution;
 
@@ -67,6 +68,7 @@ public interface Parfactor {
 	 * ************************************************************************/
 	
 	public List<Parfactor> split(Binding substitution);
+	public Parfactor count(LogicalVariable logicalVariable);
 	
 	public Parfactor replaceLogicalVariablesConstrainedToSingleConstant();
 	public Parfactor renameLogicalVariables();

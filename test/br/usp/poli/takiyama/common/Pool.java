@@ -877,6 +877,40 @@ public class Pool {
 		createSimpleParfactor("g8", "Lot != 1", "sprinkler", "F2", "0.6;0.4");		
 	}
 	
+	/**
+	 * Creates data structures for example in section 2.5.2.7 of Kisynski (2010).
+	 * Only sets &Phi;<sub>4</sub> and &Phi;<sub>5</sub> are put in the pool.
+	 * <br>
+	 * Parfactors [09] and [12] have been changed to use integer numbers, 
+	 * otherwise comparison between doubles would complicate the test.
+	 * Precision is not the objective of this test.
+	 * <br>
+	 * The population of logical variable Lot is set to 16 individuals. Factor
+	 * F7 will have 32 rows.
+	 * 
+	 */
+	public void setExample2_5_2_7forCountingConvert() {
+		
+		createLogicalVariable("Lot", "lot", 16);
+		
+		// parfactor [01]
+		createPrv("rain", "");
+		createSimpleParfactor("g1", "", "rain", "F1", "0.8;0.2");
+		
+		// parfactor [09]
+		createPrv("wet_grass", "Lot");
+		createConstraint("Lot", "1");
+		createSimpleParfactor("g9", "Lot != 1", "rain;wet_grass", "F5", "2;3;5;7");
+		
+		// parfactor [11]
+		createSimpleParfactor("g11", "", "rain", "F6", "0.32;0.936");
+		
+		// parfactor [12]
+		createCountingFormula("#.Lot[wet_grass]", "Lot", "wet_grass", "Lot != 1");
+		createSimpleParfactor("g12", "", "rain;#.Lot[wet_grass]", "F7", "32768;49152;73728;110592;165888;248832;373248;559872;839808;1259712;1889568;2834352;4251528;6377292;9565938;14348907;30517578125;42724609375;59814453125;83740234375;117236328125;164130859375;229783203125;321696484375;450375078125;630525109375;882735153125;1235829214375;1730160900125;2422225260175;3391115364245;4747561509943");
+		
+	}
+	
 	/* ************************************************************************
 	 *      Exposed methods
 	 * ************************************************************************/

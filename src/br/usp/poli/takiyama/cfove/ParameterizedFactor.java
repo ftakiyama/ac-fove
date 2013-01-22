@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import br.usp.poli.takiyama.common.MathUtils;
 import br.usp.poli.takiyama.common.Tuple;
@@ -17,6 +18,8 @@ public final class ParameterizedFactor {
 	private final String name; // this should be an optional attribute
 	private final ArrayList<ParameterizedRandomVariable> variables;
 	private final ArrayList<Double> mapping;
+	
+	private final int size;
 	
 	/**
 	 * Private constructor. Creates a new factor on parameterized random variables.
@@ -72,13 +75,70 @@ public final class ParameterizedFactor {
 		for (ParameterizedRandomVariable prv : variables) {
 			factorSize *= prv.getRangeSize();
 		}
+		this.size = factorSize;
 		if (mapping.size() != 0 && factorSize != mapping.size()) {
 			throw new IllegalArgumentException("The mapping does " +
 					"not have the required number of values. Expected: " + 
 					factorSize + " received: " + mapping.size());
+		}	
+	}
+	
+	/**
+	 * Constructor that creates an empty factor. It only hold the list of
+	 * parameterized random variables specified.
+	 * The instance created is used to calculate all tuples in a factor
+	 * that needs to be created under complex operations, such as sum out
+	 * and counting.
+	 * @param variables A list of parameterized random variables
+	 */
+	private ParameterizedFactor(List<ParameterizedRandomVariable> variables) {
+		this.name = null;
+		this.variables = new ArrayList<ParameterizedRandomVariable>(variables);
+		this.mapping = null;
+		
+		int factorSize = 1;
+		for (ParameterizedRandomVariable prv : variables) {
+			factorSize *= prv.getRangeSize();
 		}
+		this.size = factorSize;
+	}
+	
+	/**
+	 * This class is an Iterator over all tuples of this factor.
+	 * <br>
+	 * The code was inspired on OpenJDK's implementation of ArrayList Iterator.
+	 * @author ftakiyama
+	 *
+	 */
+	private class Itr implements Iterator<Tuple> {
+
+		int nextElementToReturn;
+		int lastElementReturned = -1;
 		
 		
+		@Override
+		public boolean hasNext() {
+			return nextElementToReturn != size;
+		}
+
+		@Override
+		public Tuple next() {
+			int i = nextElementToReturn;
+			if (i > size) 
+				throw new NoSuchElementException();
+			nextElementToReturn = i + 1;
+			return getTuple(lastElementReturned = i);
+		}
+
+		/**
+		 * This method <b>does not</b> remove tuples from the factor.
+		 */
+		public void remove() {
+			if (lastElementReturned < 0)
+				throw new IllegalStateException();
+			// Factors are immutable, cannot remove without creating new 
+			// instances.
+		}
 	}
 	
 	/**
@@ -140,6 +200,34 @@ public final class ParameterizedFactor {
 		tuple.add(index);
 		Collections.reverse(tuple);
 		return new Tuple(tuple);
+	}
+	
+	/**
+	 * Returns an iterator over all tuples of a parameterized factor having
+	 * the specified variables.
+	 * <br>
+	 * The tuples returned <b>depend</b> on the order of the give 
+	 * parameterized random variable list, that is, the order of parameterized
+	 * random variables define the way the tuples are created.
+	 * @param variables A list of parameterized random variables.
+	 * @return An iterator over all tuples of a parameterized factor having
+	 * the specified parameterized random variables.
+	 */
+	public static Iterator<Tuple> getIteratorOverTuples(
+			List<ParameterizedRandomVariable> variables) {
+		return new ParameterizedFactor(variables).iterator();
+	}
+	
+	/**
+	 * Returns an iterator over all tuples of this factor.
+	 * <br>
+	 * The tuples returned <b>depend</b> on the order of the give 
+	 * parameterized random variable list, that is, the order of parameterized
+	 * random variables define the way the tuples are created.
+	 * @return An iterator over all tuples of this parameterized factor
+	 */
+	private Iterator<Tuple> iterator() {
+		return new Itr();
 	}
 	
 	@Override

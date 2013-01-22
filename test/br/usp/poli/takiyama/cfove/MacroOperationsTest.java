@@ -50,6 +50,30 @@ public class MacroOperationsTest {
 		
 		assertTrue(result.equals(answer));
 	}
+	
+	@Test
+	public void countConvert() {
+		
+		objects.setExample2_5_2_7forCountingConvert();
+		
+		HashSet<Parfactor> toCount = new HashSet<Parfactor>();
+		toCount.add(objects.getSimpleParfactor("g1"));
+		toCount.add(objects.getSimpleParfactor("g9"));
+		toCount.add(objects.getSimpleParfactor("g11"));
+		
+		Set<Parfactor> result = MacroOperations
+			.countingConvert(
+					toCount, 
+					objects.getSimpleParfactor("g9"), 
+					objects.getLogicalVariable("Lot"));
+		
+		HashSet<Parfactor> answer = new HashSet<Parfactor>();
+		answer.add(objects.getSimpleParfactor("g1"));
+		answer.add(objects.getSimpleParfactor("g11"));
+		answer.add(objects.getSimpleParfactor("g12"));
+		
+		assertTrue(result.equals(answer));
+	}
 }
 
 //

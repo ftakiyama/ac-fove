@@ -1244,8 +1244,10 @@ public final class SimpleParfactor implements Parfactor {
 			
 			// create counting formula
 			CountingFormula countingFormula = 
-				CountingFormula
-				.getInstance(logicalVariable, constraintsOnCounted, prv);
+					CountingFormula.getInstance(
+							logicalVariable, 
+							constraintsOnCounted, 
+							prv);
 			
 			// create new set of constraitns
 			HashSet<Constraint> newConstraints = new HashSet<Constraint>(this.constraints);
@@ -1253,7 +1255,7 @@ public final class SimpleParfactor implements Parfactor {
 			
 			// create new set of prvs
 			ArrayList<ParameterizedRandomVariable> newVariables =
-				this.factor.getParameterizedRandomVariables();
+					this.factor.getParameterizedRandomVariables();
 			newVariables.set(newVariables.indexOf(prv), countingFormula);
 			
 			// calculate the values of the new parfactor

@@ -74,6 +74,35 @@ public class MacroOperationsTest {
 		
 		assertTrue(result.equals(answer));
 	}
+	
+	@Test
+	public void propositionalize() {
+		
+		objects.setPropositionalizationMacroTest();
+		
+		HashSet<Parfactor> toPropositionalize = new HashSet<Parfactor>();
+		toPropositionalize.add(objects.getSimpleParfactor("g1"));
+		toPropositionalize.add(objects.getSimpleParfactor("g2"));
+		toPropositionalize.add(objects.getSimpleParfactor("g3"));
+		toPropositionalize.add(objects.getSimpleParfactor("g4"));
+		
+		Set<Parfactor> result = MacroOperations.propositionalize(
+				toPropositionalize, 
+				objects.getSimpleParfactor("g3"), 
+				objects.getLogicalVariable("Lot"));
+		
+		HashSet<Parfactor> answer = new HashSet<Parfactor>();
+		answer.add(objects.getSimpleParfactor("g1"));
+		answer.add(objects.getSimpleParfactor("g4"));
+		answer.add(objects.getSimpleParfactor("g2.0"));
+		answer.add(objects.getSimpleParfactor("g2.1"));
+		answer.add(objects.getSimpleParfactor("g2.2"));
+		answer.add(objects.getSimpleParfactor("g3.0"));
+		answer.add(objects.getSimpleParfactor("g3.1"));
+		answer.add(objects.getSimpleParfactor("g3.2"));
+
+		assertTrue(result.equals(answer));
+	}
 }
 
 //

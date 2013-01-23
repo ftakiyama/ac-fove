@@ -85,7 +85,7 @@ public final class MacroOperations {
 	 * Conditions to call this method:
 	 * <li> The specified parfactor must belong to the specified set of
 	 * Parfactors
-	 * <li> The specified logical variable must appear free in on single
+	 * <li> The specified logical variable must appear free in single
 	 * parameterized random variable in the specified Parfactor.
 	 * <br>
 	 * This method does not check for the conditions outlined above. They
@@ -108,6 +108,40 @@ public final class MacroOperations {
 		parfactors.add(result);
 		parfactors.remove(parfactorToProcess);
 		return parfactors;
+	}
+	
+	/**
+	 * This operation executes a split on the specified parfactor for every 
+	 * constant in the population
+	 * of the specified Logical Variable.
+	 * <br>
+	 * Conditions to call this method:
+	 * <li> The specified parfactor must belong to the specified set of
+	 * Parfactors
+	 * <li> The specified logical variable must appear free in 
+	 * parameterized random variables of the specified Parfactor.
+	 * <br>
+	 * <br>
+	 * It is always possible to propositionalize a parfactor.
+	 * <br>
+	 * After all the splits, the SHATTER macro operation is invoked to 
+	 * guarantee that all parameterized random variables represent equal or
+	 * disjoint sets of random variables.
+	 * <br>
+	 * 
+	 * @param parfactors A set of parfactors
+	 * @param parfactorToPropositionalize A parfactor from the specified set
+	 * @param freeLogicalVariable A free logical variable belonging to the
+	 * specified parfactor.
+	 * @return
+	 */
+	public static Set<Parfactor> propositionalize(
+			Set<Parfactor> parfactors,
+			Parfactor parfactorToPropositionalize,
+			LogicalVariable freeLogicalVariable) {
+		parfactors.remove(parfactorToPropositionalize);
+		parfactors.addAll(parfactorToPropositionalize.propositionalize(freeLogicalVariable));
+		return shatter(parfactors);
 	}
 }
 

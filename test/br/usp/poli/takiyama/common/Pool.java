@@ -911,6 +911,46 @@ public class Pool {
 		
 	}
 	
+	public void setPropositionalizationMacroTest() {
+		
+		createLogicalVariable("Lot", "lot", 3);
+		
+		// parfactor [01]
+		createPrv("rain", "");
+		createSimpleParfactor("g1", "", "rain", "F1", "0.8;0.2");
+				
+		// parfactor [02]
+		createPrv("sprinkler", "Lot");
+		createSimpleParfactor("g2", "", "sprinkler", "F2", "0.6;0.4");
+		
+		// parfactor [03]
+		createPrv("wet_grass", "Lot");
+		createSimpleParfactor("g3", "", "rain;sprinkler;wet_grass", "F3", "1.0;0.0;0.2;0.8;0.1;0.9;0.01;0.99");
+		
+		// parfactor [04]
+		createPrv("wet_grass", "Lot=1");
+		createSimpleParfactor("g4", "", "wet_grass", "F4", "0;1");
+		
+		// parfactor [02] after propositionalization
+		createPrv("sprinkler", "Lot=0");
+		createSimpleParfactor("g2.0", "", "sprinkler", "F2", "0.6;0.4");
+		createPrv("sprinkler", "Lot=1");
+		createSimpleParfactor("g2.1", "", "sprinkler", "F2", "0.6;0.4");
+		createPrv("sprinkler", "Lot=2");
+		createSimpleParfactor("g2.2", "", "sprinkler", "F2", "0.6;0.4");
+		
+		// parfactor [03] after propositinalization
+		createPrv("sprinkler", "Lot=0");
+		createPrv("wet_grass", "Lot=0");
+		createSimpleParfactor("g3.0", "", "rain;sprinkler;wet_grass", "F3", "1.0;0.0;0.2;0.8;0.1;0.9;0.01;0.99");
+		createPrv("sprinkler", "Lot=1");
+		createPrv("wet_grass", "Lot=1");
+		createSimpleParfactor("g3.1", "", "rain;sprinkler;wet_grass", "F3", "1.0;0.0;0.2;0.8;0.1;0.9;0.01;0.99");
+		createPrv("sprinkler", "Lot=2");
+		createPrv("wet_grass", "Lot=2");
+		createSimpleParfactor("g3.2", "", "rain;sprinkler;wet_grass", "F3", "1.0;0.0;0.2;0.8;0.1;0.9;0.01;0.99");
+	}
+	
 	/* ************************************************************************
 	 *      Exposed methods
 	 * ************************************************************************/

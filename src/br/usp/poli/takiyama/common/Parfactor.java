@@ -67,8 +67,9 @@ public interface Parfactor {
 	 *   ENABLING OPERATIONS
 	 * ************************************************************************/
 	
-	public List<Parfactor> split(Binding substitution);
-	public Parfactor count(LogicalVariable logicalVariable);
+	public List<Parfactor> split(Binding s);
+	public Parfactor count(LogicalVariable lv);
+	public Set<Parfactor> propositionalize(LogicalVariable lv);
 	
 	public Parfactor replaceLogicalVariablesConstrainedToSingleConstant();
 	public Parfactor renameLogicalVariables();

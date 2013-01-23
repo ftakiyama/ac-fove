@@ -674,11 +674,26 @@ public final class SimpleParfactor implements Parfactor {
 	 * ************************************************************************/
 	
 	// TODO: hey! what if n = 2?
+	// TODO: improve documentation
+	/**
+	 * <p>
+	 * Expands the specified counting formula in the specified term.
+	 * </p>
+	 * <p>
+	 * The index of the modified counting formula does not change.
+	 * The expanded random variable is put one position after the modified
+	 * counting formula.
+	 * </p>
+	 * 
+	 * 
+	 * @param countingFormula The counting formula to expand
+	 * @param term The term to "take out" of the counting formula.
+	 * 
+	 * @return This parfactor with the specified counting formula expanded on
+	 * the specified term.
+	 */
 	public Parfactor expand(CountingFormula countingFormula, Term term) {
-		if (this.isInNormalForm()
-				&& belongsToParfactor(countingFormula) 
-				&& termIsNotInConstraintsFromCountingFormula(countingFormula, term) 
-				&& termAppearsInConstraintsForAllLogicalVariablesInCountingFormula(countingFormula, term)) {
+		if (canExpandOn(countingFormula, term)) {
 
 			// Creates the new set of parameterized random variables:
 			// V' = V \ {#_A:CA [f(...,A,...)]} U {f(...,t,...), #_A:(CA U {A != t}) [f(...,A,...)]}
@@ -686,23 +701,32 @@ public final class SimpleParfactor implements Parfactor {
 			ArrayList<ParameterizedRandomVariable> newVariables = this.factor.getParameterizedRandomVariables();
 			
 			CountingFormula newCountingFormula = 
-				countingFormula.addConstraint(
-					Constraint.getInstance(
-						countingFormula.getBoundVariable(), 
-						term
-					)
-				);
-			
-			newVariables.set(newVariables.indexOf(countingFormula), newCountingFormula);
-			newVariables.add(
-				newVariables.indexOf(newCountingFormula) + 1, 
-				newCountingFormula.applySubstitutionToPrv(
-					Binding.create(
-						newCountingFormula.getBoundVariable(), 
-						term
-					)
-				)
-			);
+					countingFormula.addConstraint(
+							Constraint.getInstance(
+									countingFormula.getBoundVariable(), 
+									term
+							)
+					);
+
+			int cfIndex = newVariables.indexOf(countingFormula);
+			if (newCountingFormula.canBeConvertedToPrv()) {
+				ParameterizedRandomVariable prv = newCountingFormula.convertToPrv();
+				newVariables.set(cfIndex, prv);
+				newVariables.add(
+						cfIndex + 1, 
+						newCountingFormula.applySubstitutionToPrv(
+								Binding.create(
+										newCountingFormula.getBoundVariable(),
+										term)));
+			} else {
+				newVariables.set(cfIndex, newCountingFormula);
+				newVariables.add(
+						cfIndex + 1, 
+						newCountingFormula.applySubstitutionToPrv(
+								Binding.create(
+										newCountingFormula.getBoundVariable(), 
+										term)));
+			}
 			
 			
 			// Creates the new Factor
@@ -720,7 +744,14 @@ public final class SimpleParfactor implements Parfactor {
 			newValues.add(this.factor.getTupleValue(this.factor.getAllValues().size() - 2));
 			newValues.add(this.factor.getTupleValue(this.factor.getAllValues().size() - 1));
 
-			return SimpleParfactor.getInstance(this.constraints, ParameterizedFactor.getInstance(this.factor.getName(), newVariables, newValues));
+			return SimpleParfactor
+						.getInstance(
+								this.constraints, 
+								ParameterizedFactor.getInstance(
+										this.factor.getName(), 
+										newVariables, 
+										newValues))
+						.replaceLogicalVariablesConstrainedToSingleConstant();
 		} else {
 			return this;
 		}
@@ -848,6 +879,36 @@ public final class SimpleParfactor implements Parfactor {
 				&& termIsNotInConstraintsFromCountingFormula(countingFormula, term) 
 				&& termAppearsInConstraintsForAllLogicalVariablesInCountingFormula(countingFormula, term)
 				&& term.isConstant();
+	}
+	
+	public Parfactor fullExpand(CountingFormula countingFormula) {
+		Parfactor toExpand = this;
+		int countingFormulaIndex = 
+				toExpand
+					.getFactor()
+					.getParameterizedRandomVariables()
+					.indexOf(countingFormula);
+		
+		if (countingFormulaIndex == -1) 
+			return this;
+		
+		for (Constant individual : countingFormula
+				.getBoundVariable()
+				.getIndividualsSatisfying(
+						countingFormula.getConstraints())) {
+			if (toExpand
+					.getFactor()
+					.getParameterizedRandomVariables()
+					.get(countingFormulaIndex) instanceof CountingFormula) {
+				countingFormula = (CountingFormula) toExpand
+						.getFactor()
+						.getParameterizedRandomVariables()
+						.get(countingFormulaIndex);
+				toExpand = toExpand.expand(countingFormula, individual);
+			}
+		}
+		
+		return toExpand;
 	}
 	
 	/**************************************************************************/

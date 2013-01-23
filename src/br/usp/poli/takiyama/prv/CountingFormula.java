@@ -232,6 +232,40 @@ public class CountingFormula extends ParameterizedRandomVariable {
 		return this.prv.getRangeSize();
 	}
 	
+	/**
+	 * <p>
+	 * Returns true if the counting formula can be converted to a standard
+	 * parameterized random variable, false otherwise.
+	 * </p>
+	 * <p>
+	 * A counting formula can be converted to standard parameterized random
+	 * variable when the set of constraints is big enough to restrict the
+	 * bound logical variable to a single individual.
+	 * </p>
+	 * @return True if the counting formula can be converted to a standard
+	 * parameterized random variable, false otherwise.
+	 */
+	public boolean canBeConvertedToPrv() {
+		return (boundLogicalVariable.getIndividualsSatisfying(constraints).size() == 1);
+	}
+	
+	/**
+	 * Converts this counting formula to a standard parameterized random 
+	 * variable when it its logical variable is constrained to a single 
+	 * individual.
+	 * @return The converted counting formula to a parameterized random variable.
+	 */
+	public ParameterizedRandomVariable convertToPrv() {
+		Set<Constant> loneIndividual = boundLogicalVariable.getIndividualsSatisfying(constraints);
+		if (loneIndividual.size() != 1) {
+			return this;
+		}
+		return prv.applyOneSubstitution(
+				Binding.create(
+						boundLogicalVariable, 
+						loneIndividual.iterator().next()));
+	}
+	
 	@Override
 	public String toString() {
 		return "#." 

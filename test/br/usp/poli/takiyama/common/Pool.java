@@ -109,6 +109,7 @@ public class Pool {
 		prvPool.put(name, PRV.getBooleanPrv(name, terms.toArray(new Term[terms.size()])));
 	}
 	
+	
 	/**
 	 * Creates an instance of ParameterizedRandomVariable and puts it in the
 	 * PRV pool. The variable is created using an existing variable and 
@@ -949,6 +950,33 @@ public class Pool {
 		createPrv("sprinkler", "Lot=2");
 		createPrv("wet_grass", "Lot=2");
 		createSimpleParfactor("g3.2", "", "rain;sprinkler;wet_grass", "F3", "1.0;0.0;0.2;0.8;0.1;0.9;0.01;0.99");
+	}
+	
+	public void setFullExpandTest() {
+		
+		createLogicalVariable("A", "x", 3);
+		createLogicalVariable("B", "x", 3);
+		
+		createPrv("f", "A");
+		createSimpleParfactor("g1", "", "f", "F1", "0.4;0.6");
+		createPrv("h", "B");
+		createConstraint("A", "1");
+		createCountingFormula("#.A[f]", "A", "f", "A != 1");
+		createSimpleParfactor("g2", "", "#.A[f];h", "F2", "1;2;3;4;5;6");
+		
+		createPrv("f", "A=0");
+		createSimpleParfactor("g1.0", "", "f", "F1", "0.4;0.6");
+		createPrv("f", "A=1");
+		createSimpleParfactor("g1.1", "", "f", "F1", "0.4;0.6");
+		createPrv("f", "A=2");
+		createSimpleParfactor("g1.2", "", "f", "F1", "0.4;0.6");
+		
+		createPrv("f", "A");
+		createPrvFromSubstitution("f", "A/0");
+		createPrvFromSubstitution("f", "A/2");
+		createSimpleParfactor("g3", "", "f[A/0];f[A/2];h", "F3", "1;2;3;4;3;4;5;6");
+		
+		
 	}
 	
 	/* ************************************************************************

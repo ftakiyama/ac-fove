@@ -103,6 +103,29 @@ public class MacroOperationsTest {
 
 		assertTrue(result.equals(answer));
 	}
+	
+	@Test
+	public void fullExpand() {
+		
+		objects.setFullExpandTest();
+		
+		HashSet<Parfactor> toExpand = new HashSet<Parfactor>();
+		toExpand.add(objects.getSimpleParfactor("g1"));
+		toExpand.add(objects.getSimpleParfactor("g2"));
+		
+		Set<Parfactor> result = MacroOperations.fullExpand(
+				toExpand,
+				objects.getSimpleParfactor("g2"),
+				objects.getCountingFormula("#.A[f]"));
+		
+		HashSet<Parfactor> answer = new HashSet<Parfactor>();
+		answer.add(objects.getSimpleParfactor("g1.0"));
+		answer.add(objects.getSimpleParfactor("g1.1"));
+		answer.add(objects.getSimpleParfactor("g1.2"));
+		answer.add(objects.getSimpleParfactor("g3"));
+
+		assertTrue(result.equals(answer));
+	}
 }
 
 //

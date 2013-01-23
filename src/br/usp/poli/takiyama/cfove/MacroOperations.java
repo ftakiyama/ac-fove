@@ -6,6 +6,8 @@ import java.util.Set;
 import java.util.Stack;
 
 import br.usp.poli.takiyama.common.Parfactor;
+import br.usp.poli.takiyama.prv.Constant;
+import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 
 public final class MacroOperations {
@@ -122,6 +124,8 @@ public final class MacroOperations {
 	 * parameterized random variables of the specified Parfactor.
 	 * <br>
 	 * <br>
+	 * This method does not check for the conditions outlined above. They
+	 *  must be verified in the caller method.
 	 * It is always possible to propositionalize a parfactor.
 	 * <br>
 	 * After all the splits, the SHATTER macro operation is invoked to 
@@ -133,7 +137,8 @@ public final class MacroOperations {
 	 * @param parfactorToPropositionalize A parfactor from the specified set
 	 * @param freeLogicalVariable A free logical variable belonging to the
 	 * specified parfactor.
-	 * @return
+	 * @return The specified set of parfactors with the parfactor 
+	 * propositionalized in individuals of the specified logival variable.
 	 */
 	public static Set<Parfactor> propositionalize(
 			Set<Parfactor> parfactors,
@@ -141,6 +146,54 @@ public final class MacroOperations {
 			LogicalVariable freeLogicalVariable) {
 		parfactors.remove(parfactorToPropositionalize);
 		parfactors.addAll(parfactorToPropositionalize.propositionalize(freeLogicalVariable));
+		return shatter(parfactors);
+	}
+	
+	/**
+	 * <p>
+	 * Expands the specified counting formula in the specified parfactor for all
+	 * individuals of the bound variable that satisfy the constraints of the
+	 * counting formula.
+	 * </p>
+	 * <p>
+	 * Conditions to call this method:
+	 * </p>
+	 * <li> The specified parfactor must belong to the specified set of
+	 * Parfactors
+	 * <li> The specified counting formula must appear in the set of
+	 * parameterized random variables of the specified Parfactor.
+	 * <br>
+	 * <br>
+	 * <p>
+	 * This method does not check for the conditions outlined above. They
+	 *  must be verified in the caller method.
+	 * </p>
+	 * <p>
+	 * Given a set of parfactors, it is always possible to fully expand a 
+	 * parfactor.
+	 * </p>
+	 * <p>
+	 * After all the splits, the SHATTER macro operation is invoked to 
+	 * guarantee that all parameterized random variables represent equal or
+	 * disjoint sets of random variables.
+	 * </p>
+	 * 
+	 * @param parfactors A set of parfactors
+	 * @param parfactorToExpand The parfactor in which the expansion will take
+	 * place.
+	 * @param countingFormula The counting formula to expand.
+	 * @return The specified set of parfactor with the counting formula expanded
+	 * in the specified parfactor for all individuals satisfying the constraints
+	 * of the counting formula.
+	 */
+	public static Set<Parfactor> fullExpand(
+			Set<Parfactor> parfactors,
+			Parfactor parfactorToExpand,
+			CountingFormula countingFormula) {
+		
+		parfactors.remove(parfactorToExpand);
+		parfactors.add(parfactorToExpand.fullExpand(countingFormula));
+		
 		return shatter(parfactors);
 	}
 }

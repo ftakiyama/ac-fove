@@ -5,9 +5,11 @@ import java.util.Set;
 
 import br.usp.poli.takiyama.cfove.ParameterizedFactor;
 import br.usp.poli.takiyama.prv.Binding;
+import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 import br.usp.poli.takiyama.prv.Substitution;
+import br.usp.poli.takiyama.prv.Term;
 
 /**
  * A parfactor represents a set of factors. This set is obtained by applying
@@ -70,6 +72,8 @@ public interface Parfactor {
 	public List<Parfactor> split(Binding s);
 	public Parfactor count(LogicalVariable lv);
 	public Set<Parfactor> propositionalize(LogicalVariable lv);
+	public Parfactor expand(CountingFormula countingFormula, Term term);
+	public Parfactor fullExpand(CountingFormula countingFormula);
 	
 	public Parfactor replaceLogicalVariablesConstrainedToSingleConstant();
 	public Parfactor renameLogicalVariables();

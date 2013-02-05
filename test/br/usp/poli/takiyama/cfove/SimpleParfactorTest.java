@@ -219,7 +219,9 @@ public class SimpleParfactorTest {
 	 * D(X) = {x1,....,xn}, since parameterized random variables are
 	 * typed to their logical variables and having X with two different
 	 * populations would make no sense.
+	 * 
 	 */
+	// TODO: test is not correct because the answer has not been renamed back 
 	@Test
 	public void unify() {
 		

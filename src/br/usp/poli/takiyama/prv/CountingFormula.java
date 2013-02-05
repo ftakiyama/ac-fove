@@ -172,6 +172,14 @@ public class CountingFormula extends ParameterizedRandomVariable {
 		return false;
 	}
 	
+	@Override
+	public Set<LogicalVariable> getParameters() {
+		Set<LogicalVariable> parameters = new HashSet<LogicalVariable>(
+				this.prv.getParameters());
+		parameters.remove(boundLogicalVariable);
+		return parameters;
+	}
+	
 	/* ************************************************************************
 	 *     Methods for counting formulas
 	 * ************************************************************************/

@@ -3,9 +3,11 @@ package br.usp.poli.takiyama.cfove;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import br.usp.poli.takiyama.common.MathUtils;
 import br.usp.poli.takiyama.common.Tuple;
@@ -164,6 +166,18 @@ public final class ParameterizedFactor {
 	
 	public static ParameterizedFactor getInstance(ParameterizedFactor factor) {
 		return new ParameterizedFactor(factor.name, factor.variables, factor.mapping);
+	}
+	
+	/**
+	 * Returns the set of all logical variables in the PRVs of this factor.
+	 * @return The set of all logical variables in the PRVs of this factor.
+	 */
+	Set<LogicalVariable> getLogicalVariables() {
+		Set<LogicalVariable> logicalVariables = new HashSet<LogicalVariable>();
+		for (ParameterizedRandomVariable prv : this.variables) {
+			logicalVariables.addAll(prv.getParameters());
+		}
+		return logicalVariables;
 	}
 	
 	/**

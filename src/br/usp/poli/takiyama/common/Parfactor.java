@@ -26,13 +26,7 @@ import br.usp.poli.takiyama.prv.Term;
 public interface Parfactor {
 	
 	public boolean contains(ParameterizedRandomVariable variable); // I think I will use it on global sum out.
-	
-	//public Set<Parfactor> sumOut(Set<Parfactor> setOfParfactors, ParameterizedRandomVariable variable);
-	
-	//public boolean canBeMultipliedBy(Parfactor parfactor);
-	
-	//public Set<Parfactor> multiply(Set<Parfactor> setOfParfactors, Parfactor parfactor);
-	
+		
 	public ParameterizedFactor getFactor();
 	
 	// should i enforce getPRV and getConstraints?
@@ -49,6 +43,14 @@ public interface Parfactor {
 	public ParameterizedRandomVariable getChildVariable();
 	
 	public Set<Constraint> getConstraints();
+	
+	public Set<LogicalVariable> getLogicalVariables();
+	
+	/**
+	 * Retunrs the number of factors this parfactor represents.
+	 * @return The number of factors this parfactor represents.
+	 */
+	public int size();
 	
 	/**
 	 * Returns true if the parfactor is constant, that is, the neutral
@@ -74,6 +76,8 @@ public interface Parfactor {
 	public Set<Parfactor> propositionalize(LogicalVariable lv);
 	public Parfactor expand(CountingFormula countingFormula, Term term);
 	public Parfactor fullExpand(CountingFormula countingFormula);
+	public Parfactor multiply(Parfactor parfactor);
+	public Parfactor sumOut(ParameterizedRandomVariable prv);
 	
 	public Parfactor replaceLogicalVariablesConstrainedToSingleConstant();
 	public Parfactor renameLogicalVariables();

@@ -148,37 +148,48 @@ public final class SimpleParfactor implements Parfactor {
 		return this.factor;
 	}
 	
+	public Set<LogicalVariable> getLogicalVariables() {
+		return this.factor.getLogicalVariables();
+	}
+	
 	/**
 	 * Returns the number of factors this parfactor represents.
 	 * @return The number of factors this parfactor represents.
 	 */
 	public int size() {
 		int size = 1;
-		HashSet<LogicalVariable> read = new HashSet<LogicalVariable>(); // is it the best thing to do? 
-		for (ParameterizedRandomVariable v : factor.getParameterizedRandomVariables()) {
-			if (!(v instanceof CountingFormula)) {
-				for (LogicalVariable lv : v.getParameters()) {
-					if (!read.contains(lv)) {
-						size = size * lv.getSizeOfPopulationSatisfying(constraints);
-						read.add(lv);
-					}
-				}
-			}
-		}
 		
-		if (read.isEmpty()) 
-			size = 0;
+		for (LogicalVariable lv : this.factor.getLogicalVariables()) {
+			size = size * lv.getSizeOfPopulationSatisfying(this.constraints);
+		}
 		
 		return size;
+		
+//		HashSet<LogicalVariable> read = new HashSet<LogicalVariable>(); // is it the best thing to do? 
+//		for (ParameterizedRandomVariable v : factor.getParameterizedRandomVariables()) {
+//			if (!(v instanceof CountingFormula)) {
+//				for (LogicalVariable lv : v.getParameters()) {
+//					if (!read.contains(lv)) {
+//						size = size * lv.getSizeOfPopulationSatisfying(constraints);
+//						read.add(lv);
+//					}
+//				}
+//			}
+//		}
+//		
+//		if (read.isEmpty()) 
+//			size = 0;
+//		
+//		return size;
 	}
 	
-	public List<LogicalVariable> getLogicalVariables() {
-		HashSet<LogicalVariable> logicalVariables = new HashSet<LogicalVariable>();
-		for (ParameterizedRandomVariable prv : factor.getParameterizedRandomVariables()) {
-			logicalVariables.addAll(prv.getParameters());
-		}
-		return new ArrayList<LogicalVariable>(logicalVariables);
-	}
+//	public List<LogicalVariable> getLogicalVariables() {
+//		HashSet<LogicalVariable> logicalVariables = new HashSet<LogicalVariable>();
+//		for (ParameterizedRandomVariable prv : factor.getParameterizedRandomVariables()) {
+//			logicalVariables.addAll(prv.getParameters());
+//		}
+//		return new ArrayList<LogicalVariable>(logicalVariables);
+//	}
 
 	@Override
 	public boolean contains(ParameterizedRandomVariable variable) {
@@ -210,6 +221,27 @@ public final class SimpleParfactor implements Parfactor {
 	/* ************************************************************************
 	 *    Lifted elimination
 	 * ************************************************************************/
+	
+	public Parfactor sumOut(ParameterizedRandomVariable prv) {
+		List<ParameterizedRandomVariable> newVariables = this.factor.getParameterizedRandomVariables();
+		newVariables.remove(prv);
+		
+		ParameterizedFactor newFactor = getFactor().sumOut(prv);
+		
+		SimpleParfactor newParfactor = SimpleParfactor.getInstance(
+				getConstraints(), 
+				newFactor);
+		
+		double size1 = (double) this.size();
+		double size2 = (double) newParfactor.size();
+		double exponent = size1 / size2;
+		
+		newParfactor = SimpleParfactor.getInstance(
+				getConstraints(), 
+				newFactor.pow(exponent));
+						
+		return newParfactor;
+	}
 	
 	public Set<SimpleParfactor> sumOut(
 			Set<SimpleParfactor> setOfParfactors, 
@@ -359,6 +391,30 @@ public final class SimpleParfactor implements Parfactor {
 	/* ************************************************************************
 	 *    MULTIPLICATION
 	 * ************************************************************************/
+	
+	public Parfactor multiply(Parfactor parfactor) {
+		
+		Set<Constraint> allConstraints = new HashSet<Constraint>(this.constraints);
+		allConstraints.addAll(parfactor.getConstraints());
+		
+		List<ParameterizedRandomVariable> allVariables = 
+			new ArrayList<ParameterizedRandomVariable>(
+					this.factor.getParameterizedRandomVariables());
+		allVariables.addAll(parfactor.getParameterizedRandomVariables());
+		
+		ParameterizedFactor product = this.getFactor().multiply(parfactor.getFactor());
+		SimpleParfactor g = SimpleParfactor.getInstance(allConstraints, product);
+		
+		double firstExponent = ((double) this.size()) / g.size();
+		double secondExponent = ((double) parfactor.size()) / g.size();
+		
+		return SimpleParfactor.getInstance(
+				allConstraints, 
+				this.getFactor().pow(firstExponent)
+				.multiply(
+						parfactor.getFactor().pow(secondExponent)));
+	}
+	
 	
 	public Set<SimpleParfactor> multiply(
 			Set<SimpleParfactor> setOfParfactors, 

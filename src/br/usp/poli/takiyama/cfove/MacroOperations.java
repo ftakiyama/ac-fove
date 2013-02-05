@@ -5,10 +5,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
 
+import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.Parfactor;
-import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
+import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 
 public final class MacroOperations {
 	
@@ -195,6 +196,61 @@ public final class MacroOperations {
 		parfactors.add(parfactorToExpand.fullExpand(countingFormula));
 		
 		return shatter(parfactors);
+	}
+	
+	/**
+	 * <p>
+	 * Eliminates the set of random variables represented by the specified
+	 * parameterized random variable constrained to the given set of
+	 * constraints. The parfactors that involve the specified PRV are 
+	 * multiplied and then the PRV is eliminated in a lifted manner from the
+	 * product, if possible.
+	 * </p>
+	 * <p>
+	 * When it is not possible to eliminate the specified PRV, all parfactors
+	 * that involve it are replace by their product.
+	 * </p>
+	 * <p>
+	 * Conditions to call this method:
+	 * </p>
+	 * <li> The specified set of parfactors must have been shattered 
+	 * previously to enable multiplication.
+	 * <br>
+	 * <br>
+	 * <p>
+	 * This method does not check for the conditions outlined above. They
+	 *  must be verified in the caller method.
+	 * </p>
+	 * @param parfactors A set of parfactors
+	 * @param variableToEliminate The parameterized random variable to
+	 * eliminate from the set of parfactors.
+	 * @param constraints A set of constraints involving logical variables
+	 * from the specified parameterized random variable. It can be empty.
+	 * @return The specified set of parfactors with all random variables
+	 * represented by the specified PRV subject to the specified set of
+	 * constraints eliminated.
+	 */
+	public static Set<Parfactor> globalSumOut(
+			Set<Parfactor> parfactors,
+			ParameterizedRandomVariable variableToEliminate,
+			Set<Constraint> constraints) {
+		
+		Parfactor result = SimpleParfactor.getConstantInstance();
+		Set<Parfactor> parfactorsCopy = new HashSet<Parfactor>(parfactors);
+		for (Parfactor parfactor : parfactorsCopy) {
+			if (parfactor.contains(variableToEliminate) 
+					&& parfactor.getConstraints().containsAll(constraints)) {
+				result = result.multiply(parfactor);
+				parfactors.remove(parfactor);
+			}
+		}
+		if (variableToEliminate.getParameters().equals(result.getLogicalVariables())) {
+			result = result.sumOut(variableToEliminate);
+		}
+		if(!result.isConstant()) {
+			parfactors.add(result);
+		}
+		return parfactors;
 	}
 }
 

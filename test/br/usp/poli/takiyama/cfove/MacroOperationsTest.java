@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import br.usp.poli.takiyama.cfove.MacroOperations;
+import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.Pool;
 
@@ -125,6 +126,88 @@ public class MacroOperationsTest {
 		answer.add(objects.getSimpleParfactor("g3"));
 
 		assertTrue(result.equals(answer));
+	}
+	
+	@Test
+	public void globalSumOutWithConstraint() {
+		
+		objects.setGlobalSumOutTest();
+		
+		HashSet<Constraint> constraints =  new HashSet<Constraint>();
+		constraints.add(objects.getConstraint("Lot != 1"));
+		
+		HashSet<Parfactor> input = new HashSet<Parfactor>();
+		input.add(objects.getSimpleParfactor("g1"));
+		input.add(objects.getSimpleParfactor("g4"));
+		input.add(objects.getSimpleParfactor("g5"));
+		input.add(objects.getSimpleParfactor("g6"));
+		input.add(objects.getSimpleParfactor("g7"));
+		input.add(objects.getSimpleParfactor("g8"));
+		
+		Set<Parfactor> output = MacroOperations.globalSumOut(
+				input,
+				objects.getParameterizedRandomVariable("sprinkler"),
+				constraints);
+		
+		Set<Parfactor> answer = new HashSet<Parfactor>();
+		answer.add(objects.getSimpleParfactor("g1"));
+		answer.add(objects.getSimpleParfactor("g4"));
+		answer.add(objects.getSimpleParfactor("g5"));
+		answer.add(objects.getSimpleParfactor("g7"));
+		answer.add(objects.getSimpleParfactor("g9"));
+		
+		assertTrue(output.equals(answer));		
+	}
+
+	@Test
+	public void globalSumOutNoConstraints() {
+		
+		objects.setGlobalSumOutTest();
+		
+		HashSet<Constraint> constraints =  new HashSet<Constraint>();
+		
+		HashSet<Parfactor> input = new HashSet<Parfactor>();
+		input.add(objects.getSimpleParfactor("g1"));
+		input.add(objects.getSimpleParfactor("g4"));
+		input.add(objects.getSimpleParfactor("g5"));
+		input.add(objects.getSimpleParfactor("g7"));
+		input.add(objects.getSimpleParfactor("g9"));
+		
+		Set<Parfactor> output = MacroOperations.globalSumOut(
+				input,
+				objects.getParameterizedRandomVariable("sprinkler[Lot/1]"),
+				constraints);
+		
+		Set<Parfactor> answer = new HashSet<Parfactor>();
+		answer.add(objects.getSimpleParfactor("g1"));
+		answer.add(objects.getSimpleParfactor("g4"));
+		answer.add(objects.getSimpleParfactor("g9"));
+		answer.add(objects.getSimpleParfactor("g10"));
+		
+		assertTrue(output.equals(answer));
+	}
+
+	@Test
+	public void globalSumOutThreeSimpleParfactors() {
+		
+		objects.setGlobalSumOutTest();
+		
+		HashSet<Constraint> constraints =  new HashSet<Constraint>();
+		
+		HashSet<Parfactor> input = new HashSet<Parfactor>();
+		input.add(objects.getSimpleParfactor("g1"));
+		input.add(objects.getSimpleParfactor("g11"));
+		input.add(objects.getSimpleParfactor("g12"));
+		
+		Set<Parfactor> output = MacroOperations.globalSumOut(
+				input,
+				objects.getParameterizedRandomVariable("rain"),
+				constraints);
+		
+		Set<Parfactor> answer = new HashSet<Parfactor>();
+		answer.add(objects.getSimpleParfactor("g13"));
+		
+		assertTrue(output.equals(answer));
 	}
 }
 

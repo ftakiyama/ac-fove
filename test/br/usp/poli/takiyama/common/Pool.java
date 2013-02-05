@@ -979,6 +979,35 @@ public class Pool {
 		
 	}
 	
+	public void setGlobalSumOutTest() {
+		
+		createLogicalVariable("Lot", "lot", 10);
+		
+		createPrv("rain", "");
+		createPrv("sprinkler", "Lot");
+		createPrv("wet_grass", "Lot");
+		createPrv("another_rain", "");
+		createPrvFromSubstitution("sprinkler", "Lot/1");
+		createPrvFromSubstitution("wet_grass", "Lot/1");
+		
+		createConstraint("Lot", "1");
+		
+		createSimpleParfactor("g1", "", "rain", "F1", "1;2");
+		createSimpleParfactor("g4", "", "wet_grass[Lot/1]", "F4", "1;2");
+		createSimpleParfactor("g5", "", "rain;sprinkler[Lot/1];wet_grass[Lot/1]", "F3", "1;2;3;4;5;6;7;8");
+		createSimpleParfactor("g6", "Lot != 1", "rain;sprinkler;wet_grass", "F3", "1;2;3;4;5;6;7;8");
+		createSimpleParfactor("g7", "", "sprinkler[Lot/1]", "F2", "2;3");
+		createSimpleParfactor("g8", "Lot != 1", "sprinkler", "F2", "2;3");
+		
+		createSimpleParfactor("g9", "Lot != 1", "rain;wet_grass", "F9", "11;16;31;36");
+		createSimpleParfactor("g10", "", "rain;wet_grass[Lot/1]", "F9", "11;16;31;36");
+		
+		createSimpleParfactor("g11", "", "rain", "F6", "3;5");
+		createSimpleParfactor("g12", "", "rain;another_rain", "F7", "2;3;5;7");
+		
+		createSimpleParfactor("g13", "", "another_rain", "F8", "56;79");
+	}
+	
 	/* ************************************************************************
 	 *      Exposed methods
 	 * ************************************************************************/

@@ -263,7 +263,7 @@ public class ParameterizedFactorTest {
 	
 	@Test
 	public void testEqualsWithDifferentFactors() {
-		System.out.println("\nTest: precision of equals()");
+		System.out.println("\nTest: equals() with different objects");
 		String name = "factor2";
 		ArrayList<ParameterizedRandomVariable> prvs = new ArrayList<ParameterizedRandomVariable>();
 		prvs.add(variables.get("f0"));
@@ -291,12 +291,10 @@ public class ParameterizedFactorTest {
 		
 		ParameterizedFactor factor = factors.get("factor1");
 		
-		System.out.println("    Different name: " + factor.equals(differentName));
 		System.out.println("Different variable: " + factor.equals(differentVariable));
 		System.out.println(" Different mapping: " + factor.equals(differentMapping));
 		
-		assertTrue(!factor.equals(differentName) &&
-				   !factor.equals(differentVariable) &&
+		assertTrue(!factor.equals(differentVariable) &&
 				   !factor.equals(differentMapping));
 	}
 	
@@ -380,11 +378,12 @@ public class ParameterizedFactorTest {
 		ArrayList<ParameterizedRandomVariable> prvs = new ArrayList<ParameterizedRandomVariable>();
 		prvs.add(variables.get("g0"));
 		ArrayList<Number> mapping = new ArrayList<Number>();
-		mapping.add(1.0);
-		mapping.add(0.56);
+		mapping.add(0.1 + 0.3);
+		mapping.add(0.2 + 0.4);
 		ParameterizedFactor correctResult = ParameterizedFactor.getInstance(name, prvs, mapping);
 		
 		ParameterizedFactor factor = factors.get("factor2");
+		System.out.println("Factor to sum out: " + factor.toString());
 		factor = factor.sumOut(variables.get("f0"));
 		
 		System.out.println("After summing out: " + factor.toString());
@@ -401,11 +400,12 @@ public class ParameterizedFactorTest {
 		ArrayList<ParameterizedRandomVariable> prvs = new ArrayList<ParameterizedRandomVariable>();
 		prvs.add(variables.get("f0"));
 		ArrayList<Number> mapping = new ArrayList<Number>();
-		mapping.add(0.6);
-		mapping.add(0.96);
+		mapping.add(0.1 + 0.2);
+		mapping.add(0.3 + 0.4);
 		ParameterizedFactor correctResult = ParameterizedFactor.getInstance(name, prvs, mapping);
 		
 		ParameterizedFactor factor = factors.get("factor2");
+		System.out.println("Factor to sum out: " + factor.toString());
 		factor = factor.sumOut(variables.get("g0"));
 		
 		System.out.println("After summing out: " + factor.toString());

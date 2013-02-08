@@ -766,40 +766,44 @@ public final class SimpleParfactor implements Parfactor {
 
 			int cfIndex = newVariables.indexOf(countingFormula);
 			if (newCountingFormula.canBeConvertedToPrv()) {
-				ParameterizedRandomVariable prv = newCountingFormula.convertToPrv();
-				newVariables.set(cfIndex, prv);
-				newVariables.add(
-						cfIndex + 1, 
-						newCountingFormula.applySubstitutionToPrv(
-								Binding.create(
-										newCountingFormula.getBoundVariable(),
-										term)));
+				newVariables.set(cfIndex, newCountingFormula.convertToPrv());
 			} else {
 				newVariables.set(cfIndex, newCountingFormula);
-				newVariables.add(
-						cfIndex + 1, 
-						newCountingFormula.applySubstitutionToPrv(
-								Binding.create(
-										newCountingFormula.getBoundVariable(), 
-										term)));
 			}
-			
+			newVariables.add(
+					cfIndex + 1, 
+					newCountingFormula.applySubstitutionToPrv(
+							Binding.create(
+									newCountingFormula.getBoundVariable(), 
+									term)));
 			
 			// Creates the new Factor
 			ArrayList<Number> newValues = new ArrayList<Number>();
 			
 			// maybe there is a smarter way to do this
-			newValues.add(this.factor.getTupleValue(0));
-			newValues.add(this.factor.getTupleValue(1));
-			for (int i = 2; i < this.factor.getAllValues().size() - 2; i = i + 2) {
-				newValues.add(this.factor.getAllValues().get(i));
-				newValues.add(this.factor.getAllValues().get(i + 1));
-				newValues.add(this.factor.getAllValues().get(i));
-				newValues.add(this.factor.getAllValues().get(i + 1));
-			}
-			newValues.add(this.factor.getTupleValue(this.factor.getAllValues().size() - 2));
-			newValues.add(this.factor.getTupleValue(this.factor.getAllValues().size() - 1));
+//			newValues.add(this.factor.getTupleValue(0));
+//			newValues.add(this.factor.getTupleValue(1));
+//			for (int i = 2; i < this.factor.getAllValues().size() - 2; i = i + 2) {
+//				newValues.add(this.factor.getAllValues().get(i));
+//				newValues.add(this.factor.getAllValues().get(i + 1));
+//				newValues.add(this.factor.getAllValues().get(i));
+//				newValues.add(this.factor.getAllValues().get(i + 1));
+//			}
+//			newValues.add(this.factor.getTupleValue(this.factor.getAllValues().size() - 2));
+//			newValues.add(this.factor.getTupleValue(this.factor.getAllValues().size() - 1));
 
+			Iterator<Tuple> newTuplesIt = ParameterizedFactor.getIteratorOverTuples(newVariables);
+			while (newTuplesIt.hasNext()) {
+				Tuple tuple = newTuplesIt.next();
+				int rangeIndex = tuple.get(cfIndex);
+				int bucketIndex = tuple.get(cfIndex + 1);
+				String oldHistogram = newCountingFormula.addCount(rangeIndex, bucketIndex, 1); 
+				int oldHistogramIndex = countingFormula.getRange().indexOf(oldHistogram);
+				tuple = tuple.remove(cfIndex + 1);
+				tuple = tuple.getModifiedTuple(cfIndex, oldHistogramIndex);
+				newValues.add(this.factor.getTupleValue(this.factor.getTupleIndex(tuple)));
+			}
+			
 			return SimpleParfactor
 						.getInstance(
 								this.constraints, 

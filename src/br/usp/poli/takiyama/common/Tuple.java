@@ -68,10 +68,12 @@ public final class Tuple {
 	 * of the index will be shifted to left.
 	 * @see {@link ArrayList#remove}
 	 * @param index The index of the element to be removed.
-	 * @return This tuple with the element specified removed.
+	 * @return A copy of this tuple with the element specified removed.
 	 */
-	public Integer remove(int index) {
-		return new ArrayList<Integer>(values).remove(index);
+	public Tuple remove(int index) {
+		ArrayList<Integer> newTuple = new ArrayList<Integer>(values);
+		newTuple.remove(index);
+		return new Tuple(newTuple);
 	}
 	
 	/**

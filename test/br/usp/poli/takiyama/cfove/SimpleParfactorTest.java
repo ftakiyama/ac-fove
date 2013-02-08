@@ -64,7 +64,7 @@ public class SimpleParfactorTest {
 		objects.setExample2_16();
 		
 		// Expands parfactor on individual x1
-		CountingFormula countingFormula = objects.getCountingFormula("#.A:{A!=B}[f(A)]");
+		CountingFormula countingFormula = objects.getCountingFormula("#.A:{A!=x0}[f(A)]");
 		Term x1 = objects.getLogicalVariable("A").getPopulation().getIndividual(1);
 		Parfactor result = objects.getSimpleParfactor("g1").expand(countingFormula, x1);
 		
@@ -244,11 +244,35 @@ public class SimpleParfactorTest {
 	
 	/**
 	 * Unification test using two counting formulas.
+	 * In this test the expanded counting formula is constrained to one
+	 * single individual, and thus is equivalent to a simple random variable.
 	 */
 	@Test
 	public void unifyCountingFormulas() {
 		
 		objects.setUnificationTestWithTwoCountingFormulas();
+		
+		LogicalVariableNameGenerator.reset();
+		
+		HashSet<Parfactor> unifiedParfactors = new HashSet<Parfactor>();
+		unifiedParfactors.addAll(objects.getSimpleParfactor("g1").unify(objects.getSimpleParfactor("g2")));
+		
+		HashSet<SimpleParfactor> answer = new HashSet<SimpleParfactor>();
+		answer.add(objects.getSimpleParfactor("g3"));
+		answer.add(objects.getSimpleParfactor("g4"));
+		answer.add(objects.getSimpleParfactor("g5"));
+		
+		assertTrue(unifiedParfactors.equals(answer));
+	}
+	
+	/**
+	 * Unification test using two counting formulas and a bigger population.
+	 * The expanded counting formula is not constrained to a single individual.
+	 */
+	@Test
+	public void unifyCountingFormulasWithBigPopulation() {
+		
+		objects.setUnificationTestWithTwoCountingFormulasBigPopulation();
 		
 		LogicalVariableNameGenerator.reset();
 		

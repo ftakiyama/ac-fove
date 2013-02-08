@@ -99,6 +99,14 @@ public class ParameterizedRandomVariable {
 	}
 	
 	/**
+	 * Returns the range of the functor.
+	 * @return The range of the functor.
+	 */
+	public List<String> getRange() {
+		return functor.getRange();
+	}
+	
+	/**
 	 * Returns an Instance of this Parameterized Random Variable by applying
 	 * a substitution.
 	 * The application of a substitution θ ={X1/ti1....,Xl/til} to a 
@@ -168,6 +176,10 @@ public class ParameterizedRandomVariable {
 		return ImmutableSet.copyOf(parameters.iterator());
 	}
 	
+	/**
+	 * Returns the name of the functor of this parameterized random variable.
+	 * @return The name of the functor of this parameterized random variable.
+	 */
 	public String getName() {
 		return this.functor.getName();
 	}
@@ -285,6 +297,9 @@ public class ParameterizedRandomVariable {
 	 * or do not have the same number of parameters or do not unify.
 	 */
 	public Substitution getMgu(ParameterizedRandomVariable other) throws IllegalArgumentException {
+		if (other instanceof CountingFormula)
+			return getMgu((CountingFormula) other);
+		
 		if (this.parameters.size() != other.parameters.size()
 				|| this.getName() != other.getName()) {
 			throw new IllegalArgumentException();
@@ -333,6 +348,34 @@ public class ParameterizedRandomVariable {
 		
 		return Substitution.create(new ArrayList<Binding>(mgu));
 		
+	}
+	
+	/**
+	 * Returns the Most General Unifier (MGU) between this parameterized
+	 * random variable and the specified counting formula.
+	 * <br>
+	 * The MGU is obtained by comparing this parameterized random variable
+	 * with the parameterized random variable associated with the specified
+	 * counting formula.
+	 * <br>
+	 * Both variables must have the same name and have the same number of
+	 * parameters. In case these conditions are not met, this method throws
+	 * an IllegalArgumentException.
+	 * <br>
+	 * If the PRVs do not unify, throws an IllegalArgumentException.
+	 * <br>
+	 * The algorithm used was adapted by Kisynski (2010) from Sterling and
+	 * Shapiro (1994).
+	 * 
+	 * @param countingFormula The counting formula from which the MGU will
+	 * be obtained.
+	 * @return The MGU as a Substitution.
+	 * @throws IllegalArgumentException If the PRVs do not have the same name
+	 * or do not have the same number of parameters or do not unify.
+	 */
+	public Substitution getMgu(CountingFormula countingFormula) 
+			throws IllegalArgumentException {
+		return countingFormula.getMgu(this);
 	}
 	
 	/**

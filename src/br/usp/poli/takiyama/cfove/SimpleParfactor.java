@@ -209,6 +209,14 @@ public final class SimpleParfactor implements Parfactor {
 				&& this.factor.getAllValues().get(0).doubleValue() == 1);
 	}
 	
+//	@Override
+//	public Set<RandomVariable> getRandomVariables() {
+//		HashSet<RandomVariable> randomVariables = new HashSet<RandomVariable>();
+//		for (ParameterizedRandomVariable prv : this.factor.getParameterizedRandomVariables()) {
+//			randomVariables.addAll(prv.getGroundInstance(index));
+//		}
+//	}
+	
 	/*
 	 ***************************************************************************
 	 *
@@ -229,7 +237,7 @@ public final class SimpleParfactor implements Parfactor {
 		ParameterizedFactor newFactor = getFactor().sumOut(prv);
 		
 		SimpleParfactor newParfactor = SimpleParfactor.getInstance(
-				getConstraints(), 
+				getConstraints(), // TODO the set of constraints remains the same?
 				newFactor);
 		
 		double size1 = (double) this.size();

@@ -22,6 +22,7 @@ public final class ParameterizedFactor {
 	private final ArrayList<Double> mapping;
 	
 	private final int size;
+	private final static double PRECISION = 0.000000000000001;
 	
 	/**
 	 * Private constructor. Creates a new factor on parameterized random variables.
@@ -268,7 +269,7 @@ public final class ParameterizedFactor {
 		
 		// Print the variables names
 		for (ParameterizedRandomVariable prv : this.variables) {
-			result += String.format(cellFormat, prv.getName()); 
+			result += String.format(cellFormat, prv.toString()); 
 		}
 		
 		// Value column
@@ -474,13 +475,23 @@ public final class ParameterizedFactor {
 	    	return false;
 	    // Tests if both have the same attributes
 	    ParameterizedFactor targetObject = (ParameterizedFactor) other;
+	    
+	    // checking value equality with tolerance
+	    for (int i = 0; i < this.mapping.size(); i++) {
+	    	if (Math.abs(this.mapping.get(i) - targetObject.mapping.get(i)) 
+	    			> ParameterizedFactor.PRECISION) {
+	    		return false;
+	    	}
+	    }
+	    
 	    return //this.name.equals(targetObject.name) &&  // 23/11/2012 Decided to take out the name of the factor when comparing it. 
 	    	   ((this.variables == null) ? 
 	    		 targetObject.variables == null : 
-	    		 this.variables.equals(targetObject.variables)) &&
+	    		 this.variables.equals(targetObject.variables)); // 13/02/2013 Decided to make a comparison of values using a tolerance 
+	    		/*&&
     		   ((this.mapping == null) ? 
     		     targetObject.mapping == null : 
-    		     this.mapping.equals(targetObject.mapping));	    		
+    		     this.mapping.equals(targetObject.mapping));*/	    		
 	}
 	
 	@Override

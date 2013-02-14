@@ -32,6 +32,11 @@ class PredicateSymbol {
 		}
 	}
 	
+	PredicateSymbol() {
+		this.name = "";
+		this.range = new ArrayList<String>(0);
+	}
+	
 	/**
 	 * Constructor. Creates a Predicate Symbol using the same elements of
 	 * the specified predicate symbol.

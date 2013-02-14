@@ -1,6 +1,7 @@
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -74,4 +75,51 @@ public class Sandbox {
 		s2.set(3);
 		System.out.println(s2);		
 	}
+	
+	/**
+	 * Calculates the binomial coefficient C(n,k).
+	 * <br>
+	 * This method returns 0 if n = 0 and k > 0. It throws an
+	 * IllegalArgumentException if any specified argument is negative.
+	 * 
+	 * @param n A nonnegative integer
+	 * @param k A nonnegative integer
+	 * @return The binomial coefficient C(n,k).
+	 * @throws IllegalArgumentException If the specified arguments are
+	 * negative (at least one of them)
+	 */
+	public int combination(int n, int k) throws IllegalArgumentException {
+		int r = 1;
+		
+		if (n < 0 || k < 0) {
+			throw new IllegalArgumentException("Cannot calculate combination" 
+					+ " for negative numbers.");
+		}
+		
+		if (n == 0) return 0;
+		//if (k == 0 && n >= 0) return 1;
+		
+		for (int i = 1; i <= k; i++) {
+			r = r * (n - k + i) / i;
+		}
+		return r;
+	}
+	
+	@Test
+	public void testCombination() {
+		for (int n = 0; n < 11; n++) {
+			for (int k = 0; k < 11; k++) {
+				System.out.println("C(" + n + "," + k + ") = " + combination(n,k));		
+			}
+		}
+	}
+	
+	@Test
+	public void testArrayString() {
+		Pool p = new Pool();
+		p.setExample2_5_2_7(5);
+		for (int i = 1; i <= 13; i++)
+			System.out.println(p.getSimpleParfactor("g" + i));
+	}
+	
 }

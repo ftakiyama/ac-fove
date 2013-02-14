@@ -67,6 +67,14 @@ public interface Parfactor {
 	 */
 	public Parfactor restoreLogicalVariableNames();
 	
+	/**
+	 * Returns the set of all random variables represented by PRVs from this
+	 * parfactor.
+	 * @return The set of all random variables represented by PRVs from this
+	 * parfactor.
+	 */
+	///public Set<RandomVariable> getRandomVariables();
+	
 	/* ************************************************************************
 	 *   ENABLING OPERATIONS
 	 * ************************************************************************/

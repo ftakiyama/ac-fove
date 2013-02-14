@@ -94,7 +94,7 @@ public class ParameterizedRandomVariable {
 	 */
 	public static ParameterizedRandomVariable getEmptyInstance() {
 		return new ParameterizedRandomVariable(
-				new PredicateSymbol(""), 
+				new PredicateSymbol(), 
 				new ArrayList<Term>());
 	}
 	
@@ -584,6 +584,21 @@ public class ParameterizedRandomVariable {
 	 */
 	public RandomVariable getRandomVariableRepresetantion() {
 		return RandomVariable.createRandomVariable(this.functor.getName(), this.functor.getRange());
+	}
+	
+	/**
+	 * Returns the number of ground instances satisfying the specified set of
+	 * constraints.
+	 * @param constraints A set of constraints
+	 * @return The number of ground instances satisfying the specified set of
+	 * constraints.
+	 */
+	public int getGroundSetSize(Set<Constraint> constraints) {
+		int size = 1;
+		for (LogicalVariable lv : this.getParameters()) {
+			size = size * lv.getSizeOfPopulationSatisfying(constraints);
+		}
+		return size;
 	}
 	
 	@Override

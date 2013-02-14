@@ -7,6 +7,7 @@ import java.util.Stack;
 
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.Parfactor;
+import br.usp.poli.takiyama.common.RandomVariableSet;
 import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
@@ -78,6 +79,45 @@ public final class MacroOperations {
 			shatteredPool.clear();
 		}
 		
+		return shatteredSet;
+	}
+	
+	/**
+	 * This operation makes all the necessary splits to 
+	 * guarantee that the sets of random variables represented by parameterized
+	 * random variables in each parfactor of the given set are equal or 
+	 * disjoint to the specified query set.
+	 * <br>
+	 * In other words, for any parameterized random variable p from
+	 * parfactors of the specified set, p and the query set represent identical 
+	 * or disjoint sets of random variables.
+	 * <br>
+	 * This operation is used once at the beginning of the C-FOVE algorithm.
+	 * <br>
+	 * If the specified set is empty, returns an empty set.
+	 * <br>
+	 * <b>I am not sure whether this operation should be used every time SHATTER
+	 * is called.</b>
+	 * 
+	 * @param parfactors The set of parfactors to shatter.
+	 * @param query A set of random variables to shatter against. It must be 
+	 * given in the form of a {@link RandomVariableSet}
+	 * @return The specified set of parfactors shattered, or an empty set if
+	 * the specified set is also empty.
+	 */
+	public static Set<Parfactor> shatter (
+			Set<Parfactor> parfactors, 
+			RandomVariableSet query) {
+		
+		HashSet<Parfactor> shatteredSet = new HashSet<Parfactor>(parfactors);
+		for (Parfactor p : parfactors) {
+			if (p.contains(query.getPrv())) {
+				HashSet<Constraint> constraints = 
+						new HashSet<Constraint>(query.getConstraints());
+				shatteredSet.remove(p);
+				shatteredSet.addAll(p.splitOnConstraints(constraints));
+			}
+		}
 		return shatteredSet;
 	}
 	

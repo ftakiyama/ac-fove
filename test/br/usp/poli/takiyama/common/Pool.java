@@ -33,6 +33,7 @@ public class Pool {
 	private HashMap<String, ParameterizedRandomVariable> prvPool;
 	private HashMap<String, SimpleParfactor> simpleParfactorPool;
 	private HashMap<String, Substitution> substitutionPool;
+	private HashMap<String, RandomVariableSet> randomVariableSetPool;
 	
 	// maybe I could separate factors in a separated pool.
 	
@@ -40,11 +41,12 @@ public class Pool {
 	 * Constructor. Creates an empty Pool.
 	 */
 	public Pool() {
-		variablesPool = new HashMap<String, LogicalVariable>();
-		constraintsPool = new HashMap<String, Constraint>();
-		prvPool = new HashMap<String, ParameterizedRandomVariable>();
-		simpleParfactorPool = new HashMap<String, SimpleParfactor>();
-		substitutionPool = new HashMap<String, Substitution>();
+		this.variablesPool = new HashMap<String, LogicalVariable>();
+		this.constraintsPool = new HashMap<String, Constraint>();
+		this.prvPool = new HashMap<String, ParameterizedRandomVariable>();
+		this.simpleParfactorPool = new HashMap<String, SimpleParfactor>();
+		this.substitutionPool = new HashMap<String, Substitution>();
+		this.randomVariableSetPool = new HashMap<String, RandomVariableSet>();
 	}
 	
 	/**
@@ -240,19 +242,36 @@ public class Pool {
 	 * @param factorName The name of the factor
 	 * @param values A list of factor values ordered according to the order of
 	 * ths list of PRVs, separated by semicolon
+	 * @throws IllegalArgumentException If it cannot find a constraint or 
+	 * parameterized logical variable in the pool.
 	 */
-	private void createSimpleParfactor(String name, String constraints, String prvs, String factorName, String values) {
+	private void createSimpleParfactor(
+			String name, 
+			String constraints, 
+			String prvs, 
+			String factorName, 
+			String values) 
+			throws IllegalArgumentException {
 		
 		Set<Constraint> constraintsSet = new HashSet<Constraint>();
 		if (constraints.length() > 0) {
 			for (String constraint : constraints.split(";")) {
-				constraintsSet.add(constraintsPool.get(constraint));
+				if (constraintsPool.containsKey(constraint))
+					constraintsSet.add(constraintsPool.get(constraint));
+				else
+					throw new IllegalArgumentException("Could not find "
+							+ "constraint " + constraint);
 			}
 		}
 		
-		ArrayList<ParameterizedRandomVariable> variablesSet = new ArrayList<ParameterizedRandomVariable>();
+		ArrayList<ParameterizedRandomVariable> variablesSet = 
+			new ArrayList<ParameterizedRandomVariable>();
 		for (String variable : prvs.split(";")) {
-			variablesSet.add(prvPool.get(variable));
+			if (prvPool.containsKey(variable))
+				variablesSet.add(prvPool.get(variable));
+			else
+				throw new IllegalArgumentException("Could not find PRV " 
+						+ variable);
 		}
 
 		ArrayList<Number> factorValues = new ArrayList<Number>();
@@ -304,6 +323,48 @@ public class Pool {
 		substitutionPool.put(setName, Substitution.create(bindings));
 	}
 	
+	/**
+	 * Creates a random variable set based on a parameterized random variable
+	 * and a set of constraints.
+	 * @param name The name of the set. Used as a key to retrieve the instance
+	 * created later
+	 * @param prv The name of the PRV in PRV pool
+	 * @param constraints A list of constraint names in the constraint pool
+	 */
+	private void createRandomVariableSet (
+			String name, String prv, String ... constraints) {
+		HashSet<Constraint> c = new HashSet<Constraint>(constraints.length);
+		for (String constraintName : constraints) {
+			if (constraintsPool.containsKey(constraintName)) {
+				c.add(constraintsPool.get(constraintName));
+			} else {
+				throw new IllegalArgumentException("No such constraint in pool: "
+						+ constraintName);
+			}
+		}
+		
+		if (!prvPool.containsKey(prv))
+			throw new IllegalArgumentException("No such PRV in pool: " + prv);
+		
+		randomVariableSetPool.put(
+				name, 
+				RandomVariableSet.getInstance(
+						prvPool.get(prv), 
+						c));
+	}
+	
+	/**
+	 * Converts an array of doubles to a string that obeys the convention
+	 * to initialize parfactors.
+	 * @param v An array of doubles.
+	 * @return The specified array converted to string
+	 */
+	private String toString(double[] v) {
+		String vs = Arrays.toString(v);
+		vs = vs.substring(1, vs.length() - 1);
+		vs = vs.replaceAll(", ", ";");
+		return vs;
+	}
 	
 	/* ************************************************************************
 	 *      Setup pool
@@ -1058,6 +1119,89 @@ public class Pool {
 		createSimpleParfactor("g13", "", "another_rain", "F8", "56;79");
 	}
 	
+	/**
+	 * Creates all parfactors from section 2.5.2.7 of Kisynski (2010).
+	 * @param populationSize The size of the population of logival variable
+	 * 'Lot'.
+	 */
+	public void setExample2_5_2_7(int populationSize) {
+		
+		createLogicalVariable("Lot", "lot", populationSize);
+		
+		createPrv("rain", "");
+		createPrv("sprinkler", "Lot");
+		createPrv("wet_grass", "Lot");
+		createPrvFromSubstitution("sprinkler", "Lot/1");
+		createPrvFromSubstitution("wet_grass", "Lot/1");
+		
+		createConstraint("Lot", "1");
+		
+		createCountingFormula("#.Lot[wet_grass]", "Lot", "wet_grass", "Lot != 1");
+		
+		createRandomVariableSet("wg:lot", "wet_grass", "Lot != 1");
+		
+		// factor components
+		
+		double[] f1 = {0.8, 0.2};
+		double[] f2 = {0.6, 0.4};
+		double[] f3 = {1.0, 0.0, 0.2, 0.8, 0.1, 0.9, 0.01, 0.99};
+		double[] f4 = {0.0, 1.0};
+		
+		double[] f2xf3 = new double[8];
+		for (int i = 0; i < f2xf3.length; i++) {
+			f2xf3[i] = f2[(i / 2) % 2] * f3[i];
+		}
+		
+		double[] f5 = new double[4];
+		f5[0] = f2xf3[0] + f2xf3[2];
+		f5[1] = f2xf3[1] + f2xf3[3];
+		f5[2] = f2xf3[4] + f2xf3[6];
+		f5[3] = f2xf3[5] + f2xf3[7];
+		
+		double[] f4xf5 = new double[4];
+		for (int i = 0; i < f4xf5.length; i++) {
+			f4xf5[i] = f4[i % 2] * f5[i];
+		}
+		
+		double[] f6 = new double[2];
+		f6[0] = f4xf5[0] + f4xf5[1];
+		f6[1] = f4xf5[2] + f4xf5[3];
+
+		int n = populationSize;
+		double[] f7 = new double[2 * n];
+		for (int i = 0; i < n; i++) {
+			f7[i] = Math.pow(f5[0], n - 1 - i) * Math.pow(f5[1], i);
+			f7[n + i] = Math.pow(f5[2], n - 1 - i) * Math.pow(f5[3], i);
+		}
+		
+		double[] f1xf6xf7 = new double[2 * n];
+		for (int i = 0; i < 2 * n; i++) {
+			f1xf6xf7[i] = f1[i / n] * f6[i / n] * f7[i];
+		}
+
+		double[] f8 = new double[n];
+		for (int i = 0; i < n; i++) {
+			f8[i] = f1xf6xf7[i] + f1xf6xf7[n + i];
+		}
+		
+		// parfactors
+		
+		createSimpleParfactor("g1", "", "rain", "F1", toString(f1));
+		createSimpleParfactor("g2", "", "sprinkler", "F2", toString(f2));
+		createSimpleParfactor("g3", "", "rain;sprinkler;wet_grass", "F3", toString(f3));
+		createSimpleParfactor("g4", "", "wet_grass[Lot/1]", "F4", toString(f4));
+		createSimpleParfactor("g5", "", "rain;sprinkler[Lot/1];wet_grass[Lot/1]", "F3", toString(f3));
+		createSimpleParfactor("g6", "Lot != 1", "rain;sprinkler;wet_grass", "F3", toString(f3));
+		createSimpleParfactor("g7", "", "sprinkler[Lot/1]", "F2", toString(f2));
+		createSimpleParfactor("g8", "Lot != 1", "sprinkler", "F2", toString(f2));
+		createSimpleParfactor("g9", "Lot != 1", "rain;wet_grass", "F5", toString(f5));
+		createSimpleParfactor("g10", "", "rain;wet_grass[Lot/1]", "F5", toString(f5));
+		createSimpleParfactor("g11", "", "rain", "F6", toString(f6));
+		createSimpleParfactor("g12", "", "rain;#.Lot[wet_grass]", "F7", toString(f7));
+		createSimpleParfactor("g13", "", "#.Lot[wet_grass]", "F8", toString(f8));
+	}
+	
+	
 	/* ************************************************************************
 	 *      Exposed methods
 	 * ************************************************************************/
@@ -1132,6 +1276,42 @@ public class Pool {
 			return constraintsPool.get(name);
 		} else {
 			throw new IllegalArgumentException("There is no such constraint in " +
+					"the pool: " + name);
+		}
+	}
+	
+	/**
+	 * Returns a set of the specified simple parfactors.
+	 * @param name A list of simple parfactor names
+	 * @return A set with the specified simple parfactors
+	 * @throws IllegalArgumentException If a specified parfactor is not
+	 * in the pool
+	 */
+	public Set<Parfactor> getSimpleParfactorSet(String ... name) 
+			throws IllegalArgumentException {
+		HashSet<Parfactor> parfactors = new HashSet<Parfactor>(name.length);
+		for (String parfactor : name) {
+			if (simpleParfactorPool.containsKey(parfactor)) 
+				parfactors.add(simpleParfactorPool.get(parfactor));
+			else
+				throw new IllegalArgumentException("There is no such" 
+						+ " parfactor in the pool: '" + parfactor + "'");
+		}
+		return parfactors;
+	}
+	
+	/**
+	 * Returns a random variable set from the pool
+	 * @param name The name of the random variable set. 
+	 * @return A random variable set from the pool with the specified name.
+	 * @throws IllegalArgumentException If the set with the given name
+	 * does not exist in the pool.
+	 */
+	public RandomVariableSet getRandomVariableSet(String name) throws IllegalArgumentException {
+		if (randomVariableSetPool.containsKey(name)) {
+			return randomVariableSetPool.get(name);
+		} else {
+			throw new IllegalArgumentException("There is no such RV set in " +
 					"the pool: " + name);
 		}
 	}

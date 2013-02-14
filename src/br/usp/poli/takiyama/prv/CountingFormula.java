@@ -319,11 +319,24 @@ public class CountingFormula extends ParameterizedRandomVariable {
 	}
 	
 	/**
-	 * Returns a short representation of the counting formula. Example: #.A[f]
-	 * @return The short representation of the counting formula
+	 * Returns the name of the parameterized random variable associated with
+	 * this counting formula.
+	 * @return The name of the parameterized random variable associated with
+	 * this counting formula.
 	 */
 	public String getName() {
-		return "#."+ this.boundLogicalVariable + "[" + this.prv.getName() + "]";
+		return this.prv.getName();//"#."+ this.boundLogicalVariable + "[" + this.prv.getName() + "]";
+	}
+	
+	// This method is the same of PRV, but I'm overriding it in case I change
+	// inheritance to interface. At least, I should.
+	@Override
+	public int getGroundSetSize(Set<Constraint> constraints) {
+		int size = 1;
+		for (LogicalVariable lv : this.getParameters()) {
+			size = size * lv.getSizeOfPopulationSatisfying(constraints);
+		}
+		return size;
 	}
 	
 	/* ************************************************************************
@@ -336,6 +349,16 @@ public class CountingFormula extends ParameterizedRandomVariable {
 	 */
 	public LogicalVariable getBoundVariable() {
 		return this.boundLogicalVariable;
+	}
+	
+	/**
+	 * Returns the parameterized random variable associated with this 
+	 * counting formula.
+	 * @return The parameterized random variable associated with this 
+	 * counting formula.
+	 */
+	public ParameterizedRandomVariable getPrv() {
+		return this.prv;
 	}
 	
 	/**

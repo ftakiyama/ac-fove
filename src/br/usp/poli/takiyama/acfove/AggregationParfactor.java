@@ -1,3 +1,398 @@
+package br.usp.poli.takiyama.acfove;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+import br.usp.poli.takiyama.acfove.operator.BooleanOperator;
+import br.usp.poli.takiyama.cfove.ParameterizedFactor;
+import br.usp.poli.takiyama.cfove.SimpleParfactor;
+import br.usp.poli.takiyama.common.Constraint;
+import br.usp.poli.takiyama.common.Parfactor;
+import br.usp.poli.takiyama.common.Tuple;
+import br.usp.poli.takiyama.prv.Binding;
+import br.usp.poli.takiyama.prv.CountingFormula;
+import br.usp.poli.takiyama.prv.LogicalVariable;
+import br.usp.poli.takiyama.prv.LogicalVariableNameGenerator;
+import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
+import br.usp.poli.takiyama.prv.Substitution;
+import br.usp.poli.takiyama.prv.Term;
+
+
+public class AggregationParfactor implements Parfactor {
+
+	private final ParameterizedRandomVariable parent;
+	private final ParameterizedRandomVariable child;
+	
+	private final ParameterizedFactor factor;
+	
+	private final BooleanOperator operator; // should think of something more generic
+	 
+	private final HashSet<Constraint> constraintsOnExtraVariable; 
+	private final HashSet<Constraint> otherConstraints;
+	
+	private final LogicalVariable extraVariable;
+	
+	// Builder pattern
+	public static class Builder {
+		// required parameters
+		private final ParameterizedRandomVariable p;
+		private final ParameterizedRandomVariable c;
+		private final BooleanOperator op;
+		private final LogicalVariable lv;
+		
+		// optional parameters
+		private ParameterizedFactor f; 
+		private HashSet<Constraint> constraintsOnExtra; 
+		private HashSet<Constraint> otherConstraints;
+		
+		public Builder (
+				ParameterizedRandomVariable p,
+				ParameterizedRandomVariable c,
+				BooleanOperator op) 
+				throws IllegalArgumentException {
+			
+			this.p = ParameterizedRandomVariable.getInstance(p);
+			this.c = ParameterizedRandomVariable.getInstance(c);
+			this.op = op;
+			this.f = ParameterizedFactor.getConstantInstance(p);
+			this.constraintsOnExtra = new HashSet<Constraint>();
+			this.otherConstraints = new HashSet<Constraint>();
+			
+			HashSet<LogicalVariable> vars = 
+					new HashSet<LogicalVariable>(p.getParameters());
+			vars.removeAll(c.getParameters());
+			if (vars.size() == 1) {
+				this.lv = new LogicalVariable(vars.iterator().next());
+			} else {
+				throw new IllegalArgumentException(p 
+						+ " does not have 1 extra logical variable: "
+						+ vars);
+			}
+		}
+		
+		public Builder addConstraintsOnExtra(Set<Constraint> c) {
+			this.constraintsOnExtra.addAll(c);
+			return this;
+		}
+		
+		public Builder addOtherConstraints(Set<Constraint> c) {
+			this.otherConstraints.addAll(c);
+			return this;
+		}
+		
+		public Builder addConstraint(Constraint c) {
+			if (c.contains(lv)) {
+				this.constraintsOnExtra.add(c);
+			} else {
+				this.otherConstraints.add(c);
+			}
+			return this;
+		}
+		
+		public Builder addConstraints(Set<Constraint> c) {
+			for (Constraint constraint : c) {
+				this.addConstraint(constraint);
+			}
+			return this;
+		}
+		
+		public Builder factor(ParameterizedFactor f) {
+			this.f = ParameterizedFactor.getInstance(f);
+			return this;
+		}
+		
+		public AggregationParfactor build() {
+			return new AggregationParfactor(this);
+		}
+	}
+	
+	private AggregationParfactor(Builder builder) {
+		this.parent = builder.p;
+		this.child = builder.c;
+		this.factor = builder.f;
+		this.operator = builder.op;
+		this.constraintsOnExtraVariable = builder.constraintsOnExtra;
+		this.otherConstraints = builder.otherConstraints;
+		this.extraVariable = builder.lv;
+	}
+	
+	@Override
+	public boolean contains(ParameterizedRandomVariable variable) {
+		return (variable.equals(this.child) || variable.equals(this.parent));
+	}
+
+	@Override
+	public ParameterizedFactor getFactor() {
+		return ParameterizedFactor.getInstance(factor);
+	}
+
+	@Override
+	public List<ParameterizedRandomVariable> getParameterizedRandomVariables() {
+		List<ParameterizedRandomVariable> vars = 
+			new ArrayList<ParameterizedRandomVariable>();
+		vars.add(child);
+		vars.add(parent);
+		return vars;
+	}
+
+	@Override
+	public ParameterizedRandomVariable getChildVariable() {
+		return ParameterizedRandomVariable.getInstance(child);
+	}
+
+	/**
+	 * Returns the set of all constraints of this parfactors: the ones that
+	 * involve the extra logical variable in the parent node and the ones that
+	 * do not involve this variable.
+	 * @return All constraints in the parfactor
+	 */
+	public Set<Constraint> getConstraints() {
+		Set<Constraint> constraints = new HashSet<Constraint>();
+		constraints.addAll(constraintsOnExtraVariable);
+		constraints.addAll(otherConstraints);
+		return constraints;
+	}
+
+	@Override
+	public Set<LogicalVariable> getLogicalVariables() {
+		Set<LogicalVariable> vars = new HashSet<LogicalVariable>();
+		vars.addAll(child.getParameters());
+		vars.addAll(parent.getParameters());
+		return vars;
+	}
+
+	@Override
+	public int size() {
+		Set<LogicalVariable> vars = this.getLogicalVariables();
+		vars.remove(extraVariable);
+		int numFactors = 1;
+		for (LogicalVariable lv : vars) {
+			numFactors = numFactors * lv.getSizeOfPopulationSatisfying(otherConstraints);
+		}
+		
+		return numFactors;
+	}
+
+	@Override
+	public boolean isConstant() {
+		return false;
+	}
+
+	@Override
+	public Parfactor restoreLogicalVariableNames() {
+		AggregationParfactor ap = this;
+		for (LogicalVariable lv : this.getLogicalVariables()) {
+			ap = applySubstitution(lv, LogicalVariableNameGenerator.restore(lv));
+		}
+		return ap;
+	}
+	
+	private AggregationParfactor applySubstitution(LogicalVariable oldVar, 
+			LogicalVariable newVar) {
+		
+		Binding sub = Binding.create(oldVar, newVar);
+		
+		HashSet<Constraint> constraintsOnExtra = new HashSet<Constraint>();
+		HashSet<Constraint> constraintsRemaining = new HashSet<Constraint>();
+		
+		for (Constraint c : this.constraintsOnExtraVariable) {
+			Constraint nc = c.applySubstitution(sub);
+			if (nc != null)
+				constraintsOnExtra.add(nc);
+		}
+		
+		// TODO complete
+		return null;
+	}
+	
+
+	@Override
+	public List<Parfactor> split(Binding s) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Parfactor count(LogicalVariable lv) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Set<Parfactor> propositionalize(LogicalVariable lv) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Parfactor expand(CountingFormula countingFormula, Term term) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Parfactor fullExpand(CountingFormula countingFormula) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Parfactor multiply(Parfactor parfactor) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Parfactor sumOut(ParameterizedRandomVariable prv) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Parfactor replaceLogicalVariablesConstrainedToSingleConstant() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Parfactor renameLogicalVariables() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Parfactor> splitOnMgu(Substitution mgu) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Parfactor> splitOnConstraints(Set<Constraint> constraints) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Set<Parfactor> unify(Parfactor parfactor) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	
+	/* ************************************************************************
+	 * 
+	 *   Class specific methods
+	 * 
+	 * ***********************************************************************/
+	
+	
+	/* ====================================================================== */
+	/*   Conversion to standard parfactors                                    */
+	/* ====================================================================== */
+	
+	/**
+	 * Converts this aggregation parfactor into standard parfactors.
+	 * <br>
+	 * <br>
+	 * The conversion can be made only if the set of all constraints in
+	 * this aggregation parfactor is in the normal form. One must check this
+	 * condition before calling this method.
+	 * <br>
+	 * <br>
+	 * The conversion results in two parfactors, one of them involving a 
+	 * counting formula. This method returns a list of the resulting parfactors
+	 * in the following order: the first does involves counting formulas and
+	 * the second does not.
+	 * <br>
+	 * <b>The result is a list so I can retrieve the parfactors I want later,
+	 * although I'm not sure if this will be necessary</b>
+	 * 
+	 * @return The result of converting this aggregation parfactor into 
+	 * standard parfactors.
+	 */
+	public List<Parfactor> convertToParfactor() {
+		
+		CountingFormula cf = CountingFormula.getInstance(extraVariable, 
+				constraintsOnExtraVariable, parent);
+		
+		List<ParameterizedRandomVariable> vars = 
+				new ArrayList<ParameterizedRandomVariable>(2);
+		vars.add(cf);
+		vars.add(child);
+		
+		Iterator<Tuple> it = ParameterizedFactor.getIteratorOverTuples(vars);
+		List<Number> values = new ArrayList<Number>();
+		while (it.hasNext()) {
+			Tuple current = it.next();
+			if (aggregationIsConsistent(current, cf)) {
+				values.add(1.0);
+			} else {
+				values.add(0.0);
+			}
+		}
+		
+		// first parfactor
+		ParameterizedFactor factor = ParameterizedFactor.getInstance("", vars, values);
+		Parfactor parfactor = SimpleParfactor.getInstance(this.otherConstraints, factor);
+		factor = null; // object won't be used further
+		
+		List<Parfactor> result = new ArrayList<Parfactor>(2);
+		result.add(parfactor);
+		
+		// second parfactor
+		parfactor = SimpleParfactor.getInstance(getConstraints(), this.factor);
+		result.add(parfactor);
+		
+		return result;
+	}
+	
+	/**
+	 * Calculates r = &otimes;(x &in; range(p), &otimes;(i = 1, H(v(cf), x), x))
+	 * and returns true if r = v(c).
+	 * <br>
+	 * The function v is an assignment of values to PRVs. 
+	 * @param t The tuple that represents the assignment of values
+	 * @param cf The counting formula being analyzed
+	 * @return True if the aggregation of parent nodes for the given 
+	 * assignment of values is consistent with the child node value in 
+	 * the tuple
+	 */
+	private boolean aggregationIsConsistent(Tuple t, CountingFormula cf) {
+		
+		int cfRangeIndex =  t.get(0);
+		Set<Boolean> s = new HashSet<Boolean>(2 * this.parent.getRangeSize());
+
+		for (String e : this.parent.getRange()) {
+			int bucketIndex = this.parent.getRange().indexOf(e);
+			int count = cf.getCount(cfRangeIndex, bucketIndex);
+			
+			if (count > 0) {
+				Boolean eToBool = Boolean.valueOf(e);
+				Boolean intermediate = this.operator.applyOn(eToBool, count); // <-- "returns the specified element" is wrong
+				
+				s.add(intermediate);
+			}
+		}
+		
+		Boolean b = this.operator.applyOn(s).booleanValue();
+		int childRangeIndex = t.get(1);
+		String childRangeElem = this.child.getElementFromRange(childRangeIndex);
+		
+		return (b.compareTo(Boolean.valueOf(childRangeElem)) == 0);
+	}
+	
+	// TODO test conversion to parfactor
+	
+	/* ====================================================================== */
+	/*   toString, hashCode and equals                                        */
+	/* ====================================================================== */
+	// TODO implement those
+}
+
 //package br.usp.poli.takiyama.acfove;
 //
 //import java.util.ArrayList;

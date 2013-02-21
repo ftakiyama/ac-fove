@@ -4,10 +4,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import br.usp.poli.takiyama.acfove.AggregationParfactor;
+import br.usp.poli.takiyama.acfove.AggregationParfactor.Builder;
+import br.usp.poli.takiyama.acfove.operator.And;
+import br.usp.poli.takiyama.acfove.operator.BooleanOperator;
+import br.usp.poli.takiyama.acfove.operator.Or;
 import br.usp.poli.takiyama.cfove.ParameterizedFactor;
 import br.usp.poli.takiyama.cfove.SimpleParfactor;
 import br.usp.poli.takiyama.prv.Binding;
@@ -34,6 +40,7 @@ public class Pool {
 	private HashMap<String, SimpleParfactor> simpleParfactorPool;
 	private HashMap<String, Substitution> substitutionPool;
 	private HashMap<String, RandomVariableSet> randomVariableSetPool;
+	private HashMap<String, AggregationParfactor> aggParfactorPool;
 	
 	// maybe I could separate factors in a separated pool.
 	
@@ -47,6 +54,7 @@ public class Pool {
 		this.simpleParfactorPool = new HashMap<String, SimpleParfactor>();
 		this.substitutionPool = new HashMap<String, Substitution>();
 		this.randomVariableSetPool = new HashMap<String, RandomVariableSet>();
+		this.aggParfactorPool = new HashMap<String, AggregationParfactor>();
 	}
 	
 	/**
@@ -351,6 +359,104 @@ public class Pool {
 				RandomVariableSet.getInstance(
 						prvPool.get(prv), 
 						c));
+	}
+	
+	/**
+	 * Creates an instance of aggregation parfactor and puts it in the pool of
+	 * aggregation parfactors.
+	 * @param name The key to retrieve the created parfactor later
+	 * @param parent The name of the parent PRV
+	 * @param child The name of the child PRV
+	 * @param constraints A list of constraint names separated by semicolon
+	 * @param factorName The name of the factor
+	 * @param values The values of the factor separated by semicolon
+	 * @param operator A {@link BinaryOperator}
+	 * @throws IllegalArgumentException If it cannot find a constraint, the
+	 * parent PRV or the child PRV.
+	 */
+	private void createAggParfactor(
+			String name,
+			String parent,
+			String child,
+			String constraints,
+			String factorName,
+			String values,
+			BooleanOperator operator) 
+			throws IllegalArgumentException {
+		
+		Set<Constraint> constraintsSet = new HashSet<Constraint>();
+		if (constraints.length() > 0) {
+			for (String constraint : constraints.split(";")) {
+				if (constraintsPool.containsKey(constraint)) {
+					constraintsSet.add(constraintsPool.get(constraint));
+				} else {
+					throw new IllegalArgumentException("Could not find "
+							+ "constraint " + constraint);
+				}
+			}
+		}
+		
+		ParameterizedRandomVariable p = null;
+		ParameterizedRandomVariable c = null;
+		if (prvPool.containsKey(parent) && prvPool.containsKey(child)) {
+			p = prvPool.get(parent);
+			c = prvPool.get(child);
+		} else {
+			throw new IllegalArgumentException("Could not find PRV " 
+					+ parent
+					+ " or "
+					+ child);
+		}
+		
+		ArrayList<Number> factorValues = new ArrayList<Number>();
+		for (String value : values.split(";")) {
+			factorValues.add(Double.valueOf(value));
+		}
+		
+		List<ParameterizedRandomVariable> plist = new ArrayList<ParameterizedRandomVariable>(1);
+		plist.add(p);
+		ParameterizedFactor f = ParameterizedFactor.getInstance(name, plist, factorValues);
+		
+		Builder builder = new AggregationParfactor.Builder(p, c, operator);
+		builder.addConstraints(constraintsSet);
+		builder.factor(f);
+		AggregationParfactor ag = builder.build();
+		
+		aggParfactorPool.put(name, ag);
+	}
+	
+	/**
+	 * 
+	 * Creates an instance of aggregation parfactor and puts it in the pool of
+	 * aggregation parfactors.
+	 * <br>
+	 * The instance created has the identity factor 1.
+	 * @param name The key to retrieve the created parfactor later
+	 * @param parent The name of the parent PRV
+	 * @param child The name of the child PRV
+	 * @param operator A {@link BinaryOperator}
+	 * @param constraints A list of constraint names separated by semicolon
+	 * @throws IllegalArgumentException If it cannot find a constraint, the
+	 * parent PRV or the child PRV.
+	 */
+	private void createAggParfactor(
+			String name,
+			String parent,
+			String child,
+			String constraints,
+			BooleanOperator operator) 
+			throws IllegalArgumentException {
+		String factorName = "1";
+		StringBuilder v = new StringBuilder();
+		if (prvPool.containsKey(parent)) {
+			for (int i = 0; i < prvPool.get(parent).getRangeSize(); i++) {
+				v.append("1.0;");
+			}
+		} else {
+			throw new IllegalArgumentException("Could not find PRV " + parent);
+		}
+		v.deleteCharAt(v.lastIndexOf(";"));
+		createAggParfactor(name, parent, child, constraints, factorName, v.toString(), operator);
 	}
 	
 	/**
@@ -1201,6 +1307,30 @@ public class Pool {
 		createSimpleParfactor("g13", "", "#.Lot[wet_grass]", "F8", toString(f8));
 	}
 	
+	/**
+	 * Creates parfactors used in example 3.9 of Kisynski (2010)
+	 * @param populationSize  The size of the population of logical variable
+	 * Person
+	 */
+	public void setExample3_9(int populationSize) {
+		createLogicalVariable("Person", "p", populationSize);
+		createPrv("matched_6", "Person");
+		createPrv("jackpot_won", "");
+		createCountingFormula("#.Person[matched_6]", "Person", "matched_6");
+		
+		double [] f = new double[2 * (populationSize + 1)];
+		f[0] = 1.0;
+		f[1] = 0.0;
+		for (int i = 2; i < f.length; i++) {
+			f[i] = (double)(i % 2);
+		}
+		
+		createAggParfactor("ag", "matched_6", "jackpot_won", "", Or.OR);
+
+		createSimpleParfactor("g1", "", "#.Person[matched_6];jackpot_won", "F#", toString(f));
+		createSimpleParfactor("g2", "", "matched_6", "1", "1.0;1.0");
+	}
+	
 	
 	/* ************************************************************************
 	 *      Exposed methods
@@ -1313,6 +1443,16 @@ public class Pool {
 		} else {
 			throw new IllegalArgumentException("There is no such RV set in " +
 					"the pool: " + name);
+		}
+	}
+	
+	public AggregationParfactor getAggParfactor(String name) throws IllegalArgumentException {
+		if (aggParfactorPool.containsKey(name)) {
+			return aggParfactorPool.get(name);
+		} else {
+			throw new IllegalArgumentException("There is no such Aggregation"
+					+ " parfactor in the pool: " 
+					+ name);
 		}
 	}
 }

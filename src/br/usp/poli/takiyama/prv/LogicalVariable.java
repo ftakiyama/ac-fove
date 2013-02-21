@@ -59,6 +59,15 @@ public final class LogicalVariable implements Term {
 	}
 	
 	/**
+	 * Constructor. Creates a copy of the specified logical variable.
+	 * @param lv The LogicalVariable to be copied.
+	 */
+	public LogicalVariable(LogicalVariable lv) {
+		this.name = lv.name;
+		this.population = lv.getPopulation();
+	}
+	
+	/**
 	 * Returns the name of this logical variable.
 	 * @return The name of this logical variable.
 	 */

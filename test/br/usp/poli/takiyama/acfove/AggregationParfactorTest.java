@@ -1,3 +1,50 @@
+package br.usp.poli.takiyama.acfove;
+
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import br.usp.poli.takiyama.common.Parfactor;
+import br.usp.poli.takiyama.common.Pool;
+
+/**
+ * Unit tests for Aggregation parfactors.
+ * @author ftakiyama
+ *
+ */
+public class AggregationParfactorTest {
+
+	private Pool objects;
+	
+	@Before
+	public void setUp() {
+		objects = new Pool();
+	}
+	
+	/**
+	 * Example 3.9 of Kisysnki (2010)
+	 */
+	@Test
+	public void conversionToParfactorWithCountingFormula() {
+		
+		objects.setExample3_9(10);
+		
+		AggregationParfactor ag = objects.getAggParfactor("ag");
+		
+		List<Parfactor> result = ag.convertToParfactor();
+		
+		List<Parfactor> answer = new ArrayList<Parfactor>(2);
+		answer.add(objects.getSimpleParfactor("g1"));
+		answer.add(objects.getSimpleParfactor("g2"));
+		
+		assertTrue(result.equals(answer));
+	}
+}
+
 //package br.usp.poli.takiyama.acfove;
 //
 //import java.util.ArrayList;

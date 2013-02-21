@@ -12,6 +12,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import br.usp.poli.takiyama.acfove.operator.And;
 import br.usp.poli.takiyama.common.Parfactors;
 import br.usp.poli.takiyama.common.Pool;
 import br.usp.poli.takiyama.common.Parfactor;
@@ -39,7 +40,6 @@ public class Sandbox {
 		
 	}
 	
-	@Test
 	public void testHistogramGeneration() {
 		ArrayList<String> H = new ArrayList<String>();
 		ArrayList<Integer> h = new ArrayList<Integer>(10);
@@ -66,7 +66,6 @@ public class Sandbox {
 		}
 	}
 	
-	@Test
 	public void testObjectReference() {
 		SubSandbox s1 = new SubSandbox(1);
 		SubSandbox s2 = s1;
@@ -105,7 +104,6 @@ public class Sandbox {
 		return r;
 	}
 	
-	@Test
 	public void testCombination() {
 		for (int n = 0; n < 11; n++) {
 			for (int k = 0; k < 11; k++) {
@@ -114,12 +112,22 @@ public class Sandbox {
 		}
 	}
 	
-	@Test
+
 	public void testArrayString() {
 		Pool p = new Pool();
 		p.setExample2_5_2_7(5);
 		for (int i = 1; i <= 13; i++)
 			System.out.println(p.getSimpleParfactor("g" + i));
+	}
+	
+	@Test
+	public void testArrayListReference() {
+		ArrayList<StringBuilder> a = new ArrayList<StringBuilder>();
+		StringBuilder s = new StringBuilder("1");
+		a.add(s);
+		s.append(" 2");
+		a.add(s);
+		System.out.println(s);
 	}
 	
 }

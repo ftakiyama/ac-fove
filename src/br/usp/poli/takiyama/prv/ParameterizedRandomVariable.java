@@ -53,8 +53,8 @@ public class ParameterizedRandomVariable {
 	 * @param prv A parameterized random variable
 	 */
 	protected ParameterizedRandomVariable(ParameterizedRandomVariable prv) {
-		this.functor = prv.functor;
-		this.parameters = prv.parameters;
+		this.functor = new PredicateSymbol(prv.functor);
+		this.parameters = new ArrayList<Term>(prv.parameters);
 	}
 	
 	/**
@@ -85,6 +85,16 @@ public class ParameterizedRandomVariable {
 			PredicateSymbol functor, 
 			List<Term> parameters) {
 		return new ParameterizedRandomVariable(functor, parameters);
+	}
+	
+	/**
+	 * Static factory of PRV. Returns a copy of the given PRV.
+	 * @param prv The PRV to copy.
+	 * @return A copy of the given PRV.
+	 */
+	public static ParameterizedRandomVariable getInstance (
+			ParameterizedRandomVariable prv) {
+		return new ParameterizedRandomVariable(prv);
 	}
 	
 	/**

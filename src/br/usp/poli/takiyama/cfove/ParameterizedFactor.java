@@ -170,6 +170,45 @@ public final class ParameterizedFactor {
 	}
 	
 	/**
+	 * Static factory that returns a constant parameterized factor.
+	 * The constant instance return 1 for all tuples in the factor.
+	 * @param variables The parameterized random variables in the factor.
+	 * @return A constant parameterized factor with the specified variables.
+	 */
+	public static ParameterizedFactor getConstantInstance (
+			List<ParameterizedRandomVariable> variables) {
+		
+		int factorSize = 1;
+		for (ParameterizedRandomVariable prv : variables) {
+			factorSize *= prv.getRangeSize();
+		}
+		ArrayList<Double> temp = new ArrayList<Double>(factorSize);
+		for (int i = 0; i < factorSize; i++) {
+			temp.add(1.0);
+		}
+		return new ParameterizedFactor("1", variables, temp);
+	}
+	
+	/**
+	 * Static factory that returns a constant parameterized factor.
+	 * The constant instance return 1 for all tuples in the factor.
+	 * @param variables The parameterized random variables in the factor.
+	 * @return A constant parameterized factor with the specified variables.
+	 */
+	public static ParameterizedFactor getConstantInstance (
+			ParameterizedRandomVariable prv) {
+		
+		ArrayList<Double> temp = new ArrayList<Double>(prv.getRangeSize());
+		for (int i = 0; i < prv.getRangeSize(); i++) {
+			temp.add(1.0);
+		}
+		List<ParameterizedRandomVariable> variables = 
+			new ArrayList<ParameterizedRandomVariable>(1);
+		variables.add(prv);
+		return new ParameterizedFactor("1", variables, temp);
+	}
+	
+	/**
 	 * Returns the set of all logical variables in the PRVs of this factor.
 	 * @return The set of all logical variables in the PRVs of this factor.
 	 */

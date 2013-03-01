@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 import br.usp.poli.takiyama.acfove.AggregationParfactor;
 import br.usp.poli.takiyama.acfove.AggregationParfactor.Builder;
-import br.usp.poli.takiyama.acfove.operator.And;
+import br.usp.poli.takiyama.acfove.Marginal;
 import br.usp.poli.takiyama.acfove.operator.BooleanOperator;
 import br.usp.poli.takiyama.acfove.operator.Or;
 import br.usp.poli.takiyama.cfove.ParameterizedFactor;
@@ -41,6 +41,9 @@ public class Pool {
 	private HashMap<String, Substitution> substitutionPool;
 	private HashMap<String, RandomVariableSet> randomVariableSetPool;
 	private HashMap<String, AggregationParfactor> aggParfactorPool;
+	private HashMap<String, Binding> bindingPool;
+	private HashMap<String, Marginal> marginalPool;
+	private HashMap<String, List<Parfactor>> parfactorListPool;
 	
 	// maybe I could separate factors in a separated pool.
 	
@@ -55,6 +58,9 @@ public class Pool {
 		this.substitutionPool = new HashMap<String, Substitution>();
 		this.randomVariableSetPool = new HashMap<String, RandomVariableSet>();
 		this.aggParfactorPool = new HashMap<String, AggregationParfactor>();
+		this.bindingPool = new HashMap<String, Binding>();
+		this.marginalPool = new HashMap<String, Marginal>();
+		this.parfactorListPool = new HashMap<String, List<Parfactor>>();
 	}
 	
 	/**
@@ -170,6 +176,7 @@ public class Pool {
 	}
 	
 	/**
+	 * @deprecated
 	 * Creates an instance of Constraint and puts it in the Constraint pool.
 	 * The key to get the constraint is [firstTerm] != [secondTerm].
 	 * <br>
@@ -457,6 +464,158 @@ public class Pool {
 		}
 		v.deleteCharAt(v.lastIndexOf(";"));
 		createAggParfactor(name, parent, child, constraints, factorName, v.toString(), operator);
+	}
+	
+	/**
+	 * Creates an instance of {@link Marginal} and puts it in the pool of 
+	 * Marginals.
+	 * <br>
+	 * If the name of randomVarialbeSet is null or an empty string, the 
+	 * marginal does not sum out any random variable from the product of
+	 * parfactors.
+	 * <br>
+	 * The random variable set and the parfactors must have been put into 
+	 * their respective pools before calling this method. Otherwise, an
+	 * {@link IllegalArgumentException} is thrown.
+	 * 
+	 * @param name The key to retrieve the created marginal later
+	 * @param randomVariableSet The name of random variable set
+	 * @param parfactor An aggregation parfactor name or a simple parfactor name
+	 * @param parfactors A list of aggregation parfactor names or a simple 
+	 * parfactor names (it may contain both)
+	 * @throws IllegalArgumentException If it cannot find the random variable
+	 * set or a parfactor from the list.
+	 */
+	private void createMarginal(
+			String name, 
+			String randomVariableSet, 
+			String parfactor, 
+			String ... parfactors) 
+			throws IllegalArgumentException {
+		
+		Set<Parfactor> pSet = new HashSet<Parfactor>(parfactors.length);
+		
+		if (aggParfactorPool.containsKey(parfactor)) {
+			pSet.add(getAggParfactor(parfactor));
+		} else if (simpleParfactorPool.containsKey(parfactor)) {
+			pSet.add(getSimpleParfactor(parfactor));
+		} else {
+			throw new IllegalArgumentException("No such parfactor: " + parfactor);
+		}
+		
+		for (String pName : parfactors) {
+			if (aggParfactorPool.containsKey(pName)) {
+				pSet.add(getAggParfactor(pName));
+			} else if (simpleParfactorPool.containsKey(pName)) {
+				pSet.add(getSimpleParfactor(pName));
+			} else {
+				throw new IllegalArgumentException("No such parfactor: " + pName);
+			}
+		}
+		
+		if (randomVariableSet == null || randomVariableSet == "") {
+			Marginal m = Marginal.getInstance(pSet);
+			marginalPool.put(name, m);
+		} else if (randomVariableSetPool.containsKey(randomVariableSet)) {
+			RandomVariableSet rvs = getRandomVariableSet(randomVariableSet);
+			Marginal m = Marginal.getInstance(rvs, pSet);
+			marginalPool.put(name, m);
+		} else {
+			throw new IllegalArgumentException("No such RVS: " + randomVariableSet);
+		}
+	}
+	
+	/**
+	 * Creates an instance of {@link Binding} and puts it in the binding
+	 * pool. 
+	 * <br>
+	 * The first term must exist in the PRV pool, and the second term must
+	 * be a valid index for the first term population. Otherwise, an
+	 * {@link IllegalArgumentException} is thrown.
+	 * 
+	 * @param name The key to retrieve this binding later
+	 * @param firstTerm A logical variable
+	 * @param secondTerm The index of the individual in first term population.
+	 * @throws IllegalArgumentException If the first term does not exist in
+	 * the pool or if the second term is an invalid index.
+	 */
+	private void createBinding(String name, String firstTerm, int secondTerm) 
+			throws IllegalArgumentException {
+		
+		if (!variablesPool.containsKey(firstTerm)) {
+			throw new IllegalArgumentException("No such PRV: " + firstTerm);
+		}
+		
+		LogicalVariable lv = variablesPool.get(firstTerm);
+		
+		if (lv.getPopulation().size() <= secondTerm
+				|| secondTerm < 0) {
+			throw new IllegalArgumentException("Not a valid individual: " 
+					+ secondTerm
+					+ " because "
+					+ firstTerm
+					+ " has a population of size "
+					+ lv.getPopulation().size());
+		}
+		
+		Term c = lv.getPopulation().getIndividual(secondTerm);
+		Binding b = Binding.create(lv, c);
+		
+		bindingPool.put(name, b);
+	}
+	
+	/**
+	 * Creates an instance of {@link Binding} and puts it in the binding
+	 * pool. 
+	 * <br>
+	 * The first term  and the second term must exist in the PRV pool. 
+	 * Otherwise, an {@link IllegalArgumentException} is thrown.
+	 * 
+	 * @param name The key to retrieve this binding later
+	 * @param firstTerm A logical variable
+	 * @param secondTerm A logical variable
+	 * @throws IllegalArgumentException If the first term or the second term
+	 * do not exist in the pool.
+	 */
+	private void createBinding(String name, String firstTerm, String secondTerm) 
+			throws IllegalArgumentException {
+		
+		if (!variablesPool.containsKey(firstTerm)) {
+			throw new IllegalArgumentException("No such PRV: " + firstTerm);
+		}
+		if (!variablesPool.containsKey(secondTerm)) {
+			throw new IllegalArgumentException("No such PRV: " + secondTerm);
+		}
+		
+		LogicalVariable lv = variablesPool.get(firstTerm);
+		Term t = variablesPool.get(secondTerm);
+		Binding b = Binding.create(lv, t);
+		
+		bindingPool.put(name, b);
+	}
+	
+	/**
+	 * Creates a list of parfactors. The specified parfactors must be in
+	 * the pool.
+	 * @param p1 The name of the first parfactor to add.
+	 * @param parfactors The name of the remaining parfactors to add.
+	 */
+	private void createParfactorList(String name, String ... parfactors) {
+		ArrayList<Parfactor> pList = new ArrayList<Parfactor>();
+		
+		if (parfactors == null || parfactors.length == 0) {
+			throw new IllegalArgumentException("Empty list of parfactors!");
+		}
+		for (String p : parfactors) {
+			if (aggParfactorPool.containsKey(p)) {
+				pList.add(getAggParfactor(p));
+			} else if (simpleParfactorPool.containsKey(p)) {
+				pList.add(getSimpleParfactor(p));
+			} else {
+				throw new IllegalArgumentException("No such parfactor: " + p);
+			}
+		}
+		this.parfactorListPool.put(name, pList);
 	}
 	
 	/**
@@ -1331,6 +1490,74 @@ public class Pool {
 		createSimpleParfactor("g2", "", "matched_6", "1", "1.0;1.0");
 	}
 	
+	/**
+	 * Creates all data structures to perform split tests on aggregation
+	 * parfactors.
+	 */
+	public void setSplitAggParfactorTest() {
+		createLogicalVariable("A", "x", 10);
+		createLogicalVariable("B", "x", 10);
+		createPrv("p", "A", "B");
+		createPrv("c", "B");
+		createPrv("c'", "B");
+		createPrvFromSubstitution("p", "A/1");
+		createPrvFromSubstitution("p", "B/1");
+		createPrvFromSubstitution("c", "B/1");
+		createBinding("B/1", "B", 1);
+		createBinding("A/1", "A", 1);
+		createBinding("A/B", "B", "A");
+		createBinding("B/A", "A", "B");
+		createConstraint("A", "1");
+		createConstraint("A", "2");
+		createConstraint("B", "1");
+		createConstraint("B", "2");
+		createConstraint("A", "B");
+		createAggParfactor("ag1", "p", "c", "", Or.OR);
+		createAggParfactor("ag2", "p", "c", "A != 2;B != 2", Or.OR);
+		
+		createAggParfactor("g1", "p[B/1]", "c[B/1]", "", Or.OR);
+		createAggParfactor("g2", "p", "c", "B != 1", Or.OR);
+		createParfactorList("m1", "g1", "g2");
+		
+		createAggParfactor("g3", "p", "c", "A != 1", Or.OR);
+		
+		double [] f = {1.0, 
+					   0.0,
+					   0.0,
+					   1.0,
+					   0.0,
+					   1.0,
+					   0.0,
+					   1.0};
+		
+		createSimpleParfactor("g4", "", "p[A/1];c';c", "Fc", toString(f));
+		createParfactorList("m2", "g3", "g4");
+		
+		createAggParfactor("g5", "p", "c'", "A != B", Or.OR);
+		createSimpleParfactor("g6", "", "p[A/B];c';c", "Fc", toString(f));
+		createParfactorList("m3", "g5", "g6");
+		
+		createAggParfactor("g7", "p", "c'", "A != B", Or.OR);
+		createSimpleParfactor("g8", "", "p[A/B];c';c", "Fc", toString(f));
+		createParfactorList("m4", "g7", "g8");
+		
+		createAggParfactor("g9",  "p[B/1]", "c[B/1]", "A != 2", Or.OR);
+		createAggParfactor("g10", "p", "c", "B != 1;B != 2;A != 2", Or.OR);
+		createParfactorList("m5", "g9", "g10");
+				
+		createAggParfactor("g11", "p", "c'", "A != 1; A != 2;B != 2", Or.OR);
+		createSimpleParfactor("g12", "B != 2", "p[A/1];c';c", "Fc", toString(f));
+		createParfactorList("m6", "g11", "g12");
+				
+		createAggParfactor("g13", "p", "c'", "A != B; A != 2;B != 2", Or.OR);
+		createSimpleParfactor("g14", "B != 2", "p[A/B];c';c", "Fc", toString(f));
+		createParfactorList("m7", "g13", "g14");
+		
+		createAggParfactor("g15", "p", "c'", "B != A; A != 2;B != 2", Or.OR);
+		createSimpleParfactor("g16", "A != 2", "p[B/A];c';c", "Fc", toString(f));
+		createParfactorList("m8", "g15", "g16");
+	}
+	
 	
 	/* ************************************************************************
 	 *      Exposed methods
@@ -1446,11 +1673,62 @@ public class Pool {
 		}
 	}
 	
+	/**
+	 * Returns an aggregation parfactor from the pool.
+	 * @param name The name of the aggregation parfactor
+	 * @return An aggregation parfactor from the pool.
+	 * @throws IllegalArgumentException If the parfactor with the given name
+	 * does not exist in the pool.
+	 */
 	public AggregationParfactor getAggParfactor(String name) throws IllegalArgumentException {
 		if (aggParfactorPool.containsKey(name)) {
 			return aggParfactorPool.get(name);
 		} else {
 			throw new IllegalArgumentException("There is no such Aggregation"
+					+ " parfactor in the pool: " 
+					+ name);
+		}
+	}
+	
+	/**
+	 * Returns a marginal from the pool.
+	 * @param name The name of the marginal.
+	 * @return A marginal from the pool.
+	 * @throws IllegalArgumentException If the marginal with the given name 
+	 * does not exist in the pool.
+	 */
+	public Marginal getMarginal(String name) throws IllegalArgumentException {
+		if (marginalPool.containsKey(name)) {
+			return marginalPool.get(name);
+		} else {
+			throw new IllegalArgumentException("There is no such Marginal"
+					+ " parfactor in the pool: " 
+					+ name);
+		}
+	}
+	
+	/**
+	 * Returns a binding from the pool.
+	 * @param name The name of the binding.
+	 * @return A binding from the pool.
+	 * @throws IllegalArgumentException If the binding with the specified name
+	 * does not exist in the pool.
+	 */
+	public Binding getBinding(String name) throws IllegalArgumentException {
+		if (bindingPool.containsKey(name)) {
+			return bindingPool.get(name);
+		} else {
+			throw new IllegalArgumentException("There is no such Binding"
+					+ " in the pool: " 
+					+ name);
+		}
+	}
+	
+	public List<Parfactor> getParfactorList(String name) throws IllegalArgumentException {
+		if (parfactorListPool.containsKey(name)) {
+			return parfactorListPool.get(name);
+		} else {
+			throw new IllegalArgumentException("There is no such list of"
 					+ " parfactor in the pool: " 
 					+ name);
 		}

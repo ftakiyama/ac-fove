@@ -10,6 +10,8 @@ import org.junit.Test;
 
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.Pool;
+import br.usp.poli.takiyama.prv.Binding;
+import br.usp.poli.takiyama.prv.LogicalVariable;
 
 /**
  * Unit tests for Aggregation parfactors.
@@ -40,6 +42,206 @@ public class AggregationParfactorTest {
 		List<Parfactor> answer = new ArrayList<Parfactor>(2);
 		answer.add(objects.getSimpleParfactor("g1"));
 		answer.add(objects.getSimpleParfactor("g2"));
+		
+		assertTrue(result.equals(answer));
+	}
+	
+	/**
+	 * Splits aggregation parfactor
+	 * &lang; &empty;, p(A,B), c(B), 1, OR, &empty; &rang; 
+	 * on substitution {B/x1}.
+	 * <br>
+	 * <br>
+	 * Result should be
+	 * J( { &lang; &empty;, p(A,x1), c(x1), 1, OR, &empty; &rang;,      
+	 * 		&lang; {B &ne; x1}, p(A,B), c(B), 1, OR, &empty; &rang; } ).
+	 */
+	@Test
+	public void testSimpleSplit() {
+		
+		objects.setSplitAggParfactorTest();
+		
+		AggregationParfactor ag = objects.getAggParfactor("ag1");
+		Binding substitution = objects.getBinding("B/1");
+		List<Parfactor> result = ag.split(substitution);
+		
+		List<Parfactor> answer = objects.getParfactorList("m1");
+		
+		assertTrue(result.equals(answer));
+	}
+	
+	/**
+	 * Splits aggregation parfactor
+	 * &lang; &empty;, p(A,B), c(B), 1, OR, &empty; &rang; 
+	 * on substitution {A/x1}.
+	 * <br>
+	 * <br>
+	 * Result should be
+	 * &sum;<sub>ground(c')</sub> 
+	 * J( { &lang; &empty;, p(A,B), c'(B), 1, OR, {A&ne;x1} &rang;,      
+	 * 		&lang; &empty;, { p(x1,B), c'(B), c(B) }, Fc &rang; } ).
+	 */
+	@Test
+	public void testSplitOnExtraWithConstant() {
+		
+		objects.setSplitAggParfactorTest();
+
+		AggregationParfactor ag = objects.getAggParfactor("ag1");
+		Binding substitution = objects.getBinding("A/1");
+		List<Parfactor> result = ag.split(substitution);
+		
+		List<Parfactor> answer = objects.getParfactorList("m2");
+		
+		assertTrue(result.equals(answer));
+	}
+	
+	/**
+	 * Splits aggregation parfactor
+	 * &lang; &empty;, p(A,B), c(B), 1, OR, &empty; &rang; 
+	 * on substitution {A/B}.
+	 * <br>
+	 * <br>
+	 * Result should be
+	 * &sum;<sub>ground(c')</sub> 
+	 * J( { &lang; &empty;, p(A,B), c'(B), 1, OR, {A&ne;B} &rang;,      
+	 * 		&lang; &empty;, { p(B,B), c'(B), c(B) }, Fc &rang; } ).
+	 */
+	@Test 
+	public void testSplitOnExtraWithVariable() {
+		
+		objects.setSplitAggParfactorTest();
+
+		AggregationParfactor ag = objects.getAggParfactor("ag1");
+		Binding substitution = objects.getBinding("A/B");
+		List<Parfactor> result = ag.split(substitution);
+		
+		List<Parfactor> answer = objects.getParfactorList("m3");
+		
+		assertTrue(result.equals(answer));
+	}
+	
+	/**
+	 * Splits aggregation parfactor
+	 * &lang; &empty;, p(A,B), c(B), 1, OR, &empty; &rang; 
+	 * on substitution {B/A}.
+	 * <br>
+	 * <br>
+	 * Result should be
+	 * &sum;<sub>ground(c')</sub> 
+	 * J( { &lang; &empty;, p(A,B), c'(B), 1, OR, {A&ne;B} &rang;,      
+	 * 		&lang; &empty;, { p(A,A), c'(B), c(B) }, Fc &rang; } ).
+	 */
+	@Test 
+	public void testSplitWithExtra() {
+		
+		objects.setSplitAggParfactorTest();
+
+		AggregationParfactor ag = objects.getAggParfactor("ag1");
+		Binding substitution = objects.getBinding("B/A");
+		List<Parfactor> result = ag.split(substitution);
+		
+		List<Parfactor> answer = objects.getParfactorList("m4");
+		
+		assertTrue(result.equals(answer));
+	}
+	
+	/**
+	 * Splits aggregation parfactor
+	 * &lang; {B&ne;x2}, p(A,B), c(B), 1, OR, {A&ne;x2} &rang; 
+	 * on substitution {B/x1}.
+	 * <br>
+	 * <br>
+	 * Result should be
+	 * J( { &lang; &empty;, p(A,x1), c(x1), 1, OR, {A&ne;x2} &rang;,      
+	 * 		&lang; {B&ne;x1,B&ne;x2}, p(A,B), c(B), 1, OR, {A&ne;x2} &rang; } ).
+	 */
+	@Test
+	public void testSimpleSplitConstrainedParfactor() {
+		
+		objects.setSplitAggParfactorTest();
+
+		AggregationParfactor ag = objects.getAggParfactor("ag2");
+		Binding substitution = objects.getBinding("B/1");
+		List<Parfactor> result = ag.split(substitution);
+		
+		List<Parfactor> answer = objects.getParfactorList("m5");
+		
+		assertTrue(result.equals(answer));
+	}
+	
+	/**
+	 * Splits aggregation parfactor
+	 * &lang; {B&ne;x2}, p(A,B), c(B), 1, OR, {A&ne;x2} &rang; 
+	 * on substitution {A/x1}.
+	 * <br>
+	 * <br>
+	 * Result should be
+	 * &sum;<sub>ground(c')</sub> 
+	 * J( { &lang; {B&ne;x2}, p(A,B), c'(B), 1, OR, {A&ne;x1,A&ne;x2} &rang;,      
+	 * 		&lang; {B&ne;x2}, { p(x1,B), c'(B), c(B) }, Fc &rang; } ).
+	 */
+	@Test
+	public void testSplitConstrainedParfactorOnExtraWithConstant() {
+		
+		objects.setSplitAggParfactorTest();
+
+		AggregationParfactor ag = objects.getAggParfactor("ag2");
+		Binding substitution = objects.getBinding("A/1");
+		List<Parfactor> result = ag.split(substitution);
+		
+		List<Parfactor> answer = objects.getParfactorList("m6");
+		
+		assertTrue(result.equals(answer));
+		
+	}
+	
+	/**
+	 * Splits aggregation parfactor
+	 * &lang; {B&ne;x2}, p(A,B), c(B), 1, OR, {A&ne;x2} &rang; 
+	 * on substitution {A/B}.
+	 * <br>
+	 * <br>
+	 * Result should be
+	 * &sum;<sub>ground(c')</sub> 
+	 * J( { &lang; {B&ne;x2}, p(A,B), c'(B), 1, OR, {A&ne;B,A&ne;x2} &rang;,      
+	 * 		&lang; {B&ne;x2}, { p(B,B), c'(B), c(B) }, Fc &rang; } ).
+	 */
+	@Test 
+	public void testSplitConstrainedParfactorOnExtraWithVariable() {
+		
+		objects.setSplitAggParfactorTest();
+
+		AggregationParfactor ag = objects.getAggParfactor("ag2");
+		Binding substitution = objects.getBinding("A/B");
+		List<Parfactor> result = ag.split(substitution);
+		
+		List<Parfactor> answer = objects.getParfactorList("m7");
+		
+		assertTrue(result.equals(answer));
+		
+	}
+	
+	/**
+	 * Splits aggregation parfactor
+	 * &lang; {B&ne;x2}, p(A,B), c(B), 1, OR, {A&ne;x2} &rang; 
+	 * on substitution {B/A}.
+	 * <br>
+	 * <br>
+	 * Result should be
+	 * &sum;<sub>ground(c')</sub> 
+	 * J( { &lang; {B&ne;x2}, p(A,B), c'(B), 1, OR, {A&ne;B,A&ne;x2} &rang;,      
+	 * 		&lang; {A&ne;x2}, { p(A,A), c'(B), c(B) }, Fc &rang; } ).
+	 */
+	@Test 
+	public void testSplitConstrainedParfactorWithExtra() {
+		
+		objects.setSplitAggParfactorTest();
+
+		AggregationParfactor ag = objects.getAggParfactor("ag2");
+		Binding substitution = objects.getBinding("B/A");
+		List<Parfactor> result = ag.split(substitution);
+		
+		List<Parfactor> answer = objects.getParfactorList("m8");
 		
 		assertTrue(result.equals(answer));
 	}

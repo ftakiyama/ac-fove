@@ -7,7 +7,6 @@ import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
-import br.usp.poli.takiyama.prv.Substitution;
 
 /**
  * Represents the set of random variables represented by a parameterized
@@ -82,6 +81,19 @@ public final class RandomVariableSet {
 			return getEmptyInstance();
 		else
 			return new RandomVariableSet(prv, constraints);
+	}
+	
+	/**
+	 * Static factory of RandomVariableSet. Returns an instance of
+	 * RandomVariableSet that is identical to the specified RandomVariableSet.
+	 * @param rvs The RandomVariableSet to copy.
+	 * @return An instance of RandomVariableSet that is identical to the 
+	 * specified RandomVariableSet.
+	 */
+	public static RandomVariableSet getInstance(RandomVariableSet rvs) {
+		ParameterizedRandomVariable prv = ParameterizedRandomVariable.getInstance(rvs.prv);
+		Set<Constraint> constraints = new HashSet<Constraint>(rvs.constraints);
+		return new RandomVariableSet(prv, constraints);
 	}
 	
 	/**

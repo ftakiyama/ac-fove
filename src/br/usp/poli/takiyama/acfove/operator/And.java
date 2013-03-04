@@ -64,4 +64,20 @@ final public class And implements BooleanOperator {
 	public String toString() {
 		return "AND";
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		return (obj instanceof And);
+	}
+	
+	/**
+	 * Returns 2, since this is a singleton.
+	 */
+	@Override
+	public int hashCode() {
+		return 2; // singleton
+	}
 }

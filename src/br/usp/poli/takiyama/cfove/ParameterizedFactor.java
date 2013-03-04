@@ -11,6 +11,7 @@ import java.util.Set;
 
 import br.usp.poli.takiyama.common.MathUtils;
 import br.usp.poli.takiyama.common.Tuple;
+import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
@@ -22,7 +23,7 @@ public final class ParameterizedFactor {
 	private final ArrayList<Double> mapping;
 	
 	private final int size;
-	private final static double PRECISION = 0.000000000000001;
+	private final static double PRECISION = 0.000000000000002;
 	
 	/**
 	 * Private constructor. Creates a new factor on parameterized random variables.
@@ -841,5 +842,20 @@ public final class ParameterizedFactor {
 			}
 		}
 		return result;		
+	}
+	
+	/**
+	 * Applies the specified substitution to this factor. This method applies
+	 * the specified substitution to each parameterized random variable of
+	 * this factor; the values are not modified.
+	 * @param s The substitution (binding) to apply
+	 * @return This factor with the specified substitution applied.
+	 */
+	public ParameterizedFactor applySubstitution(Binding s) {
+		List<ParameterizedRandomVariable> prvs = new ArrayList<ParameterizedRandomVariable>(this.variables.size());
+		for (ParameterizedRandomVariable v : variables) {
+			prvs.add(v.applyOneSubstitution(s));
+		}
+		return new ParameterizedFactor(this.name, prvs, this.mapping);
 	}
 }

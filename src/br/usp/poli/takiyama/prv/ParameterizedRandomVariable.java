@@ -117,6 +117,19 @@ public class ParameterizedRandomVariable {
 	}
 	
 	/**
+	 * Returns a new Parameterized Random Variable equal to this one with the
+	 * specified name
+	 * @param newName The new name of this PRV.
+	 * @return This PRV renamed. A new instance is created.
+	 */
+	public ParameterizedRandomVariable rename(String newName) {
+		PredicateSymbol f = new PredicateSymbol(newName, 
+				this.functor.getRange().toArray(new String[this.functor.getRange().size()])); // arrrrrrrrgh
+		List<Term> param = new ArrayList<Term>(this.parameters);
+		return new ParameterizedRandomVariable(f, param);
+	}
+	
+	/**
 	 * Returns an Instance of this Parameterized Random Variable by applying
 	 * a substitution.
 	 * The application of a substitution θ ={X1/ti1....,Xl/til} to a 

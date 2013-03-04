@@ -12,6 +12,7 @@ import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.Pool;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.LogicalVariable;
+import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 
 /**
  * Unit tests for Aggregation parfactors.
@@ -90,8 +91,8 @@ public class AggregationParfactorTest {
 		Binding substitution = objects.getBinding("A/1");
 		List<Parfactor> result = ag.split(substitution);
 		
-		List<Parfactor> answer = objects.getParfactorList("m2");
-		
+		List<Parfactor> answer = objects.getParfactorList("m2");  
+				
 		assertTrue(result.equals(answer));
 	}
 	

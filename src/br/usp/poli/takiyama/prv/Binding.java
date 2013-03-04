@@ -50,6 +50,33 @@ public class Binding {
 		return this.secondTerm;
 	}
 	
+	/**
+	 * Returns true if this binding contains the specified term.
+	 * @param t The term to search for.
+	 * @return True if this binding contains the specified term, false
+	 * otherwise.
+	 */
+	public boolean contains(Term t) {
+		if (t.isLogicalVariable()) {
+			LogicalVariable lv = (LogicalVariable) t;
+			if (this.firstTerm.equals(lv)) {
+				return true;
+			}
+			if (this.secondTerm.isLogicalVariable()
+					&& ((LogicalVariable) this.secondTerm).equals(lv)) {
+				return true;
+			}
+			return false;
+		} else {
+			Constant c = (Constant) t;
+			if (this.secondTerm.isConstant()
+					&& ((Constant) this.secondTerm).equals(c)) {
+				return true;
+			}
+			return false;
+		}
+	}
+	
 	@Override
 	public boolean equals(Object other) {
 		// Tests if both refer to the same object

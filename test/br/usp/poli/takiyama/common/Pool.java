@@ -1500,18 +1500,21 @@ public class Pool {
 		createPrv("p", "A", "B");
 		createPrv("c", "B");
 		createPrv("c'", "B");
+		createPrvFromSubstitution("p", "A/B");
+		createPrvFromSubstitution("p", "B/A");
 		createPrvFromSubstitution("p", "A/1");
 		createPrvFromSubstitution("p", "B/1");
 		createPrvFromSubstitution("c", "B/1");
 		createBinding("B/1", "B", 1);
 		createBinding("A/1", "A", 1);
-		createBinding("A/B", "B", "A");
-		createBinding("B/A", "A", "B");
+		createBinding("B/A", "B", "A");
+		createBinding("A/B", "A", "B");
 		createConstraint("A", "1");
 		createConstraint("A", "2");
 		createConstraint("B", "1");
 		createConstraint("B", "2");
 		createConstraint("A", "B");
+		createConstraint("B", "A");
 		createAggParfactor("ag1", "p", "c", "", Or.OR);
 		createAggParfactor("ag2", "p", "c", "A != 2;B != 2", Or.OR);
 		
@@ -1519,7 +1522,7 @@ public class Pool {
 		createAggParfactor("g2", "p", "c", "B != 1", Or.OR);
 		createParfactorList("m1", "g1", "g2");
 		
-		createAggParfactor("g3", "p", "c", "A != 1", Or.OR);
+		createAggParfactor("g3", "p", "c'", "A != 1", Or.OR);
 		
 		double [] f = {1.0, 
 					   0.0,
@@ -1545,15 +1548,15 @@ public class Pool {
 		createAggParfactor("g10", "p", "c", "B != 1;B != 2;A != 2", Or.OR);
 		createParfactorList("m5", "g9", "g10");
 				
-		createAggParfactor("g11", "p", "c'", "A != 1; A != 2;B != 2", Or.OR);
+		createAggParfactor("g11", "p", "c'", "A != 1;A != 2;B != 2", Or.OR);
 		createSimpleParfactor("g12", "B != 2", "p[A/1];c';c", "Fc", toString(f));
 		createParfactorList("m6", "g11", "g12");
 				
-		createAggParfactor("g13", "p", "c'", "A != B; A != 2;B != 2", Or.OR);
+		createAggParfactor("g13", "p", "c'", "A != B;A != 2;B != 2", Or.OR);
 		createSimpleParfactor("g14", "B != 2", "p[A/B];c';c", "Fc", toString(f));
 		createParfactorList("m7", "g13", "g14");
 		
-		createAggParfactor("g15", "p", "c'", "B != A; A != 2;B != 2", Or.OR);
+		createAggParfactor("g15", "p", "c'", "B != A;A != 2;B != 2", Or.OR);
 		createSimpleParfactor("g16", "A != 2", "p[B/A];c';c", "Fc", toString(f));
 		createParfactorList("m8", "g15", "g16");
 	}

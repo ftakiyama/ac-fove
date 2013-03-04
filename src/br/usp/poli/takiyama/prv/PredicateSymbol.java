@@ -81,7 +81,8 @@ class PredicateSymbol {
 	    	return false;
 	    // Tests if both have the same attributes
 	    PredicateSymbol targetObject = (PredicateSymbol) other;
-	    return (this.name == targetObject.name)
+	      
+	    return (this.name.equals(targetObject.name))
 	    		&& ((this.range == null) ? (targetObject.range == null) : this.range.equals(targetObject.range));
 	}
 	

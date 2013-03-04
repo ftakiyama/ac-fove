@@ -69,4 +69,20 @@ final public class Or implements BooleanOperator {
 	public String toString() {
 		return "OR";
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		return (obj instanceof Or);
+	}
+	
+	/**
+	 * Returns 1, since this is a singleton.
+	 */
+	@Override
+	public int hashCode() {
+		return 1; // singleton
+	}
 }

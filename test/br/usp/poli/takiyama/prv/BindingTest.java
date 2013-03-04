@@ -30,4 +30,33 @@ public class BindingTest {
 //		assertTrue(b.isValid());
 //	}
 
+	@Test
+	public void testContains() {
+		/*
+		 * X/Y - X
+		 * X/Y - Y
+		 * X/Y - W
+		 * X/x1 - X
+		 * X/x1 - W
+		 * X/x1 - x1
+		 * X/x1 - x2
+		 */
+		LogicalVariable x = PRV.getLogicalVariable("X", "x", 2);
+		LogicalVariable y = PRV.getLogicalVariable("Y", "x", 2);
+		LogicalVariable w = PRV.getLogicalVariable("W", "x", 2);
+		Constant x1 = new Constant("x1");
+		Constant x2 = new Constant("x2");
+		
+		Binding b1 = Binding.create(x, y);
+		Binding b2 = Binding.create(x, x1);
+		
+		assertTrue(
+				b1.contains(x)
+				&& b1.contains(y)
+				&& !b1.contains(w)
+				&& b2.contains(x)
+				&& !b2.contains(w)
+				&& b2.contains(x1)
+				&& !b2.contains(x2));
+	}
 }

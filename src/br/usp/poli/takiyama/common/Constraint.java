@@ -180,6 +180,33 @@ public class Constraint {
 	    	return false;
 	    // Tests if both have the same attributes
 	    Constraint targetObject = (Constraint) other;
+	    if (this.secondTerm.isLogicalVariable()
+	    		&& targetObject.secondTerm.isLogicalVariable()) { // tests the case (A!=B).equals(B!=A)
+	    	LogicalVariable thisSt = (LogicalVariable) this.secondTerm;
+	    	LogicalVariable otherSt = (LogicalVariable) targetObject.secondTerm;
+	    	
+	    	// direct
+	    	boolean directCompare = 
+	    		((this.firstTerm == null) 
+	    				? (targetObject.firstTerm == null) 
+	    				: (this.firstTerm.equals(targetObject.firstTerm))) 
+	    		&&
+	    		((this.secondTerm == null) 
+	    				? (targetObject.secondTerm == null) 
+	    				: (this.secondTerm.equals(targetObject.secondTerm)));
+	    	
+	    	// inverse
+	    	boolean inverseCompare = 
+	    		((this.firstTerm == null) 
+	    				? (otherSt == null) 
+	    				: (this.firstTerm.equals(otherSt))) 
+	    		&&
+	    		((thisSt == null) 
+	    				? (targetObject.firstTerm == null) 
+	    				: (thisSt.equals(targetObject.firstTerm)));
+	    	
+	    	return (directCompare || inverseCompare);
+	    }
 	    return ((this.firstTerm == null) ? 
 	    		 targetObject.firstTerm == null : 
 		    		 this.firstTerm.equals(targetObject.firstTerm)) &&

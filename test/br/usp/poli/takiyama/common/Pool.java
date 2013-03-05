@@ -1541,7 +1541,7 @@ public class Pool {
 		createParfactorList("m3", "g5", "g6");
 		
 		createAggParfactor("g7", "p", "c'", "A != B", Or.OR);
-		createSimpleParfactor("g8", "", "p[A/B];c';c", "Fc", toString(f));
+		createSimpleParfactor("g8", "", "p[B/A];c';c", "Fc", toString(f));
 		createParfactorList("m4", "g7", "g8");
 		
 		createAggParfactor("g9",  "p[B/1]", "c[B/1]", "A != 2", Or.OR);

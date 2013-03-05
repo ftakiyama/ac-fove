@@ -1561,6 +1561,56 @@ public class Pool {
 		createParfactorList("m8", "g15", "g16");
 	}
 	
+	public void setMultiplicationAggParfactor() {
+		createLogicalVariable("Person", "p", 100);
+		createPrv("played", "Person");
+		createPrv("matched_6", "Person");
+		createPrv("jackpot_won", "");
+		
+		double [] fPlayed = {
+				0.95,
+				0.05
+		};
+		createSimpleParfactor("g1", "", "played", "Fplayed", toString(fPlayed));
+		
+		double [] fMatched = {
+				1.0,
+				0.0,
+				0.99999993,
+				0.00000007
+		};
+		createSimpleParfactor("g2", "", "played;matched_6", "Fmatched", toString(fMatched));
+		
+		createAggParfactor("g3", "matched_6", "jackpot_won", "", Or.OR);
+		
+		double [] fSum = {
+				0.9999999965,
+				0.0000000035
+		};
+		createAggParfactor("g4", "matched_6", "jackpot_won", "", "Fsum", toString(fSum), Or.OR);
+		
+		// second test
+		createLogicalVariable("A", "x", 100);
+		createLogicalVariable("B", "x", 100);
+		createPrv("p", "A", "B");
+		createPrv("c", "B");
+		createConstraint("A", "1");
+		createConstraint("A", "2");
+		createConstraint("A", "B");
+		createConstraint("B", "3");
+		
+		double [] f1 = {0.1234, 0.9876};
+		createSimpleParfactor("h1", "A != 1;A != 2;A != B;B != 3", "p", "F1", toString(f1));
+				
+		double [] f2 = {0.5425, 0.6832};
+		createAggParfactor("h2", "p", "c", "A != 1;A != 2;A != B;B != 3", "F2", toString(f2), Or.OR);
+		
+		double [] f3 = new double[2];
+		f3[0] = f1[0] * f2[0];
+		f3[1] = f1[1] * f2[1];
+		createAggParfactor("h3", "p", "c", "A != 1;A != 2;A != B;B != 3", "F3", toString(f3), Or.OR);
+	}
+	
 	
 	/* ************************************************************************
 	 *      Exposed methods

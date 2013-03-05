@@ -75,6 +75,16 @@ public class AggregationParfactor implements Parfactor {
 			}
 		}
 		
+		public Builder(AggregationParfactor ap) {
+			this.p = ParameterizedRandomVariable.getInstance(ap.parent);
+			this.c = ParameterizedRandomVariable.getInstance(ap.child);
+			this.op = ap.operator;
+			this.f = ParameterizedFactor.getInstance(ap.factor);
+			this.constraintsOnExtra = new HashSet<Constraint>(ap.constraintsOnExtraVariable);
+			this.otherConstraints = new HashSet<Constraint>(ap.otherConstraints);
+			this.lv = new LogicalVariable(ap.extraVariable);
+		}
+		
 		public Builder addConstraintsOnExtra(Set<Constraint> c) {
 			this.constraintsOnExtra.addAll(c);
 			return this;
@@ -617,6 +627,66 @@ public class AggregationParfactor implements Parfactor {
 	/**************************************************************************/
 	
 	
+	/* ************************************************************************
+	 *    Multiplication
+	 * ************************************************************************/
+	
+	@Override
+	public Parfactor multiply(Parfactor parfactor) throws IllegalArgumentException {
+		if (!canMultiply(parfactor)) {
+			throw new IllegalArgumentException(this 
+					+ "\n cannot be multiplied by \n" 
+					+ parfactor);
+		}
+		
+		ParameterizedFactor first = this.getFactor();
+		ParameterizedFactor second = parfactor.getFactor();
+		ParameterizedFactor result = first.multiply(second);
+		
+		return setFactor(result);
+	}
+	
+	/**
+	 * Returns true if this parfactor can be multiplied by the specified
+	 * parfactor, false otherwise.
+	 * <br>
+	 * This parfactor can be multiplied by the specified parfactor if:
+	 * <li> The specified parfactor is a simple parfactor
+	 * <li> The specified parfactor has only the parent PRV
+	 * <li> The constraints of the specified parfactor are equal to the union
+	 * of all constraints in this aggregation parfactor.
+	 * 
+	 * @param p The candidate parfactor to multiply this one
+	 * @return True if this parfactor can be multiplied by the specified
+	 * parfactor, false otherwise.
+	 */
+	public boolean canMultiply(Parfactor p) {
+		if (p instanceof AggregationParfactor) {
+			return false;
+		}
+		boolean compatibleConstraints = p.getConstraints().equals(this.getConstraints());
+		List<ParameterizedRandomVariable> prvs = p.getParameterizedRandomVariables();
+		boolean parfactorOnParent = (prvs.size() == 1) && prvs.contains(this.parent);
+		
+		return compatibleConstraints && parfactorOnParent;
+	}
+	
+	/**
+	 * Sets the factor in this aggregation parfactor.
+	 * @param f The new parameterized factor
+	 * @return This aggregation parfactor with the specified parameterized
+	 * factor.
+	 */
+	private AggregationParfactor setFactor(ParameterizedFactor f) {
+		Builder builder = new Builder(this);
+		builder.factor(f);
+		return builder.build();
+	}
+	
+	/**************************************************************************/
+	
+	
+	
 	@Override
 	public Parfactor count(LogicalVariable lv) {
 		// TODO Auto-generated method stub
@@ -637,12 +707,6 @@ public class AggregationParfactor implements Parfactor {
 
 	@Override
 	public Parfactor fullExpand(CountingFormula countingFormula) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method!");
-	}
-
-	@Override
-	public Parfactor multiply(Parfactor parfactor) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method!");
 	}

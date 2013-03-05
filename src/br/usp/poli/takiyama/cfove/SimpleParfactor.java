@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import br.usp.poli.takiyama.acfove.AggregationParfactor;
 import br.usp.poli.takiyama.common.Constraint;
 //import br.usp.poli.takiyama.common.Constraints;
 import br.usp.poli.takiyama.common.Parfactor;
@@ -402,6 +403,11 @@ public final class SimpleParfactor implements Parfactor {
 	
 	public Parfactor multiply(Parfactor parfactor) {
 		
+		if (parfactor instanceof AggregationParfactor) {
+			AggregationParfactor ap = (AggregationParfactor) parfactor;
+			return ap.multiply(this);
+		}
+		
 		Set<Constraint> allConstraints = new HashSet<Constraint>(this.constraints);
 		allConstraints.addAll(parfactor.getConstraints());
 		
@@ -439,7 +445,7 @@ public final class SimpleParfactor implements Parfactor {
 		 */
 		
 		HashSet<SimpleParfactor> newSetOfParfactors = new HashSet<SimpleParfactor>(setOfParfactors);
-		if (this.canBeMultipliedBy(parfactor)) {
+		if (this.canMultipliy(parfactor)) {
 			SimpleParfactor p = (SimpleParfactor) parfactor;
 			Set<Constraint> union = p.getConstraints();
 			union.addAll(this.getConstraints());
@@ -463,9 +469,10 @@ public final class SimpleParfactor implements Parfactor {
 	}
 	
 	// TODO: check when parfactor is an agg parfactor...
-	public boolean canBeMultipliedBy(SimpleParfactor parfactor) {
-		if (!(parfactor instanceof SimpleParfactor)) {
-			return parfactor.canBeMultipliedBy(this);
+	public boolean canMultipliy(Parfactor parfactor) {
+		if (parfactor instanceof AggregationParfactor) {
+			AggregationParfactor ap = (AggregationParfactor) parfactor;
+			return ap.canMultiply(this);
 		}
 		SimpleParfactor p = (SimpleParfactor) parfactor;
 		

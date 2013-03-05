@@ -246,6 +246,88 @@ public class AggregationParfactorTest {
 		
 		assertTrue(result.equals(answer));
 	}
+	
+	/**
+	 * Example 3.12 of Kisynski (2010).
+	 * <br>
+	 * Given the set of parfactors
+	 * <br>
+	 * &Phi; = {<br>
+	 * &lang; &empty;, {played(Person)}, Fplayed &rang;,<br>
+	 * &lang; &empty;, {played(Person), matched_6(Person}, Fmatched_6 &rang;,<br> 
+	 * &lang; &empty;, matched_6(Person), jackpot_won(Person), 1, OR, &empty; &rang; },
+	 * <br>
+	 * <br>
+	 * we want to calculate J<sub>ground(jackpot_won())</sub>(&Phi;).
+	 * <br>
+	 * <br>
+	 * The partial result in the calculation is parfactor
+	 * &lang; &empty;, matched_6(Person), jackpot_won(Person), F, OR, &empty; &rang;,
+	 * where
+	 * F = 1 &odot; &sum;<sub>played(Person)</sub>(Fplayed &odot; Fmatched_6).
+	 */
+	@Test
+	public void testTrivialMultiplication() {
+		
+		objects.setMultiplicationAggParfactor();
+		
+		Parfactor g1 = objects.getSimpleParfactor("g1");
+		Parfactor g2 = objects.getSimpleParfactor("g2");
+		Parfactor g3 = objects.getAggParfactor("g3");
+		Parfactor temp = g1.multiply(g2);
+		ParameterizedRandomVariable played = 
+				objects.getParameterizedRandomVariable("played");
+		temp = temp.sumOut(played);
+		Parfactor result = g3.multiply(temp);
+		Parfactor answer = objects.getAggParfactor("g4");
+		assertTrue(result.equals(answer));
+	}
+	
+	/**
+	 * Multiplies
+	 * <br>
+	 * h1 = &lang; {A&ne;x1,A&ne;x2,A&ne;B,B&ne;x3}, {p(A,B)}, F1 &rang;
+	 * <br>
+	 * with
+	 * <br>
+	 * h2 = &lang; {B&ne;x3}, p(A,B), c(B), F2, OR, {A&ne;x1,A&ne;x2,A&ne;B} &rang;
+	 * <br>
+	 * <br>
+	 * The result is
+	 * h3 = &lang; {B&ne;x3}, p(A,B), c(B), F1&odot;F2, OR, {A&ne;x1,A&ne;x2,A&ne;B} &rang;
+	 */
+	@Test
+	public void testMultiplication() {
+
+		objects.setMultiplicationAggParfactor();
+		
+		Parfactor g1 = objects.getSimpleParfactor("h1");
+		Parfactor g2 = objects.getAggParfactor("h2");
+		Parfactor result = g2.multiply(g1);
+		
+		Parfactor answer = objects.getAggParfactor("h3");
+
+		assertTrue(result.equals(answer));
+	}
+	
+	/**
+	 * Tests reflexivity.
+	 * <br>
+	 * Given two parfactors g1 and g2, g1 &odot; g2 = g2 &odot; g1.
+	 */
+	@Test
+	public void testMultiplicationReflexivity() {
+		
+		objects.setMultiplicationAggParfactor();
+		
+		Parfactor g1 = objects.getSimpleParfactor("h1");
+		Parfactor g2 = objects.getAggParfactor("h2");
+		Parfactor result = g2.multiply(g1);
+		Parfactor sameResult = g1.multiply(g2); 
+		
+		assertTrue(result.equals(sameResult) 
+				&& sameResult.equals(result));
+	}
 }
 
 //package br.usp.poli.takiyama.acfove;

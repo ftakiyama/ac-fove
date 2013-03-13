@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import br.usp.poli.takiyama.acfove.operator.BooleanOperator;
@@ -16,6 +17,7 @@ import br.usp.poli.takiyama.common.Tuple;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.CountingFormula;
+import br.usp.poli.takiyama.prv.CountingFormula.Histogram;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.LogicalVariableNameGenerator;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
@@ -686,6 +688,256 @@ public class AggregationParfactor implements Parfactor {
 	/**************************************************************************/
 	
 	
+	/* ************************************************************************
+	 *    Sum out
+	 * ************************************************************************/
+	
+	@Override
+	public Parfactor sumOut(ParameterizedRandomVariable prv) {
+		
+		Set<Constraint> c = new HashSet<Constraint>(this.otherConstraints);
+		ParameterizedFactor f = calculateSumOutFactor();
+		Parfactor result;
+		if (childHasExtra()) {
+			result = countChildVariable(f);
+		} else {
+			result = SimpleParfactor.getInstance(c, f);
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Calculates the factor Fm. (cannot think right now)
+	 * @return
+	 */
+	private ParameterizedFactor calculateSumOutFactor() {
+		
+		// base
+		List<Number> currentFactor = new ArrayList<Number>(child.getRangeSize());
+		for (String x : child.getRange()) {
+			if (this.parent.getRange().contains(x)) {
+				int index = parent.getRange().indexOf(x); // only works if p is the only PRV in Fp
+				currentFactor.add(this.factor.getTupleValue(index));
+			} else {
+				currentFactor.add(0.0);
+			}
+		}
+		
+		// Fk
+		int domainSize = this.extraVariable.getSizeOfPopulationSatisfying(constraintsOnExtraVariable);
+		String bin = Integer.toBinaryString(domainSize);
+		for (int k = 1; k < bin.length(); k++) {
+			List<Number> previousFactor = new ArrayList<Number>(currentFactor);
+			if (bin.charAt(k) == '0') {
+				for (String x : this.child.getRange()) {
+					double sum = 0.0;
+					Boolean x1 = Boolean.valueOf(x);
+					for (String y : this.child.getRange()) {
+						Boolean y1 = Boolean.valueOf(y);
+						int yindex = this.child.getRange().indexOf(y);
+						for (String z : this.child.getRange()) {
+							Boolean z1 = Boolean.valueOf(z);
+							int zindex = this.child.getRange().indexOf(z);
+							if (this.operator.applyOn(y1, z1) == x1) {
+								sum = sum 
+									+ previousFactor.get(yindex).doubleValue() 
+										* previousFactor.get(zindex).doubleValue();
+							}
+						}	
+					}
+					int xindex = this.child.getRange().indexOf(x);
+					currentFactor.set(xindex, sum);
+				}
+			} else {
+				for (String x : this.child.getRange()) {
+					double sum = 0.0;
+					Boolean x1 = Boolean.valueOf(x);
+					for (String y : this.child.getRange()) {
+						Boolean y1 = Boolean.valueOf(y);
+						int yindex = this.child.getRange().indexOf(y);
+						for (String z : this.child.getRange()) {
+							Boolean z1 = Boolean.valueOf(z);
+							int zindex = this.child.getRange().indexOf(z);
+							for (String w : this.child.getRange()) {
+								Boolean w1 = Boolean.valueOf(w);
+								if (this.operator.applyOn(w1, y1, z1) == x1) {
+									int index = parent.getRange().indexOf(w); // only works if p is the only PRV in Fp
+									sum = sum 
+										+ this.factor.getTupleValue(index)
+											* previousFactor.get(yindex).doubleValue() 
+											* previousFactor.get(zindex).doubleValue();
+								}
+							}
+						}	
+					}
+					int xindex = this.child.getRange().indexOf(x);
+					currentFactor.set(xindex, sum);
+				}
+			}
+		}
+		
+		List<ParameterizedRandomVariable> prvs = new ArrayList<ParameterizedRandomVariable>(1);
+		prvs.add(this.child);
+		ParameterizedFactor f = ParameterizedFactor.getInstance("", prvs, currentFactor);
+		return f;
+	}
+	
+	/**
+	 * Counts the child variable resulting from calculateSumOutFactor().
+	 * 
+	 * @param f The parameterized factor containing the logical variable 
+	 * to be counted
+	 * @return The result of counting the variable from the specified factor.
+	 */
+	private Parfactor countChildVariable(ParameterizedFactor f) {
+		
+		// build constraints on C_E
+		LogicalVariable extra = getExtraInChild();
+		Set<Constraint> constraintsOnExtra = getConstraintsContaining(extra);
+		Set<Constraint> constraints = new HashSet<Constraint>(this.otherConstraints);
+		constraints.removeAll(constraintsOnExtra);
+				
+		// Build counting formula
+		CountingFormula cf = CountingFormula.getInstance(extra, constraintsOnExtra, child);
+		
+		List<Number> mapping = new ArrayList<Number>();
+		for (CountingFormula.Histogram<String> h : cf.getCountingFormulaRange()) {
+			int extraPopulationSize = extra.getSizeOfPopulationSatisfying(constraintsOnExtra);
+			if (h.containsValue(extraPopulationSize)) {
+				int index = cf.getCountingFormulaRange().indexOf(h);
+				mapping.add(f.getTupleValue(index));
+			} else {
+				mapping.add(0.0);
+			}
+		}
+		
+		String name = f.getName();
+		List<ParameterizedRandomVariable> variables = f.getParameterizedRandomVariables();
+		ParameterizedFactor nf = ParameterizedFactor.getInstance(name, variables, mapping);
+		Parfactor result = SimpleParfactor.getInstance(constraints, nf);
+		return result;
+	}
+	
+	/**
+	 * Returns true if the child PRV is parameterized by a logical variable
+	 * not present in the parent PRV.
+	 * <br>
+	 * In other words, if |param(c) \ param(p)| = 1, returns true. 
+	 * 
+	 * @return True if the child PRV is parameterized by a logical variable
+	 * not present in the parent PRV, false otherwise.
+	 */
+	private boolean childHasExtra() {
+		Set<LogicalVariable> paramParent = parent.getParameters();
+		Set<LogicalVariable> paramChild = new HashSet<LogicalVariable>(child.getParameters());
+		paramChild.removeAll(paramParent);
+		return (paramChild.size() == 1);
+	}
+	
+	/**
+	 * Returns the logical variable in the child PRV that is not present in
+	 * the parent PRV.
+	 * @return The logical variable in the child PRV that is not present in
+	 * the parent PRV.
+	 * @throws NoSuchElementException If there is no extra variable in the child.
+	 */
+	private LogicalVariable getExtraInChild() throws NoSuchElementException {
+		Set<LogicalVariable> paramParent = parent.getParameters();
+		Set<LogicalVariable> paramChild = child.getParameters();
+		paramChild.removeAll(paramParent);
+		Iterator<LogicalVariable> it = paramChild.iterator();
+		if (!it.hasNext()) {
+			throw new NoSuchElementException("Child does not have extra LV.");
+		}
+		return paramChild.iterator().next();
+	}
+	
+	/**
+	 * Returns the set of constraints in this aggregation parfactor that 
+	 * contain the specified logical variable.
+	 * @param lv The logical variable to look for in constraints.
+	 * @return The set of constraints that involve the specified logical
+	 * variable.
+	 */
+	private Set<Constraint> getConstraintsContaining(LogicalVariable lv) {
+		Set<Constraint> constraints = new HashSet<Constraint>();
+		for (Constraint c : getConstraints()) {
+			if (c.contains(lv)) {
+				constraints.add(c);
+			}
+		}
+		return constraints;
+	}
+	
+	/**
+	 * Returns true if the specified parameterized random variable can be 
+	 * summed out from this aggregation parfactor.
+	 * <br>
+	 * <br>
+	 * To sum out a PRV v(...) from this parfactor, the following must be true:
+	 * <li> v(...) is the parent PRV, that is, v(...) = p(...A...)
+	 * <li> The set of all constraints from this parfactor must be in the
+	 * normal form.
+	 * <li> param(c(...)) = param(p(...A....))\{A} <b>or</b>
+	 *      param(c(...E...))\{E} = param(p(...A....))\{A}
+	 * 
+	 * @param prv The ParameterizedRandomVariable to sum out.
+	 * @return True if the specified PRV can be summed out from this parfactor,
+	 * false otherwise.
+	 */
+	public boolean canSumOut(ParameterizedRandomVariable prv) {
+		Set<LogicalVariable> paramC = new HashSet<LogicalVariable>(this.child.getParameters());
+		Set<LogicalVariable> paramP = new HashSet<LogicalVariable>(this.parent.getParameters());
+		paramP.remove(extraVariable);
+		boolean compatibleParams = (paramC.equals(paramP)) 
+								   || (paramC.size() - 1 == paramP.size());
+		boolean isParent = prv.equals(this.parent);
+		
+		return isInNormalForm() && compatibleParams && isParent;
+	}
+	
+	/**
+	 * Checks if this parfactor is in normal form.
+	 * <br>
+	 * A parfactor is in normal form if for each inequality constraint 
+	 * (X &ne; Y) &in; C we have &epsilon;<sub>X</sub><sup>C</sup>\{Y} = 
+	 *  &epsilon;<sub>Y</sub><sup>C</sup>\{X}. X and Y are logical variables.
+	 * @return
+	 */
+	private boolean isInNormalForm() {
+		for (Constraint c : this.getConstraints()) {
+			if (c.getSecondTerm() instanceof LogicalVariable) {
+				Set<Term> firstSet = getExcludedSet(c.getFirstTerm());
+				firstSet.remove(c.getSecondTerm());
+				Set<Term> secondSet = getExcludedSet((LogicalVariable) c.getSecondTerm());
+				secondSet.remove(c.getFirstTerm());
+				if (! firstSet.equals(secondSet)) {
+					return false;
+				}
+			}
+ 		}
+		return true;
+	}
+	
+	/**
+	 * Returns the excluded set for logical variable X, that is, the set of
+	 * terms t such that (X &ne; t) &in; C.
+	 * @param x The logical variable.
+	 * @return The excluded set for logical variable X.
+	 */
+	private Set<Term> getExcludedSet(LogicalVariable x) {
+		HashSet<Term> excludedSet = new HashSet<Term>();
+		for (Constraint constraint : this.getConstraints()) {
+			if (constraint.contains(x)) {
+				excludedSet.add(constraint.getSecondTerm()); // i do not verify if the other term is in fact the second term of the constraint...
+			}
+		}
+		return excludedSet;
+	}
+	
+	/**************************************************************************/
+	
 	
 	@Override
 	public Parfactor count(LogicalVariable lv) {
@@ -707,12 +959,6 @@ public class AggregationParfactor implements Parfactor {
 
 	@Override
 	public Parfactor fullExpand(CountingFormula countingFormula) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method!");
-	}
-
-	@Override
-	public Parfactor sumOut(ParameterizedRandomVariable prv) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method!");
 	}

@@ -25,7 +25,15 @@ final public class Or implements BooleanOperator {
 		boolean b2 = b;
 		return Boolean.valueOf((b1 || b2));
 	}
-
+	
+	@Override
+	public Boolean applyOn(Boolean a, Boolean b, Boolean c) {
+		boolean b1 = a.booleanValue();
+		boolean b2 = b.booleanValue();
+		boolean b3 = c.booleanValue();
+		return Boolean.valueOf(b1 || b2 || b3);
+	}
+	
 	@Override
 	public Boolean applyOn(Set<Boolean> s) throws IllegalArgumentException,
 												  NullPointerException {

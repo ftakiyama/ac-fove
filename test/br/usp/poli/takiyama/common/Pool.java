@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 import br.usp.poli.takiyama.acfove.AggregationParfactor;
 import br.usp.poli.takiyama.acfove.AggregationParfactor.Builder;
+import br.usp.poli.takiyama.acfove.GeneralizedAggregationParfactor;
 import br.usp.poli.takiyama.acfove.Marginal;
 import br.usp.poli.takiyama.acfove.operator.BooleanOperator;
 import br.usp.poli.takiyama.acfove.operator.Or;
@@ -44,6 +45,7 @@ public class Pool {
 	private HashMap<String, Binding> bindingPool;
 	private HashMap<String, Marginal> marginalPool;
 	private HashMap<String, List<Parfactor>> parfactorListPool;
+	private HashMap<String, GeneralizedAggregationParfactor> genAggParfactorPool;
 	
 	// maybe I could separate factors in a separated pool.
 	
@@ -61,6 +63,7 @@ public class Pool {
 		this.bindingPool = new HashMap<String, Binding>();
 		this.marginalPool = new HashMap<String, Marginal>();
 		this.parfactorListPool = new HashMap<String, List<Parfactor>>();
+		this.genAggParfactorPool = new HashMap<String, GeneralizedAggregationParfactor>();
 	}
 	
 	/**
@@ -464,6 +467,130 @@ public class Pool {
 		}
 		v.deleteCharAt(v.lastIndexOf(";"));
 		createAggParfactor(name, parent, child, constraints, factorName, v.toString(), operator);
+	}
+	
+	/**
+	 * Creates an instance of generalized aggregation parfactor and puts it in 
+	 * the pool of
+	 * generalized aggregation parfactors.
+	 * @param name The key to retrieve the created parfactor later
+	 * @param parent The name of the parent PRV
+	 * @param child The name of the child PRV
+	 * @param context A list of context parameterized random variables
+	 * @param constraints A list of constraint names separated by semicolon
+	 * @param factorName The name of the factor
+	 * @param values The values of the factor separated by semicolon
+	 * @param operator A {@link BinaryOperator}
+	 * @throws IllegalArgumentException If it cannot find a constraint, the
+	 * parent PRV or the child PRV.
+	 */
+	private void createGenAggParfactor(
+			String name,
+			String parent,
+			String child,
+			String context,
+			String constraints,
+			String factorName,
+			String values,
+			BooleanOperator operator) 
+			throws IllegalArgumentException {
+		
+		Set<Constraint> constraintsSet = new HashSet<Constraint>();
+		if (constraints.length() > 0) {
+			for (String constraint : constraints.split(";")) {
+				if (constraintsPool.containsKey(constraint)) {
+					constraintsSet.add(constraintsPool.get(constraint));
+				} else {
+					throw new IllegalArgumentException("Could not find "
+							+ "constraint " + constraint);
+				}
+			}
+		}
+		
+		ParameterizedRandomVariable p = null;
+		ParameterizedRandomVariable c = null;
+		if (prvPool.containsKey(parent) && prvPool.containsKey(child)) {
+			p = prvPool.get(parent);
+			c = prvPool.get(child);
+		} else {
+			throw new IllegalArgumentException("Could not find PRV " 
+					+ parent
+					+ " or "
+					+ child);
+		}
+		
+		ArrayList<Number> factorValues = new ArrayList<Number>();
+		for (String value : values.split(";")) {
+			factorValues.add(Double.valueOf(value));
+		}
+		
+		List<ParameterizedRandomVariable> plist = new ArrayList<ParameterizedRandomVariable>(1);
+		plist.add(p);
+		if (context.length() > 0) {
+			for (String contextPrv : context.split(";")) {
+				if (prvPool.containsKey(contextPrv)) {
+					plist.add(prvPool.get(contextPrv));
+				} else {
+					throw new IllegalArgumentException("Could not find "
+							+ " context PRV " + contextPrv);
+				}
+			}
+		}
+		ParameterizedFactor f = ParameterizedFactor.getInstance(name, plist, factorValues);
+		
+		GeneralizedAggregationParfactor.Builder builder = new GeneralizedAggregationParfactor.Builder(p, c, operator);
+		builder.addConstraints(constraintsSet);
+		builder.factor(f);
+		GeneralizedAggregationParfactor ag = builder.build();
+		
+		genAggParfactorPool.put(name, ag);
+	}
+	
+	/**
+	 * 
+	 * Creates an instance of generalized aggregation parfactor and puts it in 
+	 * the pool of
+	 * generalized aggregation parfactors.
+	 * <br>
+	 * The instance created has the identity factor 1.
+	 * @param name The key to retrieve the created parfactor later
+	 * @param parent The name of the parent PRV
+	 * @param child The name of the child PRV
+	 * @param context A list of context PRVs
+	 * @param operator A {@link BinaryOperator}
+	 * @param constraints A list of constraint names separated by semicolon
+	 * @throws IllegalArgumentException If it cannot find a constraint, the
+	 * parent PRV or the child PRV.
+	 */
+	private void createGenAggParfactor(
+			String name,
+			String parent,
+			String child,
+			String context,
+			String constraints,
+			BooleanOperator operator) 
+			throws IllegalArgumentException {
+		String factorName = "1";
+		StringBuilder v = new StringBuilder();
+		if (prvPool.containsKey(parent)) {
+			int factorSize = prvPool.get(parent).getRangeSize();
+			if (context.length() > 0) {
+				for (String contextPrv : context.split(";")) {
+					if (prvPool.containsKey(contextPrv)) {
+						factorSize *= prvPool.get(contextPrv).getRangeSize();
+					} else {
+						throw new IllegalArgumentException("Could not find PRV " + contextPrv);
+					}
+				}
+			}
+			for (int i = 0; i < factorSize; i++) {
+				v.append("1.0;");
+			}
+		} else {
+			throw new IllegalArgumentException("Could not find PRV " + parent);
+		}
+		v.deleteCharAt(v.lastIndexOf(";"));
+		createGenAggParfactor(name, parent, child, context, constraints, factorName, v.toString(), operator);
 	}
 	
 	/**
@@ -1467,6 +1594,8 @@ public class Pool {
 	}
 	
 	/**
+	 * Conversion to parfactors.
+	 * <br>
 	 * Creates parfactors used in example 3.9 of Kisynski (2010)
 	 * @param populationSize  The size of the population of logical variable
 	 * Person
@@ -1609,6 +1738,233 @@ public class Pool {
 		f3[0] = f1[0] * f2[0];
 		f3[1] = f1[1] * f2[1];
 		createAggParfactor("h3", "p", "c", "A != 1;A != 2;A != B;B != 3", "F3", toString(f3), Or.OR);
+	}
+	
+	public void setSumOutAggParfactorTest() {
+		
+		createLogicalVariable("Person", "p", 5);
+		createPrv("matched_6", "Person");
+		createPrv("jackpot_won", "");
+		double [] fSum = {
+				0.9999999965,
+				0.0000000035
+		};
+		createAggParfactor("g1", "matched_6", "jackpot_won", "", "Fsum", toString(fSum), Or.OR);
+		
+		// not elegant, but more readable
+		double [] f0 = new double[2];
+		double [] f1 = new double[2];
+		double [] f2 = new double[2];
+		
+		f0[0] = fSum[0];
+		f0[1] = fSum[1];
+		
+		f1[0] = f0[0] * f0[0];
+		f1[1] = f0[0]*f0[1] + f0[1]*f0[0] + f0[1]*f0[1];
+		
+		f2[0] = fSum[0] * f1[0] * f1[0];
+		f2[1] = fSum[0] * f1[0] * f1[1]
+		      + fSum[0] * f1[1] * f1[0]
+			  + fSum[0] * f1[1] * f1[1]
+		      + fSum[1] * f1[0] * f1[0]
+		      + fSum[1] * f1[0] * f1[1]
+		      + fSum[1] * f1[1] * f1[0]
+   		      + fSum[1] * f1[1] * f1[1];                       
+		createSimpleParfactor("g2", "", "jackpot_won", "F2", toString(f2));                   
+		                
+	}
+	
+	/* ************************************************************************
+	 *      Generealized Aggregation Parfactors
+	 * ************************************************************************/
+	
+	public void setGenAggParfactorConversionTest(int populationSize) {
+		createLogicalVariable("Person", "p", populationSize);
+		createPrv("matched_6", "Person");
+		createPrv("jackpot_won", "");
+		createCountingFormula("#.Person[matched_6]", "Person", "matched_6");
+		
+		double [] f = new double[2 * (populationSize + 1)];
+		f[0] = 1.0;
+		f[1] = 0.0;
+		for (int i = 2; i < f.length; i++) {
+			f[i] = (double)(i % 2);
+		}
+		
+		createGenAggParfactor("g1", "matched_6", "jackpot_won", "", "", Or.OR);
+		createSimpleParfactor("g2", "", "matched_6", "1", "1.0;1.0");
+		createSimpleParfactor("g3", "", "#.Person[matched_6];jackpot_won", "F#", toString(f));
+		
+		createLogicalVariable("A", "x", populationSize);
+		createLogicalVariable("B", "x", populationSize);
+		createLogicalVariable("C", "x", populationSize);
+		createLogicalVariable("D", "x", populationSize);
+		createLogicalVariable("E", "x", populationSize);
+		createPrv("p", "A", "B");
+		createPrv("c", "B");
+		createPrv("v", "C");
+		createPrv("u", "D", "E");
+		createConstraint("A", "2");
+		createConstraint("B", "1");
+		// createGenAggParfactor(name, parent, child, (List) context, constraints, operator, fac name, factor values)
+		
+		double [] fpv = {0.1, 0.2, 0.3 ,0.4, 0.5, 0.6, 0.7, 0.8};
+		createGenAggParfactor("g4", "p", "c", "v,u", "B != 1;A != 2", "Fpv", toString(fpv), Or.OR);
+		createSimpleParfactor("g5", "A != 2;B != 1", "p;v;u", "Fpv", toString(fpv));
+		
+		createCountingFormula("#.A[p]", "A", "p", "A != 2");
+		double [] f1 = new double[8 * populationSize];
+		Arrays.fill(f1, 0, 4, 1);
+		Arrays.fill(f1, 4, 8, 0);
+		for (int i = 1; i < populationSize; i++) {
+			Arrays.fill(f1, 8 * i, 8 * i + 4, 0);
+			Arrays.fill(f1, 8 * i + 4, 8 * (i + 1), 1);
+		}
+		createSimpleParfactor("g6", "B != 1", "#.A[p];c;v;u", "F#", toString(f1));
+	}
+	
+	public void setGenAggParfactorSplitTest() {
+		createLogicalVariable("A", "x", 10);
+		createLogicalVariable("B", "x", 10);
+		createPrv("p", "A", "B");
+		createPrv("c", "B");
+		createPrv("c'", "B");
+		createPrv("v", "A");
+		createPrv("u", "B");
+		createPrvFromSubstitution("p", "A/B");
+		createPrvFromSubstitution("p", "B/A");
+		createPrvFromSubstitution("p", "A/1");
+		createPrvFromSubstitution("p", "B/1");
+		createPrvFromSubstitution("c", "B/1");
+		createPrvFromSubstitution("u", "B/1");
+		createPrvFromSubstitution("u", "B/A");
+		createPrvFromSubstitution("v", "A/1");
+		createPrvFromSubstitution("v", "A/B");
+		createBinding("B/1", "B", 1);
+		createBinding("A/1", "A", 1);
+		createBinding("B/A", "B", "A");
+		createBinding("A/B", "A", "B");
+		createConstraint("A", "1");
+		createConstraint("A", "2");
+		createConstraint("B", "1");
+		createConstraint("B", "2");
+		createConstraint("A", "B");
+		createConstraint("B", "A");
+		
+		createGenAggParfactor("ag1", "p", "c", "v;u", "", Or.OR);
+		createGenAggParfactor("ag2", "p", "c", "v;u", "A != 2;B != 2", Or.OR);
+		
+		createGenAggParfactor("g1", "p[B/1]", "c[B/1]", "v;u[B/1]","", Or.OR);
+		createGenAggParfactor("g2", "p", "c", "v;u", "B != 1", Or.OR);
+		createParfactorList("m1", "g1", "g2");
+		
+		createGenAggParfactor("g3", "p", "c'", "v;u", "A != 1", Or.OR);
+		
+		double [] f = {1.0, 0.0,
+					   0.0, 1.0,
+					   0.0, 1.0,
+					   0.0, 1.0,
+					   0.0, 1.0,
+					   0.0, 1.0,
+					   0.0, 1.0,
+					   0.0, 1.0,
+					   0.0, 1.0,
+					   0.0, 1.0,
+					   0.0, 1.0,
+					   0.0, 1.0,
+					   0.0, 1.0,
+					   0.0, 1.0,
+					   0.0, 1.0,
+					   0.0, 1.0};
+		
+		createSimpleParfactor("g4", "", "p[A/1];v[A/1];u;c';c", "Fc", toString(f));
+		createParfactorList("m2", "g3", "g4");
+		
+		createGenAggParfactor("g5", "p", "c'", "v;u", "A != B", Or.OR);
+		createSimpleParfactor("g6", "", "p[A/B];v[A/B];u;c';c", "Fc", toString(f));
+		createParfactorList("m3", "g5", "g6");
+		
+		createGenAggParfactor("g7", "p", "c'", "v;u", "A != B", Or.OR);
+		createSimpleParfactor("g8", "", "p[B/A];v;u[B/A];c';c", "Fc", toString(f));
+		createParfactorList("m4", "g7", "g8");
+		
+		createGenAggParfactor("g9",  "p[B/1]", "c[B/1]", "v;u[B/1]", "A != 2", Or.OR);
+		createGenAggParfactor("g10", "p", "c", "v;u", "B != 1;B != 2;A != 2", Or.OR);
+		createParfactorList("m5", "g9", "g10");
+				
+		createGenAggParfactor("g11", "p", "c'", "v;u", "A != 1;A != 2;B != 2", Or.OR);
+		createSimpleParfactor("g12", "B != 2", "p[A/1];v[A/1];u;c';c", "Fc", toString(f));
+		createParfactorList("m6", "g11", "g12");
+				
+		createGenAggParfactor("g13", "p", "c'", "v;u", "A != B;A != 2;B != 2", Or.OR);
+		createSimpleParfactor("g14", "B != 2", "p[A/B];v[A/B];u;c';c", "Fc", toString(f));
+		createParfactorList("m7", "g13", "g14");
+		
+		createGenAggParfactor("g15", "p", "c'", "v;u", "B != A;A != 2;B != 2", Or.OR);
+		createSimpleParfactor("g16", "A != 2", "p[B/A];v;u[B/A];c';c", "Fc", toString(f));
+		createParfactorList("m8", "g15", "g16");
+	}
+	
+	public void setGenAggParfactorMultiplicationTest() {
+		// first test
+		createLogicalVariable("Person", "p", 100);
+		createPrv("matched_6", "Person");
+		createPrv("jackpot_won", "");
+		createPrv("big_jackpot", "");
+		
+		createGenAggParfactor("g4", "matched_6", "jackpot_won", "big_jackpot","", Or.OR);
+		double [] fMatched6 = {
+				0.9999999965,
+				0.999999989,
+				0.0000000035,
+				0.000000011
+		};
+		createSimpleParfactor("g5", "", "matched_6;big_jackpot", "Fmatched6", toString(fMatched6));
+		createGenAggParfactor("g6", "matched_6", "jackpot_won", "big_jackpot","", "Fmatched6", toString(fMatched6), Or.OR);
+		
+		// second test
+		createLogicalVariable("A", "x", 100);
+		createLogicalVariable("B", "x", 100);
+		createPrv("p", "A", "B");
+		createPrv("c", "B");
+		createPrv("v", "A");
+		createPrv("u", "B");
+		createConstraint("A", "2");
+		createConstraint("B", "1");
+		
+		double [] fpv = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8};
+		createSimpleParfactor("g1", "A != 2;B != 1", "p;v;u", "F1", toString(fpv));
+		createGenAggParfactor("ga", "p", "c", "v;u", "A != 2; B != 1", "Fpv", toString(fpv), Or.OR);
+		
+		double [] fr = new double[8];
+		for (int i = 0; i < fr.length; i++) {
+			fr[i] = fpv[i] * fpv[i];
+		}
+		createGenAggParfactor("gar", "p", "c", "v;u", "A != 2; B != 1", "Fpv'", toString(fr), Or.OR);
+	}
+	
+	public void setGenAggParfactorSumOutTest() {
+
+		createLogicalVariable("Person", "p", 5);
+		createPrv("matched_6", "Person");
+		createPrv("jackpot_won", "");
+		createPrv("big_jackpot", "");
+		
+		double [] fMatched6 = {
+				0.9999999965,
+				0.999999989,
+				0.0000000035,
+				0.000000011
+		};
+		createGenAggParfactor("g6", "matched_6", "jackpot_won", "big_jackpot", "", "Fmatched6'", toString(fMatched6), Or.OR);
+		
+		double [] fJackpotWon = {
+				0.9999999825,
+				0.9999999450,
+				0.0000000175,
+				0.0000000550
+		};
+		createSimpleParfactor("g7", "", "big_jackpot;jackpot_won", "Fjackpot_won", toString(fJackpotWon));
 	}
 	
 	
@@ -1777,11 +2133,36 @@ public class Pool {
 		}
 	}
 	
+	/**
+	 * Returns a list of parfactors from the pool.
+	 * @param name The name of the list of parfactors.
+	 * @return A list of parfactors from the pool
+	 * @throws IllegalArgumentException If the list does not exist
+	 */
 	public List<Parfactor> getParfactorList(String name) throws IllegalArgumentException {
 		if (parfactorListPool.containsKey(name)) {
 			return parfactorListPool.get(name);
 		} else {
 			throw new IllegalArgumentException("There is no such list of"
+					+ " parfactor in the pool: " 
+					+ name);
+		}
+	}
+	
+	/**
+	 * Returns a Generalized Aggregation Parfactor from the pool
+	 * @param name The name of the GAP.
+	 * @return A Generalized Aggregation Parfactor from the pool
+	 * @throws IllegalArgumentException If the GAP with the specified name 
+	 * does not exist in the pool.
+	 */
+	public GeneralizedAggregationParfactor getGenAggParfactor (String name) 
+			throws IllegalArgumentException {
+		if (genAggParfactorPool.containsKey(name)) {
+			return genAggParfactorPool.get(name);
+		} else {
+			throw new IllegalArgumentException("There is no such Generalized" 
+					+ " Aggregation"
 					+ " parfactor in the pool: " 
 					+ name);
 		}

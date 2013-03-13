@@ -27,6 +27,16 @@ interface Operator<T extends Object> {
 	public T applyOn(T a, T b);
 	
 	/**
+	 * Applies the operator to the specified arguments.
+	 * 
+	 * @param a The first argument
+	 * @param b The second argument
+	 * @param c The third argument
+	 * @return The result of applying the operator to the specified arguments.
+	 */
+	public T applyOn(T a, T b, T c);
+	
+	/**
 	 * Applies the operator to all elements in the specified set.
 	 * <br>
 	 * Thanks to commutative and associative properties, the result of

@@ -38,6 +38,7 @@ public interface Parfactor {
 	 * is not an aggregation parfactor, this method should return null.
 	 * <br>
 	 * Not the best solution, but useful as a first solution.
+	 * TODO: put aggregation methods into another interface
 	 * @return The child parameterized random variable of the parfactor.
 	 */
 	public ParameterizedRandomVariable getChildVariable();
@@ -59,13 +60,6 @@ public interface Parfactor {
 	 */
 	public boolean isConstant();
 	
-	/**
-	 * Restores the names of all logical variables in the parfactor that
-	 * were changed using {@link LogicalVariableNameGenerator}.
-	 * @return A new instance of this parfactor, with all logical variables
-	 * restored to their old names.
-	 */
-	public Parfactor restoreLogicalVariableNames();
 	
 	/* ************************************************************************
 	 *   ENABLING OPERATIONS
@@ -78,11 +72,23 @@ public interface Parfactor {
 	public Parfactor fullExpand(CountingFormula countingFormula);
 	public Parfactor multiply(Parfactor parfactor);
 	public Parfactor sumOut(ParameterizedRandomVariable prv);
+	public List<Parfactor> splitOnConstraints(Set<Constraint> constraints);
+	
+	
+	/* Unification */
+	
+	/**
+	 * Restores the names of all logical variables in the parfactor that
+	 * were changed using {@link LogicalVariableNameGenerator}.
+	 * @return A new instance of this parfactor, with all logical variables
+	 * restored to their old names.
+	 */
+	public Parfactor restoreLogicalVariableNames();
 	
 	public Parfactor replaceLogicalVariablesConstrainedToSingleConstant();
 	public Parfactor renameLogicalVariables();
 	public List<Parfactor> splitOnMgu(Substitution mgu);
-	public List<Parfactor> splitOnConstraints(Set<Constraint> constraints);
 	
 	public Set<Parfactor> unify(Parfactor parfactor);
+	
 }

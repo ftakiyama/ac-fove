@@ -120,7 +120,6 @@ public class Sandbox {
 			System.out.println(p.getSimpleParfactor("g" + i));
 	}
 	
-	@Test
 	public void testArrayListReference() {
 		ArrayList<StringBuilder> a = new ArrayList<StringBuilder>();
 		StringBuilder s = new StringBuilder("1");
@@ -128,6 +127,35 @@ public class Sandbox {
 		s.append(" 2");
 		a.add(s);
 		System.out.println(s);
+	}
+	
+	
+	public void testConversionToBase2() {
+		for (int n = 3; n < 1000000; n++) {
+			double log = Math.log(n) / Math.log(2);
+			int m = ((int) log) + 1;
+			String bin = Integer.toBinaryString(n);
+			
+			System.out.format("%d %d %s\n", n, m, bin);
+			
+			if (m != bin.length()) {
+				System.out.println("Meh: " + n);	
+				break;
+			}
+		}
+	}
+	
+	@Test
+	public void testFillArray() {
+		int populationSize = 3;
+		double [] f1 = new double[8 * populationSize];
+		Arrays.fill(f1, 0, 4, 1);
+		Arrays.fill(f1, 4, 8, 0);
+		for (int i = 1; i < populationSize; i++) {
+			Arrays.fill(f1, 8 * i, 8 * i + 4, 0);
+			Arrays.fill(f1, 8 * i + 4, 8 * (i + 1), 1);
+		}
+		System.out.print(Arrays.toString(f1));
 	}
 	
 }

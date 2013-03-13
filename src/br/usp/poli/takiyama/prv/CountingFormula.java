@@ -50,7 +50,7 @@ public class CountingFormula extends ParameterizedRandomVariable {
 	 * @param <T> The type of element in the range of the counted 
 	 * parameterized random variable. For now, it is String.
 	 */
-	private class Histogram<T> {
+	public class Histogram<T> {
 		
 		private LinkedHashMap<T, Integer> distribution;
 		
@@ -114,6 +114,17 @@ public class CountingFormula extends ParameterizedRandomVariable {
 		 */
 		void setCount(T rangeValue, int amount) {
 			distribution.put(rangeValue, amount);
+		}
+		
+		/**
+		 * Returns true if this histogram contains a bucket with the 
+		 * specified count.
+		 * @param count A count to check
+		 * @return true If this histogram contains a bucket with the 
+		 * specified count, false otherwise.
+		 */
+		public boolean containsValue(int count) {
+			return distribution.containsValue(Integer.valueOf(count));
 		}
 		
 		@Override

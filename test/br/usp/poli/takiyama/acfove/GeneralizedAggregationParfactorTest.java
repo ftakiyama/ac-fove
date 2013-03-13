@@ -18,7 +18,7 @@ import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
  * @author ftakiyama
  *
  */
-public class AggregationParfactorTest {
+public class GeneralizedAggregationParfactorTest {
 
 	private Pool objects;
 	
@@ -31,37 +31,63 @@ public class AggregationParfactorTest {
 	 * Example 3.9 of Kisysnki (2010)
 	 */
 	@Test
-	public void conversionToParfactorWithCountingFormula() {
+	public void testSimpleConversionToParfactor() {
 		
-		objects.setExample3_9(10);
+		objects.setGenAggParfactorConversionTest(10);
 		
-		AggregationParfactor ag = objects.getAggParfactor("ag");
+		GeneralizedAggregationParfactor ag = objects.getGenAggParfactor("g1");
 		
 		List<Parfactor> result = ag.convertToParfactor();
 		
 		List<Parfactor> answer = new ArrayList<Parfactor>(2);
-		answer.add(objects.getSimpleParfactor("g1"));
 		answer.add(objects.getSimpleParfactor("g2"));
+		answer.add(objects.getSimpleParfactor("g3"));
+		
+		assertTrue(result.equals(answer));
+	}
+	
+	/**
+	 * Converts aggregation parfactor
+	 * &lang; { B&ne;x1 }, p(A,B), c(B), { v(C), u(D,E) }, Fpv, OR, { A&ne;x2 } &rang; 
+	 * to simple parfactors.
+	 * <br>
+	 * <br>
+	 * Result should be
+	 * { &lang; { B&ne;x1, A&ne;x2 }, { p(A,B), v(C), u(D,E)}, Fpv &rang;,<br>      
+	 *   &lang; { B&ne;x1 }, { #<sub>A:{A&ne;x2}</sub>[p(A,B)], c(B), v(C), u(D,E) } F# &rang; }.
+	 */
+	@Test
+	public void testSimpleConversionToParfactorWithContextVariablesAndConstraints() {
+		
+		objects.setGenAggParfactorConversionTest(10);
+		
+		GeneralizedAggregationParfactor ag = objects.getGenAggParfactor("g4");
+		
+		List<Parfactor> result = ag.convertToParfactor();
+		
+		List<Parfactor> answer = new ArrayList<Parfactor>(2);
+		answer.add(objects.getSimpleParfactor("g5"));
+		answer.add(objects.getSimpleParfactor("g6"));
 		
 		assertTrue(result.equals(answer));
 	}
 	
 	/**
 	 * Splits aggregation parfactor
-	 * &lang; &empty;, p(A,B), c(B), 1, OR, &empty; &rang; 
+	 * &lang; &empty;, p(A,B), c(B), { v(A), u(B) }, 1, OR, &empty; &rang; 
 	 * on substitution {B/x1}.
 	 * <br>
 	 * <br>
 	 * Result should be
-	 * J( { &lang; &empty;, p(A,x1), c(x1), 1, OR, &empty; &rang;,      
-	 * 		&lang; {B &ne; x1}, p(A,B), c(B), 1, OR, &empty; &rang; } ).
+	 * J( { &lang; &empty;, p(A,x1), c(x1), { v(A), u(x1) }, 1, OR, &empty; &rang;,      
+	 * 		&lang; {B &ne; x1}, p(A,B), c(B), { v(A), u(B) }, 1, OR, &empty; &rang; } ).
 	 */
 	@Test
 	public void testSimpleSplit() {
 		
-		objects.setSplitAggParfactorTest();
+		objects.setGenAggParfactorSplitTest();
 		
-		AggregationParfactor ag = objects.getAggParfactor("ag1");
+		GeneralizedAggregationParfactor ag = objects.getGenAggParfactor("ag1");
 		Binding substitution = objects.getBinding("B/1");
 		List<Parfactor> result = ag.split(substitution);
 		
@@ -72,21 +98,21 @@ public class AggregationParfactorTest {
 	
 	/**
 	 * Splits aggregation parfactor
-	 * &lang; &empty;, p(A,B), c(B), 1, OR, &empty; &rang; 
+	 * &lang; &empty;, p(A,B), c(B), { v(A), u(B) }, 1, OR, &empty; &rang; 
 	 * on substitution {A/x1}.
 	 * <br>
 	 * <br>
 	 * Result should be
 	 * &sum;<sub>ground(c')</sub> 
-	 * J( { &lang; &empty;, p(A,B), c'(B), 1, OR, {A&ne;x1} &rang;,      
-	 * 		&lang; &empty;, { p(x1,B), c'(B), c(B) }, Fc &rang; } ).
+	 * J( { &lang; &empty;, p(A,B), c'(B), { v(A), u(B) }, 1, OR, {A&ne;x1} &rang;,      
+	 * 		&lang; &empty;, { p(x1,B), v(x1), u(B), c'(B), c(B) }, Fc &rang; } ).
 	 */
 	@Test
 	public void testSplitOnExtraWithConstant() {
 		
 		objects.setSplitAggParfactorTest();
 
-		AggregationParfactor ag = objects.getAggParfactor("ag1");
+		GeneralizedAggregationParfactor ag = objects.getGenAggParfactor("ag1");
 		Binding substitution = objects.getBinding("A/1");
 		List<Parfactor> result = ag.split(substitution);
 		
@@ -97,21 +123,21 @@ public class AggregationParfactorTest {
 	
 	/**
 	 * Splits aggregation parfactor
-	 * &lang; &empty;, p(A,B), c(B), 1, OR, &empty; &rang; 
+	 * &lang; &empty;, p(A,B), c(B), { v(A), u(B) }, 1, OR, &empty; &rang; 
 	 * on substitution {A/B}.
 	 * <br>
 	 * <br>
 	 * Result should be
 	 * &sum;<sub>ground(c')</sub> 
-	 * J( { &lang; &empty;, p(A,B), c'(B), 1, OR, {A&ne;B} &rang;,      
-	 * 		&lang; &empty;, { p(B,B), c'(B), c(B) }, Fc &rang; } ).
+	 * J( { &lang; &empty;, p(A,B), c'(B), { v(A), u(B) }, 1, OR, {A&ne;B} &rang;,      
+	 * 		&lang; &empty;, { p(B,B), v(B), u(B), c'(B), c(B) }, Fc &rang; } ).
 	 */
 	@Test 
 	public void testSplitOnExtraWithVariable() {
 		
 		objects.setSplitAggParfactorTest();
 
-		AggregationParfactor ag = objects.getAggParfactor("ag1");
+		GeneralizedAggregationParfactor ag = objects.getGenAggParfactor("ag1");
 		Binding substitution = objects.getBinding("A/B");
 		List<Parfactor> result = ag.split(substitution);
 		
@@ -122,21 +148,21 @@ public class AggregationParfactorTest {
 	
 	/**
 	 * Splits aggregation parfactor
-	 * &lang; &empty;, p(A,B), c(B), 1, OR, &empty; &rang; 
+	 * &lang; &empty;, p(A,B), c(B), { v(A), u(B) }, 1, OR, &empty; &rang; 
 	 * on substitution {B/A}.
 	 * <br>
 	 * <br>
 	 * Result should be
 	 * &sum;<sub>ground(c')</sub> 
-	 * J( { &lang; &empty;, p(A,B), c'(B), 1, OR, {A&ne;B} &rang;,      
-	 * 		&lang; &empty;, { p(A,A), c'(B), c(B) }, Fc &rang; } ).
+	 * J( { &lang; &empty;, p(A,B), c'(B), { v(A), u(B) }, 1, OR, {A&ne;B} &rang;,      
+	 * 		&lang; &empty;, { p(A,A), v(A), u(A), c'(B), c(B) }, Fc &rang; } ).
 	 */
 	@Test 
 	public void testSplitWithExtra() {
 		
 		objects.setSplitAggParfactorTest();
 
-		AggregationParfactor ag = objects.getAggParfactor("ag1");
+		GeneralizedAggregationParfactor ag = objects.getGenAggParfactor("ag1");
 		Binding substitution = objects.getBinding("B/A");
 		List<Parfactor> result = ag.split(substitution);
 		
@@ -147,20 +173,20 @@ public class AggregationParfactorTest {
 	
 	/**
 	 * Splits aggregation parfactor
-	 * &lang; {B&ne;x2}, p(A,B), c(B), 1, OR, {A&ne;x2} &rang; 
+	 * &lang; {B&ne;x2}, p(A,B), c(B), { v(A), u(B) }, 1, OR, {A&ne;x2} &rang; 
 	 * on substitution {B/x1}.
 	 * <br>
 	 * <br>
 	 * Result should be
-	 * J( { &lang; &empty;, p(A,x1), c(x1), 1, OR, {A&ne;x2} &rang;,      
-	 * 		&lang; {B&ne;x1,B&ne;x2}, p(A,B), c(B), 1, OR, {A&ne;x2} &rang; } ).
+	 * J( { &lang; &empty;, p(A,x1), c(x1), { v(A), u(x1) }, 1, OR, {A&ne;x2} &rang;,      
+	 * 		&lang; {B&ne;x1,B&ne;x2}, p(A,B), c(B), { v(A), u(B) }, 1, OR, {A&ne;x2} &rang; } ).
 	 */
 	@Test
 	public void testSimpleSplitConstrainedParfactor() {
 		
 		objects.setSplitAggParfactorTest();
 
-		AggregationParfactor ag = objects.getAggParfactor("ag2");
+		GeneralizedAggregationParfactor ag = objects.getGenAggParfactor("ag2");
 		Binding substitution = objects.getBinding("B/1");
 		List<Parfactor> result = ag.split(substitution);
 		
@@ -171,21 +197,21 @@ public class AggregationParfactorTest {
 	
 	/**
 	 * Splits aggregation parfactor
-	 * &lang; {B&ne;x2}, p(A,B), c(B), 1, OR, {A&ne;x2} &rang; 
+	 * &lang; {B&ne;x2}, p(A,B), c(B), { v(A), u(B) }, 1, OR, {A&ne;x2} &rang; 
 	 * on substitution {A/x1}.
 	 * <br>
 	 * <br>
 	 * Result should be
 	 * &sum;<sub>ground(c')</sub> 
-	 * J( { &lang; {B&ne;x2}, p(A,B), c'(B), 1, OR, {A&ne;x1,A&ne;x2} &rang;,      
-	 * 		&lang; {B&ne;x2}, { p(x1,B), c'(B), c(B) }, Fc &rang; } ).
+	 * J( { &lang; {B&ne;x2}, p(A,B), c'(B), { v(A), u(B) }, 1, OR, {A&ne;x1,A&ne;x2} &rang;,      
+	 * 		&lang; {B&ne;x2}, { p(x1,B), v(x1), u(B), c'(B), c(B) }, Fc &rang; } ).
 	 */
 	@Test
 	public void testSplitConstrainedParfactorOnExtraWithConstant() {
 		
 		objects.setSplitAggParfactorTest();
 
-		AggregationParfactor ag = objects.getAggParfactor("ag2");
+		GeneralizedAggregationParfactor ag = objects.getGenAggParfactor("ag2");
 		Binding substitution = objects.getBinding("A/1");
 		List<Parfactor> result = ag.split(substitution);
 		
@@ -197,21 +223,21 @@ public class AggregationParfactorTest {
 	
 	/**
 	 * Splits aggregation parfactor
-	 * &lang; {B&ne;x2}, p(A,B), c(B), 1, OR, {A&ne;x2} &rang; 
+	 * &lang; {B&ne;x2}, p(A,B), c(B), { v(A), u(B) }, 1, OR, {A&ne;x2} &rang; 
 	 * on substitution {A/B}.
 	 * <br>
 	 * <br>
 	 * Result should be
 	 * &sum;<sub>ground(c')</sub> 
-	 * J( { &lang; {B&ne;x2}, p(A,B), c'(B), 1, OR, {A&ne;B,A&ne;x2} &rang;,      
-	 * 		&lang; {B&ne;x2}, { p(B,B), c'(B), c(B) }, Fc &rang; } ).
+	 * J( { &lang; {B&ne;x2}, p(A,B), c'(B), { v(A), u(B) }, 1, OR, {A&ne;B,A&ne;x2} &rang;,      
+	 * 		&lang; {B&ne;x2}, { p(B,B), v(B), u(B), c'(B), c(B) }, Fc &rang; } ).
 	 */
 	@Test 
 	public void testSplitConstrainedParfactorOnExtraWithVariable() {
 		
 		objects.setSplitAggParfactorTest();
 
-		AggregationParfactor ag = objects.getAggParfactor("ag2");
+		GeneralizedAggregationParfactor ag = objects.getGenAggParfactor("ag2");
 		Binding substitution = objects.getBinding("A/B");
 		List<Parfactor> result = ag.split(substitution);
 		
@@ -223,21 +249,21 @@ public class AggregationParfactorTest {
 	
 	/**
 	 * Splits aggregation parfactor
-	 * &lang; {B&ne;x2}, p(A,B), c(B), 1, OR, {A&ne;x2} &rang; 
+	 * &lang; {B&ne;x2}, p(A,B), c(B), { v(A), u(B) }, 1, OR, {A&ne;x2} &rang; 
 	 * on substitution {B/A}.
 	 * <br>
 	 * <br>
 	 * Result should be
 	 * &sum;<sub>ground(c')</sub> 
-	 * J( { &lang; {B&ne;x2}, p(A,B), c'(B), 1, OR, {A&ne;B,A&ne;x2} &rang;,      
-	 * 		&lang; {A&ne;x2}, { p(A,A), c'(B), c(B) }, Fc &rang; } ).
+	 * J( { &lang; {B&ne;x2}, p(A,B), c'(B), { v(A), u(B) }, 1, OR, {A&ne;B,A&ne;x2} &rang;,      
+	 * 		&lang; {A&ne;x2}, { p(A,A), v(A), u(A), c'(B), c(B) }, Fc &rang; } ).
 	 */
 	@Test 
 	public void testSplitConstrainedParfactorWithExtra() {
 		
 		objects.setSplitAggParfactorTest();
 
-		AggregationParfactor ag = objects.getAggParfactor("ag2");
+		GeneralizedAggregationParfactor ag = objects.getGenAggParfactor("ag2");
 		Binding substitution = objects.getBinding("B/A");
 		List<Parfactor> result = ag.split(substitution);
 		
@@ -247,39 +273,28 @@ public class AggregationParfactorTest {
 	}
 	
 	/**
-	 * Example 3.12 of Kisynski (2010).
+	 * Example 3.15 of Kisynski (2010).
 	 * <br>
-	 * Given the set of parfactors
+	 * Multiplies parfactors
 	 * <br>
-	 * &Phi; = {<br>
-	 * &lang; &empty;, {played(Person)}, Fplayed &rang;,<br>
-	 * &lang; &empty;, {played(Person), matched_6(Person}, Fmatched_6 &rang;,<br> 
-	 * &lang; &empty;, matched_6(Person), jackpot_won(Person), 1, OR, &empty; &rang; },
+	 * g4 = &lang; &empty;, matched_6(Person), jackpot_won(), { big_jackpot() }, 1, OR, &empty; &rang;
 	 * <br>
-	 * <br>
-	 * we want to calculate J<sub>ground(jackpot_won())</sub>(&Phi;).
+	 * g5 = &lang; &empty;, {big_jackpot(), matched_6(Person)}, Fmatched_6' &rang;
 	 * <br>
 	 * <br>
-	 * The partial result in the calculation is parfactor
-	 * &lang; &empty;, matched_6(Person), jackpot_won(Person), F, OR, &empty; &rang;,
-	 * where
-	 * F = 1 &odot; &sum;<sub>played(Person)</sub>(Fplayed &odot; Fmatched_6).
+	 * The result in the calculation is parfactor
+	 * &lang; &empty;, matched_6(Person), jackpot_won(), { big_jackpot() }, Fmatched_6', OR, &empty; &rang;
 	 */
 	@Test
 	public void testTrivialMultiplication() {
 		
 		objects.setMultiplicationAggParfactor();
 		
-		Parfactor g1 = objects.getSimpleParfactor("g1");
-		Parfactor g2 = objects.getSimpleParfactor("g2");
-		Parfactor g3 = objects.getAggParfactor("g3");
-		Parfactor temp = g1.multiply(g2);
-		ParameterizedRandomVariable played = 
-				objects.getParameterizedRandomVariable("played");
-		temp = temp.sumOut(played);
-		Parfactor result = g3.multiply(temp);
+		Parfactor g4 = objects.getGenAggParfactor("g4");
+		Parfactor g5 = objects.getGenAggParfactor("g5");
+		Parfactor result = g4.multiply(g5);
 		
-		Parfactor answer = objects.getAggParfactor("g4");
+		Parfactor answer = objects.getAggParfactor("g7");
 		
 		assertTrue(result.equals(answer));
 	}
@@ -287,26 +302,26 @@ public class AggregationParfactorTest {
 	/**
 	 * Multiplies
 	 * <br>
-	 * h1 = &lang; {A&ne;x1,A&ne;x2,A&ne;B,B&ne;x3}, {p(A,B)}, F1 &rang;
+	 * g1 = &lang; {A&ne;x2,B&ne;x1}, {p(A,B), v(A), u(B)}, Fpv &rang;
 	 * <br>
 	 * with
 	 * <br>
-	 * h2 = &lang; {B&ne;x3}, p(A,B), c(B), F2, OR, {A&ne;x1,A&ne;x2,A&ne;B} &rang;
+	 * gA = &lang; {B&ne;x1}, p(A,B), c(B), { v(A), u(B) }, Fpv, OR, {A&ne;x2} &rang;
 	 * <br>
 	 * <br>
 	 * The result is
-	 * h3 = &lang; {B&ne;x3}, p(A,B), c(B), F1&odot;F2, OR, {A&ne;x1,A&ne;x2,A&ne;B} &rang;
+	 * gAr = &lang; {B&ne;x1}, p(A,B), c(B), { v(A), u(B) }, Fpv&otimes;Fpv, OR, {A&ne;x2} &rang;
 	 */
 	@Test
 	public void testMultiplication() {
 
 		objects.setMultiplicationAggParfactor();
 		
-		Parfactor g1 = objects.getSimpleParfactor("h1");
-		Parfactor g2 = objects.getAggParfactor("h2");
+		Parfactor g1 = objects.getSimpleParfactor("g1");
+		Parfactor g2 = objects.getGenAggParfactor("ga");
 		Parfactor result = g2.multiply(g1);
 		
-		Parfactor answer = objects.getAggParfactor("h3");
+		Parfactor answer = objects.getAggParfactor("gar");
 
 		assertTrue(result.equals(answer));
 	}
@@ -321,8 +336,8 @@ public class AggregationParfactorTest {
 		
 		objects.setMultiplicationAggParfactor();
 		
-		Parfactor g1 = objects.getSimpleParfactor("h1");
-		Parfactor g2 = objects.getAggParfactor("h2");
+		Parfactor g1 = objects.getSimpleParfactor("g1");
+		Parfactor g2 = objects.getAggParfactor("ga");
 		Parfactor result = g2.multiply(g1);
 		Parfactor sameResult = g1.multiply(g2); 
 		
@@ -331,12 +346,13 @@ public class AggregationParfactorTest {
 	}
 	
 	/**
+	 * Second part of Example 3.15 from Kisysnki (2010). 
 	 * Sums out matched_6(Person) from the aggregation parfactor
 	 * <br>
-	 * &lang; &empty;, matched_6(Person), jackpot_won(Person), Fsum, OR, &empty; &rang;
+	 * &lang; &empty;, matched_6(Person), jackpot_won(Person), {big_jackpot()} Fmatched6', OR, &empty; &rang;
 	 * <br>
 	 * <br>
-	 * The result is parfactor &lang; &empty;, {jackpot_won()}, F &rang;, where
+	 * The result is parfactor &lang; &empty;, {big_jackpot(), jackpot_won()}, Fjackpot_won &rang;, where
 	 * F depends on |D(Person)|. The test is set for |D(Person)| = 5.
 	 */
 	@Test
@@ -344,12 +360,12 @@ public class AggregationParfactorTest {
 		
 		objects.setSumOutAggParfactorTest();
 		
-		Parfactor agg = objects.getAggParfactor("g1");
+		Parfactor agg = objects.getGenAggParfactor("g6");
 		ParameterizedRandomVariable prv = 
 				objects.getParameterizedRandomVariable("matched_6");
 		Parfactor result = agg.sumOut(prv); 
 		
-		Parfactor answer = objects.getSimpleParfactor("g2");
+		Parfactor answer = objects.getSimpleParfactor("g7");
 		
 		assertTrue(result.equals(answer));
 	}

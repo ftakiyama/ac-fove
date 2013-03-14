@@ -40,8 +40,8 @@ public class GeneralizedAggregationParfactorTest {
 		List<Parfactor> result = ag.convertToParfactor();
 		
 		List<Parfactor> answer = new ArrayList<Parfactor>(2);
-		answer.add(objects.getSimpleParfactor("g2"));
 		answer.add(objects.getSimpleParfactor("g3"));
+		answer.add(objects.getSimpleParfactor("g2"));
 		
 		assertTrue(result.equals(answer));
 	}
@@ -66,8 +66,8 @@ public class GeneralizedAggregationParfactorTest {
 		List<Parfactor> result = ag.convertToParfactor();
 		
 		List<Parfactor> answer = new ArrayList<Parfactor>(2);
-		answer.add(objects.getSimpleParfactor("g5"));
 		answer.add(objects.getSimpleParfactor("g6"));
+		answer.add(objects.getSimpleParfactor("g5"));
 		
 		assertTrue(result.equals(answer));
 	}
@@ -110,7 +110,7 @@ public class GeneralizedAggregationParfactorTest {
 	@Test
 	public void testSplitOnExtraWithConstant() {
 		
-		objects.setSplitAggParfactorTest();
+		objects.setGenAggParfactorSplitTest();
 
 		GeneralizedAggregationParfactor ag = objects.getGenAggParfactor("ag1");
 		Binding substitution = objects.getBinding("A/1");
@@ -135,7 +135,7 @@ public class GeneralizedAggregationParfactorTest {
 	@Test 
 	public void testSplitOnExtraWithVariable() {
 		
-		objects.setSplitAggParfactorTest();
+		objects.setGenAggParfactorSplitTest();
 
 		GeneralizedAggregationParfactor ag = objects.getGenAggParfactor("ag1");
 		Binding substitution = objects.getBinding("A/B");
@@ -160,7 +160,7 @@ public class GeneralizedAggregationParfactorTest {
 	@Test 
 	public void testSplitWithExtra() {
 		
-		objects.setSplitAggParfactorTest();
+		objects.setGenAggParfactorSplitTest();
 
 		GeneralizedAggregationParfactor ag = objects.getGenAggParfactor("ag1");
 		Binding substitution = objects.getBinding("B/A");
@@ -184,7 +184,7 @@ public class GeneralizedAggregationParfactorTest {
 	@Test
 	public void testSimpleSplitConstrainedParfactor() {
 		
-		objects.setSplitAggParfactorTest();
+		objects.setGenAggParfactorSplitTest();
 
 		GeneralizedAggregationParfactor ag = objects.getGenAggParfactor("ag2");
 		Binding substitution = objects.getBinding("B/1");
@@ -209,7 +209,7 @@ public class GeneralizedAggregationParfactorTest {
 	@Test
 	public void testSplitConstrainedParfactorOnExtraWithConstant() {
 		
-		objects.setSplitAggParfactorTest();
+		objects.setGenAggParfactorSplitTest();
 
 		GeneralizedAggregationParfactor ag = objects.getGenAggParfactor("ag2");
 		Binding substitution = objects.getBinding("A/1");
@@ -235,7 +235,7 @@ public class GeneralizedAggregationParfactorTest {
 	@Test 
 	public void testSplitConstrainedParfactorOnExtraWithVariable() {
 		
-		objects.setSplitAggParfactorTest();
+		objects.setGenAggParfactorSplitTest();
 
 		GeneralizedAggregationParfactor ag = objects.getGenAggParfactor("ag2");
 		Binding substitution = objects.getBinding("A/B");
@@ -261,7 +261,7 @@ public class GeneralizedAggregationParfactorTest {
 	@Test 
 	public void testSplitConstrainedParfactorWithExtra() {
 		
-		objects.setSplitAggParfactorTest();
+		objects.setGenAggParfactorSplitTest();
 
 		GeneralizedAggregationParfactor ag = objects.getGenAggParfactor("ag2");
 		Binding substitution = objects.getBinding("B/A");
@@ -288,10 +288,10 @@ public class GeneralizedAggregationParfactorTest {
 	@Test
 	public void testTrivialMultiplication() {
 		
-		objects.setMultiplicationAggParfactor();
+		objects.setGenAggParfactorMultiplicationTest();
 		
 		Parfactor g4 = objects.getGenAggParfactor("g4");
-		Parfactor g5 = objects.getGenAggParfactor("g5");
+		Parfactor g5 = objects.getSimpleParfactor("g5");
 		Parfactor result = g4.multiply(g5);
 		
 		Parfactor answer = objects.getAggParfactor("g7");
@@ -315,7 +315,7 @@ public class GeneralizedAggregationParfactorTest {
 	@Test
 	public void testMultiplication() {
 
-		objects.setMultiplicationAggParfactor();
+		objects.setGenAggParfactorMultiplicationTest();
 		
 		Parfactor g1 = objects.getSimpleParfactor("g1");
 		Parfactor g2 = objects.getGenAggParfactor("ga");
@@ -334,10 +334,10 @@ public class GeneralizedAggregationParfactorTest {
 	@Test
 	public void testMultiplicationReflexivity() {
 		
-		objects.setMultiplicationAggParfactor();
+		objects.setGenAggParfactorMultiplicationTest();
 		
 		Parfactor g1 = objects.getSimpleParfactor("g1");
-		Parfactor g2 = objects.getAggParfactor("ga");
+		Parfactor g2 = objects.getGenAggParfactor("ga");
 		Parfactor result = g2.multiply(g1);
 		Parfactor sameResult = g1.multiply(g2); 
 		
@@ -358,7 +358,7 @@ public class GeneralizedAggregationParfactorTest {
 	@Test
 	public void testSimpleSumOut() {
 		
-		objects.setSumOutAggParfactorTest();
+		objects.setGenAggParfactorSumOutTest();
 		
 		Parfactor agg = objects.getGenAggParfactor("g6");
 		ParameterizedRandomVariable prv = 

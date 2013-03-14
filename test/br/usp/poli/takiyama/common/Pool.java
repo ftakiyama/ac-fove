@@ -537,8 +537,8 @@ public class Pool {
 			}
 		}
 		ParameterizedFactor f = ParameterizedFactor.getInstance(name, plist, factorValues);
-		
-		GeneralizedAggregationParfactor.Builder builder = new GeneralizedAggregationParfactor.Builder(p, c, operator);
+		plist.remove(p);
+		GeneralizedAggregationParfactor.Builder builder = new GeneralizedAggregationParfactor.Builder(p, c, operator, plist);
 		builder.addConstraints(constraintsSet);
 		builder.factor(f);
 		GeneralizedAggregationParfactor ag = builder.build();
@@ -736,6 +736,8 @@ public class Pool {
 		for (String p : parfactors) {
 			if (aggParfactorPool.containsKey(p)) {
 				pList.add(getAggParfactor(p));
+			} else if (genAggParfactorPool.containsKey(p)) {
+				pList.add(getGenAggParfactor(p));
 			} else if (simpleParfactorPool.containsKey(p)) {
 				pList.add(getSimpleParfactor(p));
 			} else {
@@ -1809,7 +1811,7 @@ public class Pool {
 		// createGenAggParfactor(name, parent, child, (List) context, constraints, operator, fac name, factor values)
 		
 		double [] fpv = {0.1, 0.2, 0.3 ,0.4, 0.5, 0.6, 0.7, 0.8};
-		createGenAggParfactor("g4", "p", "c", "v,u", "B != 1;A != 2", "Fpv", toString(fpv), Or.OR);
+		createGenAggParfactor("g4", "p", "c", "v;u", "B != 1;A != 2", "Fpv", toString(fpv), Or.OR);
 		createSimpleParfactor("g5", "A != 2;B != 1", "p;v;u", "Fpv", toString(fpv));
 		
 		createCountingFormula("#.A[p]", "A", "p", "A != 2");
@@ -1934,13 +1936,13 @@ public class Pool {
 		
 		double [] fpv = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8};
 		createSimpleParfactor("g1", "A != 2;B != 1", "p;v;u", "F1", toString(fpv));
-		createGenAggParfactor("ga", "p", "c", "v;u", "A != 2; B != 1", "Fpv", toString(fpv), Or.OR);
+		createGenAggParfactor("ga", "p", "c", "v;u", "A != 2;B != 1", "Fpv", toString(fpv), Or.OR);
 		
 		double [] fr = new double[8];
 		for (int i = 0; i < fr.length; i++) {
 			fr[i] = fpv[i] * fpv[i];
 		}
-		createGenAggParfactor("gar", "p", "c", "v;u", "A != 2; B != 1", "Fpv'", toString(fr), Or.OR);
+		createGenAggParfactor("gar", "p", "c", "v;u", "A != 2;B != 1", "Fpv'", toString(fr), Or.OR);
 	}
 	
 	public void setGenAggParfactorSumOutTest() {

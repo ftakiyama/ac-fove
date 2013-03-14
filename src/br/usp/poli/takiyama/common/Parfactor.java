@@ -25,11 +25,26 @@ import br.usp.poli.takiyama.prv.Term;
  */
 public interface Parfactor {
 	
+	/**
+	 * Checks if the specified variable exists in this parfactor.
+	 * 
+	 * @param variable The parameterized random variable to check
+	 * @return True if the specified variable exists in this parfactor,
+	 * false otherwise.
+	 */
 	public boolean contains(ParameterizedRandomVariable variable); // I think I will use it on global sum out.
 		
+	/**
+	 * Returns the parameterized factor associated with this parfactor
+	 * 
+	 * @return The parameterized factor associated with this parfactor
+	 */
 	public ParameterizedFactor getFactor();
 	
-	// should i enforce getPRV and getConstraints?
+	/**
+	 * 
+	 * @return
+	 */
 	public List<ParameterizedRandomVariable> getParameterizedRandomVariables();
 	
 	/**
@@ -39,16 +54,30 @@ public interface Parfactor {
 	 * <br>
 	 * Not the best solution, but useful as a first solution.
 	 * TODO: put aggregation methods into another interface
+	 * 
 	 * @return The child parameterized random variable of the parfactor.
 	 */
 	public ParameterizedRandomVariable getChildVariable();
 	
+	/**
+	 * Returns the set of all constraints in this parfactor.
+	 * 
+	 * @return The set of all constraints in this parfactor.
+	 */
 	public Set<Constraint> getConstraints();
 	
+	/**
+	 * Returns the set of all logical variables in parameterized random
+	 * variables in this parfactor.
+	 * 
+	 * @return The set of all logical variables in parameterized random
+	 * variables in this parfactor.
+	 */
 	public Set<LogicalVariable> getLogicalVariables();
 	
 	/**
 	 * Retunrs the number of factors this parfactor represents.
+	 * 
 	 * @return The number of factors this parfactor represents.
 	 */
 	public int size();
@@ -56,6 +85,7 @@ public interface Parfactor {
 	/**
 	 * Returns true if the parfactor is constant, that is, the neutral
 	 * term in multiplication.
+	 * 
 	 * @return True if the parfactor is constant, false otherwise.
 	 */
 	public boolean isConstant();

@@ -147,7 +147,7 @@ public class AggregationParfactor implements Parfactor {
 	public List<ParameterizedRandomVariable> getParameterizedRandomVariables() {
 		List<ParameterizedRandomVariable> vars = 
 			new ArrayList<ParameterizedRandomVariable>();
-		vars.add(child);
+		vars.add(child); // TODO: is it correct?
 		vars.add(parent);
 		return vars;
 	}

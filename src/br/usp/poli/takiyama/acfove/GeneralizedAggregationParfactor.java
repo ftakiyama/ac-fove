@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import br.usp.poli.takiyama.acfove.AggregationParfactor.Builder;
 import br.usp.poli.takiyama.acfove.operator.BooleanOperator;
 import br.usp.poli.takiyama.cfove.ParameterizedFactor;
 import br.usp.poli.takiyama.cfove.SimpleParfactor;
@@ -162,6 +163,7 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 		this.extraVariable = builder.lv;
 	}
 	
+	
 	@Override
 	public boolean contains(ParameterizedRandomVariable variable) {
 		boolean isParent = variable.equals(parent);
@@ -220,13 +222,57 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 	public boolean isConstant() {
 		return false;
 	}
-
-	@Override
-	public List<Parfactor> split(Binding s) {
-
-		throw new UnsupportedOperationException("Not implemented!");
+	
+	/**
+	 * Applies the specified substitution to this aggregation parfactor.
+	 * <br>
+	 * The substitution is applied on the set of constraints (both), the
+	 * parent PRV, the child PRV, the context variables and the factor.
+	 * @param s The substitution to apply
+	 * @return This parfactor with the specified substitution applied.
+	 */
+	private GeneralizedAggregationParfactor applySubstitution(Binding s) {
+		Set<Constraint> allConstraints = 
+				new HashSet<Constraint>(
+						constraintsOnExtraVariable.size() 
+						+ otherConstraints.size());
+		
+		for (Constraint c : constraintsOnExtraVariable) {
+			Constraint nc = c.applySubstitution(s);
+			if (nc != null) {
+				allConstraints.add(nc);
+			}
+		}
+		for (Constraint c : otherConstraints) {
+			Constraint nc = c.applySubstitution(s);
+			if (nc != null) {
+				allConstraints.add(c);
+			}
+		}
+		
+		List<ParameterizedRandomVariable> cv = new ArrayList<ParameterizedRandomVariable>(contextVariables.size());
+		for (ParameterizedRandomVariable prv : contextVariables) {
+			cv.add(prv.applyOneSubstitution(s));
+		}
+		
+		ParameterizedRandomVariable p = parent.applyOneSubstitution(s);
+		ParameterizedRandomVariable c = child.applyOneSubstitution(s);
+		ParameterizedFactor f = factor.applySubstitution(s);
+		
+		Builder builder = new Builder(p, c, this.operator, cv);
+		builder.addConstraints(allConstraints);
+		builder.factor(f);
+		
+		return builder.build();
 	}
 
+	/* ************************************************************************
+	 * 
+	 *   Enabling methods
+	 * 
+	 * ***********************************************************************/
+	
+	
 	@Override
 	public Parfactor count(LogicalVariable lv) {
 
@@ -299,6 +345,137 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 		throw new UnsupportedOperationException("Not implemented!");
 	}
 
+	/* ************************************************************************
+	 *    Split
+	 * ************************************************************************/
+
+	/**
+	 * The format of the substitution.
+	 * <li> X/t
+	 * <li> A/t
+	 * <li> X/A
+	 * <br>
+	 * where X is a logical variable, t is a term and A is the parent extra
+	 * variable.
+	 */
+	private enum SubstitutionType {
+		X_t, A_t, X_A
+	}
+	
+	@Override
+	public List<Parfactor> split(Binding s) {
+		List<Parfactor> splitParfactors = new ArrayList<Parfactor>(2);
+		switch (getSubstitutionType(s)) {
+		case X_t:
+			splitParfactors = splitOnSubstitutionXt(s);
+			break;
+		case A_t:
+			splitParfactors = splitOnSubstitutionAt(s);
+			break;
+		case X_A:
+			splitParfactors = splitOnSubstitutionXA(s);
+			break;
+		default:
+			throw new IllegalArgumentException("Unrecognizable substitution: " 
+					+ s);
+		}
+		return splitParfactors;
+	}
+	
+	/**
+	 * Returns the format of the specified substitution.
+	 * @param s The substitution to analyze
+	 * @return The format of the specified substitution as a {@link SubstitutionType}.
+	 */
+	private SubstitutionType getSubstitutionType(Binding s) {
+		LogicalVariable firstTerm = s.getFirstTerm();
+		Term secondTerm = s.getSecondTerm();
+		if (firstTerm.equals(extraVariable)) {
+			return SubstitutionType.A_t;
+		}
+		if (secondTerm.isLogicalVariable()) {
+			if (((LogicalVariable) secondTerm).equals(extraVariable)) {
+				return SubstitutionType.X_A;
+			}
+		}
+		return SubstitutionType.X_t;
+	}
+	
+	/**
+	 * Splits this parfactor on the specified substitution. The following
+	 * conditiond must be met:
+	 * <li> The substitution must be of the form X/t, where X is a logical
+	 * variable and t is a term
+	 * <li> X is not the extra logical variable in the parent PRV
+	 * <li> t is not the extra logical variable in the parent PRV
+	 * <li> (X &ne; t) &notin; C
+	 * <li> X &in; param(c)
+	 * <li> t &in; D(X) or t &in; param (c)
+	 * <br>
+	 * This method does not verify the conditions above. They must be checked
+	 * using the method {@link GeneralizedAggregationParfactor#canBeSplit(Binding)}.
+	 * <br>
+	 * It is not recommended to call this method directly. 
+	 * {@link GeneralizedAggregationParfactor#split(Binding)} should be used instead.
+	 * <br>
+	 * <br>
+	 * Splitting g = &lang; C, p, c, V, Fpv, &otimes;, C<sub>A</sub> &rang;
+	 * on substitution {X/t} (given that it meets conditions above) results in 
+	 * two parfactors:
+	 * <li> g[X/t], that is, g with all occurrences of X replaced with t 
+	 * <li> &lang; C U {X &ne; t}, p, c, V, Fpv, &otimes;, C<sub>A</sub> &rang;,
+	 * the residual parfactor.
+	 * <br>
+	 * This method returns the two parfactors above in the order listed.
+	 * 
+	 * @param s The substitution on which we split this parfactor. It must
+	 * obey the conditions above.
+	 * @return A list where the first position is occupied by g[X/t] and the
+	 * second position is the residual parfactor.
+	 */
+	private List<Parfactor> splitOnSubstitutionXt(Binding s) {
+		Parfactor split = this.applySubstitution(s);
+		Constraint constraint = Constraint.getInequalityConstraintFromBinding(s);
+		Parfactor residue = this.addConstraint(constraint);
+		List<Parfactor> result = new ArrayList<Parfactor>(2);
+		result.add(split);
+		result.add(residue);
+		return result;
+	}
+	
+	/**
+	 * Adds the specified constraint to this parfactor.
+	 * @param c The constraint to add.
+	 * @return This parfactor with the specified constraint added. A new
+	 * instance is created.
+	 */
+	private GeneralizedAggregationParfactor addConstraint(Constraint c) {
+		Builder builder = new Builder(this.parent, this.child, this.operator, this.contextVariables);
+		builder.addConstraints(this.constraintsOnExtraVariable);
+		builder.addConstraints(this.otherConstraints);
+		builder.addConstraint(c);
+		builder.factor(this.factor);
+		return builder.build();
+	}
+	
+	private List<Parfactor> splitOnSubstitutionAt(Binding s) {
+		throw new UnsupportedOperationException("Not implemented!");
+	}
+	
+	private List<Parfactor> splitOnSubstitutionXA(Binding s) {
+		throw new UnsupportedOperationException("Not implemented!");
+	}
+	
+	/* ************************************************************************
+	 * 
+	 *   Class specific methods
+	 * 
+	 * ***********************************************************************/
+	
+	
+	/* ====================================================================== */
+	/*   Conversion to standard parfactors                                    */
+	/* ====================================================================== */
 	
 	/**
 	 * Converts this aggregation parfactor into standard parfactors.
@@ -392,4 +569,123 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 		return (b.compareTo(Boolean.valueOf(childRangeElem)) == 0);
 	}
 	
+	
+	/* ====================================================================== */
+	/*   toString, hashCode and equals                                        */
+	/* ====================================================================== */
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((child == null) ? 0 : child.hashCode());
+		result = prime
+				* result
+				+ ((constraintsOnExtraVariable == null) ? 0
+						: constraintsOnExtraVariable.hashCode());
+		result = prime
+				* result
+				+ ((contextVariables == null) ? 0 : contextVariables.hashCode());
+		result = prime * result
+				+ ((extraVariable == null) ? 0 : extraVariable.hashCode());
+		result = prime * result + ((factor == null) ? 0 : factor.hashCode());
+		result = prime * result
+				+ ((operator == null) ? 0 : operator.hashCode());
+		result = prime
+				* result
+				+ ((otherConstraints == null) ? 0 : otherConstraints.hashCode());
+		result = prime * result + ((parent == null) ? 0 : parent.hashCode());
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof GeneralizedAggregationParfactor)) {
+			return false;
+		}
+		GeneralizedAggregationParfactor other = (GeneralizedAggregationParfactor) obj;
+		if (child == null) {
+			if (other.child != null) {
+				return false;
+			}
+		} else if (!child.equals(other.child)) {
+			return false;
+		}
+		if (constraintsOnExtraVariable == null) {
+			if (other.constraintsOnExtraVariable != null) {
+				return false;
+			}
+		} else if (!constraintsOnExtraVariable
+				.equals(other.constraintsOnExtraVariable)) {
+			return false;
+		}
+		if (contextVariables == null) {
+			if (other.contextVariables != null) {
+				return false;
+			}
+		} else if (!contextVariables.equals(other.contextVariables)) {
+			return false;
+		}
+		if (extraVariable == null) {
+			if (other.extraVariable != null) {
+				return false;
+			}
+		} else if (!extraVariable.equals(other.extraVariable)) {
+			return false;
+		}
+		if (factor == null) {
+			if (other.factor != null) {
+				return false;
+			}
+		} else if (!factor.equals(other.factor)) {
+			return false;
+		}
+		if (operator == null) {
+			if (other.operator != null) {
+				return false;
+			}
+		} else if (!operator.equals(other.operator)) {
+			return false;
+		}
+		if (otherConstraints == null) {
+			if (other.otherConstraints != null) {
+				return false;
+			}
+		} else if (!otherConstraints.equals(other.otherConstraints)) {
+			return false;
+		}
+		if (parent == null) {
+			if (other.parent != null) {
+				return false;
+			}
+		} else if (!parent.equals(other.parent)) {
+			return false;
+		}
+		return true;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "p = " + parent 
+				+ ", c = " + child
+				+ ", V = " + contextVariables
+				+ ", C_A = " + constraintsOnExtraVariable
+				+ ", C = " + otherConstraints 
+				+ "\n" + factor;
+	}
 }

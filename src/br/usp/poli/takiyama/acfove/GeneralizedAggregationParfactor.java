@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import br.usp.poli.takiyama.acfove.AggregationParfactor.Builder;
 import br.usp.poli.takiyama.acfove.operator.BooleanOperator;
 import br.usp.poli.takiyama.cfove.ParameterizedFactor;
 import br.usp.poli.takiyama.cfove.SimpleParfactor;
@@ -445,6 +444,7 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 	
 	/**
 	 * Adds the specified constraint to this parfactor.
+	 * 
 	 * @param c The constraint to add.
 	 * @return This parfactor with the specified constraint added. A new
 	 * instance is created.
@@ -459,7 +459,93 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 	}
 	
 	private List<Parfactor> splitOnSubstitutionAt(Binding s) {
-		throw new UnsupportedOperationException("Not implemented!");
+		
+		// Builds the aggregation parfactor
+		
+		Constraint constraintFromBinding = Constraint.getInequalityConstraintFromBinding(s);
+		ParameterizedRandomVariable cAux = this.child.rename(this.child.getName() + "'");
+		
+		Builder builder = new Builder(this.parent, cAux, this.operator, this.contextVariables);
+		builder.addConstraints(this.constraintsOnExtraVariable);
+		builder.addConstraints(this.otherConstraints);
+		builder.addConstraint(constraintFromBinding);
+		builder.factor(this.factor);
+		GeneralizedAggregationParfactor residue = builder.build();
+		
+		// Builds the simple parfactor
+		// It is relatively simple, but the code below doesn't reflect that
+		// TODO make it simpler
+		
+		Set<Constraint> constraints = new HashSet<Constraint>(this.otherConstraints);
+		for (Constraint c : this.constraintsOnExtraVariable) {
+			Constraint nc = c.applySubstitution(s);
+			if (nc != null) {
+				constraints.add(nc);
+			}
+		}
+		
+		List<ParameterizedRandomVariable> prvs = 
+				new ArrayList<ParameterizedRandomVariable>(3 + contextVariables.size());
+		prvs.add(this.parent.applyOneSubstitution(s));
+		for (ParameterizedRandomVariable prv : contextVariables) {
+			ParameterizedRandomVariable sprv = prv.applyOneSubstitution(s);
+			prvs.add(sprv);
+		}
+		prvs.add(cAux);
+		prvs.add(this.child);
+
+		List<Number> mapping = new ArrayList<Number>();
+		Iterator<Tuple> it = ParameterizedFactor.getIteratorOverTuples(prvs);
+		while (it.hasNext()) {
+			Tuple currentTuple = it.next();
+			
+			int rangeIndexOfP = currentTuple.get(0);
+			int rangeIndexOfCAux = currentTuple.get(prvs.size() - 2);
+			int rangeIndexOfC = currentTuple.get(prvs.size() - 1);
+			
+			String valueOfP = this.parent.getElementFromRange(rangeIndexOfP);
+			String valueOfCAux = cAux.getElementFromRange(rangeIndexOfCAux);
+			String valueOfC = this.child.getElementFromRange(rangeIndexOfC);
+			
+			Boolean p = Boolean.valueOf(valueOfP); // ugly
+			Boolean c = Boolean.valueOf(valueOfC); 
+			Boolean caux = Boolean.valueOf(valueOfCAux);
+			
+			if (this.operator.applyOn(p, caux).equals(c)) {
+				double correction = getCorrectionFraction();
+				ArrayList<Integer> tupleValue = new ArrayList<Integer>(1);
+				tupleValue.add(rangeIndexOfP);
+				Tuple t = new Tuple(tupleValue);
+				double v = this.factor.getTupleValue(this.factor.getTupleIndex(t));
+				mapping.add(Math.pow(v, correction));
+			} else {
+				mapping.add(0.0);
+			}
+		}
+		ParameterizedFactor fc = ParameterizedFactor.getInstance("fc", prvs, mapping);
+		SimpleParfactor split = SimpleParfactor.getInstance(constraints, fc);
+		
+		List<Parfactor> result = new ArrayList<Parfactor>(2);
+		result.add(residue);
+		result.add(split);
+		return result;
+	}
+	
+	/**
+	 * Returns the correction factor used in split operations.
+	 * <br>
+	 * The correction factor is given by rp / rc, where
+	 * <li> rp = |ground(p(...,a,...)):C|, a &in; D(A):C<sub>A</sub>
+	 * <li> rc = |ground(c(...)):C| 
+	 * @return The correction factor used in split operations.
+	 */
+	private double getCorrectionFraction() {
+		Binding s = Binding.create(extraVariable, extraVariable.getPopulation().getIndividual(0));
+		ParameterizedRandomVariable p = this.parent.applyOneSubstitution(s);
+		int rp = p.getGroundSetSize(otherConstraints);
+		int rc = this.child.getGroundSetSize(otherConstraints);
+		
+		return ((double) rp) / rc;
 	}
 	
 	private List<Parfactor> splitOnSubstitutionXA(Binding s) {

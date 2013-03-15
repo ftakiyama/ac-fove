@@ -1966,7 +1966,7 @@ public class Pool {
 				0.0000000175,
 				0.0000000550
 		};
-		createSimpleParfactor("g7", "", "big_jackpot;jackpot_won", "Fjackpot_won", toString(fJackpotWon));
+		createSimpleParfactor("g7", "", "jackpot_won;big_jackpot", "Fjackpot_won", toString(fJackpotWon));
 	}
 	
 	

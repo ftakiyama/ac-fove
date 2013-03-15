@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import br.usp.poli.takiyama.acfove.AggregationParfactor.Builder;
@@ -293,13 +294,6 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 
 	@Override
 	public Parfactor fullExpand(CountingFormula countingFormula) {
-
-		throw new UnsupportedOperationException("Not implemented!");
-	}
-
-
-	@Override
-	public Parfactor sumOut(ParameterizedRandomVariable prv) {
 
 		throw new UnsupportedOperationException("Not implemented!");
 	}
@@ -750,6 +744,223 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 		return builder.build();
 	}
 	
+	
+	/* ************************************************************************
+	 *    Sum out
+	 * ************************************************************************/
+	
+	@Override
+	public Parfactor sumOut(ParameterizedRandomVariable prv) {
+		
+		ParameterizedFactor f = calculateSumOutFactor();
+		Parfactor result;
+		if (childHasExtra()) {
+			result = countChildVariable(f);
+		} else {
+			Set<Constraint> c = new HashSet<Constraint>(this.otherConstraints);
+			result = SimpleParfactor.getInstance(c, f);
+		}
+		
+		return result;
+	}
+	
+	
+	private ParameterizedFactor calculateSumOutFactor() {
+		
+		List<ParameterizedRandomVariable> prvs = 
+				new ArrayList<ParameterizedRandomVariable>(contextVariables);
+		prvs.add(0, child);
+		Iterator<Tuple> it = ParameterizedFactor.getIteratorOverTuples(prvs);
+		
+		ParameterizedFactor currentFactor = calculateSumOutBase(it, prvs);
+		
+		int domainSize = this.extraVariable.getSizeOfPopulationSatisfying(constraintsOnExtraVariable);
+		String bin = Integer.toBinaryString(domainSize);
+		
+		for (int k = 1; k < bin.length(); k++) {
+			it = ParameterizedFactor.getIteratorOverTuples(prvs);
+			if (bin.charAt(k) == '0') {
+				currentFactor = calculateSumOutFk0(it, currentFactor);
+			} else {
+				currentFactor = calculateSumOutFk1(it, currentFactor);
+			}
+		}
+		
+		return currentFactor;
+	}
+	
+	private ParameterizedFactor calculateSumOutBase(Iterator<Tuple> it, List<ParameterizedRandomVariable> prvs) {
+
+		List<Number> base = new ArrayList<Number>();
+
+		while (it.hasNext()) {
+			Tuple t = it.next();
+			String childRangeValue = child.getElementFromRange(t.get(0));
+			if (this.parent.getRange().contains(childRangeValue)) {
+				int pindex = parent.getRange().indexOf(childRangeValue);
+				Tuple t1 = t.getModifiedTuple(0, pindex);
+				base.add(factor.getValue(t1));
+			} else {
+				base.add(0.0);
+			}
+		}
+		
+		return ParameterizedFactor.getInstance("", prvs, base);
+	}
+	
+	private ParameterizedFactor calculateSumOutFk0(Iterator<Tuple> it, ParameterizedFactor previousFactor) {
+		
+		List<Number> fValues = new ArrayList<Number>();
+		
+		while (it.hasNext()) {
+			Tuple t = it.next();
+			String x = child.getElementFromRange(t.get(0));
+			Boolean x1 = Boolean.valueOf(x);
+			double sum = 0.0;
+			for (String y : this.child.getRange()) {
+				Boolean y1 = Boolean.valueOf(y);
+				int yindex = this.child.getRange().indexOf(y);
+				for (String z : this.child.getRange()) {
+					Boolean z1 = Boolean.valueOf(z);
+					int zindex = this.child.getRange().indexOf(z);
+					if (this.operator.applyOn(y1, z1) == x1) {
+						Tuple ty = t.getModifiedTuple(0, yindex);
+						Tuple tz = t.getModifiedTuple(0, zindex);
+						sum = sum 
+							+ previousFactor.getValue(ty)
+								* previousFactor.getValue(tz);
+					}
+				}
+			}
+			fValues.add(sum);
+		}
+		
+		List<ParameterizedRandomVariable> prvs = previousFactor.getParameterizedRandomVariables();
+		return ParameterizedFactor.getInstance("", prvs, fValues);
+	}
+	
+	private ParameterizedFactor calculateSumOutFk1(Iterator<Tuple> it, ParameterizedFactor previousFactor) {
+		List<Number> fValues = new ArrayList<Number>();
+		
+		while (it.hasNext()) {
+			Tuple t = it.next();
+			String x = child.getElementFromRange(t.get(0));
+			Boolean x1 = Boolean.valueOf(x);
+			double sum = 0.0;
+			for (String y : this.child.getRange()) {
+				Boolean y1 = Boolean.valueOf(y);
+				int yindex = this.child.getRange().indexOf(y);
+				for (String z : this.child.getRange()) {
+					Boolean z1 = Boolean.valueOf(z);
+					int zindex = this.child.getRange().indexOf(z);
+					for (String w : this.child.getRange()) {
+						Boolean w1 = Boolean.valueOf(w);
+						int windex = this.parent.getRange().indexOf(w);
+						if (this.operator.applyOn(w1, y1, z1) == x1) {
+							Tuple tw = t.getModifiedTuple(0, windex);
+							Tuple ty = t.getModifiedTuple(0, yindex);
+							Tuple tz = t.getModifiedTuple(0, zindex);
+							sum = sum 
+								+ factor.getValue(tw)
+									* previousFactor.getValue(ty)
+									* previousFactor.getValue(tz);
+						}
+					}
+				}
+			}
+			fValues.add(sum);
+		}
+		
+		List<ParameterizedRandomVariable> prvs = previousFactor.getParameterizedRandomVariables();
+		return ParameterizedFactor.getInstance("", prvs, fValues);
+	}
+		
+	/**
+	 * Returns true if the child PRV is parameterized by a logical variable
+	 * not present in the parent PRV.
+	 * <br>
+	 * In other words, if |param(c) \ param(p)| = 1, returns true. 
+	 * 
+	 * @return True if the child PRV is parameterized by a logical variable
+	 * not present in the parent PRV, false otherwise.
+	 */
+	private boolean childHasExtra() {
+		Set<LogicalVariable> paramParent = parent.getParameters();
+		Set<LogicalVariable> paramChild = new HashSet<LogicalVariable>(child.getParameters());
+		paramChild.removeAll(paramParent);
+		return (paramChild.size() == 1);
+	}
+	
+	/**
+	 * Counts the child variable resulting from calculateSumOutFactor().
+	 * 
+	 * @param f The parameterized factor containing the logical variable 
+	 * to be counted
+	 * @return The result of counting the variable from the specified factor.
+	 */
+	private Parfactor countChildVariable(ParameterizedFactor f) {
+		
+		// build constraints on C_E
+		LogicalVariable extra = getExtraInChild();
+		Set<Constraint> constraintsOnExtra = getConstraintsContaining(extra);
+		Set<Constraint> constraints = new HashSet<Constraint>(this.otherConstraints);
+		constraints.removeAll(constraintsOnExtra);
+				
+		// Build counting formula
+		CountingFormula cf = CountingFormula.getInstance(extra, constraintsOnExtra, child);
+		
+		List<Number> mapping = new ArrayList<Number>();
+		for (CountingFormula.Histogram<String> h : cf.getCountingFormulaRange()) {
+			int extraPopulationSize = extra.getSizeOfPopulationSatisfying(constraintsOnExtra);
+			if (h.containsValue(extraPopulationSize)) {
+				int index = cf.getCountingFormulaRange().indexOf(h);
+				mapping.add(f.getTupleValue(index));
+			} else {
+				mapping.add(0.0);
+			}
+		}
+		
+		String name = f.getName();
+		List<ParameterizedRandomVariable> variables = f.getParameterizedRandomVariables();
+		ParameterizedFactor nf = ParameterizedFactor.getInstance(name, variables, mapping);
+		Parfactor result = SimpleParfactor.getInstance(constraints, nf);
+		return result;
+	}
+	
+	/**
+	 * Returns the logical variable in the child PRV that is not present in
+	 * the parent PRV.
+	 * @return The logical variable in the child PRV that is not present in
+	 * the parent PRV.
+	 * @throws NoSuchElementException If there is no extra variable in the child.
+	 */
+	private LogicalVariable getExtraInChild() throws NoSuchElementException {
+		Set<LogicalVariable> paramParent = parent.getParameters();
+		Set<LogicalVariable> paramChild = child.getParameters();
+		paramChild.removeAll(paramParent);
+		Iterator<LogicalVariable> it = paramChild.iterator();
+		if (!it.hasNext()) {
+			throw new NoSuchElementException("Child does not have extra LV.");
+		}
+		return paramChild.iterator().next();
+	}
+	
+	/**
+	 * Returns the set of constraints in this aggregation parfactor that 
+	 * contain the specified logical variable.
+	 * @param lv The logical variable to look for in constraints.
+	 * @return The set of constraints that involve the specified logical
+	 * variable.
+	 */
+	private Set<Constraint> getConstraintsContaining(LogicalVariable lv) {
+		Set<Constraint> constraints = new HashSet<Constraint>();
+		for (Constraint c : getConstraints()) {
+			if (c.contains(lv)) {
+				constraints.add(c);
+			}
+		}
+		return constraints;
+	}
 	
 	/* ************************************************************************
 	 * 

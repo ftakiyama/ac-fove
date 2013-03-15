@@ -858,4 +858,14 @@ public final class ParameterizedFactor {
 		}
 		return new ParameterizedFactor(this.name, prvs, this.mapping);
 	}
+	
+	/**
+	 * Returns the value of the specified tuple.
+	 * @param t The tuple
+	 * @return The value of the specified tuple.
+	 */
+	public Double getValue(Tuple t) {
+		int index = getTupleIndex(t);
+		return mapping.get(index);
+	}
 }

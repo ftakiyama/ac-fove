@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import br.usp.poli.takiyama.acfove.AggregationParfactor.Builder;
 import br.usp.poli.takiyama.acfove.operator.BooleanOperator;
 import br.usp.poli.takiyama.cfove.ParameterizedFactor;
 import br.usp.poli.takiyama.cfove.SimpleParfactor;
@@ -458,6 +459,40 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 		return builder.build();
 	}
 	
+	/**
+	 * Splits this parfactor on the specified substitution. The following
+	 * conditiond must be met:
+	 * <li> The substitution must be of the form A/t, where A is the parent's
+	 * extra logical variable and t is a term
+	 * <li> t is not the extra logical variable in the parent PRV
+	 * <li> (A &ne; t) &notin; C<sub>A</sub>
+	 * <li> t &in; D(A) or t &in; param(p)\{A}
+	 * <br>
+	 * This method does not verify the conditions above. They must be checked
+	 * using the method {@link GeneralizedAggregationParfactor#canBeSplit(Binding)}.
+	 * <br>
+	 * It is not recommended to call this method directly. 
+	 * {@link GeneralizedAggregationParfactor#split(Binding)} should be used instead.
+	 * <br>
+	 * <br>
+	 * Splitting g = &lang; C, p, c, V, Fp, &otimes;, C<sub>A</sub> &rang;
+	 * on substitution {A/t} (which mets conditions above) results in two
+	 * parfactors:
+	 * <li> &lang; C, p, c', V, Fp, &otimes;, C<sub>A</sub> U {A &ne; t} &rang;
+	 * <li> &lang; C U C<sub>A</sub>[A/t], {p[A/t], V[A/t], c', c} , Fc &rang;
+	 * <br>
+	 * where c' is an auxiliary PRV that is equal to c and Fc is a factor
+	 * defined in Kisynski (2010).
+	 * <br>
+	 * This method returns the two parfactors above in the order listed. One
+	 * should be aware to sum out c', since it is introduced by this operation.
+	 * 
+	 * @param s The substitution on which we split this parfactor. It must
+	 * obey the conditions above.
+	 * @return A list where the first position is occupied by the aggregation
+	 * parfactor and the
+	 * second position is the simple parfactor.
+	 */
 	private List<Parfactor> splitOnSubstitutionAt(Binding s) {
 		
 		// Builds the aggregation parfactor
@@ -548,8 +583,114 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 		return ((double) rp) / rc;
 	}
 	
+	/**
+	 * Splits this parfactor on the specified substitution. The following
+	 * conditiond must be met:
+	 * <li> The substitution must be of the form X/A, where A is the parent's
+	 * extra logical variable and X is a logical variable
+	 * <li> X is not the extra logical variable in the parent PRV
+	 * <li> (X &ne; A) &notin; C<sub>A</sub>
+	 * <li> X &in; param(p)\{A}
+	 * <br>
+	 * This method does not verify the conditions above. They must be checked
+	 * using the method {@link GeneralizedAggregationParfactor#canBeSplit(Binding)}.
+	 * <br>
+	 * It is not recommended to call this method directly. 
+	 * {@link GeneralizedAggregationParfactor#split(Binding)} should be used instead.
+	 * <br>
+	 * <br>
+	 * Splitting g = &lang; C, p, c, V, Fp, &otimes;, C<sub>A</sub> &rang;
+	 * on substitution {X/A} (given that it meets conditions above) results in two
+	 * parfactors:
+	 * <li> &lang; C, p, c', V, Fp, &otimes;, C<sub>A</sub> U {A &ne; t} &rang;
+	 * <li> &lang; C[A/t] U C<sub>A</sub>, {p[X/A], V[X/A], c', c} , Fc &rang;
+	 * <br>
+	 * where c' is an auxiliary PRV that is equal to c and Fc is a factor
+	 * defined in Kisynski (2010).
+	 * <br>
+	 * This method returns the two parfactors above in the order listed. One
+	 * should be aware to sum out c', since it is introduced by this operation.
+	 * 
+	 * @param s The substitution on which we split this parfactor. It must
+	 * obey the conditions above.
+	 * @return A list where the first position is occupied by the aggregation
+	 * parfactor and the
+	 * second position is the simple parfactor.
+	 */
 	private List<Parfactor> splitOnSubstitutionXA(Binding s) {
-		throw new UnsupportedOperationException("Not implemented!");
+		
+		/* This method is actually the same as splitOnSubstitutionAt.
+		 * The only difference is on the set of constraints on the simple
+		 * parfactor, instead of using C_A I use C.
+		 */
+		
+		// Builds the aggregation parfactor
+		
+		Constraint constraintFromBinding = Constraint.getInequalityConstraintFromBinding(s);
+		ParameterizedRandomVariable cAux = this.child.rename(this.child.getName() + "'");
+		
+		Builder builder = new Builder(this.parent, cAux, this.operator, this.contextVariables);
+		builder.addConstraints(this.constraintsOnExtraVariable);
+		builder.addConstraints(this.otherConstraints);
+		builder.addConstraint(constraintFromBinding);
+		builder.factor(this.factor);
+		GeneralizedAggregationParfactor residue = builder.build();
+		
+		// Builds the simple parfactor
+		
+		Set<Constraint> constraints = new HashSet<Constraint>(this.constraintsOnExtraVariable);
+		for (Constraint c : this.otherConstraints) {
+			Constraint nc = c.applySubstitution(s);
+			if (nc != null) {
+				constraints.add(nc);
+			}
+		}
+		
+		List<ParameterizedRandomVariable> prvs = 
+			new ArrayList<ParameterizedRandomVariable>(3 + contextVariables.size());
+		prvs.add(this.parent.applyOneSubstitution(s));
+		for (ParameterizedRandomVariable prv : contextVariables) {
+			ParameterizedRandomVariable sprv = prv.applyOneSubstitution(s);
+			prvs.add(sprv);
+		}
+		prvs.add(cAux);
+		prvs.add(this.child);
+
+		List<Number> mapping = new ArrayList<Number>();
+		Iterator<Tuple> it = ParameterizedFactor.getIteratorOverTuples(prvs);
+		while (it.hasNext()) {
+			Tuple currentTuple = it.next();
+			
+			int rangeIndexOfP = currentTuple.get(0);
+			int rangeIndexOfCAux = currentTuple.get(prvs.size() - 2);
+			int rangeIndexOfC = currentTuple.get(prvs.size() - 1);
+			
+			String valueOfP = this.parent.getElementFromRange(rangeIndexOfP);
+			String valueOfCAux = cAux.getElementFromRange(rangeIndexOfCAux);
+			String valueOfC = this.child.getElementFromRange(rangeIndexOfC);
+			
+			Boolean p = Boolean.valueOf(valueOfP); // ugly
+			Boolean c = Boolean.valueOf(valueOfC); 
+			Boolean caux = Boolean.valueOf(valueOfCAux);
+			
+			if (this.operator.applyOn(p, caux).equals(c)) {
+				double correction = getCorrectionFraction();
+				ArrayList<Integer> tupleValue = new ArrayList<Integer>(1);
+				tupleValue.add(rangeIndexOfP);
+				Tuple t = new Tuple(tupleValue);
+				double v = this.factor.getTupleValue(this.factor.getTupleIndex(t));
+				mapping.add(Math.pow(v, correction));
+			} else {
+				mapping.add(0.0);
+			}
+		}
+		ParameterizedFactor fc = ParameterizedFactor.getInstance("fc", prvs, mapping);
+		SimpleParfactor split = SimpleParfactor.getInstance(constraints, fc);
+		
+		List<Parfactor> result = new ArrayList<Parfactor>(2);
+		result.add(residue);
+		result.add(split);
+		return result;
 	}
 	
 	/* ************************************************************************

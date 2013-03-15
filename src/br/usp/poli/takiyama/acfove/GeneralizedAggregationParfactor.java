@@ -297,11 +297,6 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 		throw new UnsupportedOperationException("Not implemented!");
 	}
 
-	@Override
-	public Parfactor multiply(Parfactor parfactor) {
-
-		throw new UnsupportedOperationException("Not implemented!");
-	}
 
 	@Override
 	public Parfactor sumOut(ParameterizedRandomVariable prv) {
@@ -692,6 +687,69 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 		result.add(split);
 		return result;
 	}
+	
+		
+	/* ************************************************************************
+	 *    Multiplication
+	 * ************************************************************************/
+	
+	@Override
+	public Parfactor multiply(Parfactor parfactor) throws IllegalArgumentException {
+		if (!canMultiply(parfactor)) {
+			throw new IllegalArgumentException(this 
+					+ "\n cannot be multiplied by \n" 
+					+ parfactor);
+		}
+		
+		ParameterizedFactor first = this.getFactor();
+		ParameterizedFactor second = parfactor.getFactor();
+		ParameterizedFactor result = first.multiply(second);
+		
+		return setFactor(result);
+	}
+	
+	/**
+	 * Returns true if this parfactor can be multiplied by the specified
+	 * parfactor, false otherwise.
+	 * <br>
+	 * This parfactor can be multiplied by the specified parfactor if:
+	 * <li> The specified parfactor is a simple parfactor
+	 * <li> The specified parfactor has only the parent PRV and context PRVs
+	 * <li> The constraints of the specified parfactor are equal to the union
+	 * of all constraints in this aggregation parfactor.
+	 * 
+	 * @param p The candidate parfactor to multiply this one
+	 * @return True if this parfactor can be multiplied by the specified
+	 * parfactor, false otherwise.
+	 */
+	public boolean canMultiply(Parfactor p) {
+		if (p instanceof GeneralizedAggregationParfactor
+				|| p instanceof AggregationParfactor) {
+			return false;
+		}
+		
+		boolean compatibleConstraints = p.getConstraints().equals(this.getConstraints());
+		
+		List<ParameterizedRandomVariable> prvs = p.getParameterizedRandomVariables();
+		List<ParameterizedRandomVariable> thisPrvs = factor.getParameterizedRandomVariables();
+		boolean parfactorOnParentAndContext = (prvs.size() == thisPrvs.size()) 
+												&& prvs.containsAll(thisPrvs);
+		
+		return compatibleConstraints && parfactorOnParentAndContext;
+	}
+	
+	/**
+	 * Sets the factor in this aggregation parfactor.
+	 * @param f The new parameterized factor
+	 * @return This aggregation parfactor with the specified parameterized
+	 * factor.
+	 */
+	private GeneralizedAggregationParfactor setFactor(ParameterizedFactor f) {
+		Builder builder = new Builder(this);
+		builder.factor(f);
+		return builder.build();
+	}
+	
 	
 	/* ************************************************************************
 	 * 

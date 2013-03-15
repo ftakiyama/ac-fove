@@ -294,7 +294,7 @@ public class GeneralizedAggregationParfactorTest {
 		Parfactor g5 = objects.getSimpleParfactor("g5");
 		Parfactor result = g4.multiply(g5);
 		
-		Parfactor answer = objects.getAggParfactor("g7");
+		Parfactor answer = objects.getGenAggParfactor("g6");
 		
 		assertTrue(result.equals(answer));
 	}
@@ -321,7 +321,7 @@ public class GeneralizedAggregationParfactorTest {
 		Parfactor g2 = objects.getGenAggParfactor("ga");
 		Parfactor result = g2.multiply(g1);
 		
-		Parfactor answer = objects.getAggParfactor("gar");
+		Parfactor answer = objects.getGenAggParfactor("gar");
 
 		assertTrue(result.equals(answer));
 	}

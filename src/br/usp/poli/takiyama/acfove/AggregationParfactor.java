@@ -663,7 +663,8 @@ public class AggregationParfactor implements Parfactor {
 	 * parfactor, false otherwise.
 	 */
 	public boolean canMultiply(Parfactor p) {
-		if (p instanceof AggregationParfactor) {
+		if (p instanceof GeneralizedAggregationParfactor
+				|| p instanceof AggregationParfactor) {
 			return false;
 		}
 		boolean compatibleConstraints = p.getConstraints().equals(this.getConstraints());

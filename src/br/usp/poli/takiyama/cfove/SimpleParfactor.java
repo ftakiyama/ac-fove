@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import br.usp.poli.takiyama.acfove.AggregationParfactor;
+import br.usp.poli.takiyama.acfove.GeneralizedAggregationParfactor;
 import br.usp.poli.takiyama.common.Constraint;
 //import br.usp.poli.takiyama.common.Constraints;
 import br.usp.poli.takiyama.common.Parfactor;
@@ -406,6 +407,10 @@ public final class SimpleParfactor implements Parfactor {
 		if (parfactor instanceof AggregationParfactor) {
 			AggregationParfactor ap = (AggregationParfactor) parfactor;
 			return ap.multiply(this);
+		}
+		if (parfactor instanceof GeneralizedAggregationParfactor) {
+			GeneralizedAggregationParfactor gap = (GeneralizedAggregationParfactor) parfactor;
+			return gap.multiply(this);
 		}
 		
 		Set<Constraint> allConstraints = new HashSet<Constraint>(this.constraints);

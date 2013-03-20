@@ -38,5 +38,9 @@ public class Parfactors {
 		}
 		return renamedParfactors;
 	}
+	
+	public static Set<Parfactor> unify(Parfactor g1, Parfactor g2) {
+		throw new UnsupportedOperationException("Not implemented!");
+	}
 
 }

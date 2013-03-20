@@ -369,4 +369,5 @@ public class GeneralizedAggregationParfactorTest {
 		
 		assertTrue(result.equals(answer));
 	}
+	
 }

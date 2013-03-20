@@ -1969,6 +1969,370 @@ public class Pool {
 		createSimpleParfactor("g7", "", "jackpot_won;big_jackpot", "Fjackpot_won", toString(fJackpotWon));
 	}
 	
+	public void setGenAggUnificationTest() {
+		
+		createLogicalVariable("A", "x", 10);
+		createLogicalVariable("B", "x", 10);
+		createLogicalVariable("E", "x", 10);
+		createLogicalVariable("F", "x", 10);
+		
+		createPrv("p", "A", "B");
+		createPrv("c", "B");
+		createPrv("c'", "B");
+		createPrv("u", "");
+		createPrv("v", "F");
+		createPrv("w", "B");
+		
+		createPrvFromSubstitution("p", "B/1");
+		createPrvFromSubstitution("p", "B/E");
+		createPrvFromSubstitution("p", "A/1", "B/3");
+		createPrvFromSubstitution("p", "A/1", "B/E");
+		createPrvFromSubstitution("p", "A/F", "B/E");
+		createPrvFromSubstitution("c", "B/1");
+		createPrvFromSubstitution("c", "B/3");
+		createPrvFromSubstitution("c", "B/E");
+		createPrvFromSubstitution("c'", "B/1");
+		createPrvFromSubstitution("c'", "B/3");
+		createPrvFromSubstitution("c'", "B/E");
+
+		createConstraint("A", "1");
+		createConstraint("A", "2");
+		createConstraint("A", "4");
+		createConstraint("B", "1");
+		createConstraint("B", "2");
+		createConstraint("E", "1");
+		createConstraint("E", "3");
+		createConstraint("F", "3");
+		
+		String name;
+		String parent;
+		String child;
+		String constraints;
+		String contextVars;
+		String vars;
+		String factorName;
+		String factorValues;
+		
+		// test 1 - input
+		
+		name 			= "g.1.in.1";
+		parent 			= "p";
+		child 			= "c";
+		constraints 	= "";
+		contextVars 	= "";
+		createGenAggParfactor(name, parent, child, contextVars, constraints, Or.OR);
+		
+		name 			= "g.1.in.2";
+		constraints 	= "";
+		vars 			= "p[B/1]";
+		factorName 	 	= "1";
+		factorValues 	= "1.0;1.0";
+		createSimpleParfactor(name, constraints, vars, factorName, factorValues);
+		
+		// test 1 - expected result
+		
+		name 			= "g.1.out.1";
+		parent 			= "p[B/1]";
+		child 			= "c[B/1]";
+		constraints 	= "";
+		contextVars 	= "";
+		createGenAggParfactor(name, parent, child, contextVars, constraints, Or.OR);
+		
+		name 			= "g.1.out.2";
+		parent 			= "p";
+		child 			= "c";
+		constraints 	= "B != 1";
+		contextVars 	= "";
+		createGenAggParfactor(name, parent, child, contextVars, constraints, Or.OR);
+		
+		name 			= "g.1.out.3";
+		constraints 	= "";
+		vars 			= "p[B/1]";
+		factorName 	 	= "1";
+		factorValues 	= "1.0;1.0";
+		createSimpleParfactor(name, constraints, vars, factorName, factorValues);
+		
+		
+		// test 2 - input
+		
+		name 			= "g.2.in.1";
+		parent 			= "p";
+		child 			= "c";
+		constraints 	= "";
+		contextVars 	= "";
+		createGenAggParfactor(name, parent, child, contextVars, constraints, Or.OR);
+		
+		name 			= "g.2.in.2";
+		constraints 	= "";
+		vars 			= "p[A/1, B/E]";
+		factorName 	 	= "1";
+		factorValues 	= "1.0;1.0";
+		createSimpleParfactor(name, constraints, vars, factorName, factorValues);
+		
+		// test 2 - expected result
+		
+		name 			= "g.2.out.1";
+		parent 			= "p";
+		child 			= "c'";
+		constraints 	= "A != 1";
+		contextVars 	= "";
+		createGenAggParfactor(name, parent, child, contextVars, constraints, Or.OR);
+		
+		name 			= "g.2.out.2";
+		constraints 	= "";
+		vars 			= "p[A/1, B/E];c'[B/E];c[B/E]";
+		factorName 	 	= "Fc";
+		factorValues 	= "1.0;0.0;0.0;1.0;0.0;1.0;0.0;1.0";
+		createSimpleParfactor(name, constraints, vars, factorName, factorValues);
+		
+		name 			= "g.2.out.3";
+		constraints 	= "";
+		vars 			= "p[A/1, B/E]";
+		factorName 	 	= "1";
+		factorValues 	= "1.0;1.0";
+		createSimpleParfactor(name, constraints, vars, factorName, factorValues);
+		
+		
+		// test 3 - input
+		
+		name 			= "g.3.in.1";
+		parent 			= "p";
+		child 			= "c";
+		constraints 	= "B != 2;A != 4";
+		contextVars 	= "";
+		createGenAggParfactor(name, parent, child, contextVars, constraints, Or.OR);
+		
+		name 			= "g.3.in.2";
+		constraints 	= "E != 3";
+		vars 			= "p[A/1, B/E]";
+		factorName 	 	= "1";
+		factorValues 	= "1.0;1.0";
+		createSimpleParfactor(name, constraints, vars, factorName, factorValues);
+		
+		// test 3 - expected result
+		
+		name 			= "g.3.out.1";
+		parent 			= "p";
+		child 			= "c'";
+		constraints 	= "B != 2;A != 4;A != 1";
+		contextVars 	= "";
+		createGenAggParfactor(name, parent, child, contextVars, constraints, Or.OR);
+		
+		name 			= "g.3.out.2";
+		constraints 	= "E != 3";
+		vars 			= "p[A/1, B/E]";
+		factorName 	 	= "1";
+		factorValues 	= "1.0;1.0";
+		createSimpleParfactor(name, constraints, vars, factorName, factorValues);
+		
+		name 			= "g.3.out.3";
+		constraints 	= "";
+		vars 			= "p[A/1, B/3];c'[B/3];c[B/3]";
+		factorName 	 	= "Fc";
+		factorValues 	= "1.0;0.0;0.0;1.0;0.0;1.0;0.0;1.0";
+		createSimpleParfactor(name, constraints, vars, factorName, factorValues);
+		
+		name 			= "g.3.out.4";
+		constraints 	= "E != 3";
+		vars 			= "p[A/1, B/E];c'[B/E];c[B/E]";
+		factorName 	 	= "Fc";
+		factorValues 	= "1.0;0.0;0.0;1.0;0.0;1.0;0.0;1.0";
+		createSimpleParfactor(name, constraints, vars, factorName, factorValues);
+		
+		
+		// test 4 - input
+		
+		name 			= "g.4.in.1";
+		parent 			= "p";
+		child 			= "c";
+		constraints 	= "";
+		contextVars 	= "";
+		createGenAggParfactor(name, parent, child, contextVars, constraints, Or.OR);
+		
+		name 			= "g.4.in.2";
+		parent 			= "p[A/F, B/E]";
+		child 			= "c[B/E]";
+		constraints 	= "";
+		contextVars 	= "";
+		createGenAggParfactor(name, parent, child, contextVars, constraints, Or.OR);
+		
+		// test 4 - expected result
+		// g.4.out.1 == g.4.out.2 
+		// g.4.out.3 == g.4.out.4
+		// result is 1,2 or 3,4
+		
+		name 			= "g.4.out.1";
+		parent 			= "p";
+		child 			= "c";
+		constraints 	= "";
+		contextVars 	= "";
+		createGenAggParfactor(name, parent, child, contextVars, constraints, Or.OR);
+		
+		name 			= "g.4.out.2";
+		parent 			= "p";
+		child 			= "c";
+		constraints 	= "";
+		contextVars 	= "";
+		createGenAggParfactor(name, parent, child, contextVars, constraints, Or.OR);
+		
+		name 			= "g.4.out.3";
+		parent 			= "p[A/F, B/E]";
+		child 			= "c[B/E]";
+		constraints 	= "";
+		contextVars 	= "";
+		createGenAggParfactor(name, parent, child, contextVars, constraints, Or.OR);
+		
+		name 			= "g.4.out.4";
+		parent 			= "p[A/F, B/E]";
+		child 			= "c[B/E]";
+		constraints 	= "";
+		contextVars 	= "";
+		createGenAggParfactor(name, parent, child, contextVars, constraints, Or.OR);
+		
+		
+		// test 5 - input
+		
+		name 			= "g.5.in.1";
+		parent 			= "p";
+		child 			= "c";
+		constraints 	= "";
+		contextVars 	= "u";
+		createGenAggParfactor(name, parent, child, contextVars, constraints, Or.OR);
+		
+		name 			= "g.5.in.2";
+		parent 			= "p[A/F, B/E]";
+		child 			= "c[B/E]";
+		constraints 	= "";
+		contextVars 	= "";
+		createGenAggParfactor(name, parent, child, contextVars, constraints, Or.OR);
+		
+		// test 5 - expected result
+		// result is 1,2 or 3,4
+		
+		name 			= "g.5.out.1";
+		parent 			= "p";
+		child 			= "c";
+		constraints 	= "";
+		contextVars 	= "u";
+		createGenAggParfactor(name, parent, child, contextVars, constraints, Or.OR);
+		
+		name 			= "g.5.out.2";
+		parent 			= "p";
+		child 			= "c";
+		constraints 	= "";
+		contextVars 	= "";
+		createGenAggParfactor(name, parent, child, contextVars, constraints, Or.OR);
+		
+		name 			= "g.5.out.3";
+		parent 			= "p[A/F, B/E]";
+		child 			= "c[B/E]";
+		constraints 	= "";
+		contextVars 	= "u";
+		createGenAggParfactor(name, parent, child, contextVars, constraints, Or.OR);
+		
+		name 			= "g.5.out.4";
+		parent 			= "p[A/F, B/E]";
+		child 			= "c[B/E]";
+		constraints 	= "";
+		contextVars 	= "";
+		createGenAggParfactor(name, parent, child, contextVars, constraints, Or.OR);
+		
+		
+		// test 6 - input
+		
+		name 			= "g.6.in.1";
+		parent 			= "p[B/1]";
+		child 			= "c[B/1]";
+		constraints 	= "";
+		contextVars 	= "u";
+		createGenAggParfactor(name, parent, child, contextVars, constraints, Or.OR);
+		
+		name 			= "g.6.in.2";
+		parent 			= "p[B/E]";
+		child 			= "c[B/E]";
+		constraints 	= "";
+		contextVars 	= "v";
+		createGenAggParfactor(name, parent, child, contextVars, constraints, Or.OR);
+		
+		// test 6 - expected result
+		
+		name 			= "g.6.out.1";
+		parent 			= "p[B/1]";
+		child 			= "c[B/1]";
+		constraints 	= "";
+		contextVars 	= "u";
+		createGenAggParfactor(name, parent, child, contextVars, constraints, Or.OR);
+		
+		name 			= "g.6.out.2";
+		parent 			= "p[B/1]";
+		child 			= "c[B/1]";
+		constraints 	= "";
+		contextVars 	= "v";
+		createGenAggParfactor(name, parent, child, contextVars, constraints, Or.OR);
+		
+		name 			= "g.6.out.3";
+		parent 			= "p[B/E]";
+		child 			= "c[B/E]";
+		constraints 	= "E != 1";
+		contextVars 	= "v";
+		createGenAggParfactor(name, parent, child, contextVars, constraints, Or.OR);
+		
+
+		// test 7 - input
+		
+		name 			= "g.7.in.1";
+		parent 			= "p[B/1]";
+		child 			= "c[B/1]";
+		constraints 	= "B != 1;A != 2";
+		contextVars 	= "w";
+		createGenAggParfactor(name, parent, child, contextVars, constraints, Or.OR);
+		
+		name 			= "g.7.in.2";
+		parent 			= "p[B/E]";
+		child 			= "c[B/E]";
+		constraints 	= "F != 3;A != 4";
+		contextVars 	= "v";
+		createGenAggParfactor(name, parent, child, contextVars, constraints, Or.OR);
+		
+		// test 7 - expected result
+		
+		name 			= "g.7.out.1";
+		parent 			= "p[B/1]";
+		child 			= "c'[B/1]";
+		constraints 	= "F != 3;A != 2;A != 2";
+		contextVars 	= "v";
+		createGenAggParfactor(name, parent, child, contextVars, constraints, Or.OR);
+		
+		name 			= "g.7.out.2";
+		constraints 	= "F != 3";
+		vars 			= "p[B/1];v;c'[B/1];c[B/1]";
+		factorName 	 	= "Fc";
+		factorValues 	= "1.0;0.0;0.0;1.0;1.0;0.0;0.0;1.0;0.0;1.0;0.0;1.0;0.0;1.0;0.0;1.0";
+		createSimpleParfactor(name, constraints, vars, factorName, factorValues);
+		
+		name 			= "g.7.out.3";
+		parent 			= "p[B/1]";
+		child 			= "c'[B/1]";
+		constraints 	= "B != 1;A != 2;A != 4";
+		contextVars 	= "w";
+		createGenAggParfactor(name, parent, child, contextVars, constraints, Or.OR);
+		
+		name 			= "g.7.out.4";
+		constraints 	= "B != 1";
+		vars 			= "p[B/1];w;c'[B/1];c[B/1]";
+		factorName 	 	= "Fc'";
+		factorValues 	= "1.0;0.0;0.0;1.0;1.0;0.0;0.0;1.0;0.0;1.0;0.0;1.0;0.0;1.0;0.0;1.0";
+		createSimpleParfactor(name, constraints, vars, factorName, factorValues);
+		
+		name 			= "g.7.out.5";
+		parent 			= "p[B/E]";
+		child 			= "c[B/E]";
+		constraints 	= "F != 3;E != 1;A != 4";
+		contextVars 	= "v";
+		createGenAggParfactor(name, parent, child, contextVars, constraints, Or.OR);
+		
+	}
+	
 	
 	/* ************************************************************************
 	 *      Exposed methods

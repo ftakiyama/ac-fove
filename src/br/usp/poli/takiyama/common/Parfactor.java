@@ -35,11 +35,19 @@ public interface Parfactor {
 	public boolean contains(ParameterizedRandomVariable variable); // I think I will use it on global sum out.
 		
 	/**
+	 * @deprecated
 	 * Returns the parameterized factor associated with this parfactor
 	 * 
 	 * @return The parameterized factor associated with this parfactor
 	 */
 	public ParameterizedFactor getFactor();
+	
+	/**
+	 * Returns the parameterized factor associated with this parfactor
+	 * 
+	 * @return The parameterized factor associated with this parfactor
+	 */
+	public ParameterizedFactor factor();
 	
 	/**
 	 * 
@@ -60,11 +68,29 @@ public interface Parfactor {
 	public ParameterizedRandomVariable getChildVariable();
 	
 	/**
+	 * @deprecated
 	 * Returns the set of all constraints in this parfactor.
 	 * 
 	 * @return The set of all constraints in this parfactor.
 	 */
 	public Set<Constraint> getConstraints();
+	
+	/**
+	 * Returns the set of all constraints in this parfactor.
+	 * 
+	 * @return The set of all constraints in this parfactor.
+	 */
+	public Set<Constraint> constraints();
+	
+	/**
+	 * @deprecated
+	 * Returns the set of all logical variables in parameterized random
+	 * variables in this parfactor.
+	 * 
+	 * @return The set of all logical variables in parameterized random
+	 * variables in this parfactor.
+	 */
+	public Set<LogicalVariable> getLogicalVariables();
 	
 	/**
 	 * Returns the set of all logical variables in parameterized random
@@ -73,7 +99,7 @@ public interface Parfactor {
 	 * @return The set of all logical variables in parameterized random
 	 * variables in this parfactor.
 	 */
-	public Set<LogicalVariable> getLogicalVariables();
+	public Set<LogicalVariable> logicalVariables();
 	
 	/**
 	 * Retunrs the number of factors this parfactor represents.

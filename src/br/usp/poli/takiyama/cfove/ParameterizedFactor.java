@@ -210,6 +210,8 @@ public final class ParameterizedFactor {
 	}
 	
 	/**
+	 * @deprecated
+	 * 
 	 * Returns the set of all logical variables in the PRVs of this factor.
 	 * @return The set of all logical variables in the PRVs of this factor.
 	 */
@@ -867,5 +869,17 @@ public final class ParameterizedFactor {
 	public Double getValue(Tuple t) {
 		int index = getTupleIndex(t);
 		return mapping.get(index);
+	}
+	
+	/**
+	 * Returns the set of all logical variables in the PRVs of this factor.
+	 * @return The set of all logical variables in the PRVs of this factor.
+	 */
+	Set<LogicalVariable> logicalVariables() {
+		Set<LogicalVariable> logicalVariables = new HashSet<LogicalVariable>();
+		for (ParameterizedRandomVariable prv : this.variables) {
+			logicalVariables.addAll(prv.getParameters());
+		}
+		return logicalVariables;
 	}
 }

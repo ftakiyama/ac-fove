@@ -9,7 +9,7 @@ import java.util.List;
  * @author ftakiyama
  *
  */
-public final class PRV {
+public final class PRVs {
 	
 	public static Constant getConstant(String value) {
 		return new Constant(value);

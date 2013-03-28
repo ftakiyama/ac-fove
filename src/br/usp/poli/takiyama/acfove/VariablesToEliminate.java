@@ -7,6 +7,7 @@ import java.util.Set;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 
 /**
+ * @deprecated
  * Singleton class that serves as a buffer to store PRVs created
  * during splits operations on Aggregation Parfactors. These PRVs must be 
  * eliminated later.

@@ -41,6 +41,10 @@ public final class SimpleParfactor implements Parfactor {
 	
 	// this class should be able to return factors.
 	
+	/* ************************************************************************
+	 *    Constructors
+	 * ************************************************************************/
+	
 	/**
 	 * Constructor.
 	 * @param constraints A set of inequality constraints on logical variables
@@ -68,6 +72,20 @@ public final class SimpleParfactor implements Parfactor {
 //		}
 	}
 	
+	
+	/* ************************************************************************
+	 *    Static factory methods
+	 * ************************************************************************/
+
+	/**
+	 * Returns a new instance SimpleParfactor that is the copy of the specified
+	 * Parfactor.
+	 * @param p The parfactor to copy
+	 * @see Parfactor
+	 */
+	public static Parfactor getInstance(Parfactor p) {
+		return new SimpleParfactor(p.constraints(), p.factor());
+	}
 
 	/**
 	 * @deprecated
@@ -1277,7 +1295,7 @@ public final class SimpleParfactor implements Parfactor {
 						int firstVariableIndex = g1.getFactor().getParameterizedRandomVariableIndex(firstVariable);
 						int secondVariableIndex = g2.getFactor().getParameterizedRandomVariableIndex(secondVariable);
 						
-						if (Parfactors.checkMguAgainstConstraints(mgu, allConstraints)) {
+						if (Parfactors.isConsistent(mgu, allConstraints)) {
 							List<Parfactor> firstSplitOnMgu = g1.splitOnMgu(mgu);
 							List<Parfactor> secondSplitOnMgu = g2.splitOnMgu(mgu);
 							Parfactor firstResult = firstSplitOnMgu.remove(0);
@@ -1451,6 +1469,10 @@ public final class SimpleParfactor implements Parfactor {
 	
 	/**************************************************************************/
 	
+	/* ************************************************************************
+	 *    toString, equals and hashCode
+	 * ************************************************************************/
+	
 	@Override
 	public String toString() {
 		return "\n<\n" + constraints + ",\n" + factor.getParameterizedRandomVariables() + ",\n" + factor + ">\n";
@@ -1481,5 +1503,23 @@ public final class SimpleParfactor implements Parfactor {
 		result = 31 + result + factor.hashCode();
 		return result;
 	}
+	
+	/* ************************************************************************
+	 *    Getters
+	 * ************************************************************************/
+	
+	@Override
+	public ParameterizedFactor factor() {
+		return ParameterizedFactor.getInstance(factor);
+	}
 
+	@Override
+	public Set<Constraint> constraints() {
+		return new HashSet<Constraint>(constraints);
+	}
+
+	@Override
+	public Set<LogicalVariable> logicalVariables() {
+		return factor.logicalVariables();
+	}
 }

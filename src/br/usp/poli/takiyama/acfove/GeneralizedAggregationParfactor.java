@@ -1066,10 +1066,10 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 	}
 	
 	
-	/* ====================================================================== */
-	/*   toString, hashCode and equals                                        */
-	/* ====================================================================== */
-	
+	/* ************************************************************************
+	 *    hashCode, equals and toString
+	 * ************************************************************************/
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
@@ -1183,5 +1183,34 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 				+ ", C_A = " + constraintsOnExtraVariable
 				+ ", C = " + otherConstraints 
 				+ "\n" + factor;
+	}
+
+	/* ************************************************************************
+	 *    Getters
+	 * ************************************************************************/
+
+	@Override
+	public ParameterizedFactor factor() {
+		return ParameterizedFactor.getInstance(factor);
+	}
+
+
+	@Override
+	public Set<Constraint> constraints() {
+		Set<Constraint> allConstraints = new HashSet<Constraint>(constraintsOnExtraVariable);
+		allConstraints.addAll(otherConstraints);
+		return allConstraints;
+	}
+
+
+	@Override
+	public Set<LogicalVariable> logicalVariables() {
+		Set<LogicalVariable> allVariables = new HashSet<LogicalVariable>();
+		allVariables.addAll(parent.getParameters());
+		allVariables.addAll(child.getParameters());
+		for (ParameterizedRandomVariable prv : contextVariables) {
+			allVariables.addAll(prv.getParameters());
+		}
+		return allVariables;
 	}
 }

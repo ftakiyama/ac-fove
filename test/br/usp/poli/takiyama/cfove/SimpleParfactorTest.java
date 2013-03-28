@@ -133,7 +133,7 @@ public class SimpleParfactorTest {
 		constraints.add(objects.getConstraint("X3 != X4"));
 		constraints.add(objects.getConstraint("X4 != 0"));
 		
-		assertTrue(Parfactors.checkMguAgainstConstraints(mgu, constraints));
+		assertTrue(Parfactors.isConsistent(mgu, constraints));
 	
 	}
 	

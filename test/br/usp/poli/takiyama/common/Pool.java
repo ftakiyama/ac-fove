@@ -12,7 +12,6 @@ import java.util.regex.Pattern;
 import br.usp.poli.takiyama.acfove.AggregationParfactor;
 import br.usp.poli.takiyama.acfove.AggregationParfactor.Builder;
 import br.usp.poli.takiyama.acfove.GeneralizedAggregationParfactor;
-import br.usp.poli.takiyama.acfove.Marginal;
 import br.usp.poli.takiyama.acfove.operator.BooleanOperator;
 import br.usp.poli.takiyama.acfove.operator.Or;
 import br.usp.poli.takiyama.cfove.ParameterizedFactor;
@@ -20,7 +19,7 @@ import br.usp.poli.takiyama.cfove.SimpleParfactor;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
-import br.usp.poli.takiyama.prv.PRV;
+import br.usp.poli.takiyama.prv.PRVs;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
@@ -43,7 +42,6 @@ public class Pool {
 	private HashMap<String, RandomVariableSet> randomVariableSetPool;
 	private HashMap<String, AggregationParfactor> aggParfactorPool;
 	private HashMap<String, Binding> bindingPool;
-	private HashMap<String, Marginal> marginalPool;
 	private HashMap<String, List<Parfactor>> parfactorListPool;
 	private HashMap<String, GeneralizedAggregationParfactor> genAggParfactorPool;
 	
@@ -61,7 +59,6 @@ public class Pool {
 		this.randomVariableSetPool = new HashMap<String, RandomVariableSet>();
 		this.aggParfactorPool = new HashMap<String, AggregationParfactor>();
 		this.bindingPool = new HashMap<String, Binding>();
-		this.marginalPool = new HashMap<String, Marginal>();
 		this.parfactorListPool = new HashMap<String, List<Parfactor>>();
 		this.genAggParfactorPool = new HashMap<String, GeneralizedAggregationParfactor>();
 	}
@@ -75,7 +72,7 @@ public class Pool {
 	 * @param populationSize The size of the population
 	 */
 	private void createLogicalVariable(String name, String prefix, int populationSize) {
-		variablesPool.put(name, PRV.getLogicalVariable(name, prefix, populationSize));
+		variablesPool.put(name, PRVs.getLogicalVariable(name, prefix, populationSize));
 	}
 	
 	/**
@@ -85,7 +82,7 @@ public class Pool {
 	 * @param variables An array of names of logical variables from this PRV.
 	 */
 	private void createPrv(String name, LogicalVariable ... variables) {
-		prvPool.put(name, PRV.getBooleanPrv(name, variables));
+		prvPool.put(name, PRVs.getBooleanPrv(name, variables));
 	}
 	
 	/**
@@ -125,7 +122,7 @@ public class Pool {
 			}
 		}
 		
-		prvPool.put(name, PRV.getBooleanPrv(name, terms.toArray(new Term[terms.size()])));
+		prvPool.put(name, PRVs.getBooleanPrv(name, terms.toArray(new Term[terms.size()])));
 	}
 	
 	
@@ -591,65 +588,6 @@ public class Pool {
 		}
 		v.deleteCharAt(v.lastIndexOf(";"));
 		createGenAggParfactor(name, parent, child, context, constraints, factorName, v.toString(), operator);
-	}
-	
-	/**
-	 * Creates an instance of {@link Marginal} and puts it in the pool of 
-	 * Marginals.
-	 * <br>
-	 * If the name of randomVarialbeSet is null or an empty string, the 
-	 * marginal does not sum out any random variable from the product of
-	 * parfactors.
-	 * <br>
-	 * The random variable set and the parfactors must have been put into 
-	 * their respective pools before calling this method. Otherwise, an
-	 * {@link IllegalArgumentException} is thrown.
-	 * 
-	 * @param name The key to retrieve the created marginal later
-	 * @param randomVariableSet The name of random variable set
-	 * @param parfactor An aggregation parfactor name or a simple parfactor name
-	 * @param parfactors A list of aggregation parfactor names or a simple 
-	 * parfactor names (it may contain both)
-	 * @throws IllegalArgumentException If it cannot find the random variable
-	 * set or a parfactor from the list.
-	 */
-	private void createMarginal(
-			String name, 
-			String randomVariableSet, 
-			String parfactor, 
-			String ... parfactors) 
-			throws IllegalArgumentException {
-		
-		Set<Parfactor> pSet = new HashSet<Parfactor>(parfactors.length);
-		
-		if (aggParfactorPool.containsKey(parfactor)) {
-			pSet.add(getAggParfactor(parfactor));
-		} else if (simpleParfactorPool.containsKey(parfactor)) {
-			pSet.add(getSimpleParfactor(parfactor));
-		} else {
-			throw new IllegalArgumentException("No such parfactor: " + parfactor);
-		}
-		
-		for (String pName : parfactors) {
-			if (aggParfactorPool.containsKey(pName)) {
-				pSet.add(getAggParfactor(pName));
-			} else if (simpleParfactorPool.containsKey(pName)) {
-				pSet.add(getSimpleParfactor(pName));
-			} else {
-				throw new IllegalArgumentException("No such parfactor: " + pName);
-			}
-		}
-		
-		if (randomVariableSet == null || randomVariableSet == "") {
-			Marginal m = Marginal.getInstance(pSet);
-			marginalPool.put(name, m);
-		} else if (randomVariableSetPool.containsKey(randomVariableSet)) {
-			RandomVariableSet rvs = getRandomVariableSet(randomVariableSet);
-			Marginal m = Marginal.getInstance(rvs, pSet);
-			marginalPool.put(name, m);
-		} else {
-			throw new IllegalArgumentException("No such RVS: " + randomVariableSet);
-		}
 	}
 	
 	/**
@@ -2464,24 +2402,7 @@ public class Pool {
 					+ name);
 		}
 	}
-	
-	/**
-	 * Returns a marginal from the pool.
-	 * @param name The name of the marginal.
-	 * @return A marginal from the pool.
-	 * @throws IllegalArgumentException If the marginal with the given name 
-	 * does not exist in the pool.
-	 */
-	public Marginal getMarginal(String name) throws IllegalArgumentException {
-		if (marginalPool.containsKey(name)) {
-			return marginalPool.get(name);
-		} else {
-			throw new IllegalArgumentException("There is no such Marginal"
-					+ " parfactor in the pool: " 
-					+ name);
-		}
-	}
-	
+		
 	/**
 	 * Returns a binding from the pool.
 	 * @param name The name of the binding.

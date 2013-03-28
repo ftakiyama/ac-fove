@@ -1204,6 +1204,28 @@ public class AggregationParfactor implements Parfactor {
 				+ ", C = " + otherConstraints 
 				+ "\n" + factor;
 	}
+
+	@Override
+	public ParameterizedFactor factor() {
+		return ParameterizedFactor.getInstance(factor);
+	}
+
+
+	@Override
+	public Set<Constraint> constraints() {
+		Set<Constraint> allConstraints = new HashSet<Constraint>(constraintsOnExtraVariable);
+		allConstraints.addAll(otherConstraints);
+		return allConstraints;
+	}
+
+
+	@Override
+	public Set<LogicalVariable> logicalVariables() {
+		Set<LogicalVariable> allVariables = new HashSet<LogicalVariable>();
+		allVariables.addAll(parent.getParameters());
+		allVariables.addAll(child.getParameters());
+		return allVariables;
+	}
 	
 }
 

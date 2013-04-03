@@ -1,0 +1,1749 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="11.5.1">
+  <help_text>// Uncomment the following line to change the fontsize and font:
+fontsize=10
+// fontfamily=Monospaced //possible: SansSerif,Serif,Monospaced
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+// Welcome to UMLet!
+//
+// Double-click on elements to add them to the diagram, or to copy them
+// Edit elements by modifying the text in this panel
+// Hold Cmd to select multiple elements
+// Use Cmd+mouse to select via lasso
+//
+// Use +/- or Cmd+mouse wheel to zoom
+// Drag a whole relation at its central square icon
+//
+// Press Cmd+C to copy the whole diagram to the system clipboard (then just paste it to, eg, Word)
+// Edit the files in the "palettes" directory to create your own element palettes
+//
+// Select "Custom Elements &gt; New..." to create new element types
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+
+// This text will be stored with each diagram;  use it for notes.</help_text>
+  <zoom_level>2</zoom_level>
+  <element>
+    <type>com.umlet.element.Class</type>
+    <coordinates>
+      <x>400</x>
+      <y>112</y>
+      <w>66</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>Parfactors
+--
+-constraintsFromParfactors(p:Parfactor[]) : Set&lt;Constraint&gt;
+-constraintsFromPrvs(p:Prv[]) : Set&lt;Constraint&gt;
+-restoreLogicalVariableNames 
+-splitOn(c:Set&lt;Constraint&gt;,p:Parfactor) : SplitResult
+-splitOn(s:Substitution,p:Parfactor) : SplitResult
+-splitOnConstraints(r:SplitResult[],i:int[]) : SplitResult[]
++unify(p1:Parfactor,p2:Parfactor) : Distribution
+
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <group>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>190</x>
+        <y>308</y>
+        <w>52</w>
+        <h>28</h>
+      </coordinates>
+      <panel_attributes>*Histogram&lt;T extends RangeElement&gt;*
+--
+-distribution : HashMap&lt;T,Integer&gt;
+--
+-addCount(t:T, c:int) : void
++containsValue(c:int) : boolean
++equals(o:Object) : boolean
++getCount(t:T) : int
++hashCode() : int
++setCount(t:T, c:int) : int
++size() : int
++toString() : String</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>190</x>
+        <y>274</y>
+        <w>54</w>
+        <h>12</h>
+      </coordinates>
+      <panel_attributes>&lt;&lt;interface&gt;&gt;
+/*RangeElement*/
+--
++apply(o:Operator,e:RangeElement) : RangeElement
+</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>98</x>
+        <y>266</y>
+        <w>24</w>
+        <h>8</h>
+      </coordinates>
+      <panel_attributes>&lt;&lt;interface&gt;&gt;
+/*Operator*/
+
+
+</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>154</x>
+        <y>308</y>
+        <w>30</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>*Bool*
+--
+value : boolean
+--
++value() : boolean
+</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>162</x>
+        <y>280</y>
+        <w>58</w>
+        <h>32</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+      <additional_attributes>54;6;6;28</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>210</x>
+        <y>280</y>
+        <w>10</w>
+        <h>32</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+      <additional_attributes>6;6;6;28</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>232</x>
+        <y>280</y>
+        <w>10</w>
+        <h>32</h>
+      </coordinates>
+      <panel_attributes>lt=&gt;&gt;&gt;</panel_attributes>
+      <additional_attributes>6;6;6;28</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>84</x>
+        <y>282</y>
+        <w>52</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>&lt;&lt;interface&gt;&gt;
+/*TypedOperator&lt;E extends RangeElement&gt;*/
+--
++applyOn(e1:E, e2:E) : E
++applyOn(e1:E, e2:E, e3:E) : E
++applyOn(e1:E, n:int) : E
++applyOn(s:Set&lt;E&gt;) : E
+
+</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>104</x>
+        <y>268</y>
+        <w>10</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+      <additional_attributes>6;6;6;14</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>84</x>
+        <y>316</y>
+        <w>16</w>
+        <h>8</h>
+      </coordinates>
+      <panel_attributes>*Or*
+--
+
+</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>120</x>
+        <y>308</y>
+        <w>16</w>
+        <h>8</h>
+      </coordinates>
+      <panel_attributes>*And*
+--
+
+</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>86</x>
+        <y>294</y>
+        <w>10</w>
+        <h>26</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+      <additional_attributes>6;6;6;22</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>122</x>
+        <y>294</y>
+        <w>10</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+      <additional_attributes>6;6;6;14</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>130</x>
+        <y>306</y>
+        <w>28</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;-</panel_attributes>
+      <additional_attributes>24;6;6;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>94</x>
+        <y>314</y>
+        <w>64</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;-</panel_attributes>
+      <additional_attributes>60;6;50;6;6;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Package</type>
+      <coordinates>
+        <x>76</x>
+        <y>256</y>
+        <w>176</w>
+        <h>86</h>
+      </coordinates>
+      <panel_attributes>Operator
+bg=orange</panel_attributes>
+      <additional_attributes/>
+    </element>
+  </group>
+  <group>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>124</x>
+        <y>386</y>
+        <w>36</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>&lt;&lt;interface&gt;&gt;
+/*Term*/
+--
++equals(o:Object) : boolean
++hashCode() : int
++toString() : String // = value()</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>106</x>
+        <y>418</y>
+        <w>32</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>*Constant*
+--
+-value : String</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>160</x>
+        <y>452</y>
+        <w>32</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>*StdLogicalVariable*
+--
+-population : Population
+-value : String</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>116</x>
+        <y>398</y>
+        <w>30</w>
+        <h>24</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+      <additional_attributes>26;6;6;20</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>170</x>
+        <y>436</y>
+        <w>10</w>
+        <h>20</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+      <additional_attributes>6;6;6;16</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>100</x>
+        <y>452</y>
+        <w>42</w>
+        <h>22</h>
+      </coordinates>
+      <panel_attributes>*Population*
+--
+//LinkedHashSet
+-individuals : Set&lt;Constant&gt; 
+--
++getInstance(p:Population) : Population
++contains(t:Constant) : boolean
++iterator() : Iterator&lt;Constant&gt;
++remove(i:Constant) : void
++size() : int
++asSet() : Set&lt;Constant&gt;
+</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>136</x>
+        <y>452</y>
+        <w>28</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
+      <additional_attributes>24;6;6;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>146</x>
+        <y>418</y>
+        <w>58</w>
+        <h>24</h>
+      </coordinates>
+      <panel_attributes>&lt;&lt;interface&gt;&gt;
+/*LogicalVariable*/
+--
++contains(c:Constant) : boolean
++getIndividual(i:int) : Constant // needed?
++getIndividualsSatisfying(c:Set&lt;Constraint&gt;) : Population
++remove(c:Constant) : boolean // needed?
++sizeOfPopulationSatisfying(c:Set&lt;Constraint&gt;) : int</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>136</x>
+        <y>398</y>
+        <w>44</w>
+        <h>24</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+      <additional_attributes>6;6;40;20</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Package</type>
+      <coordinates>
+        <x>88</x>
+        <y>372</y>
+        <w>148</w>
+        <h>112</h>
+      </coordinates>
+      <panel_attributes>Term
+bg=orange</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>116</x>
+        <y>422</y>
+        <w>10</w>
+        <h>34</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
+      <additional_attributes>6;30;6;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Interface</type>
+      <coordinates>
+        <x>212</x>
+        <y>424</y>
+        <w>16</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>Constraint</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>198</x>
+        <y>420</y>
+        <w>24</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;-</panel_attributes>
+      <additional_attributes>20;6;6;6</additional_attributes>
+    </element>
+  </group>
+  <group>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>318</x>
+        <y>408</y>
+        <w>52</w>
+        <h>36</h>
+      </coordinates>
+      <panel_attributes>&lt;&lt;interface&gt;&gt;
+/*Constraint*/
+--
++equals(o:Object) : boolean
++hashCode() : int
++toString() : String
+--
++apply(s:Substitution) : Constraint
++contains(t:Term) : boolean
++firstTerm() : Term
++secondTerm() : Term
++hasCommonTermWith(c:Constraint) : boolean
++isConsistentWith(t:Term) : boolean // returns true if the term satisfies this constraint
++toBinding() : Binding
++toInverseBinding() : Binding
+</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>306</x>
+        <y>452</y>
+        <w>32</w>
+        <h>12</h>
+      </coordinates>
+      <panel_attributes>*InequalityConstraint*
+--
+-firstTerm : Term
+-secondTerm : Term</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>350</x>
+        <y>452</y>
+        <w>32</w>
+        <h>12</h>
+      </coordinates>
+      <panel_attributes>*EqualityConstraint*
+--
+-firstTerm : Term
+-secondTerm : Term</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>316</x>
+        <y>438</y>
+        <w>18</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+      <additional_attributes>14;6;6;14</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>352</x>
+        <y>438</y>
+        <w>18</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+      <additional_attributes>6;6;14;14</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>364</x>
+        <y>410</y>
+        <w>24</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
+      <additional_attributes>6;6;20;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Interface</type>
+      <coordinates>
+        <x>378</x>
+        <y>414</y>
+        <w>16</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>Term</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Interface</type>
+      <coordinates>
+        <x>378</x>
+        <y>434</y>
+        <w>16</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>Binding</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Interface</type>
+      <coordinates>
+        <x>378</x>
+        <y>424</y>
+        <w>16</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>Substitution</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>364</x>
+        <y>420</y>
+        <w>24</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;-</panel_attributes>
+      <additional_attributes>20;6;6;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>364</x>
+        <y>430</y>
+        <w>24</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;-</panel_attributes>
+      <additional_attributes>20;6;6;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Package</type>
+      <coordinates>
+        <x>292</x>
+        <y>392</y>
+        <w>112</w>
+        <h>84</h>
+      </coordinates>
+      <panel_attributes>Constraint
+bg=orange</panel_attributes>
+      <additional_attributes/>
+    </element>
+  </group>
+  <group>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>476</x>
+        <y>410</y>
+        <w>58</w>
+        <h>32</h>
+      </coordinates>
+      <panel_attributes>*Substitution*
+--
+-bindings : List&lt;Binding&gt;
+--
++equals(o:Object) : boolean
++hashCode() : int
++toString() : String
+--
++contains(b:Binding) : boolean
++getReplacement(t:Term) : Term
++substitutedIterator() : Iterator&lt;Term&gt;
++haveSameReplacement(t1:Term, t2:Term) : boolean
++isEmpty() : boolean
++isUnifier(f1:Prv, f2:Prv) : boolean
+
+</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>476</x>
+        <y>454</y>
+        <w>34</w>
+        <h>26</h>
+      </coordinates>
+      <panel_attributes>*Binding*
+--
+-firstTerm : LogicalVariable
+-secondTerm : Term
+--
++equals(o:Object) : boolean
++hashCode() : int
++toString() : String
+--
++contains() : boolean
++firstTerm() : LogicalVariable
++secondTerm() : Term</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>486</x>
+        <y>436</y>
+        <w>10</w>
+        <h>22</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
+      <additional_attributes>6;6;6;18</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>504</x>
+        <y>454</y>
+        <w>20</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>lt=-&gt;&gt;&gt;</panel_attributes>
+      <additional_attributes>16;6;6;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Interface</type>
+      <coordinates>
+        <x>514</x>
+        <y>458</y>
+        <w>16</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>Term</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>504</x>
+        <y>464</y>
+        <w>20</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>lt=-&gt;&gt;&gt;</panel_attributes>
+      <additional_attributes>16;6;6;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Interface</type>
+      <coordinates>
+        <x>514</x>
+        <y>468</y>
+        <w>16</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>LogicalVariable</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Package</type>
+      <coordinates>
+        <x>460</x>
+        <y>396</y>
+        <w>90</w>
+        <h>94</h>
+      </coordinates>
+      <panel_attributes>Substitution
+bg=orange</panel_attributes>
+      <additional_attributes/>
+    </element>
+  </group>
+  <group>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>324</x>
+        <y>282</y>
+        <w>32</w>
+        <h>12</h>
+      </coordinates>
+      <panel_attributes>*RandomVariableSet*
+--
+-prv : PRV
+-constraints : Set&lt;Constraint&gt;
+--
+
+</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>354</x>
+        <y>312</y>
+        <w>60</w>
+        <h>28</h>
+      </coordinates>
+      <panel_attributes>*StdPRV*
+--
+-predicateSymbol : String
+-parameters : List&lt;? extends Term&gt;
+-range : List&lt;? extends RangeElement&gt;
+--
+-StdPrv()
+-StdPrv(ps:String,lv:LogicalVariable)
+-StdPrv(ps:String,lv1:LogicalVariable,lv2:LogicalVariable)
+-StdPrv(ps:String,lvs:List&lt;LogicalVariable&gt;)
+</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>422</x>
+        <y>312</y>
+        <w>72</w>
+        <h>44</h>
+      </coordinates>
+      <panel_attributes>*CountingFormula*
+--
+-boundLogicalVariable : LogicalVariable
+-constraints : Set&lt;Constraint&gt;
+-prv : Prv
+-range : List&lt;Histogram&lt;? extends RangeElement&gt;&gt;
+--
++boundVariable() : LogicalVariable
+//prv() : PRV // expose only needed methods
+--
++add(c:Constraint) : Prv
++increaseCount(h:Histogram, e:RangeElement, c:int) : RangeElement
++applyToPRV(s:Binding) : Prv
++countedRangeSize() : int
++getCount(h:Histogram, t:RangeElement) : int
++isStdPrv() : boolean
+//+rangeElementAt(index:int) : Histogram
++toStdPrv() : Prv
+</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>350</x>
+        <y>282</y>
+        <w>50</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
+      <additional_attributes>6;6;46;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>392</x>
+        <y>286</y>
+        <w>30</w>
+        <h>30</h>
+      </coordinates>
+      <panel_attributes>lt=&gt;&gt;
+</panel_attributes>
+      <additional_attributes>6;26;6;20;26;20;26;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>412</x>
+        <y>286</y>
+        <w>30</w>
+        <h>30</h>
+      </coordinates>
+      <panel_attributes>lt=&gt;&gt;
+</panel_attributes>
+      <additional_attributes>26;26;26;20;6;20;6;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>396</x>
+        <y>244</y>
+        <w>46</w>
+        <h>48</h>
+      </coordinates>
+      <panel_attributes>&lt;&lt;interface&gt;&gt;
+*/Prv/*
+--
++apply(s:Substitution) : Prv
++apply(s:Binding) : Prv
++contains(t:Term) : boolean
++constraints() : Set&lt;Constraint&gt;
++equals(o:Object) : boolean
++groundSetSize() : int
++name() : String
++parameters() : Set&lt;LogicalVariable&gt;
++rangeElementAt(index:int) : RangeElement
++rangeSize() : int
++rename(n:String) : Prv</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>370</x>
+        <y>272</y>
+        <w>30</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
+      <additional_attributes>26;6;6;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>436</x>
+        <y>246</y>
+        <w>28</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;.</panel_attributes>
+      <additional_attributes>24;6;6;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Interface</type>
+      <coordinates>
+        <x>366</x>
+        <y>276</y>
+        <w>16</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>RangeElement</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Interface</type>
+      <coordinates>
+        <x>454</x>
+        <y>250</y>
+        <w>16</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>Substitution</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>436</x>
+        <y>282</y>
+        <w>76</w>
+        <h>38</h>
+      </coordinates>
+      <panel_attributes>lt=-&gt;&gt;&gt;</panel_attributes>
+      <additional_attributes>6;6;72;6;72;34;58;34</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Interface</type>
+      <coordinates>
+        <x>500</x>
+        <y>324</y>
+        <w>16</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>Histogram</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>488</x>
+        <y>320</y>
+        <w>22</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
+      <additional_attributes>6;6;18;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Interface</type>
+      <coordinates>
+        <x>454</x>
+        <y>262</y>
+        <w>16</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>Binding</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Interface</type>
+      <coordinates>
+        <x>366</x>
+        <y>250</y>
+        <w>16</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>Term</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Interface</type>
+      <coordinates>
+        <x>366</x>
+        <y>262</y>
+        <w>16</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>LogicalVariable</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>370</x>
+        <y>246</y>
+        <w>30</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>lt=&gt;&gt;&gt;-</panel_attributes>
+      <additional_attributes>6;6;26;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>370</x>
+        <y>258</y>
+        <w>30</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>lt=-&gt;&gt;&gt;</panel_attributes>
+      <additional_attributes>6;6;26;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Interface</type>
+      <coordinates>
+        <x>454</x>
+        <y>274</y>
+        <w>16</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>Constraint</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>436</x>
+        <y>258</y>
+        <w>28</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;.</panel_attributes>
+      <additional_attributes>24;6;6;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>436</x>
+        <y>270</y>
+        <w>28</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
+      <additional_attributes>6;6;24;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Package</type>
+      <coordinates>
+        <x>308</x>
+        <y>232</y>
+        <w>220</w>
+        <h>136</h>
+      </coordinates>
+      <panel_attributes>PRV
+bg=orange</panel_attributes>
+      <additional_attributes/>
+    </element>
+  </group>
+  <group>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>214</x>
+        <y>174</y>
+        <w>42</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>*ParameterizedFactor*
+--
+-name : String
+-size : int
+-variables : List&lt;Prv&gt;
+-mapping ; List&lt;? extends Number&gt;
+--
+
+</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>160</x>
+        <y>174</y>
+        <w>38</w>
+        <h>34</h>
+      </coordinates>
+      <panel_attributes>*Tuple&lt;E&gt;*
+--
+-values : List&lt;E&gt;
+--
++equals(o:Object) : boolean
++hashCode() : int
++toString() : String
+--
++elementAt(i:int) : E
++isEmpty() : boolean
++remove(i:int) : Tuple&lt;E&gt;
++set(i:int, e:E) : Tuple&lt;E&gt;
++size() : int
++subTuple(s:int,e:int) : Tuple&lt;E&gt;
++subTuple(i:int[]) : Tuple&lt;E&gt;
+</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>250</x>
+        <y>178</y>
+        <w>26</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>lt=-&gt;&gt;&gt;</panel_attributes>
+      <additional_attributes>22;6;6;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>192</x>
+        <y>176</y>
+        <w>26</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;-</panel_attributes>
+      <additional_attributes>6;6;22;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Interface</type>
+      <coordinates>
+        <x>266</x>
+        <y>182</y>
+        <w>16</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>Prv</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Package</type>
+      <coordinates>
+        <x>150</x>
+        <y>158</y>
+        <w>136</w>
+        <h>60</h>
+      </coordinates>
+      <panel_attributes>Factor
+bg=orange</panel_attributes>
+      <additional_attributes/>
+    </element>
+  </group>
+  <group>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>686</x>
+        <y>402</y>
+        <w>40</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>StdSplitResult
+--
+-result : Parfactor
+-distribution : Distribution
+
+</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>612</x>
+        <y>402</y>
+        <w>60</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>&lt;&lt;interface&gt;&gt;
+/Distribution/
+--
+-parfactors : Set&lt;Parfactor&gt;
+--
++iterator : Iterator&lt;Parfactor&gt;
+bg=light_gray</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>738</x>
+        <y>354</y>
+        <w>40</w>
+        <h>12</h>
+      </coordinates>
+      <panel_attributes>&lt;&lt;interface&gt;&gt;
+/Elimination&lt;E extends Prv&gt;/
+--
++eliminables() : Set&lt;E&gt;
+bg=light_gray</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>782</x>
+        <y>430</y>
+        <w>40</w>
+        <h>14</h>
+      </coordinates>
+      <panel_attributes>&lt;&lt;interface&gt;&gt;
+/Marginal&lt;E extends Prv&gt;/
+--
++distribution() : Distribution 
+bg=light_gray</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>712</x>
+        <y>376</y>
+        <w>40</w>
+        <h>16</h>
+      </coordinates>
+      <panel_attributes>&lt;&lt;interface&gt;&gt;
+/SplitResult/
+--
++residues() : Distribution
++result() : Parfactor
++eliminables() : Set&lt;StdPRV&gt;
+bg=light_gray</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>752</x>
+        <y>360</y>
+        <w>54</w>
+        <h>74</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+      <additional_attributes>6;6;6;12;50;12;50;70</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>700</x>
+        <y>386</y>
+        <w>36</w>
+        <h>20</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+      <additional_attributes>32;6;32;12;6;12;6;16</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>738</x>
+        <y>402</y>
+        <w>40</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>AggSplitResult
+--
+-result : Parfactor
+-marginal : Marginal&lt;StdPRV&gt;
+</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>726</x>
+        <y>386</y>
+        <w>36</w>
+        <h>20</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+      <additional_attributes>6;6;6;12;32;12;32;16</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>666</x>
+        <y>404</y>
+        <w>24</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
+      <additional_attributes>20;6;6;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>750</x>
+        <y>414</y>
+        <w>36</w>
+        <h>24</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
+      <additional_attributes>6;6;6;20;32;20</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>772</x>
+        <y>454</y>
+        <w>32</w>
+        <h>16</h>
+      </coordinates>
+      <panel_attributes>UnconstrainedMarginal
+--
+-eliminables : Set&lt;StdPrv&gt;
+-distribution: Distribution
+--
++eliminables() : Set&lt;Prv&gt;
++distribution() : Distribution </panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>616</x>
+        <y>430</y>
+        <w>24</w>
+        <h>12</h>
+      </coordinates>
+      <panel_attributes>StdDistribution
+--
+
+</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>622</x>
+        <y>414</y>
+        <w>10</w>
+        <h>20</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+      <additional_attributes>6;6;6;16</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>726</x>
+        <y>360</y>
+        <w>36</w>
+        <h>20</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+      <additional_attributes>32;6;32;12;6;12;6;16</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>800</x>
+        <y>478</y>
+        <w>32</w>
+        <h>16</h>
+      </coordinates>
+      <panel_attributes>ConstrainedMarginal
+--
+-eliminables : Set&lt;RVSet&gt;
+-distribution: Distribution
+--
++eliminables() : Set&lt;RvSet&gt;
++distribution() : Distribution </panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>810</x>
+        <y>438</y>
+        <w>10</w>
+        <h>44</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+      <additional_attributes>6;6;6;40</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>782</x>
+        <y>438</y>
+        <w>10</w>
+        <h>20</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+      <additional_attributes>6;6;6;16</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>636</x>
+        <y>414</y>
+        <w>140</w>
+        <h>52</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
+      <additional_attributes>136;48;6;48;6;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>636</x>
+        <y>414</y>
+        <w>168</w>
+        <h>76</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
+      <additional_attributes>164;72;6;72;6;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>644</x>
+        <y>414</y>
+        <w>142</w>
+        <h>28</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;.</panel_attributes>
+      <additional_attributes>6;6;6;24;138;24</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Package</type>
+      <coordinates>
+        <x>604</x>
+        <y>344</y>
+        <w>238</w>
+        <h>158</h>
+      </coordinates>
+      <panel_attributes>EmptyPackage
+bg=orange</panel_attributes>
+      <additional_attributes/>
+    </element>
+  </group>
+  <group>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>662</x>
+        <y>134</y>
+        <w>60</w>
+        <h>74</h>
+      </coordinates>
+      <panel_attributes>&lt;&lt;interface&gt;&gt;
+/*Parfactor*/
+--
++constraints() : Set&lt;Constraint&gt;
++factor() : ParameterizedFactor
++logicalVariables() : Set&lt;LogicalVariable&gt;
+//+parameterizedRandomVariables() : List&lt;Prv&gt; // expose only what is needed
++size() : int
+--
++equals(o:Object) : boolean
++hashCode() : int
++toString() : String
+--
++apply(s:Substitution) : Parfactor
++contains(prv:Prv) : boolean
++count(lv:LogicalVariable) : Parfactor
++expand(cf:Prv,t:Term) : Parfactor
++fullExpand(cf:CountingFormula) : Parfactor // need this?
++isConstant() : boolean
++isCountable(lv:LogicalVariable) : boolean
++isExpandable(cf:Prv,t:Term) boolean
++isMultipliable(p:Parfactor) : boolean
++isSplittable(s:Substitution) : boolean
++multiply(p:Parfactor) : Parfactor
++propositionalize(lv:LogicalVariable) : Distribution // need this?
++prvAt(i:int) : Prv
++renameLogicalVariables() : Parfactor
++restoreLogicalVariables() : Parfactor
++simplifyLogicalVaribles() : Parfactor
+// do i need splits?
++splitOn(s:Substitution) : SplitResult
++splitOn(s:Set&lt;? extends Constraint&gt;) : SplitResult
++sumOut(prv:Prv) : Parfactor
+bg=light_gray</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>648</x>
+        <y>228</y>
+        <w>28</w>
+        <h>8</h>
+      </coordinates>
+      <panel_attributes>*StdParfactor*
+--
+
+
+</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>692</x>
+        <y>228</y>
+        <w>60</w>
+        <h>22</h>
+      </coordinates>
+      <panel_attributes>&lt;&lt;interface&gt;&gt;
+/*AggregationParfactor*/
+--
++parent() : Prv
++child() : Prv
++context() : List&lt;Prv&gt;
+--
++toStdParfactors() : Distribution
+bg=light_gray</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>692</x>
+        <y>298</y>
+        <w>60</w>
+        <h>12</h>
+      </coordinates>
+      <panel_attributes>*GenAggParfactor*
+--
+-contextVariables : List&lt;Prv&gt;
+--
+
+</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Class</type>
+      <coordinates>
+        <x>692</x>
+        <y>262</y>
+        <w>60</w>
+        <h>24</h>
+      </coordinates>
+      <panel_attributes>*AggParfactor*
+--
+-parent : Prv
+-child : Prv
+-constraintsOnExtra : Set&lt;Constraint&gt;
+-constraintsRemaining : Set&lt;Constraint&gt;
+-extraLv : LogicalVariable
+-operator : Operator
+--
+
+
+</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>716</x>
+        <y>244</y>
+        <w>10</w>
+        <h>22</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+      <additional_attributes>6;6;6;18</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>716</x>
+        <y>280</y>
+        <w>10</w>
+        <h>22</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+      <additional_attributes>6;6;6;18</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>656</x>
+        <y>202</y>
+        <w>40</w>
+        <h>30</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+      <additional_attributes>36;6;36;16;6;16;6;26</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>686</x>
+        <y>202</y>
+        <w>40</w>
+        <h>30</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+      <additional_attributes>6;6;6;16;36;16;36;26</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>624</x>
+        <y>150</y>
+        <w>42</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;.</panel_attributes>
+      <additional_attributes>6;6;38;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>624</x>
+        <y>164</y>
+        <w>42</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;-</panel_attributes>
+      <additional_attributes>6;6;38;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>624</x>
+        <y>136</y>
+        <w>42</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>lt=-&gt;&gt;&gt;</panel_attributes>
+      <additional_attributes>6;6;38;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>716</x>
+        <y>136</y>
+        <w>44</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;-</panel_attributes>
+      <additional_attributes>40;6;6;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>624</x>
+        <y>178</y>
+        <w>42</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;-</panel_attributes>
+      <additional_attributes>6;6;38;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>716</x>
+        <y>150</y>
+        <w>44</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;.</panel_attributes>
+      <additional_attributes>40;6;6;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Interface</type>
+      <coordinates>
+        <x>760</x>
+        <y>234</y>
+        <w>16</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>Operator</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>746</x>
+        <y>230</y>
+        <w>24</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
+      <additional_attributes>6;6;20;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Interface</type>
+      <coordinates>
+        <x>620</x>
+        <y>182</y>
+        <w>16</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>LogicalVariable</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Interface</type>
+      <coordinates>
+        <x>620</x>
+        <y>168</y>
+        <w>16</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>Constraint</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Interface</type>
+      <coordinates>
+        <x>620</x>
+        <y>154</y>
+        <w>16</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>Substitution</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Interface</type>
+      <coordinates>
+        <x>618</x>
+        <y>140</y>
+        <w>20</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>ParameterizedFactor</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Interface</type>
+      <coordinates>
+        <x>750</x>
+        <y>154</y>
+        <w>16</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>Distribution</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Interface</type>
+      <coordinates>
+        <x>750</x>
+        <y>140</y>
+        <w>16</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>SplitResult</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Interface</type>
+      <coordinates>
+        <x>750</x>
+        <y>168</y>
+        <w>16</w>
+        <h>18</h>
+      </coordinates>
+      <panel_attributes>Prv</panel_attributes>
+      <additional_attributes/>
+    </element>
+    <element>
+      <type>com.umlet.element.Relation</type>
+      <coordinates>
+        <x>716</x>
+        <y>164</y>
+        <w>44</w>
+        <h>10</h>
+      </coordinates>
+      <panel_attributes>lt=-&gt;&gt;&gt;</panel_attributes>
+      <additional_attributes>40;6;6;6</additional_attributes>
+    </element>
+    <element>
+      <type>com.umlet.element.Package</type>
+      <coordinates>
+        <x>604</x>
+        <y>118</y>
+        <w>182</w>
+        <h>206</h>
+      </coordinates>
+      <panel_attributes>Parfactor
+bg=orange</panel_attributes>
+      <additional_attributes/>
+    </element>
+  </group>
+</diagram>

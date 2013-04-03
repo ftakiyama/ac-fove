@@ -61,11 +61,19 @@ public class Parfactors {
 //				for (ParameterizedRandomVariable f2 : g2.variables()) {
 //					try {
 //						Substitution mgu = f1.getMgu(f2);
-//						Set<Constraint> allConstraints = getAllConstraints(g1, g2, f1, f2);
+//						Set<Constraint> allConstraints = constraintsFromParfactors(g1, g2);
+//						allConstraints.add(constraintsFromPrvs(f1, f2));
 //						if (isSplittable(mgu, allConstraints)) {
-//							// get all constraints, including those from CF
-//							unifiedSet = split(mgu, g1, g2);
+//							int [] index = {g1.indexOf(f1), g2.indexOf(f2)};
+//							Distribution [] splitOnMgu = {g1.splitOn(mgu), g2.splitOn(mgu)};
 //							
+//							// encpasulate
+//							Constraint [] resultConstraint = constraintsFromParfactors(splitOnMgu);
+//							resultConstraint[0] = (splitOnMgu[1].result().prvAt(index).constraints());
+//							resultConstraint[1] = (splitOnMgu[0].result().prvAt(index).constraints());
+//							
+//							Distribution [] splitOnConstraints = {g1.splitOn(resultConstraint),...};
+							
 //						}
 //					} catch (IllegalArgumentException e) {
 //						// f1 and f2 are disjoint sets of RVs

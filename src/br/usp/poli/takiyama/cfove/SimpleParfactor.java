@@ -1334,9 +1334,9 @@ public final class SimpleParfactor implements Parfactor {
 										constraintsFromFirstResult);
 							unifiedSet.remove(g1);
 							unifiedSet.remove(g2);
-							unifiedSet.addAll(firstSplitOnMgu);
+							unifiedSet.addAll(firstSplitOnMgu); // residues
 							unifiedSet.addAll(secondSplitOnMgu);
-							unifiedSet.addAll(firstSplitOnConstraints);
+							unifiedSet.addAll(firstSplitOnConstraints); // result+residues
 							unifiedSet.addAll(secondSplitOnConstraints);
 							updatedSet = true;
 							break;

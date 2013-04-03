@@ -20,6 +20,7 @@ import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariableNameGenerator;
+import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
 
@@ -145,7 +146,6 @@ public class Sandbox {
 		}
 	}
 	
-	@Test
 	public void testFillArray() {
 		int populationSize = 3;
 		double [] f1 = new double[8 * populationSize];
@@ -158,4 +158,27 @@ public class Sandbox {
 		System.out.print(Arrays.toString(f1));
 	}
 	
+	public interface Marginal<E extends ParameterizedRandomVariable> {
+		
+	}
+	
+	public class MarginalDecorator<E extends ParameterizedRandomVariable> {
+		Marginal<E> m;
+	}
+	
+	private interface Operator {
+		
+	}
+	
+	private interface GenOperator<E extends Object> extends Operator {
+		
+	}
+	
+	private class OR implements GenOperator<Boolean> {
+		 
+	}
+	
+	public void testTypes() {
+		Operator op = new OR();
+	}
 }

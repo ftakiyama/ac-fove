@@ -6,7 +6,8 @@ import java.util.Iterator;
 import java.util.Set;
 
 /**
- * Standard implementation of {@link Distribution}.
+ * Standard implementation of {@link Distribution}. This implementation is a
+ * immutable set of {@link Parfactor}s.
  * 
  * @author Felipe Takiyama
  *
@@ -41,9 +42,13 @@ public final class StdDistribution implements Distribution {
 	/**
 	 * Creates a distribution with one parfactor
 	 * @param p1 A parfactor
+	 * @throws NullPointerException If the specified parfators is <code>null</code>.
 	 */
-	public static Distribution of(Parfactor p1) {
-		Distribution dist = new StdDistribution(1);
+	public static Distribution of(Parfactor p1) throws NullPointerException {
+		if (p1 == null) {
+			throw new NullPointerException();
+		}
+		StdDistribution dist = new StdDistribution(1);
 		dist.add(p1);
 		return dist;
 	}
@@ -52,9 +57,14 @@ public final class StdDistribution implements Distribution {
 	 * Creates a distribution with two parfactors
 	 * @param p1 The first parfactor to put in the distribution
 	 * @param p2 The second parfactor to put in the distribution
+	 * @throws NullPointerException If any of the specified parfators is 
+	 * <code>null</code>.
 	 */
-	public static Distribution of(Parfactor p1, Parfactor p2) {
-		Distribution dist = new StdDistribution(2);
+	public static Distribution of(Parfactor p1, Parfactor p2) throws NullPointerException {
+		if (p1 == null || p2 == null) {
+			throw new NullPointerException();
+		}
+		StdDistribution dist = new StdDistribution(2);
 		dist.add(p1);
 		dist.add(p2);
 		return dist;
@@ -62,12 +72,49 @@ public final class StdDistribution implements Distribution {
 	
 	/**
 	 * Creates a distribution with the specified collection of parfactors
-	 * @param c A collection of parfactors.s
+	 * @param c A collection of parfactors
+	 * @throws NullPointerException If the specified Collection contains a 
+	 * <code>null</code> element.
 	 */
-	public static Distribution of(Collection<? extends Parfactor> c) {
-		Distribution dist = new StdDistribution(Math.max((int) (c.size()/.75f) + 1, 16));
+	public static Distribution of(Collection<? extends Parfactor> c) throws NullPointerException {
+		if (c.contains(null)) {
+			throw new NullPointerException();
+		}
+		StdDistribution dist = new StdDistribution(Math.max((int) (c.size()/.75f) + 1, 16));
 		dist.addAll(c);
 		return dist;
+	}
+	
+	/**
+	 * Creates a distribution that has the same elements as the specified
+	 * distribution. The order in which the elements are put in the new 
+	 * distribution is not necessarily the same as the specified distribution.
+	 * 
+	 * @param d The distribution to "copy"
+	 * @return A distribution with the same elements as the specified 
+	 * distribution.
+	 * @throws NullPointerException If the specified Distribution contains a 
+	 * <code>null</code> element.
+	 */
+	public static Distribution of(Distribution d) throws NullPointerException {
+		if (d.contains(null)) {
+			throw new NullPointerException();
+		}
+		StdDistribution dist = new StdDistribution(Math.max((int) (d.size()/.75f) + 1, 16));
+		dist.addAll(d.toSet());
+		return dist;
+	}
+	
+	/* ************************************************************************
+	 *    Auxiliary methods
+	 * ************************************************************************/
+	
+	private void add(Parfactor p) {
+		pSet.add(p);
+	}
+	
+	private void addAll(Collection<? extends Parfactor> c) {
+		pSet.addAll(c);
 	}
 	
 	/* ************************************************************************
@@ -75,28 +122,16 @@ public final class StdDistribution implements Distribution {
 	 * ************************************************************************/
 	
 	@Override
-	public boolean add(Parfactor e) {
-		return pSet.add(e);
-	}
-
-	@Override
-	public boolean addAll(Collection<? extends Parfactor> c) {
-		return pSet.addAll(c);
-	}
-
-	@Override
-	public void clear() {
-		this.pSet.clear();
-	}
-
-	@Override
-	public boolean contains(Object o) {
+	public boolean contains(Object o) throws NullPointerException {
+		if (o == null) {
+			throw new NullPointerException();
+		}
 		return pSet.contains(o);
 	}
 
 	@Override
-	public boolean containsAll(Collection<?> c) {
-		return pSet.containsAll(c);
+	public boolean containsAll(Distribution d) {
+		return pSet.containsAll(d.toSet());
 	}
 
 	@Override
@@ -110,33 +145,13 @@ public final class StdDistribution implements Distribution {
 	}
 
 	@Override
-	public boolean remove(Object o) {
-		return pSet.remove(o);
-	}
-
-	@Override
-	public boolean removeAll(Collection<?> c) {
-		return pSet.removeAll(c);
-	}
-
-	@Override
-	public boolean retainAll(Collection<?> c) {
-		return pSet.retainAll(c);
-	}
-
-	@Override
 	public int size() {
 		return pSet.size();
 	}
-
+	
 	@Override
-	public Object[] toArray() {
-		return pSet.toArray();
-	}
-
-	@Override
-	public <T> T[] toArray(T[] a) {
-		return pSet.toArray(a);
+	public Set<Parfactor> toSet() {
+		return new HashSet<Parfactor>(pSet);
 	}
 
 	/* ************************************************************************

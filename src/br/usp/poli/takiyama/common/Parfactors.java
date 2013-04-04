@@ -42,7 +42,48 @@ public class Parfactors {
 		return renamedParfactors;
 	}
 	
-	public static Set<Parfactor> unify(Parfactor g1, Parfactor g2) {
+	public static Set<Parfactor> unify(Parfactor p1, Parfactor p2) {
+		
+//		Parfactor [] parfactor = new Parfactor[2];
+//		parfactor[0] = p1;
+//		parfactor[1] = p2;
+//		
+//		parfactor = simplifyLogicalVariables(parfactor);
+//		parfactor = renameLogicalVariables(parfactor);
+//		
+//		p1 = parfactor[0];
+//		p2 = parfactor[1];
+//		
+//		boolean setUpdated = true;
+//		while (setUpdated) {
+//			setUpdated = false;
+//			for (Prv prv1 : p1.variables()) {
+//				for (Prv prv2 : p2.variables()) {
+//					try {
+//						Substitution mgu = Prvs.mgu(prv1, prv2);
+//						if (!mgu.isEmpty() && mguIsConsistent(allConstraints)) {
+//							splitOn(mgu);
+//							splitOnConstraints();
+//							setUpdated = true;
+//							
+//							/*
+//							 * Since the set of parfactors was updated, 
+//							 * WAIT! need to refactor this algorithm because it
+//							 * is WRONG!!!!
+//							 * */
+//							break;
+//						}
+//					} catch (IllegalArgumentException e) {
+//						/* 
+//						 * prv1 and prv2 represent disjoint sets of 
+//						 * random variables, thus no splits are needed;
+//						 * go to next prv in p2 
+//						 */
+//						continue;
+//					}
+//				}
+//			}
+//		}
 		
 //		Set<Parfactor> unifiedSet = new LinkedHashSet<Parfactor>();
 //		unifiedSet.add(g1);

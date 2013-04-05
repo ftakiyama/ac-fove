@@ -28,6 +28,16 @@ public final class StdDistribution implements Distribution {
 		this.pSet = new HashSet<Parfactor>(capacity);
 	}
 	
+	/**
+	 * Creates a distribution with the elements of the specified set.
+	 * @param p A set of parfactors whose elements will compose this 
+	 * distribution
+	 */
+	private StdDistribution(Set<Parfactor> p) {
+		pSet = new HashSet<Parfactor>(Math.max((int) (p.size()/.75f) + 1, 16));
+		pSet.addAll(p);
+	}
+	
 	/* ************************************************************************
 	 *    Static factories
 	 * ************************************************************************/
@@ -109,17 +119,25 @@ public final class StdDistribution implements Distribution {
 	 *    Auxiliary methods
 	 * ************************************************************************/
 	
-	private void add(Parfactor p) {
-		pSet.add(p);
-	}
-	
 	private void addAll(Collection<? extends Parfactor> c) {
 		pSet.addAll(c);
 	}
 	
 	/* ************************************************************************
-	 *    Inherited methods
+	 *    Interface methods
 	 * ************************************************************************/
+	
+	@Override
+	public Distribution add(Parfactor p) {
+		Set<Parfactor> newSet = new HashSet<Parfactor>(pSet);
+		newSet.add(p);
+		return new StdDistribution(newSet);
+	}
+	
+	@Override
+	public Distribution addAll(Distribution d) {
+		return new StdDistribution(d.toSet());
+	}
 	
 	@Override
 	public boolean contains(Object o) throws NullPointerException {

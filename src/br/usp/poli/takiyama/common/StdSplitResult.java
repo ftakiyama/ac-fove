@@ -8,9 +8,8 @@ import br.usp.poli.takiyama.prv.Prv;
 
 /**
  * Standard implementation of {@link SplitResult}. Instances of this class are
- * returned when splitting {@link SimpleParfactor}s and usually 
- * {@link AggregationParfactor}s.
- * 
+ * returned when splitting {@link SimpleParfactor}s and  
+ * {@link AggregationParfactor}s (usually).
  * <p>
  * Particularly, this class does not have 'eliminable' random variables, 
  * and thus is considered a simple {@link Distribution} rather than a

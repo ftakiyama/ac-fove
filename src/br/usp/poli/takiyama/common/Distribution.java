@@ -17,12 +17,30 @@ import java.util.Set;
 public interface Distribution {
 	
 	/**
+	 * Returns a distribution with the specified parfactor added. The order of
+	 * the elements in the distribution may not be preserved. In other words,
+	 * adding a parfactor to this distribution does not mean that it will be
+	 * the last to be retrieved by {@link #iterator()}.
+	 * 
+	 * @param p The parfactor to add to this distribution
+	 * @return A copy of this distribution with the specified parfactor added.
+	 */
+	public Distribution add(Parfactor p);
+	
+	/**
+	 * Returns a distribution that is the result of the union of the specified
+	 * distribution and this distribution. Duplications are removed from the
+	 * resulting distribution.
+	 * @param d The distribution to unify with this distribution
+	 * @return The union of this ditribution with the specified distribution.
+	 */
+	public Distribution addAll(Distribution d);
+	
+	/**
 	 * Returns true if this distribution contains the specified element.
 	 * 
-	 * @param o Element whose presence in this set is to be tested 
-	 * 
+	 * @param o Element whose presence in this set is to be tested
 	 * @return <code>true</code> if this set contains the specified element 
-	 * 
 	 * @throws NullPointerException If the specified element is null
 	 */
 	public boolean contains(Object o) throws NullPointerException;
@@ -32,10 +50,8 @@ public interface Distribution {
 	 * elements of the specified distribution.
 	 *  
 	 * @param d Distribution to be checked for containment in this distribution 
-	 * 
 	 * @return <code>true</code> if this distribution contains all of the 
 	 * elements of the specified distribution 
-	 * 
 	 * @see Set#containsAll(Collection)
 	 */
 	public boolean containsAll(Distribution d);

@@ -14,6 +14,7 @@ import br.usp.poli.takiyama.common.Tuple;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
+import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 import br.usp.poli.takiyama.prv.Term;
 
@@ -215,8 +216,8 @@ public final class ParameterizedFactor {
 	 * Returns the set of all logical variables in the PRVs of this factor.
 	 * @return The set of all logical variables in the PRVs of this factor.
 	 */
-	Set<LogicalVariable> getLogicalVariables() {
-		Set<LogicalVariable> logicalVariables = new HashSet<LogicalVariable>();
+	Set<StdLogicalVariable> getLogicalVariables() {
+		Set<StdLogicalVariable> logicalVariables = new HashSet<StdLogicalVariable>();
 		for (ParameterizedRandomVariable prv : this.variables) {
 			logicalVariables.addAll(prv.getParameters());
 		}
@@ -382,7 +383,7 @@ public final class ParameterizedFactor {
 	 * @return True if the logical variable specified is present in the
 	 * parameterized factor.
 	 */
-	public boolean contains(LogicalVariable logicalVariable) {
+	public boolean contains(StdLogicalVariable logicalVariable) {
 		for (ParameterizedRandomVariable prv : this.variables) {
 			if (prv.getParameters().contains(logicalVariable)) {
 				return true;
@@ -668,8 +669,8 @@ public final class ParameterizedFactor {
 		double correction = MathUtils
 				.factorial(countingFormula
 						.getBoundVariable()
-						.getSizeOfPopulationSatisfying(countingFormula
-								.getConstraints()));
+						.individualsSatisfying(countingFormula
+								.getConstraints()).size());
 		correction = correction / productOfValuesInHistogram;
 		
 		return correction;
@@ -875,8 +876,8 @@ public final class ParameterizedFactor {
 	 * Returns the set of all logical variables in the PRVs of this factor.
 	 * @return The set of all logical variables in the PRVs of this factor.
 	 */
-	Set<LogicalVariable> logicalVariables() {
-		Set<LogicalVariable> logicalVariables = new HashSet<LogicalVariable>();
+	Set<StdLogicalVariable> logicalVariables() {
+		Set<StdLogicalVariable> logicalVariables = new HashSet<StdLogicalVariable>();
 		for (ParameterizedRandomVariable prv : this.variables) {
 			logicalVariables.addAll(prv.getParameters());
 		}

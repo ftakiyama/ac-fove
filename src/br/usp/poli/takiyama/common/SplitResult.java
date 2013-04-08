@@ -30,4 +30,13 @@ public interface SplitResult extends Elimination<Prv> {
 	 * @return The residual parfactors.
 	 */
 	public Distribution residue();
+	
+	@Override
+	public int hashCode();
+
+	@Override
+	public boolean equals(Object o);
+
+	@Override
+	public String toString();
 }

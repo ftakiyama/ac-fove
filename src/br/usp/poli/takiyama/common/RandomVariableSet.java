@@ -5,7 +5,7 @@ import java.util.Set;
 
 import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.CountingFormula;
-import br.usp.poli.takiyama.prv.LogicalVariable;
+import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 
 /**
@@ -74,8 +74,8 @@ public final class RandomVariableSet {
 		}
 		
 		int maxNumConstraints = 0;
-		for (LogicalVariable lv : prv.getParameters()) {
-			maxNumConstraints = maxNumConstraints + lv.getPopulation().size();
+		for (StdLogicalVariable lv : prv.getParameters()) {
+			maxNumConstraints = maxNumConstraints + lv.population().size();
 		}
 		if (maxNumConstraints == constraints.size())
 			return getEmptyInstance();
@@ -134,8 +134,8 @@ public final class RandomVariableSet {
 	 */
 	public RandomVariableSet getComplement() {
 		HashSet<Constraint> constraints = new HashSet<Constraint>();
-		for (LogicalVariable lv : this.prv.getParameters()) {
-			for (Constant c : lv.getIndividualsSatisfying(this.constraints)) {
+		for (StdLogicalVariable lv : this.prv.getParameters()) {
+			for (Constant c : lv.individualsSatisfying(this.constraints)) {
 				constraints.add(Constraint.getInstance(lv, c));
 			}
 		}

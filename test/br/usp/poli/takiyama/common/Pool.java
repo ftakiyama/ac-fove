@@ -19,6 +19,7 @@ import br.usp.poli.takiyama.cfove.SimpleParfactor;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
+import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.PRVs;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 import br.usp.poli.takiyama.prv.Substitution;
@@ -110,8 +111,8 @@ public class Pool {
 			} else if (variablesPool.containsKey(parameter.split("=")[0])) {
 				terms.add(variablesPool
 						.get(parameter.split("=")[0])
-						.getPopulation()
-						.getIndividual(Integer
+						.population()
+						.individualAt(Integer
 								.parseInt(parameter
 										.split("=")[1])));
 			} else if (parameter == "") {
@@ -169,8 +170,8 @@ public class Pool {
 					Constraint.getInstance(
 							variablesPool.get(firstTerm), 
 							variablesPool.get(firstTerm)
-										 .getPopulation()
-										 .getIndividual(
+										 .population()
+										 .individualAt(
 												 Integer.parseInt(secondTerm))));
 		}
 	}
@@ -215,8 +216,8 @@ public class Pool {
 				Constraint.getInstance(
 						variablesPool.get(firstTerm), 
 						variablesPool.get(secondTerm.split("=")[0])
-									 .getPopulation()
-									 .getIndividual(
+									 .population()
+									 .individualAt(
 											 Integer.parseInt(secondTerm.split("=")[1]))));
 	}
 	
@@ -321,21 +322,21 @@ public class Pool {
 			Matcher matcher = Pattern.compile("^\\d+").matcher(secondTerm); // maybe this regular expression is incorrect.
 			if (matcher.find()) {
 				bindings.add(
-						Binding.create(
+						Binding.getInstance(
 								variablesPool.get(firstTerm), 
 								variablesPool.get(firstTerm)
-											 .getPopulation()
-											 .getIndividual(
+											 .population()
+											 .individualAt(
 													 Integer.parseInt(secondTerm))));
 			} else {
 				bindings.add(
-						Binding.create(
+						Binding.getInstance(
 								variablesPool.get(firstTerm), 
 								variablesPool.get(secondTerm)));
 				
 			}
 		}
-		substitutionPool.put(setName, Substitution.create(bindings));
+		substitutionPool.put(setName, Substitution.getInstance(bindings));
 	}
 	
 	/**
@@ -613,18 +614,18 @@ public class Pool {
 		
 		LogicalVariable lv = variablesPool.get(firstTerm);
 		
-		if (lv.getPopulation().size() <= secondTerm
+		if (lv.population().size() <= secondTerm
 				|| secondTerm < 0) {
 			throw new IllegalArgumentException("Not a valid individual: " 
 					+ secondTerm
 					+ " because "
 					+ firstTerm
 					+ " has a population of size "
-					+ lv.getPopulation().size());
+					+ lv.population().size());
 		}
 		
-		Term c = lv.getPopulation().getIndividual(secondTerm);
-		Binding b = Binding.create(lv, c);
+		Term c = lv.population().individualAt(secondTerm);
+		Binding b = Binding.getInstance(lv, c);
 		
 		bindingPool.put(name, b);
 	}
@@ -654,7 +655,7 @@ public class Pool {
 		
 		LogicalVariable lv = variablesPool.get(firstTerm);
 		Term t = variablesPool.get(secondTerm);
-		Binding b = Binding.create(lv, t);
+		Binding b = Binding.getInstance(lv, t);
 		
 		bindingPool.put(name, b);
 	}
@@ -2271,6 +2272,41 @@ public class Pool {
 		
 	}
 	
+	/**
+	 * Creates parfactors to test the Shattering macro operation using the new
+	 * structure.
+	 */
+	public void setStdParfactorShatteringTest() {
+		createLogicalVariable("X", "x", 10);
+//		createStdPrv("f", "X");
+//		createStdPrv("h", "X");
+//		createStdPrvFromSubstitution("f", "X/1");
+//		createStdPrvFromSubstitution("f", "X/2");
+//		createStdPrvFromSubstitution("h", "X/1");
+//		createStdPrvFromSubstitution("h", "X/2");
+//		createInequalityConstraint("X", "1");
+//		createInequalityConstraint("X", "2");
+//		
+//		// test 1 - input
+//		createStdParfactor("g.1.in.1", "", "f;h[X/1]", "F1", "1;2;3;4");
+//		createStdParfactor("g.1.in.2", "", "f[X/2];h", "F2", "1;2;3;4");
+//		
+//		// test 1 - expected result
+//		createStdParfactor("g.1.out.3", "", "f[X/2];h[X/1]", "F1", "1;2;3;4");
+//		createStdParfactor("g.1.out.4", "X != 2", "f;h[X/1]", "F1", "1;2;3;4");
+//		createStdParfactor("g.1.out.5", "", "f[X/2];h[X/1]", "F2", "1;2;3;4");
+//		createStdParfactor("g.1.out.7", "X != 1", "f[X/2];h", "F2", "1;2;3;4");
+//		
+//		// test 2 - input
+//		createStdParfactor("g.2.in.1", "", "f;h", "F1", "1;2;3;4");
+//		createStdParfactor("g.2.in.2", "", "f[X/1];h[X/2]", "F2", "5;6;7;8");
+//		
+//		// test 2 - expected result
+//		createStdParfactor("g.2.out.3", "", "f[X/1];h[X/1]", "F1", "1;2;3;4");
+//		createStdParfactor("g.2.out.4", "X != 1;X != 2", "f;h", "F1", "1;2;3;4");
+//		createStdParfactor("g.2.out.5", "", "f[X/2];h[X/2]", "F1", "1;2;3;4");
+//		createStdParfactor("g.2.out.7", "", "f[X/1];h[X/2]", "F2", "5;6;7;8");
+	}
 	
 	/* ************************************************************************
 	 *      Exposed methods

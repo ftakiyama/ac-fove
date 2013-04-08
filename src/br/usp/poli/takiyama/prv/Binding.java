@@ -2,8 +2,8 @@ package br.usp.poli.takiyama.prv;
 
 /**
  * A binding is an ordered pair of terms (t1, t2). The first term (t1) must be a 
- * {@link LogicalVariable} and the second term (t2) may be a {@link Constant}
- * or another {@link LogicalVariable}.
+ * {@link StdLogicalVariable} and the second term (t2) may be a {@link Constant}
+ * or another {@link StdLogicalVariable}.
  * We say that t2 replaces t1.
  * 
  * @author ftakiyama
@@ -30,7 +30,7 @@ public class Binding {
 	 * @param t2
 	 * @return
 	 */
-	public static Binding create(LogicalVariable t1, Term t2) {
+	public static Binding getInstance(LogicalVariable t1, Term t2) {
 		return new Binding(t1, t2);
 	}
 	
@@ -38,7 +38,7 @@ public class Binding {
 	 * Returns the first term of this binding.
 	 * @return The first term of this binding.
 	 */
-	public LogicalVariable getFirstTerm() {
+	public LogicalVariable firstTerm() {
 		return this.firstTerm;
 	}
 
@@ -46,7 +46,7 @@ public class Binding {
 	 * Returns the second term of this binding.
 	 * @return The second term of this binding.
 	 */
-	public Term getSecondTerm() {
+	public Term secondTerm() {
 		return this.secondTerm;
 	}
 	
@@ -57,24 +57,25 @@ public class Binding {
 	 * otherwise.
 	 */
 	public boolean contains(Term t) {
-		if (t.isLogicalVariable()) {
-			LogicalVariable lv = (LogicalVariable) t;
-			if (this.firstTerm.equals(lv)) {
-				return true;
-			}
-			if (this.secondTerm.isLogicalVariable()
-					&& ((LogicalVariable) this.secondTerm).equals(lv)) {
-				return true;
-			}
-			return false;
-		} else {
-			Constant c = (Constant) t;
-			if (this.secondTerm.isConstant()
-					&& ((Constant) this.secondTerm).equals(c)) {
-				return true;
-			}
-			return false;
-		}
+//		if (t.isLogicalVariable()) {
+//			LogicalVariable lv = (LogicalVariable) t;
+//			if (this.firstTerm.equals(lv)) {
+//				return true;
+//			}
+//			if (this.secondTerm.isLogicalVariable()
+//					&& ((LogicalVariable) this.secondTerm).equals(lv)) {
+//				return true;
+//			}
+//			return false;
+//		} else {
+//			Constant c = (Constant) t;
+//			if (this.secondTerm.isConstant()
+//					&& ((Constant) this.secondTerm).equals(c)) {
+//				return true;
+//			}
+//			return false;
+//		}
+		return t.equals(firstTerm) || t.equals(secondTerm);
 	}
 	
 	@Override

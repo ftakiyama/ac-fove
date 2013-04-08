@@ -70,6 +70,11 @@ public final class AggSplitResult implements SplitResult {
 		return StdDistribution.of(marginal.distribution());
 	}
 	
+	@Override
+	public boolean isEmpty() {
+		return (result.isConstant() && marginal.isEmpty());
+	}
+	
 	/* ************************************************************************
 	 *    hashCode, equals and toString
 	 * ************************************************************************/

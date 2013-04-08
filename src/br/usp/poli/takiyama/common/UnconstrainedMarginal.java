@@ -81,6 +81,11 @@ public class UnconstrainedMarginal implements Marginal<StdPrv> {
 		return StdDistribution.of(distribution);
 	}
 	
+	@Override
+	public boolean isEmpty() {
+		return distribution.isEmpty();
+	}
+	
 	/* ************************************************************************
 	 *    hashCode, equals and toString
 	 * ************************************************************************/

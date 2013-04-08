@@ -26,7 +26,7 @@ public final class LogicalVariableNameGenerator {
 	 * @param old The logical variable to be renamed.
 	 * @return The specified logical variable renamed.
 	 */
-	public static LogicalVariable rename(LogicalVariable old) {
+	public static LogicalVariable rename(StdLogicalVariable old) {
 		
 		/*
 		 * Discussion
@@ -37,7 +37,7 @@ public final class LogicalVariableNameGenerator {
 		 * The code below looks ugly to me. Sounds 'wrong'.
 		 */
 		count++;
-		mapping.put(("X" + count), old.getValue());
+		mapping.put(("X" + count), old.value());
 		return old.rename(("X" + count)); 
 	}
 	
@@ -58,9 +58,9 @@ public final class LogicalVariableNameGenerator {
 	 * changed to the old one, according to the internal mapping, or the 
 	 * specified logical variable if there is no mapping that matches it.
 	 */
-	public static LogicalVariable restore(LogicalVariable lv) {
-		if (mapping.containsKey(lv.getValue())) {
-			return lv.rename(mapping.get(lv.getValue()));
+	public static LogicalVariable restore(StdLogicalVariable lv) {
+		if (mapping.containsKey(lv.value())) {
+			return lv.rename(mapping.get(lv.value()));
 		} else {
 			return lv;
 		}

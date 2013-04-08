@@ -201,7 +201,7 @@ public class CountingFormula extends ParameterizedRandomVariable {
 					+ prv);
 		
 		int allowedDomainSize = 
-			boundLogicalVariable.getSizeOfPopulationSatisfying(constraints);
+			boundLogicalVariable.individualsSatisfying(constraints).size();
 		Histogram<String> histogram = new Histogram<String>(prv.getRange());
 		generateHistograms(this.range, allowedDomainSize, histogram, 0);
 	}
@@ -271,7 +271,7 @@ public class CountingFormula extends ParameterizedRandomVariable {
 	
 	@Override
 	public ParameterizedRandomVariable applyOneSubstitution(Binding s) {
-		if (s.getSecondTerm().isConstant()) {
+		if (s.secondTerm() instanceof Constant) { //TODO take it out
 			System.out.println(
 					"WARN " 
 					+ s.toString()
@@ -286,7 +286,7 @@ public class CountingFormula extends ParameterizedRandomVariable {
 			newConstraints.add(constraint.applySubstitution(s));
 		}
 		
-		return new CountingFormula((LogicalVariable) s.getSecondTerm(), 
+		return new CountingFormula((StdLogicalVariable) s.secondTerm(), 
 				newConstraints, newPrv);
 	}
 	
@@ -322,8 +322,8 @@ public class CountingFormula extends ParameterizedRandomVariable {
 	}
 	
 	@Override
-	public Set<LogicalVariable> getParameters() {
-		Set<LogicalVariable> parameters = new HashSet<LogicalVariable>(
+	public Set<StdLogicalVariable> getParameters() {
+		Set<StdLogicalVariable> parameters = new HashSet<StdLogicalVariable>(
 				this.prv.getParameters());
 		parameters.remove(boundLogicalVariable);
 		return parameters;
@@ -344,8 +344,8 @@ public class CountingFormula extends ParameterizedRandomVariable {
 	@Override
 	public int getGroundSetSize(Set<Constraint> constraints) {
 		int size = 1;
-		for (LogicalVariable lv : this.getParameters()) {
-			size = size * lv.getSizeOfPopulationSatisfying(constraints);
+		for (StdLogicalVariable lv : this.getParameters()) {
+			size = size * lv.individualsSatisfying(constraints).size();
 		}
 		return size;
 	}
@@ -469,7 +469,7 @@ public class CountingFormula extends ParameterizedRandomVariable {
 	 */
 	public boolean canBeConvertedToPrv() {
 		return (boundLogicalVariable
-				.getIndividualsSatisfying(constraints).size() == 1);
+				.individualsSatisfying(constraints).size() == 1);
 	}
 	
 	/**
@@ -479,13 +479,13 @@ public class CountingFormula extends ParameterizedRandomVariable {
 	 * @return The converted counting formula to a parameterized random variable.
 	 */
 	public ParameterizedRandomVariable convertToPrv() {
-		Set<Constant> loneIndividual = 
-			boundLogicalVariable.getIndividualsSatisfying(constraints);
+		Population loneIndividual = 
+			boundLogicalVariable.individualsSatisfying(constraints);
 		if (loneIndividual.size() != 1) {
 			return this;
 		}
 		return prv.applyOneSubstitution(
-				Binding.create(
+				Binding.getInstance(
 						boundLogicalVariable, 
 						loneIndividual.iterator().next()));
 	}

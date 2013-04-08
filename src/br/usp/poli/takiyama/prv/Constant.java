@@ -3,13 +3,17 @@ package br.usp.poli.takiyama.prv;
 
 /**
  * A constant is a word that starts with a lower-case letter. [Poole, 2010]
- * @author ftakiyama
+ * @author Felipe Takiyama
  *
  */
 public final class Constant implements Term {
 	
 	private final String value;
-	
+
+	/* ************************************************************************
+	 *    Constructors
+	 * ************************************************************************/
+
 	/**
 	 * Creates a constant. 
 	 * @param value The value of the constant. It must start with a lower-case
@@ -17,7 +21,7 @@ public final class Constant implements Term {
 	 * @throws IllegalArgumentException If <code>value</code> does not start 
 	 * with a lower-case letter.
 	 */
-	public Constant(String value) throws IllegalArgumentException {
+	private Constant(String value) throws IllegalArgumentException {
 		this.value = new String(value);
 		
 		if (Character.isUpperCase(value.charAt(0))) {
@@ -26,28 +30,52 @@ public final class Constant implements Term {
 					"lowercase letter.");
 		}
 	}
+		
+	
+	/* ************************************************************************
+	 *    Static factories
+	 * ************************************************************************/
+
+	/**
+	 * Creates a constant. 
+	 * 
+	 * @param value The value of the constant. It must start with a lower-case
+	 * letter.
+	 * @throws IllegalArgumentException If <code>value</code> does not start 
+	 * with a lower-case letter.
+	 */
+	public static Constant getInstance(String value) throws IllegalArgumentException {
+		return new Constant(value);
+	}
+	
 	
 	/**
-	 * Returns the value of this constant.
-	 * @return The value of this constant.
+	 * Returns a constant that is a copy of the specified constant.
+	 * @param c The constant to copy.
+	 * @return A constant that is a copy of the specified constant.
 	 */
-	public String getValue() {
-		return new String(value);
+	public static Constant getInstance(Constant c) {
+		return new Constant(c.value());
 	}
+
 	
+	/* ************************************************************************
+	 *    Inherited methods
+	 * ************************************************************************/
+
 	@Override
-	public boolean isLogicalVariable() {
-		return false;
+	public String value() {
+		return value;
 	}
 	
-	@Override
-	public boolean isConstant() {
-		return true;
-	}
 	
+	/* ************************************************************************
+	 *    hashCode, equals and toString
+	 * ************************************************************************/
+
 	@Override
 	public String toString() {
-		return this.value;
+		return value;
 	}
 	
 	@Override

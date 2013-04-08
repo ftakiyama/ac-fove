@@ -12,7 +12,7 @@ import java.util.List;
 public final class PRVs {
 	
 	public static Constant getConstant(String value) {
-		return new Constant(value);
+		return Constant.getInstance(value);
 	}
 	
 	public static LogicalVariable getLogicalVariable(
@@ -23,10 +23,11 @@ public final class PRVs {
 		
 		ArrayList<Constant> population = new ArrayList<Constant>();
 		for (int i = 0; i < populationSize; i++) {
-			population.add(new Constant(individualPrefix + i));
+			population.add(Constant.getInstance(individualPrefix + i));
 		}
+		Population pop = Population.getInstance(population);
 		
-		return new LogicalVariable(name, population);
+		return StdLogicalVariable.getInstance(name, pop);
 	}
 	
 	public static ParameterizedRandomVariable getPrv(
@@ -66,7 +67,7 @@ public final class PRVs {
 	
 	public static ParameterizedRandomVariable getBooleanPrv(
 			String functorName,
-			LogicalVariable... parameters) 
+			StdLogicalVariable... parameters) 
 			throws IllegalArgumentException {
 		
 		ArrayList<String> range = new ArrayList<String>();
@@ -75,7 +76,7 @@ public final class PRVs {
 		
 		PredicateSymbol functor = new PredicateSymbol(functorName, range.toArray(new String[range.size()]));
 		ArrayList<Term> terms = new ArrayList<Term>();
-		for (LogicalVariable v : parameters) {
+		for (StdLogicalVariable v : parameters) {
 			terms.add(v);
 		}
 

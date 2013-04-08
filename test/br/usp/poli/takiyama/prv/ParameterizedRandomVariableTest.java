@@ -11,7 +11,7 @@ import br.usp.poli.takiyama.common.Pool;
 import br.usp.poli.takiyama.common.RandomVariable;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.Constant;
-import br.usp.poli.takiyama.prv.LogicalVariable;
+import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 import br.usp.poli.takiyama.prv.PredicateSymbol;
 import br.usp.poli.takiyama.prv.Substitution;
@@ -41,19 +41,23 @@ public class ParameterizedRandomVariableTest {
 		ArrayList<Constant> individualsForX2 = new ArrayList<Constant>();
 		ArrayList<Constant> individualsForX3 = new ArrayList<Constant>();
 		
-		individualsForX1.add(new Constant("a1"));
+		individualsForX1.add(Constant.getInstance("a1"));
 		
-		individualsForX2.add(new Constant("b1"));
-		individualsForX2.add(new Constant("b2"));
+		individualsForX2.add(Constant.getInstance("b1"));
+		individualsForX2.add(Constant.getInstance("b2"));
 		
-		individualsForX3.add(new Constant("c1"));
-		individualsForX3.add(new Constant("c2"));
-		individualsForX3.add(new Constant("c3"));
+		individualsForX3.add(Constant.getInstance("c1"));
+		individualsForX3.add(Constant.getInstance("c2"));
+		individualsForX3.add(Constant.getInstance("c3"));
+		
+		Population p1 = Population.getInstance(individualsForX1);
+		Population p2 = Population.getInstance(individualsForX2);
+		Population p3 = Population.getInstance(individualsForX3);
 		
 		ArrayList<Term> parameters = new ArrayList<Term>();
-		parameters.add(new LogicalVariable("X1", individualsForX1));
-		parameters.add(new LogicalVariable("X2", individualsForX2));
-		parameters.add(new LogicalVariable("X3", individualsForX3));
+		parameters.add(StdLogicalVariable.getInstance("X1", p1));
+		parameters.add(StdLogicalVariable.getInstance("X2", p2));
+		parameters.add(StdLogicalVariable.getInstance("X3", p3));
 		
 		return ParameterizedRandomVariable.getInstance(functor, parameters);
 	}
@@ -66,35 +70,39 @@ public class ParameterizedRandomVariableTest {
 		ArrayList<Constant> individualsForX2 = new ArrayList<Constant>();
 		ArrayList<Constant> individualsForX3 = new ArrayList<Constant>();
 		
-		individualsForX1.add(new Constant("a1"));
+		individualsForX1.add(Constant.getInstance("a1"));
 		
-		individualsForX2.add(new Constant("b1"));
-		individualsForX2.add(new Constant("b2"));
+		individualsForX2.add(Constant.getInstance("b1"));
+		individualsForX2.add(Constant.getInstance("b2"));
 		
-		individualsForX3.add(new Constant("c1"));
-		individualsForX3.add(new Constant("c2"));
-		individualsForX3.add(new Constant("c3"));
+		individualsForX3.add(Constant.getInstance("c1"));
+		individualsForX3.add(Constant.getInstance("c2"));
+		individualsForX3.add(Constant.getInstance("c3"));
 		
 		ParameterizedRandomVariable prv = getBooleanPrv();
 		
 		System.out.println("PRV: " + prv.toString());
 		
+		Population p1 = Population.getInstance(individualsForX1);
+		Population p2 = Population.getInstance(individualsForX2);
+		Population p3 = Population.getInstance(individualsForX3);
+		
 		ArrayList<Binding> bindings = new ArrayList<Binding>();
-		bindings.add(Binding.create(new LogicalVariable("X1", individualsForX1), new LogicalVariable("Y1", individualsForX1)));
-		bindings.add(Binding.create(new LogicalVariable("X2", individualsForX2), new LogicalVariable("Y2", individualsForX2)));
-		bindings.add(Binding.create(new LogicalVariable("X3", individualsForX3), new LogicalVariable("Y3", individualsForX3)));
+		bindings.add(Binding.getInstance(StdLogicalVariable.getInstance("X1", p1), StdLogicalVariable.getInstance("Y1", p1)));
+		bindings.add(Binding.getInstance(StdLogicalVariable.getInstance("X2", p2), StdLogicalVariable.getInstance("Y2", p2)));
+		bindings.add(Binding.getInstance(StdLogicalVariable.getInstance("X3", p3), StdLogicalVariable.getInstance("Y3", p3)));
 		
 		System.out.println("Substitution: " + bindings.toString());
 		
-		Substitution substitution = Substitution.create(bindings);
+		Substitution substitution = Substitution.getInstance(bindings);
 		
 		System.out.println("PRV after substitution: " + prv.applySubstitution(substitution));
 		
 		PredicateSymbol functor = new PredicateSymbol("f", "true", "false");
 		ArrayList<Term> parameters = new ArrayList<Term>();
-		parameters.add(new LogicalVariable("Y1", individualsForX1));
-		parameters.add(new LogicalVariable("Y2", individualsForX2));
-		parameters.add(new LogicalVariable("Y3", individualsForX3));
+		parameters.add(StdLogicalVariable.getInstance("Y1", p1));
+		parameters.add(StdLogicalVariable.getInstance("Y2", p2));
+		parameters.add(StdLogicalVariable.getInstance("Y3", p3));
 		
 		ParameterizedRandomVariable correctResult = ParameterizedRandomVariable.getInstance(functor, parameters);
 		
@@ -112,31 +120,35 @@ public class ParameterizedRandomVariableTest {
 		ArrayList<Constant> individualsForX2 = new ArrayList<Constant>();
 		ArrayList<Constant> individualsForX3 = new ArrayList<Constant>();
 		
-		individualsForX1.add(new Constant("a1"));
+		individualsForX1.add(Constant.getInstance("a1"));
 		
-		individualsForX2.add(new Constant("b1"));
-		individualsForX2.add(new Constant("b2"));
+		individualsForX2.add(Constant.getInstance("b1"));
+		individualsForX2.add(Constant.getInstance("b2"));
 		
-		individualsForX3.add(new Constant("c1"));
-		individualsForX3.add(new Constant("c2"));
-		individualsForX3.add(new Constant("c3"));
+		individualsForX3.add(Constant.getInstance("c1"));
+		individualsForX3.add(Constant.getInstance("c2"));
+		individualsForX3.add(Constant.getInstance("c3"));
+		
+		Population p1 = Population.getInstance(individualsForX1);
+		Population p2 = Population.getInstance(individualsForX2);
+		Population p3 = Population.getInstance(individualsForX3);
 		
 		ParameterizedRandomVariable correctResult = getBooleanPrv();
 		
 		PredicateSymbol functor = new PredicateSymbol("f", "true", "false");
 		ArrayList<Term> parameters = new ArrayList<Term>();
 
-		parameters.add(new LogicalVariable("X1", individualsForX1));
-		parameters.add(new LogicalVariable("X2", individualsForX2));
-		parameters.add(new LogicalVariable("X3", individualsForX3));
+		parameters.add(StdLogicalVariable.getInstance("X1", p1));
+		parameters.add(StdLogicalVariable.getInstance("X2", p2));
+		parameters.add(StdLogicalVariable.getInstance("X3", p3));
 		
 		ParameterizedRandomVariable prv = ParameterizedRandomVariable.getInstance(functor, parameters);
 		
 		functor = new PredicateSymbol("f", "true", "false");
 		parameters = new ArrayList<Term>();
-		parameters.add(new LogicalVariable("X1", individualsForX1));
-		parameters.add(new LogicalVariable("X2", individualsForX2));
-		parameters.add(new LogicalVariable("X3", individualsForX3));
+		parameters.add(StdLogicalVariable.getInstance("X1", p1));
+		parameters.add(StdLogicalVariable.getInstance("X2", p2));
+		parameters.add(StdLogicalVariable.getInstance("X3", p3));
 		
 		ParameterizedRandomVariable prv2 = ParameterizedRandomVariable.getInstance(functor, parameters);
 		
@@ -164,23 +176,26 @@ public class ParameterizedRandomVariableTest {
 		ArrayList<Constant> individualsForX2 = new ArrayList<Constant>();
 		ArrayList<Constant> individualsForX3 = new ArrayList<Constant>();
 		
-		individualsForX1.add(new Constant("a1"));
+		individualsForX1.add(Constant.getInstance("a1"));
 		
-		individualsForX2.add(new Constant("b1"));
-		individualsForX2.add(new Constant("b2"));
+		individualsForX2.add(Constant.getInstance("b1"));
+		individualsForX2.add(Constant.getInstance("b2"));
 		
-		individualsForX3.add(new Constant("c1"));
-		individualsForX3.add(new Constant("c2"));
-		individualsForX3.add(new Constant("c3"));
+		individualsForX3.add(Constant.getInstance("c1"));
+		individualsForX3.add(Constant.getInstance("c2"));
+		individualsForX3.add(Constant.getInstance("c3"));
 		
+		Population p1 = Population.getInstance(individualsForX1);
+		Population p2 = Population.getInstance(individualsForX2);
+		Population p3 = Population.getInstance(individualsForX3);
 
 		ArrayList<Binding> bindings = new ArrayList<Binding>();
-		bindings.add(Binding.create(new LogicalVariable("X1", individualsForX1), new Constant("y1")));
-		bindings.add(Binding.create(new LogicalVariable("X3", individualsForX3), new Constant("y4")));
+		bindings.add(Binding.getInstance(StdLogicalVariable.getInstance("X1", p1), Constant.getInstance("y1")));
+		bindings.add(Binding.getInstance(StdLogicalVariable.getInstance("X3", p3), Constant.getInstance("y4")));
 		
 		System.out.println("Substitution: " + bindings.toString());
 		
-		Substitution substitution = Substitution.create(bindings);
+		Substitution substitution = Substitution.getInstance(bindings);
 		
 		ParameterizedRandomVariable prv = getBooleanPrv().applySubstitution(substitution);
 
@@ -188,7 +203,7 @@ public class ParameterizedRandomVariableTest {
 		System.out.println("Parameters: " + prv.getParameters().toString());
 		
 		ImmutableSet<LogicalVariable> correctResult = ImmutableSet
-			.of(new LogicalVariable("X2", individualsForX2));
+			.of(StdLogicalVariable.getInstance("X2", p2));
 		
 		assertTrue(prv.getParameters().equals(correctResult));
 	}
@@ -239,20 +254,23 @@ public class ParameterizedRandomVariableTest {
 		ArrayList<Constant> individualsForX2 = new ArrayList<Constant>();
 		ArrayList<Constant> individualsForX3 = new ArrayList<Constant>();
 		
-		individualsForX1.add(new Constant("a1"));
+		individualsForX1.add(Constant.getInstance("a1"));
 		
-		individualsForX2.add(new Constant("b1"));
-		individualsForX2.add(new Constant("b2"));
+		individualsForX2.add(Constant.getInstance("b1"));
+		individualsForX2.add(Constant.getInstance("b2"));
 		
-		individualsForX3.add(new Constant("c1"));
-		individualsForX3.add(new Constant("c2"));
-		individualsForX3.add(new Constant("c3"));
+		individualsForX3.add(Constant.getInstance("c1"));
+		individualsForX3.add(Constant.getInstance("c2"));
+		individualsForX3.add(Constant.getInstance("c3"));
+		
+		Population p1 = Population.getInstance(individualsForX1);
+		Population p3 = Population.getInstance(individualsForX3);
 		
 		ArrayList<Binding> bindings = new ArrayList<Binding>();
-		bindings.add(Binding.create(new LogicalVariable("X1", individualsForX1), new Constant("y1")));
-		bindings.add(Binding.create(new LogicalVariable("X3", individualsForX3), new Constant("y3")));
+		bindings.add(Binding.getInstance(StdLogicalVariable.getInstance("X1", p1), Constant.getInstance("y1")));
+		bindings.add(Binding.getInstance(StdLogicalVariable.getInstance("X3", p3), Constant.getInstance("y3")));
 				
-		Substitution substitution = Substitution.create(bindings);
+		Substitution substitution = Substitution.getInstance(bindings);
 		
 		ParameterizedRandomVariable prv = getBooleanPrv().applySubstitution(substitution);
 		
@@ -277,13 +295,15 @@ public class ParameterizedRandomVariableTest {
 		PredicateSymbol functor = new PredicateSymbol("f", "true", "false");
 		ArrayList<Constant> individualsForX1 = new ArrayList<Constant>();
 		
-		individualsForX1.add(new Constant("a1"));
-		individualsForX1.add(new Constant("a2"));
-		individualsForX1.add(new Constant("a3"));
-		individualsForX1.add(new Constant("a4"));
+		individualsForX1.add(Constant.getInstance("a1"));
+		individualsForX1.add(Constant.getInstance("a2"));
+		individualsForX1.add(Constant.getInstance("a3"));
+		individualsForX1.add(Constant.getInstance("a4"));
+		
+		Population p1 = Population.getInstance(individualsForX1);
 		
 		ArrayList<Term> parameters = new ArrayList<Term>();
-		parameters.add(new LogicalVariable("X1", individualsForX1));
+		parameters.add(StdLogicalVariable.getInstance("X1", p1));
 		
 		ParameterizedRandomVariable prv = ParameterizedRandomVariable.getInstance(functor, parameters);
 		

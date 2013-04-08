@@ -44,11 +44,11 @@ public class BindingTest {
 		LogicalVariable x = PRVs.getLogicalVariable("X", "x", 2);
 		LogicalVariable y = PRVs.getLogicalVariable("Y", "x", 2);
 		LogicalVariable w = PRVs.getLogicalVariable("W", "x", 2);
-		Constant x1 = new Constant("x1");
-		Constant x2 = new Constant("x2");
+		Constant x1 = Constant.getInstance("x1");
+		Constant x2 = Constant.getInstance("x2");
 		
-		Binding b1 = Binding.create(x, y);
-		Binding b2 = Binding.create(x, x1);
+		Binding b1 = Binding.getInstance(x, y);
+		Binding b2 = Binding.getInstance(x, x1);
 		
 		assertTrue(
 				b1.contains(x)

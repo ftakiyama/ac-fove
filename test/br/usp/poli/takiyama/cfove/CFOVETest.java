@@ -13,6 +13,7 @@ import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.Pool;
 import br.usp.poli.takiyama.common.RandomVariableSet;
 import br.usp.poli.takiyama.prv.LogicalVariable;
+import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 
 /**

@@ -48,6 +48,14 @@ public final class StdSplitResult implements SplitResult {
 	 *    Static factories
 	 * ************************************************************************/
 
+	/**
+	 * Returns an empty instance of SplitResult.
+	 * @return An empty instance of SplitResult.
+	 */
+	public static StdSplitResult getInstance() {
+		return new StdSplitResult();
+	}
+	
 	/* ************************************************************************
 	 *    Getters
 	 * ************************************************************************/
@@ -70,6 +78,16 @@ public final class StdSplitResult implements SplitResult {
 		return StdDistribution.of(residue);
 	}
 
+	/**
+	 * Returns <code>true</code> if this is an empty split result. This 
+	 * condition is met if both the result and the residues are not associated
+	 * with parfactors.
+	 */
+	@Override
+	public boolean isEmpty() {
+		return ((result == null) && residue.isEmpty());
+	}
+	
 	/* ************************************************************************
 	 *    hashCode, equals and toString
 	 * ************************************************************************/

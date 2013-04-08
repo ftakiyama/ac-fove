@@ -17,6 +17,7 @@ import br.usp.poli.takiyama.common.Tuple;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
+import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
@@ -71,10 +72,10 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 			this.constraintsOnExtra = new HashSet<Constraint>();
 			this.otherConstraints = new HashSet<Constraint>();
 			
-			HashSet<LogicalVariable> vars = new HashSet<LogicalVariable>(p.getParameters());
+			HashSet<StdLogicalVariable> vars = new HashSet<StdLogicalVariable>(p.getParameters());
 			vars.removeAll(c.getParameters());
 			if (vars.size() == 1) {
-				this.lv = new LogicalVariable(vars.iterator().next());
+				this.lv = StdLogicalVariable.getInstance(vars.iterator().next());
 			} else {
 				throw new IllegalArgumentException(p 
 						+ " does not have 1 extra logical variable: "
@@ -90,7 +91,7 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 			this.f = ParameterizedFactor.getInstance(ap.factor);
 			this.constraintsOnExtra = new HashSet<Constraint>(ap.constraintsOnExtraVariable);
 			this.otherConstraints = new HashSet<Constraint>(ap.otherConstraints);
-			this.lv = new LogicalVariable(ap.extraVariable);
+			this.lv = StdLogicalVariable.getInstance(ap.extraVariable);
 		}
 		
 		public Builder addConstraint(Constraint c) {
@@ -197,8 +198,8 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 	}
 
 	@Override
-	public Set<LogicalVariable> getLogicalVariables() {
-		Set<LogicalVariable> allVariables = new HashSet<LogicalVariable>();
+	public Set<StdLogicalVariable> getLogicalVariables() {
+		Set<StdLogicalVariable> allVariables = new HashSet<StdLogicalVariable>();
 		allVariables.addAll(parent.getParameters());
 		allVariables.addAll(child.getParameters());
 		for (ParameterizedRandomVariable prv : contextVariables) {
@@ -209,11 +210,11 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 
 	@Override
 	public int size() {
-		Set<LogicalVariable> vars = this.getLogicalVariables();
+		Set<StdLogicalVariable> vars = this.getLogicalVariables();
 		vars.remove(extraVariable);
 		int numFactors = 1;
-		for (LogicalVariable lv : vars) {
-			numFactors = numFactors * lv.getSizeOfPopulationSatisfying(otherConstraints);
+		for (StdLogicalVariable lv : vars) {
+			numFactors = numFactors * lv.individualsSatisfying(otherConstraints).size();
 		}
 		
 		return numFactors;
@@ -377,13 +378,13 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 	 * @return The format of the specified substitution as a {@link SubstitutionType}.
 	 */
 	private SubstitutionType getSubstitutionType(Binding s) {
-		LogicalVariable firstTerm = s.getFirstTerm();
-		Term secondTerm = s.getSecondTerm();
+		LogicalVariable firstTerm = s.firstTerm();
+		Term secondTerm = s.secondTerm();
 		if (firstTerm.equals(extraVariable)) {
 			return SubstitutionType.A_t;
 		}
-		if (secondTerm.isLogicalVariable()) {
-			if (((LogicalVariable) secondTerm).equals(extraVariable)) {
+		if (secondTerm instanceof StdLogicalVariable) { //TODO take it out
+			if (((StdLogicalVariable) secondTerm).equals(extraVariable)) {
 				return SubstitutionType.X_A;
 			}
 		}
@@ -564,7 +565,7 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 	 * @return The correction factor used in split operations.
 	 */
 	private double getCorrectionFraction() {
-		Binding s = Binding.create(extraVariable, extraVariable.getPopulation().getIndividual(0));
+		Binding s = Binding.getInstance(extraVariable, extraVariable.population().individualAt(0));
 		ParameterizedRandomVariable p = this.parent.applyOneSubstitution(s);
 		int rp = p.getGroundSetSize(otherConstraints);
 		int rc = this.child.getGroundSetSize(otherConstraints);
@@ -774,7 +775,7 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 		
 		ParameterizedFactor currentFactor = calculateSumOutBase(it, prvs);
 		
-		int domainSize = this.extraVariable.getSizeOfPopulationSatisfying(constraintsOnExtraVariable);
+		int domainSize = this.extraVariable.individualsSatisfying(constraintsOnExtraVariable).size();
 		String bin = Integer.toBinaryString(domainSize);
 		
 		for (int k = 1; k < bin.length(); k++) {
@@ -885,8 +886,8 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 	 * not present in the parent PRV, false otherwise.
 	 */
 	private boolean childHasExtra() {
-		Set<LogicalVariable> paramParent = parent.getParameters();
-		Set<LogicalVariable> paramChild = new HashSet<LogicalVariable>(child.getParameters());
+		Set<StdLogicalVariable> paramParent = parent.getParameters();
+		Set<StdLogicalVariable> paramChild = new HashSet<StdLogicalVariable>(child.getParameters());
 		paramChild.removeAll(paramParent);
 		return (paramChild.size() == 1);
 	}
@@ -901,7 +902,7 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 	private Parfactor countChildVariable(ParameterizedFactor f) {
 		
 		// build constraints on C_E
-		LogicalVariable extra = getExtraInChild();
+		StdLogicalVariable extra = getExtraInChild();
 		Set<Constraint> constraintsOnExtra = getConstraintsContaining(extra);
 		Set<Constraint> constraints = new HashSet<Constraint>(this.otherConstraints);
 		constraints.removeAll(constraintsOnExtra);
@@ -911,7 +912,7 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 		
 		List<Number> mapping = new ArrayList<Number>();
 		for (CountingFormula.Histogram<String> h : cf.getCountingFormulaRange()) {
-			int extraPopulationSize = extra.getSizeOfPopulationSatisfying(constraintsOnExtra);
+			int extraPopulationSize = extra.individualsSatisfying(constraintsOnExtra).size();
 			if (h.containsValue(extraPopulationSize)) {
 				int index = cf.getCountingFormulaRange().indexOf(h);
 				mapping.add(f.getTupleValue(index));
@@ -934,11 +935,11 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 	 * the parent PRV.
 	 * @throws NoSuchElementException If there is no extra variable in the child.
 	 */
-	private LogicalVariable getExtraInChild() throws NoSuchElementException {
-		Set<LogicalVariable> paramParent = parent.getParameters();
-		Set<LogicalVariable> paramChild = child.getParameters();
+	private StdLogicalVariable getExtraInChild() throws NoSuchElementException {
+		Set<StdLogicalVariable> paramParent = parent.getParameters();
+		Set<StdLogicalVariable> paramChild = child.getParameters();
 		paramChild.removeAll(paramParent);
-		Iterator<LogicalVariable> it = paramChild.iterator();
+		Iterator<StdLogicalVariable> it = paramChild.iterator();
 		if (!it.hasNext()) {
 			throw new NoSuchElementException("Child does not have extra LV.");
 		}
@@ -952,7 +953,7 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 	 * @return The set of constraints that involve the specified logical
 	 * variable.
 	 */
-	private Set<Constraint> getConstraintsContaining(LogicalVariable lv) {
+	private Set<Constraint> getConstraintsContaining(StdLogicalVariable lv) {
 		Set<Constraint> constraints = new HashSet<Constraint>();
 		for (Constraint c : getConstraints()) {
 			if (c.contains(lv)) {
@@ -1204,8 +1205,8 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 
 
 	@Override
-	public Set<LogicalVariable> logicalVariables() {
-		Set<LogicalVariable> allVariables = new HashSet<LogicalVariable>();
+	public Set<StdLogicalVariable> logicalVariables() {
+		Set<StdLogicalVariable> allVariables = new HashSet<StdLogicalVariable>();
 		allVariables.addAll(parent.getParameters());
 		allVariables.addAll(child.getParameters());
 		for (ParameterizedRandomVariable prv : contextVariables) {

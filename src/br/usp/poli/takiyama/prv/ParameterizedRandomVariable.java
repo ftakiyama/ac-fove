@@ -153,7 +153,7 @@ public class ParameterizedRandomVariable {
 		for (Term v : toBeReplaced) {
 			int termIndex = newInstance.parameters.indexOf(v);
 			if (termIndex != -1) {
-				newInstance.parameters.set(termIndex, s.getReplacement((LogicalVariable)v));
+				newInstance.parameters.set(termIndex, s.getReplacement((StdLogicalVariable)v));
 			}
 		}
 		
@@ -170,12 +170,12 @@ public class ParameterizedRandomVariable {
 	 * @see #applySubstitution(Substitution)
 	 */
 	public ParameterizedRandomVariable applyOneSubstitution(Binding s) {
-		if (this.parameters.indexOf(s.getFirstTerm()) == -1) {
+		if (this.parameters.indexOf(s.firstTerm()) == -1) {
 			return this;
 		}
 		ParameterizedRandomVariable newInstance =
 			new ParameterizedRandomVariable(this.functor, this.parameters);
-		newInstance.parameters.set(newInstance.parameters.indexOf(s.getFirstTerm()), s.getSecondTerm());
+		newInstance.parameters.set(newInstance.parameters.indexOf(s.firstTerm()), s.secondTerm());
 		return newInstance;
 	}
 	
@@ -184,16 +184,16 @@ public class ParameterizedRandomVariable {
 	 * this parameterized random variable (PRV).
 	 * @return A set over the logical variables of this PRV. 
 	 */
-	public Set<LogicalVariable> getParameters() {
-		ArrayList<LogicalVariable> parameters = new ArrayList<LogicalVariable>();
+	public Set<StdLogicalVariable> getParameters() {
+		ArrayList<StdLogicalVariable> parameters = new ArrayList<StdLogicalVariable>();
 		for (Term t : this.parameters) {
 			/*
 			 * There should be a better way to do that.
 			 * But since I know that Term can only be either a Constant or a
 			 * LogicalVariable, I believe that this is not a big problem.
 			 */
-			if (t instanceof LogicalVariable) {
-				parameters.add((LogicalVariable) t);
+			if (t instanceof StdLogicalVariable) {
+				parameters.add((StdLogicalVariable) t);
 			}
 		}
 		return ImmutableSet.copyOf(parameters.iterator());
@@ -242,10 +242,10 @@ public class ParameterizedRandomVariable {
 		 * to this equation. 
 		 */
 		public void applySubstitution(Binding substitution) {
-			if (firstTerm.equals(substitution.getFirstTerm())) {
-				this.firstTerm = substitution.getSecondTerm();
-			} else if (secondTerm.equals(substitution.getFirstTerm())) {
-				this.secondTerm = substitution.getSecondTerm();
+			if (firstTerm.equals(substitution.firstTerm())) {
+				this.firstTerm = substitution.secondTerm();
+			} else if (secondTerm.equals(substitution.firstTerm())) {
+				this.secondTerm = substitution.secondTerm();
 			} 
 		}
 		
@@ -254,7 +254,7 @@ public class ParameterizedRandomVariable {
 		 * @return true if the first term is a logical variable, false otherwise.
 		 */
 		public boolean firstTermIsLogicalVariable() {
-			return firstTerm.isLogicalVariable();
+			return firstTerm instanceof LogicalVariable; //TODO take it out
 		}
 		
 		/**
@@ -262,7 +262,7 @@ public class ParameterizedRandomVariable {
 		 * @return true if the second term is a logical variable, false otherwise.
 		 */
 		public boolean secondTermIsLogicalVariable() {
-			return secondTerm.isLogicalVariable();
+			return secondTerm instanceof LogicalVariable; //TODO take it out
 		}
 		
 		/**
@@ -285,7 +285,7 @@ public class ParameterizedRandomVariable {
 		 */
 		public Binding toBinding() throws IllegalArgumentException {
 			if (firstTermIsLogicalVariable()) {
-				return Binding.create((LogicalVariable) firstTerm, secondTerm);
+				return Binding.getInstance((StdLogicalVariable) firstTerm, secondTerm);
 			} else {
 				throw new IllegalArgumentException("The Equation " 
 						+ this.toString()
@@ -341,7 +341,7 @@ public class ParameterizedRandomVariable {
 				// do nothing
 			} else if (equation.firstTermIsLogicalVariable()) {
 				Binding substitution = Binding
-					.create((LogicalVariable) equation.firstTerm, 
+					.getInstance((StdLogicalVariable) equation.firstTerm, 
 							equation.secondTerm);
 				for (Equation e : buffer) {
 					e.applySubstitution(substitution);
@@ -354,7 +354,7 @@ public class ParameterizedRandomVariable {
 				mgu.add(substitution);
 			} else if (equation.secondTermIsLogicalVariable()) {
 				Binding substitution = Binding
-					.create((LogicalVariable) equation.secondTerm,
+					.getInstance((StdLogicalVariable) equation.secondTerm,
 							equation.firstTerm);
 				for (Equation e : buffer) {
 					e.applySubstitution(substitution);
@@ -369,7 +369,7 @@ public class ParameterizedRandomVariable {
 			}
 		}
 		
-		return Substitution.create(new ArrayList<Binding>(mgu));
+		return Substitution.getInstance(new ArrayList<Binding>(mgu));
 		
 	}
 	
@@ -453,10 +453,10 @@ public class ParameterizedRandomVariable {
 				throw new IllegalStateException("For now, I can only return ground " +
 						"instances of parameterized random variables whose " +
 						"terms are all logical variables. I found " +
-						t.getValue() + ", which is a constant.");
+						t.value() + ", which is a constant.");
 			}
-			termsIndexes.add(index % ((LogicalVariable) t).getPopulation().size());
-			index = index / ((LogicalVariable) t).getPopulation().size();
+			termsIndexes.add(index % ((StdLogicalVariable) t).population().size());
+			index = index / ((StdLogicalVariable) t).population().size();
 		}
 		
 		// Checks if index is within the allowed bounds - ugly
@@ -485,11 +485,11 @@ public class ParameterizedRandomVariable {
 		StringBuilder name = new StringBuilder(this.functor.getName() + " ( ");
 		for (int index = 0; index < termsIndexes.size(); index++) { // long way down to convert indexes to constant values...
 			name
-				.append(((LogicalVariable) parameters.get(index))
-					.getPopulation()
-						.getIndividual(termsIndexes
+				.append(((StdLogicalVariable) parameters.get(index))
+					.population()
+						.individualAt(termsIndexes
 							.get(index))
-								.getValue())
+								.value())
 				.append(" ");
 		}
 		name.append(")");
@@ -559,7 +559,7 @@ public class ParameterizedRandomVariable {
 	public int getNumberOfGroundInstances() {
 		int maxIndex = 1;
 		for (Term t : this.parameters) {
-			maxIndex *= ((LogicalVariable) t).getPopulation().size();
+			maxIndex *= ((StdLogicalVariable) t).population().size();
 		}
 		return maxIndex;
 	}
@@ -618,8 +618,8 @@ public class ParameterizedRandomVariable {
 	 */
 	public int getGroundSetSize(Set<Constraint> constraints) {
 		int size = 1;
-		for (LogicalVariable lv : this.getParameters()) {
-			size = size * lv.getSizeOfPopulationSatisfying(constraints);
+		for (StdLogicalVariable lv : this.getParameters()) {
+			size = size * lv.individualsSatisfying(constraints).size();
 		}
 		return size;
 	}

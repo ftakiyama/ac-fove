@@ -43,7 +43,7 @@ public class SimpleParfactorTest {
 		objects.setExample2_15();
 		
 		// Splits the parfactor on substitution {B/x1}
-		Binding binding = Binding.create(objects.getLogicalVariable("B"), objects.getLogicalVariable("B").getPopulation().getIndividual(0));
+		Binding binding = Binding.getInstance(objects.getLogicalVariable("B"), objects.getLogicalVariable("B").population().individualAt(0));
 		List<Parfactor> result = objects.getSimpleParfactor("g1").split(binding);
 		
 		// Creates the correct answer
@@ -65,7 +65,7 @@ public class SimpleParfactorTest {
 		
 		// Expands parfactor on individual x1
 		CountingFormula countingFormula = objects.getCountingFormula("#.A:{A!=x0}[f(A)]");
-		Term x1 = objects.getLogicalVariable("A").getPopulation().getIndividual(1);
+		Term x1 = objects.getLogicalVariable("A").population().individualAt(1);
 		Parfactor result = objects.getSimpleParfactor("g1").expand(countingFormula, x1);
 		
 		// Creates the correct answer

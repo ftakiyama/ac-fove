@@ -10,7 +10,7 @@ import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.RandomVariableSet;
 import br.usp.poli.takiyama.log.ConsoleLogger;
 import br.usp.poli.takiyama.prv.CountingFormula;
-import br.usp.poli.takiyama.prv.LogicalVariable;
+import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 
 import static br.usp.poli.takiyama.cfove.MacroOperations.*;
@@ -88,9 +88,9 @@ public final class CFOVE {
 	private class CountingConvert implements Operation {
 		
 		private Parfactor parfactor;
-		private LogicalVariable logicalVariable;
+		private StdLogicalVariable logicalVariable;
 		
-		CountingConvert(Parfactor parfactor, LogicalVariable logicalVariable) {
+		CountingConvert(Parfactor parfactor, StdLogicalVariable logicalVariable) {
 			this.parfactor = parfactor;
 			this.logicalVariable = logicalVariable;
 		}
@@ -158,9 +158,9 @@ public final class CFOVE {
 	private class Propositionalize implements Operation {
 
 		private Parfactor parfactor;
-		private LogicalVariable logicalVariable;
+		private StdLogicalVariable logicalVariable;
 		
-		Propositionalize(Parfactor parfactor, LogicalVariable logicalVariable) {
+		Propositionalize(Parfactor parfactor, StdLogicalVariable logicalVariable) {
 			this.parfactor = parfactor;
 			this.logicalVariable = logicalVariable;
 		}
@@ -293,7 +293,7 @@ public final class CFOVE {
 					evaluateGlobalSumOut(f, p.getConstraints());
 				}
 			}
-			for (LogicalVariable lv : p.getLogicalVariables()) {
+			for (StdLogicalVariable lv : p.getLogicalVariables()) {
 				evaluateCountingConvert(p, lv);
 				evaluatePropositionalize(p, lv);
 			}
@@ -408,7 +408,7 @@ public final class CFOVE {
 		int resultFactorSize = parfactor.getFactor().size() / cf.getRangeSize();
 		for (int i = 0; 
 			 i < cf.getBoundVariable()
-			 	   .getIndividualsSatisfying(cf.getConstraints()).size(); 
+			 	   .individualsSatisfying(cf.getConstraints()).size(); 
 			 i++) {
 			resultFactorSize = resultFactorSize * cf.getRangeSize();
 		}
@@ -432,7 +432,7 @@ public final class CFOVE {
 	 * @param parfactor The parfactor on which the operation will be performed
 	 * @param lv The logical variable to eliminate using counting
 	 */
-	private void evaluateCountingConvert(Parfactor parfactor, LogicalVariable lv) {
+	private void evaluateCountingConvert(Parfactor parfactor, StdLogicalVariable lv) {
 		if (parfactor.getFactor().isUnique(lv)) {
 			ParameterizedRandomVariable variableToCount = 
 					parfactor.getFactor().getVariableToCount(lv);
@@ -469,9 +469,9 @@ public final class CFOVE {
 	private int getNumberOfHistograms (
 			Set<Constraint> constraints, 
 			ParameterizedRandomVariable prv, 
-			LogicalVariable lv) {
+			StdLogicalVariable lv) {
 		return MathUtils.combination(
-				lv.getSizeOfPopulationSatisfying(constraints) 
+				lv.individualsSatisfying(constraints).size()
 					+ prv.getRangeSize() - 1, 
 				prv.getRangeSize() - 1);
 	}
@@ -485,9 +485,9 @@ public final class CFOVE {
 	 * @param parfactor The parfactor on which propositionalization will be made
 	 * @param lv The logical variable to propositionalizes
 	 */
-	private void evaluatePropositionalize(Parfactor parfactor, LogicalVariable lv) {
+	private void evaluatePropositionalize(Parfactor parfactor, StdLogicalVariable lv) {
 		int resultFactorSize = 
-				lv.getSizeOfPopulationSatisfying(parfactor.getConstraints()) 
+				lv.individualsSatisfying(parfactor.getConstraints()).size()
 				* parfactor.getFactor().size();
 		
 		logger.info("PROPOSITIONALIZE( "
@@ -533,7 +533,7 @@ public final class CFOVE {
 					evaluateGlobalSumOut(f, p.getConstraints());
 				}
 			}
-			for (LogicalVariable lv : p.getLogicalVariables()) {
+			for (StdLogicalVariable lv : p.getLogicalVariables()) {
 				evaluateCountingConvert(p, lv);
 				evaluatePropositionalize(p, lv);
 			}

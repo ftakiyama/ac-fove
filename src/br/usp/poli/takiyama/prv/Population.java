@@ -3,6 +3,7 @@ package br.usp.poli.takiyama.prv;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -14,39 +15,96 @@ import java.util.Set;
  * @author ftakiyama
  *
  */
-public class Population {
-	private ArrayList<Constant> individuals; //why am I using List instead of Set?
+public class Population implements Iterable<Constant> {
+	
+	// Retrieving individuals from a list is easier.
+	private List<Constant> individuals;
+	
+	
+	/* ************************************************************************
+	 *    Constructors
+	 * ************************************************************************/
+	
+	/**
+	 * Creates an empty population.
+	 */
+	private Population() {
+		individuals = new ArrayList<Constant>(0);
+	}
+	
 	
 	/**
 	 * Creates a population. All specified individuals that are repeated are
 	 * inserted only once. 
 	 * @param individuals The individuals of the population. 
 	 */
-	public Population(List<Constant> individuals) {
-		this.individuals = new ArrayList<Constant>();
+	private Population(List<Constant> individuals) {
+		this();
 		for (Constant c : individuals) {
 			if (!this.individuals.contains(c)) {
 				this.individuals.add(c);
 			}
 		}
 	}
+
+	
+	/* ************************************************************************
+	 *    Static factories
+	 * ************************************************************************/
+
+	/**
+	 * Returns an empty population.
+	 * @return An empty population.
+	 */
+	public static Population getInstance() {
+		return new Population();
+	}
+	
 	
 	/**
-	 * Copies a population. The original population is not modified.
+	 * Returns a new instance of Population that contains the same individuals
+	 * from the specified population.
+	 * 
 	 * @param p The population to be copied.
 	 * @return The copy of the specified population.
 	 */
-	public static Population copyOf(Population p) {
-		return new Population(p.individuals);
+	public static Population getInstance(Population p) {
+		return new Population(p.toList());
 	}
 	
+	
+	/**
+	 * Creates a population. All specified individuals that are repeated are
+	 * inserted only once. 
+	 * @param individuals The individuals of the population. 
+	 */
+	public static Population getInstance(List<Constant> individuals) {
+		return new Population(individuals);
+	}
+	
+	
+	/* ************************************************************************
+	 *    Getters
+	 * ************************************************************************/
+	
+	/**
+	 * Returns a copy of an individual from the population. 
+	 * @param index The index of the individual in the population.
+	 * @return A copy of an individual from the population.
+	 */
+	public Constant individualAt(int index) {
+		return Constant.getInstance(individuals.get(index));
+	}
+	
+		
 	/**
 	 * Returns the number of individuals in the population.
 	 * @return The number of individuals in the population.
 	 */
 	public int size() {
-		return this.individuals.size();
+		return individuals.size();
 	}
+	
 	
 	/**
 	 * Returns true if the population contains the specified individual.
@@ -56,40 +114,54 @@ public class Population {
 	 * otherwise.
 	 */
 	public boolean contains(Constant individual) {
-		return this.individuals.contains(individual);
+		return individuals.contains(individual);
 	}
 	
+	
 	/**
-	 * Returns a copy of an individual from the population. 
-	 * @param index The index of the individual in the population.
-	 * @return A copy of an individual from the population.
+	 * Returns the individuals in this population as a list.
+	 * @return the individuals in this population as a list.
 	 */
-	public Constant getIndividual(int index) {
-		return new Constant(individuals.get(index).getValue());
+	private List<Constant> toList() {
+		return new ArrayList<Constant>(individuals);
 	}
+	
+	
+	/**
+	 * Returns the individuals of the population as a set.
+	 * <p>
+	 * The order of the individuals in the set is not guaranteed to be preserved.
+	 * </p>
+	 * @return A set of containing all individuals of the population.
+	 */
+	public Set<Constant> toSet() {
+		return new HashSet<Constant>(individuals);
+	}
+	
+	
+	@Override
+	public Iterator<Constant> iterator() {
+		return individuals.iterator();
+	}
+	
+	/* ************************************************************************
+	 *    Setters
+	 * ************************************************************************/
 	
 	/**
 	 * Removes the individual specified from the population. If the individual
 	 * does not exist, the population remains unchanged.
 	 * @param individual The individual to be removed.
 	 */
-	public void removeIndividual(Constant individual) {
-		this.individuals.remove(individual);
+	public void remove(Constant individual) {
+		individuals.remove(individual);
 	}
 	
-	/**
-	 * Returns the individuals of the population as a set.
-	 * <b>Attention!</b> If there are repeated individuals, one of them will
-	 * be lost! I am assuming that all individuals are unique. 
-	 * <br>
-	 * The order of the individuals in the set is not guaranteed to be the same
-	 * as the one returned by the getIndividual method.
-	 * @return A set of containing all individuals of the population.
-	 */
-	public Set<Constant> toSet() {
-		return new HashSet<Constant>(this.individuals);
-	}
 	
+	/* ************************************************************************
+	 *    hashCode, equals and toString
+	 * ************************************************************************/
+
 	@Override
 	public String toString() {
 		return this.individuals.toString();

@@ -6,42 +6,80 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import br.usp.poli.takiyama.prv.LogicalVariable;
+import br.usp.poli.takiyama.prv.StdLogicalVariable;
 
 public class Substitution {
+	
 	private HashMap<LogicalVariable, Term> bindings;
 	
+	
 	/**
-	 * Static factory. Creates a substitution based on a list of bindings.
-	 * @param bindings A {@link List} of {@link Binding}s.
-	 * @return A new substitution built from the list given.
+	 * Creates an empty substitution.
 	 */
-	public static Substitution create(List<Binding> bindings) {
-		return new Substitution(bindings);
+	private Substitution() {
+		bindings = new HashMap<LogicalVariable, Term>();
 	}
+	
+	
+	/**
+	 * Constructor. Creates a substitution based on a single binding
+	 * @param binding A {@link Binding} 
+	 */
+	private Substitution(Binding binding) {
+		this();
+		add(binding);
+	}
+	
 	
 	/**
 	 * Constructor. Creates a substitution based on a list of bindings.
 	 * @param bindings A {@link List} of {@link Binding}s. 
 	 */
 	private Substitution(List<Binding> bindings) {
-		this.bindings = new HashMap<LogicalVariable, Term>();
-		for (Binding bind : bindings) {
-			this.bindings.put(bind.getFirstTerm(), bind.getSecondTerm());
+		this();
+		for (Binding binding : bindings) {
+			add(binding);
 		}
 	}
 	
-	/**
-	 * Adds a new binding to this set of substitutions.
-	 * @param v A {@link LogicalVariable}
-	 * @param t A {@link Term}
-	 */
-	public void add(LogicalVariable v, Term t) {
-		this.bindings.put(v, t);
-	}
 	
 	/**
-	 * **DO NOT USE** Returns a set containing all the logical variables that are in the first
+	 * Static factory. Creates a substitution based on a list of bindings.
+	 * @param bindings A {@link List} of {@link Binding}s.
+	 * @return A new substitution built from the list given.
+	 */
+	public static Substitution getInstance(List<Binding> bindings) {
+		return new Substitution(bindings);
+	}
+	
+	
+	/**
+	 * Static factory. Creates a substitution based on a single binding.
+	 * @param bindings A {@link Binding}.
+	 * @return A new substitution built from the binding given.
+	 */
+	public static Substitution getInstance(Binding binding) {
+		return new Substitution(binding);
+	}
+	
+	
+	/**
+	 * Adds a new binding to this set of substitutions.
+	 * @param b A {@link Binding}
+	 * @throws IllegalArgumentException If the first term of the specified 
+	 * binding is already being replaced in this substitution.
+	 */
+	private void add(Binding b) throws IllegalArgumentException {
+		if (bindings.containsKey(b.firstTerm())) {
+			throw new IllegalArgumentException(b.firstTerm() + " is already being replaced.");
+		}
+		bindings.put(b.firstTerm(), b.secondTerm());
+	}
+	
+	
+	/** 
+	 * @deprecated
+	 * Returns a set containing all the logical variables that are in the first
 	 * element of each binding in this substitution. I.e., it returns all the
 	 * logical variables that are being substituted.
 	 * @return A set containing the logical variables that are being substituted
@@ -50,16 +88,18 @@ public class Substitution {
 		return this.bindings.keySet();
 	}
 	
+	
 	/**
-	 * Weird name. Returns an iterator over the set containing all the logical 
+	 * Returns an iterator over the set containing all the logical 
 	 * variables that are in the first
 	 * element of each binding in this substitution. I.e., it returns all the
-	 * logical variables that are being substituted.
+	 * logical variables that are being replaced.
 	 * @return A set containing the logical variables that are being substituted
 	 */
 	public Iterator<LogicalVariable> getSubstitutedIterator() {
-		return this.bindings.keySet().iterator();
+		return bindings.keySet().iterator();
 	}
+	
 	
 	/**
 	 * Returns the replacement of a given logical variable in this substitution.
@@ -70,8 +110,9 @@ public class Substitution {
 	 * @return The replacement of a given logical variable in this substitution
 	 */
 	public Term getReplacement(LogicalVariable substituted) {
-		return this.bindings.get(substituted);
+		return bindings.get(substituted);
 	}
+	
 	
 	/**
 	 * Returns true if this substitution contains the binding specified, false
@@ -81,12 +122,13 @@ public class Substitution {
 	 * otherwise.
 	 */
 	public boolean contains(Binding binding) {
-		if (this.bindings.containsKey(binding.getFirstTerm())) {
-			return this.bindings.get(binding.getFirstTerm()).equals(binding);
+		if (this.bindings.containsKey(binding.firstTerm())) {
+			return this.bindings.get(binding.firstTerm()).equals(binding);
 		} else {
 			return false;
 		}
 	}
+	
 	
 	/**
 	 * Returns true if the specified logical variables have the same replacement
@@ -101,7 +143,7 @@ public class Substitution {
 	 * @return True if the specified logical variables have a common replacement,
 	 * false otherwise.
 	 */
-	public boolean haveCommonReplacement(LogicalVariable firstVariable, LogicalVariable secondVariable) {
+	public boolean hasCommonReplacement(LogicalVariable firstVariable, LogicalVariable secondVariable) {
 		if (this.bindings.containsKey(firstVariable) && this.bindings.containsKey(secondVariable)) {
 			return this.bindings.get(firstVariable).equals(this.bindings.get(secondVariable));
 		} else {
@@ -109,13 +151,35 @@ public class Substitution {
 		}
 	}
 	
+	
 	/**
-	 * Returns true if there are no elements in this set.
+	 * Returns true if there are no elements in this substitution.
 	 * @return True if this set is empty (it has no bindings), false otherwise.
 	 */
 	public boolean isEmpty() {
 		return this.bindings.isEmpty();
 	}
+	
+	
+	/**
+	 * Returns true if this substitution unifies v1 and v2.
+	 * 
+	 * <p>
+	 * A substitution &theta; is a unifier of two parameterized random variables 
+	 * f (ti1,...,tik ) and f(tj1,...,tjk) if 
+	 * f(ti1,...,tik)[&theta;] = f(tj1,...,tjk)[&theta;].
+	 * </p>
+	 * <p> 
+	 * We then say that the two parameterized random variables unify [Kisynski, 2010].
+	 * </p>
+	 * @param v1 The first {@link ParameterizedRandomVariable}.
+	 * @param v2 The second {@link ParameterizedRandomVariable}.
+	 * @return True if this substitution unifies v1 and v2, false otherwise.
+	 */
+	public boolean isUnifier(ParameterizedRandomVariable v1, ParameterizedRandomVariable v2) {		
+		return v1.applySubstitution(this).equals(v2.applySubstitution(this));
+	}
+	
 	
 	@Override
 	public String toString() {
@@ -131,6 +195,7 @@ public class Substitution {
 		return result.toString();
 	}
 	
+	
 	@Override
 	public boolean equals(Object other) {
 		if (this == other)
@@ -141,6 +206,7 @@ public class Substitution {
 		return this.bindings.equals(otherSubstitution.bindings);
 	}
 	
+	
 	@Override
 	public int hashCode() {
 		int result = 17;
@@ -150,19 +216,4 @@ public class Substitution {
 		}
 		return result;
 	}
-	
-	/**
-	 * Returns true if this substitution unifies v1 and v2.<br>
-	 * A substitution θ is a unifier of two parameterized random variables 
-	 * f (ti1,...,tik ) and f(tj1,...,tjk) if f(ti1,...,tik)[θ] = f(tj1,...,tjk)[θ]. 
-	 * We then say that the two parameterized random variables unify [Kisynski, 2010].
-	 * @param v1 The first {@link ParameterizedRandomVariable}.
-	 * @param v2 The second {@link ParameterizedRandomVariable}.
-	 * @return True if this substitution unifies v1 and v2, false otherwise.
-	 */
-	public boolean isUnifier(ParameterizedRandomVariable v1, ParameterizedRandomVariable v2) {		
-		return v1.applySubstitution(this).equals(v2.applySubstitution(this));
-	}
-
-	
 }

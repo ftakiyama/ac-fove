@@ -20,6 +20,7 @@ import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
+import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.LogicalVariableNameGenerator;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 import br.usp.poli.takiyama.prv.Population;
@@ -168,7 +169,7 @@ public final class SimpleParfactor implements Parfactor {
 		return this.factor;
 	}
 	
-	public Set<LogicalVariable> getLogicalVariables() {
+	public Set<StdLogicalVariable> getLogicalVariables() {
 		return this.factor.getLogicalVariables();
 	}
 	
@@ -179,8 +180,8 @@ public final class SimpleParfactor implements Parfactor {
 	public int size() {
 		int size = 1;
 		
-		for (LogicalVariable lv : this.factor.getLogicalVariables()) {
-			size = size * lv.getSizeOfPopulationSatisfying(this.constraints);
+		for (StdLogicalVariable lv : this.factor.getLogicalVariables()) {
+			size = size * lv.individualsSatisfying(this.constraints).size();
 		}
 		
 		return size;
@@ -377,10 +378,10 @@ public final class SimpleParfactor implements Parfactor {
 	
 		setOfParameterizedRandomVariablesWithoutTarget.remove(variable);	
 		
-		HashSet<LogicalVariable> allLogicalVariables = new HashSet<LogicalVariable>();
+		HashSet<StdLogicalVariable> allLogicalVariables = new HashSet<StdLogicalVariable>();
 		
 		for (ParameterizedRandomVariable prv : setOfParameterizedRandomVariablesWithoutTarget) {
-			allLogicalVariables = new HashSet<LogicalVariable>(
+			allLogicalVariables = new HashSet<StdLogicalVariable>(
 					Sets.union(prv.getParameters(), allLogicalVariables)); // not good
 		}
 		
@@ -537,8 +538,8 @@ public final class SimpleParfactor implements Parfactor {
 	private boolean checkSecondConditionForMultiplication(
 			SimpleParfactor parfactor) {
 		
-		ArrayList<LogicalVariable> logicalVariablesFromFirstParfactor = 
-			new ArrayList<LogicalVariable>(this.getLogicalVariables());
+		ArrayList<StdLogicalVariable> logicalVariablesFromFirstParfactor = 
+			new ArrayList<StdLogicalVariable>(this.getLogicalVariables());
 		
 		for (ParameterizedRandomVariable v1 : this.getParameterizedRandomVariables()) {
 			for (ParameterizedRandomVariable v2 : parfactor.getParameterizedRandomVariables()) {
@@ -557,7 +558,7 @@ public final class SimpleParfactor implements Parfactor {
 		}
 		
 		if (Sets.intersection(logicalVariablesFromFirstParfactor,
-							  new ArrayList<LogicalVariable>(parfactor.getLogicalVariables()))
+							  new ArrayList<StdLogicalVariable>(parfactor.getLogicalVariables()))
 				.isEmpty()) {
 			return true;
 		} else {
@@ -617,7 +618,7 @@ public final class SimpleParfactor implements Parfactor {
 	 * parfactor, false otherwise.
 	 */
 	private boolean firstTermIsPresent(Binding substitution) {		
-		return getLogicalVariables().contains(substitution.getFirstTerm());
+		return getLogicalVariables().contains(substitution.firstTerm());
 	}
 	
 	/**
@@ -630,7 +631,7 @@ public final class SimpleParfactor implements Parfactor {
 	 */
 	private boolean secondTermIsNotInConstraints(Binding substitution) {
 		for (Constraint constraint : this.constraints) {
-			if (constraint.contains(substitution.getSecondTerm())) {  
+			if (constraint.contains(substitution.secondTerm())) {  
 				return false;
 			}
 		}
@@ -645,13 +646,13 @@ public final class SimpleParfactor implements Parfactor {
 	 * population, false otherwise.
 	 */
 	private boolean secondTermIsConstantBelongingToFirstTermPopulation(Binding substitution) {
-		if (substitution.getSecondTerm() instanceof LogicalVariable) { // ugly
+		if (substitution.secondTerm() instanceof StdLogicalVariable) { // ugly
 			return false;
 		}
 		return substitution
-					.getFirstTerm()
-					.getPopulation()
-					.contains((Constant) substitution.getSecondTerm());
+					.firstTerm()
+					.population()
+					.contains((Constant) substitution.secondTerm());
 	}
 	
 	/**
@@ -663,7 +664,7 @@ public final class SimpleParfactor implements Parfactor {
 	 * parfactor, false otherwise.
 	 */
 	private boolean secondTermIsPresent(Binding substitution) {
-		return getLogicalVariables().contains(substitution.getSecondTerm());
+		return getLogicalVariables().contains(substitution.secondTerm());
 	}
 	
 	/**
@@ -674,11 +675,11 @@ public final class SimpleParfactor implements Parfactor {
 	 */
 	private boolean secondTermHasSameDomainOfFirstTerm(Binding substitution) {
 		return substitution
-					.getFirstTerm()
-					.getPopulation()
+					.firstTerm()
+					.population()
 					.equals(
-							((LogicalVariable) substitution.getSecondTerm()) // I can cast here because I know it is a logical variable
-															  .getPopulation());
+							((StdLogicalVariable) substitution.secondTerm()) // I can cast here because I know it is a logical variable
+															  .population());
 	}
 	
 	/**
@@ -746,8 +747,8 @@ public final class SimpleParfactor implements Parfactor {
 	public Set<Parfactor> propositionalize(LogicalVariable logicalVariable) {
 		Set<Parfactor> result = new HashSet<Parfactor>();
 		Parfactor parfactorToSplit = this;
-		for (Constant individual : logicalVariable.getIndividualsSatisfying(this.constraints)) {
-			List<Parfactor> splitResult = parfactorToSplit.split(Binding.create(logicalVariable, individual));
+		for (Constant individual : logicalVariable.individualsSatisfying(this.constraints)) {
+			List<Parfactor> splitResult = parfactorToSplit.split(Binding.getInstance(logicalVariable, individual));
 			result.add(splitResult.get(1));
 			parfactorToSplit = splitResult.get(0);
 		}
@@ -811,7 +812,7 @@ public final class SimpleParfactor implements Parfactor {
 			newVariables.add(
 					cfIndex + 1, 
 					newCountingFormula.applySubstitutionToPrv(
-							Binding.create(
+							Binding.getInstance(
 									newCountingFormula.getBoundVariable(), 
 									term)));
 			
@@ -866,10 +867,10 @@ public final class SimpleParfactor implements Parfactor {
 	private boolean isInNormalForm() {
 		// i dont know if this will be useful, so the code is ugly
 		for (Constraint constraint : this.constraints) {
-			if (constraint.getSecondTerm() instanceof LogicalVariable) {
+			if (constraint.getSecondTerm() instanceof StdLogicalVariable) {
 				Set<Term> firstSet = getExcludedSet(constraint.getFirstTerm());
 				firstSet.remove(constraint.getSecondTerm());
-				Set<Term> secondSet = getExcludedSet((LogicalVariable) constraint.getSecondTerm());
+				Set<Term> secondSet = getExcludedSet((StdLogicalVariable) constraint.getSecondTerm());
 				secondSet.remove(constraint.getFirstTerm());
 				if (! firstSet.equals(secondSet)) {
 					return false;
@@ -976,7 +977,7 @@ public final class SimpleParfactor implements Parfactor {
 				&& belongsToParfactor(countingFormula) 
 				&& termIsNotInConstraintsFromCountingFormula(countingFormula, term) 
 				&& termAppearsInConstraintsForAllLogicalVariablesInCountingFormula(countingFormula, term)
-				&& term.isConstant();
+				&& term instanceof Constant; //TODO take it out
 	}
 	
 	public Parfactor fullExpand(CountingFormula countingFormula) {
@@ -992,7 +993,7 @@ public final class SimpleParfactor implements Parfactor {
 		
 		for (Constant individual : countingFormula
 				.getBoundVariable()
-				.getIndividualsSatisfying(
+				.individualsSatisfying(
 						countingFormula.getConstraints())) {
 			if (toExpand
 					.getFactor()
@@ -1043,7 +1044,7 @@ public final class SimpleParfactor implements Parfactor {
 		for (Constraint constraint : this.constraints) {
 			queue.offer(constraint.getFirstTerm());
 			if (constraint.secondTermIsLogicalVariable()) {
-				queue.offer((LogicalVariable) constraint.getSecondTerm());
+				queue.offer((StdLogicalVariable) constraint.getSecondTerm());
 			}
 		}
 		
@@ -1052,13 +1053,13 @@ public final class SimpleParfactor implements Parfactor {
 		while (!queue.isEmpty()) {
 			
 			LogicalVariable logicalVariable = queue.poll();
-			Population populationSatisfyingConstraints = logicalVariable.getPopulation();
+			Population populationSatisfyingConstraints = logicalVariable.population();
 			HashSet<Constraint> newConstraints = new HashSet<Constraint>(newParfactor.getConstraints()); //safe copy
 			
 			for (Constraint constraint : newParfactor.getConstraints()) {
 				if (constraint.getFirstTerm().equals(logicalVariable) 
 						&& constraint.secondTermIsConstant()) {
-					populationSatisfyingConstraints.removeIndividual((Constant) constraint.getSecondTerm());
+					populationSatisfyingConstraints.remove((Constant) constraint.getSecondTerm());
 				}
 			}
 			
@@ -1070,11 +1071,11 @@ public final class SimpleParfactor implements Parfactor {
 						if (constraint.secondTermIsConstant()) {
 							newParfactor.constraints.remove(constraint);
 						} else {
-							queue.offer((LogicalVariable) constraint.getFirstTerm());
+							queue.offer((StdLogicalVariable) constraint.getFirstTerm());
 						}
 					}
 				}
-				Binding substitution = Binding.create(logicalVariable, populationSatisfyingConstraints.getIndividual(0));
+				Binding substitution = Binding.getInstance(logicalVariable, populationSatisfyingConstraints.individualAt(0));
 				newParfactor = newParfactor.applySubstitution(substitution);
 			} else {
 				//do nothing
@@ -1091,17 +1092,17 @@ public final class SimpleParfactor implements Parfactor {
 	 */
 	public Parfactor renameLogicalVariables() {
 		// Using hash set because I don't need repetition
-		HashSet<LogicalVariable> logicalVariables = new HashSet<LogicalVariable>();
+		HashSet<StdLogicalVariable> logicalVariables = new HashSet<StdLogicalVariable>();
 		for (ParameterizedRandomVariable prv : this.factor.getParameterizedRandomVariables()) {
-			for (LogicalVariable lv : prv.getParameters()) {
+			for (StdLogicalVariable lv : prv.getParameters()) {
 				logicalVariables.add(lv);
 			}
 		}
 		
 		SimpleParfactor newParfactor = this;
-		for (LogicalVariable lv : logicalVariables) {
+		for (StdLogicalVariable lv : logicalVariables) {
 			newParfactor = newParfactor.applySubstitution(
-					Binding.create(
+					Binding.getInstance(
 							lv, 
 							LogicalVariableNameGenerator.rename(lv) 
 					)
@@ -1133,7 +1134,7 @@ public final class SimpleParfactor implements Parfactor {
 		while (mguIterator.hasNext()) {
 			LogicalVariable replaced = mguIterator.next();
 			if (result.factor.contains(replaced)) {
-				Binding binding =  Binding.create(replaced, mgu.getReplacement(replaced));
+				Binding binding =  Binding.getInstance(replaced, mgu.getReplacement(replaced));
 				Term replacement = mgu.getReplacement(replaced);
 				
 				// counting formula
@@ -1146,7 +1147,7 @@ public final class SimpleParfactor implements Parfactor {
 					}
 				}
 				
-				if (replacement.isConstant() || result.factor.contains((LogicalVariable) replacement)) { //TODO replace it by split conditions
+				if (replacement instanceof Constant || result.factor.contains((StdLogicalVariable) replacement)) { //TODO replace it by split conditions //TODO take instanceof out
 					List<Parfactor> resultSplit = result.split(binding);
 					if (resultSplit.size() == 2) { 
 						result = (SimpleParfactor) resultSplit.get(1);
@@ -1232,7 +1233,7 @@ public final class SimpleParfactor implements Parfactor {
 					&& residue.factor.contains(constraint.getFirstTerm())
 					&& residue.factor.isInStandardPrv(constraint.getFirstTerm())
 					&& (constraint.secondTermIsConstant() 
-							|| residue.factor.contains((LogicalVariable) constraint.getSecondTerm()))) {
+							|| residue.factor.contains((StdLogicalVariable) constraint.getSecondTerm()))) {
 				List<Parfactor> resultSplit = residue.split(constraint.toBinding());
 				if (resultSplit.size() == 2) { 
 					residue = (SimpleParfactor) resultSplit.get(0);
@@ -1358,17 +1359,17 @@ public final class SimpleParfactor implements Parfactor {
 	
 	public Parfactor restoreLogicalVariableNames() {
 		
-		HashSet<LogicalVariable> logicalVariables = new HashSet<LogicalVariable>();
+		HashSet<StdLogicalVariable> logicalVariables = new HashSet<StdLogicalVariable>();
 		for (ParameterizedRandomVariable prv : this.factor.getParameterizedRandomVariables()) {
-			for (LogicalVariable lv : prv.getParameters()) {
+			for (StdLogicalVariable lv : prv.getParameters()) {
 				logicalVariables.add(lv);
 			}
 		}
 		
 		SimpleParfactor newParfactor = this;
-		for (LogicalVariable lv : logicalVariables) {
+		for (StdLogicalVariable lv : logicalVariables) {
 			newParfactor = newParfactor.applySubstitution(
-					Binding.create(
+					Binding.getInstance(
 							lv, 
 							LogicalVariableNameGenerator.restore(lv) 
 					)
@@ -1519,7 +1520,7 @@ public final class SimpleParfactor implements Parfactor {
 	}
 
 	@Override
-	public Set<LogicalVariable> logicalVariables() {
+	public Set<StdLogicalVariable> logicalVariables() {
 		return factor.logicalVariables();
 	}
 }

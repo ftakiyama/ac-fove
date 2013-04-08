@@ -5,7 +5,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import br.usp.poli.takiyama.prv.LogicalVariable;
+import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 import br.usp.poli.takiyama.prv.Substitution;
 
@@ -25,7 +25,7 @@ public class Parfactors {
 				return false;
 			}
 			if (constraint.secondTermIsLogicalVariable()) {
-				if (mgu.haveCommonReplacement(constraint.getFirstTerm(), (LogicalVariable) constraint.getSecondTerm())
+				if (mgu.hasCommonReplacement(constraint.getFirstTerm(), (StdLogicalVariable) constraint.getSecondTerm())
 						|| mgu.contains(constraint.toInverseBinding())) {
 					return false;
 				}

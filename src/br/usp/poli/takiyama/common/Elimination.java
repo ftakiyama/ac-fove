@@ -18,4 +18,11 @@ public interface Elimination <T extends Prv> {
 	 * @return The set of variables to eliminate.
 	 */
 	public Set<T> eliminables();
+	
+	/**
+	 * Returns <code>true</code> if this elimination is empty
+	 * @return <code>true</code> if this elimination is empty, 
+	 * <code>false</code> otherwise.
+	 */
+	public boolean isEmpty();
 }

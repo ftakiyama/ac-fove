@@ -7,6 +7,7 @@ import br.usp.poli.takiyama.cfove.ParameterizedFactor;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
+import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
@@ -90,7 +91,7 @@ public interface Parfactor {
 	 * @return The set of all logical variables in parameterized random
 	 * variables in this parfactor.
 	 */
-	public Set<LogicalVariable> getLogicalVariables();
+	public Set<StdLogicalVariable> getLogicalVariables();
 	
 	/**
 	 * Returns the set of all logical variables in parameterized random
@@ -99,7 +100,7 @@ public interface Parfactor {
 	 * @return The set of all logical variables in parameterized random
 	 * variables in this parfactor.
 	 */
-	public Set<LogicalVariable> logicalVariables();
+	public Set<StdLogicalVariable> logicalVariables();
 	
 	/**
 	 * Retunrs the number of factors this parfactor represents.

@@ -3,6 +3,7 @@ package br.usp.poli.takiyama.common;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.LogicalVariable;
+import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.Term;
 
 /**
@@ -47,10 +48,10 @@ public class Constraint {
 	 * @return
 	 */
 	public static Constraint getInequalityConstraintFromBinding(Binding substitution) {
-		if (substitution.getSecondTerm() instanceof Constant) { // ugly
-			return new Constraint(substitution.getFirstTerm(), (Constant) substitution.getSecondTerm());
-		} else if (substitution.getSecondTerm() instanceof LogicalVariable) { // argh
-			return new Constraint(substitution.getFirstTerm(), (LogicalVariable) substitution.getSecondTerm());
+		if (substitution.secondTerm() instanceof Constant) { // ugly
+			return new Constraint(substitution.firstTerm(), (Constant) substitution.secondTerm());
+		} else if (substitution.secondTerm() instanceof StdLogicalVariable) { // argh
+			return new Constraint(substitution.firstTerm(), (StdLogicalVariable) substitution.secondTerm());
 		} else {
 			// TODO: put a log here
 			return null; // it should never get here
@@ -83,16 +84,16 @@ public class Constraint {
 	 * specified above.
 	 */
 	public Constraint applySubstitution(Binding substitution) {
-		if (firstTerm.equals(substitution.getFirstTerm())) { // looks ugly
-			if (secondTerm instanceof LogicalVariable && substitution.getSecondTerm() instanceof Constant) { // X!=Y && X/q 
-				return new Constraint((LogicalVariable) secondTerm, substitution.getSecondTerm());
-			} else if (secondTerm instanceof Constant && substitution.getSecondTerm() instanceof Constant) { // X!=t && X/q
+		if (firstTerm.equals(substitution.firstTerm())) { // looks ugly
+			if (secondTerm instanceof StdLogicalVariable && substitution.secondTerm() instanceof Constant) { // X!=Y && X/q 
+				return new Constraint((StdLogicalVariable) secondTerm, substitution.secondTerm());
+			} else if (secondTerm instanceof Constant && substitution.secondTerm() instanceof Constant) { // X!=t && X/q
 				return null;
 			} else {
-				return new Constraint((LogicalVariable) substitution.getSecondTerm(), secondTerm);	
+				return new Constraint((StdLogicalVariable) substitution.secondTerm(), secondTerm);	
 			}
-		} else if (secondTerm.equals(substitution.getFirstTerm())) {
-			return new Constraint(firstTerm, substitution.getSecondTerm());
+		} else if (secondTerm.equals(substitution.firstTerm())) {
+			return new Constraint(firstTerm, substitution.secondTerm());
 		} else {
 			return this;
 		}
@@ -134,7 +135,7 @@ public class Constraint {
 	 * @return True if the second term is a LogicalVariable, false otherwise.
 	 */
 	public boolean secondTermIsLogicalVariable() {
-		return (this.secondTerm instanceof LogicalVariable);
+		return (this.secondTerm instanceof StdLogicalVariable);
 	}
 	
 	/**
@@ -144,7 +145,7 @@ public class Constraint {
 	 * @return The Binding corresponding to this constraint.
 	 */
 	public Binding toBinding() {
-		return Binding.create(this.firstTerm, this.secondTerm);
+		return Binding.getInstance(this.firstTerm, this.secondTerm);
 	}
 	
 	/**
@@ -157,7 +158,7 @@ public class Constraint {
 	 */
 	public Binding toInverseBinding() throws IllegalArgumentException {
 		if (this.secondTermIsLogicalVariable()) {
-			return Binding.create((LogicalVariable) this.secondTerm, this.firstTerm);
+			return Binding.getInstance((StdLogicalVariable) this.secondTerm, this.firstTerm);
 		} else {
 			throw new IllegalArgumentException("The second term of the " +
 					this.toString() + " is not a Logical Variable!");
@@ -180,10 +181,10 @@ public class Constraint {
 	    	return false;
 	    // Tests if both have the same attributes
 	    Constraint targetObject = (Constraint) other;
-	    if (this.secondTerm.isLogicalVariable()
-	    		&& targetObject.secondTerm.isLogicalVariable()) { // tests the case (A!=B).equals(B!=A)
-	    	LogicalVariable thisSt = (LogicalVariable) this.secondTerm;
-	    	LogicalVariable otherSt = (LogicalVariable) targetObject.secondTerm;
+	    if (this.secondTerm instanceof StdLogicalVariable //TODO take it out
+	    		&& targetObject.secondTerm instanceof StdLogicalVariable)  { // tests the case (A!=B).equals(B!=A) TODO take it out
+	    	StdLogicalVariable thisSt = (StdLogicalVariable) this.secondTerm;
+	    	StdLogicalVariable otherSt = (StdLogicalVariable) targetObject.secondTerm;
 	    	
 	    	// direct
 	    	boolean directCompare = 

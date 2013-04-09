@@ -1,226 +1,140 @@
 package br.usp.poli.takiyama.common;
 
 import br.usp.poli.takiyama.prv.Binding;
-import br.usp.poli.takiyama.prv.Constant;
-import br.usp.poli.takiyama.prv.LogicalVariable;
-import br.usp.poli.takiyama.prv.StdLogicalVariable;
+import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
 
 /**
- * This class represents inequality constraints of the form X &ne; Y, where
- * X is a Logical Variable and Y is a Term. The following inequalities are
- * valid: X &ne; Y, X &ne; t. 
- * <br>
- * If the inequality is written in the form t &ne; X, where t is a Constant,
- * we rewrite it as X &ne; t, although there is no direct way of doing that.
- * <br>
- * Inequalities with two constants, like t &ne; q, are invalid. If a method
- * detects a invalid constraint, it returns null.
- *  
- * @author ftakiyama
+ * This class represents constraints of the form X ? Y, where
+ * X and Y are {@link Term}s and ? is an comparison operator. For now,
+ * only operators '=' and '&ne;' are supported. 
+ * <p>
+ * A note concerning {@link #equals}: constraints X ? Y and Y ? X should
+ * be considered the same, unless '?' is not symmetric.
+ * </p>
+ * 
+ * @author Felipe Takiyama
  *
  */
-public class Constraint {
-	
-	private final LogicalVariable firstTerm;
-	private final Term secondTerm;
-	
-	private Constraint(LogicalVariable firstTerm, Term secondTerm) {
-		this.firstTerm = firstTerm;
-		this.secondTerm = secondTerm;
-	}
+public interface Constraint {
 	
 	/**
-	 * Static factory of inequality constraints
-	 * @param firstTerm
-	 * @param secondTerm
-	 * @return
+	 * Returns the left-hand side of this constraint.
+	 * 
+	 * @return the left-hand side of this constraint.
 	 */
-	public static Constraint getInstance(LogicalVariable firstTerm, Term secondTerm) {
-		return new Constraint(firstTerm, secondTerm);
-	}
+	public Term firstTerm();
+	
 	
 	/**
-	 * Creates a inequality constraint based on substitution. For instance,
-	 * if substitution is X/t, then the corresponding constraint is
-	 * X &ne; t.
-	 * @param substitution
-	 * @return
+	 * Returns the right-hand side of this constraint.
+	 * 
+	 * @return the right-hand side of this constraint.
 	 */
-	public static Constraint getInequalityConstraintFromBinding(Binding substitution) {
-		if (substitution.secondTerm() instanceof Constant) { // ugly
-			return new Constraint(substitution.firstTerm(), (Constant) substitution.secondTerm());
-		} else if (substitution.secondTerm() instanceof StdLogicalVariable) { // argh
-			return new Constraint(substitution.firstTerm(), (StdLogicalVariable) substitution.secondTerm());
-		} else {
-			// TODO: put a log here
-			return null; // it should never get here
-		}
-	}
+	public Term secondTerm();
 	
-	public LogicalVariable getFirstTerm() {
-		return this.firstTerm;
-	}
-	
-	public Term getSecondTerm() {
-		return this.secondTerm;
-	}
 	
 	/**
-	 * Apply the substitution in this inequality.
-	 * The following rules apply:<br>
-	 * <li> X &ne; Y and X/q  returns Y &ne; q
-	 * <li> X &ne; Y and Y/q  returns X &ne; q
-	 * <li> X &ne; Y and X/W  returns W &ne; Y
-	 * <li> X &ne; Y and Y/W  returns X &ne; W
-	 * <li> X &ne; t and X/q  returns <b>null</b>
-	 * <li> X &ne; t and Y/q  returns X &ne; t
-	 * <li> X &ne; t and X/W  returns W &ne; t
-	 * <li> X &ne; t and Y/W  returns X &ne; t
-	 * <br>
+	 * Applies the substitution in this constraint.
+	 * <p>
+	 * If the resulting constraint is invalid (for instance, q &ne; t, which is
+	 * always true), then throws an {@link IllegalStateException}.
+	 * </p>
+	 * <p>
+	 * If the specified substitution does not apply to this constraint, then 
+	 * returns this constraint unchanged.
+	 * </p>
+	 * 
 	 * @param substitution The substitution to apply on the constraint
 	 * @return The constraint that results from the application of the
 	 * specified substitution to this constraint, following the rules 
 	 * specified above.
+	 * @throws If the resulting constraint is invalid
 	 */
-	public Constraint applySubstitution(Binding substitution) {
-		if (firstTerm.equals(substitution.firstTerm())) { // looks ugly
-			if (secondTerm instanceof StdLogicalVariable && substitution.secondTerm() instanceof Constant) { // X!=Y && X/q 
-				return new Constraint((StdLogicalVariable) secondTerm, substitution.secondTerm());
-			} else if (secondTerm instanceof Constant && substitution.secondTerm() instanceof Constant) { // X!=t && X/q
-				return null;
-			} else {
-				return new Constraint((StdLogicalVariable) substitution.secondTerm(), secondTerm);	
-			}
-		} else if (secondTerm.equals(substitution.firstTerm())) {
-			return new Constraint(firstTerm, substitution.secondTerm());
-		} else {
-			return this;
-		}
-	}
+	public Constraint apply(Substitution s) throws java.lang.IllegalStateException;
+	
+		
+	/**
+	 * Returs <code>true</code> if the specified term is in the constraint
+	 * 
+	 * @param term The term to check the existence
+	 * @return <code>true</code> if the term specified equals one of the 
+	 * terms in this constraint, <code>false</code>.
+	 */
+	public boolean contains(Term t);
+	
 	
 	/**
-	 * Check if the term is in the constraint
-	 * @param term The term to check
-	 * @return True if the term specified equals one of the terms of the 
-	 * constraint, false otherwise.
-	 */
-	public boolean contains(Term term) {
-		return (firstTerm.equals(term) || secondTerm.equals(term));
-	}
-	
-	/**
-	 * Checks if this constraint and the constraint given as parameter have
-	 * a common term.
+	 * Returns <code>true</code> if this constraint and the specified 
+	 * constraint have a common term.
+	 * 
 	 * @param constraint The constraint to compare to.
-	 * @return True if the constraints have a common term, false otherwise.
+	 * @return <code>true</code> if the constraints have a common term, 
+	 * <code>false</code> otherwise.
 	 */
-	public boolean hasCommonTerm(Constraint constraint) {
-		return (this.firstTerm.equals(constraint.firstTerm)) 
-			|| (this.firstTerm.equals(constraint.secondTerm))
-			|| (this.secondTerm.equals(constraint.firstTerm))
-			|| (this.secondTerm.equals(constraint.secondTerm));
-	}
+	public boolean hasCommonTerm(Constraint c);
+	
 	
 	/**
-	 * Returns true if the second term is Constant, false otherwise.
-	 * @return True if the second term is Constant, false otherwise.
+	 * Returns <code>true</code> if this constraint is consistent with the
+	 * specified {@link Binding}. A constraint is consistent with a binding if
+	 * the resulting constraint after applying the binding is a valid one.
+	 * <p>
+	 * This method also returns <code>false</code> when it is not possible to
+	 * evaluate whether the resulting constraint is valid or not.
+	 * </p> 
+	 * <p>
+	 * For instance, let X, Y, W and Z be logical variables with D(X) = D(Y) = 
+	 * D(W) = D(Z) = {a, b,..., z}. Then:
+	 * <li> X != a is consistent with X/b
+	 * <li> X != Y is consistent with W/Z
+	 * <li> X == Y is consistent with W/Z
+	 * <li> X != a is not consistent with X/W
+	 * <li> X != Y is not consistent with X/W
+	 * <li> X == a is not consistent with X/b
+	 * <li> X == a is not consistent with X/W
+	 * <li> X == Y is not consistent with X/W
+	 * </p>
+	 * 
+	 * @param b The binding to test
+	 * @return <code>true</code> if this constraint is consistent with the
+	 * specified binding, <code>false</code> otherwise.
 	 */
-	public boolean secondTermIsConstant() {
-		return (this.secondTerm instanceof Constant);
-	}
+	public boolean isConsistentWith(Binding b);
+	
+	
 	
 	/**
-	 * Returns true if the second term is a LogicalVariable, false otherwise.
-	 * @return True if the second term is a LogicalVariable, false otherwise.
-	 */
-	public boolean secondTermIsLogicalVariable() {
-		return (this.secondTerm instanceof StdLogicalVariable);
-	}
-	
-	/**
-	 * Returns the Binding corresponding to this constraint. That is,
+	 * Returns the {@link Binding} corresponding to this constraint. That is,
 	 * if this constraint is t1 &ne; t2, then this method returns the
 	 * binding t1/t2.
+	 * 
 	 * @return The Binding corresponding to this constraint.
+	 * @throws IllegalArgumentException If the first term is not a Logical
+	 * Variable. In this case it is not possible to create the binding.
 	 */
-	public Binding toBinding() {
-		return Binding.getInstance(this.firstTerm, this.secondTerm);
-	}
+	public Binding toBinding();
+	
 	
 	/**
-	 * Returns the binding obtained by inverting the terms of this constraint.
+	 * Returns the {@link Binding} obtained by inverting the terms of this 
+	 * constraint.
 	 * That is, if this constraint is t2 &ne; t2, then this method returns
 	 * the binding t2/t1.
+	 * 
 	 * @return The inverse binding corresponding to this constraint.
 	 * @throws IllegalArgumentException If the second term is not a Logical
 	 * Variable. In this case it is not possible to create the binding.
 	 */
-	public Binding toInverseBinding() throws IllegalArgumentException {
-		if (this.secondTermIsLogicalVariable()) {
-			return Binding.getInstance((StdLogicalVariable) this.secondTerm, this.firstTerm);
-		} else {
-			throw new IllegalArgumentException("The second term of the " +
-					this.toString() + " is not a Logical Variable!");
-			
-		}
-	}
+	public Binding toInverseBinding();
+
 	
 	@Override
-	public String toString() {
-		return firstTerm.toString() + "!=" + secondTerm.toString();
-	}
+	public boolean equals(Object o);
 	
 	@Override
-	public boolean equals(Object other) {
-		// Tests if both refer to the same object
-		if (this == other)
-	    	return true;
-		// Tests if the Object is an instance of this class
-	    if (!(other instanceof Constraint))
-	    	return false;
-	    // Tests if both have the same attributes
-	    Constraint targetObject = (Constraint) other;
-	    if (this.secondTerm instanceof StdLogicalVariable //TODO take it out
-	    		&& targetObject.secondTerm instanceof StdLogicalVariable)  { // tests the case (A!=B).equals(B!=A) TODO take it out
-	    	StdLogicalVariable thisSt = (StdLogicalVariable) this.secondTerm;
-	    	StdLogicalVariable otherSt = (StdLogicalVariable) targetObject.secondTerm;
-	    	
-	    	// direct
-	    	boolean directCompare = 
-	    		((this.firstTerm == null) 
-	    				? (targetObject.firstTerm == null) 
-	    				: (this.firstTerm.equals(targetObject.firstTerm))) 
-	    		&&
-	    		((this.secondTerm == null) 
-	    				? (targetObject.secondTerm == null) 
-	    				: (this.secondTerm.equals(targetObject.secondTerm)));
-	    	
-	    	// inverse
-	    	boolean inverseCompare = 
-	    		((this.firstTerm == null) 
-	    				? (otherSt == null) 
-	    				: (this.firstTerm.equals(otherSt))) 
-	    		&&
-	    		((thisSt == null) 
-	    				? (targetObject.firstTerm == null) 
-	    				: (thisSt.equals(targetObject.firstTerm)));
-	    	
-	    	return (directCompare || inverseCompare);
-	    }
-	    return ((this.firstTerm == null) ? 
-	    		 targetObject.firstTerm == null : 
-		    		 this.firstTerm.equals(targetObject.firstTerm)) &&
-    		   ((this.secondTerm == null) ? 
-    		     targetObject.secondTerm == null : 
-    		     this.secondTerm.equals(targetObject.secondTerm));	    		
-	}
+	public int hashCode();
 	
 	@Override
-	public int hashCode() { // Algorithm extracted from Bloch,J. Effective Java
-		int result = 17;
-		result = 31 + result + firstTerm.hashCode();
-		result = 31 + result + secondTerm.hashCode();
-		return result;
-	}
+	public String toString();
 }

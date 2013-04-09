@@ -161,13 +161,13 @@ public class Pool {
 		if (Character.isUpperCase(secondTerm.charAt(0))) {
 			constraintsPool.put(
 					firstTerm + " != " + secondTerm, 
-					Constraint.getInstance(
+					InequalityConstraint.getInstance(
 							variablesPool.get(firstTerm), 
 							variablesPool.get(secondTerm)));
 		} else {
 			constraintsPool.put(
 					firstTerm + " != " + secondTerm, 
-					Constraint.getInstance(
+					InequalityConstraint.getInstance(
 							variablesPool.get(firstTerm), 
 							variablesPool.get(firstTerm)
 										 .population()
@@ -213,7 +213,7 @@ public class Pool {
 		}
 		constraintsPool.put(
 				firstTerm + " != " + secondTerm.split("=")[1], 
-				Constraint.getInstance(
+				InequalityConstraint.getInstance(
 						variablesPool.get(firstTerm), 
 						variablesPool.get(secondTerm.split("=")[0])
 									 .population()

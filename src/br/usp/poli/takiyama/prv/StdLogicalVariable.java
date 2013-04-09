@@ -115,10 +115,12 @@ public final class StdLogicalVariable implements LogicalVariable {
 	@Override
 	public Population individualsSatisfying(Set<Constraint> constraints) {
 		Population pop = Population.getInstance(this.population);
-		for (Constraint constraint : constraints) { // TODO encapsulate the algorithm in constraints methods
-			if (constraint.getFirstTerm().equals(this) 
-					&& constraint.secondTermIsConstant()) {
-				pop.remove((Constant) constraint.getSecondTerm());
+		for (Constant individual : pop) {
+			for (Constraint constraint : constraints) {
+				Binding bind = Binding.getInstance(this, individual);
+				if (constraint.isConsistentWith(bind)) {
+					pop.remove(individual);
+				}
 			}
 		}
 		return pop;
@@ -145,7 +147,6 @@ public final class StdLogicalVariable implements LogicalVariable {
 	/* ************************************************************************
 	 *    hashCode, equals and toString
 	 * ************************************************************************/
-
 	
 	@Override
 	public String toString() {

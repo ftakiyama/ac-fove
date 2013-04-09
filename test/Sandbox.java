@@ -2,6 +2,7 @@
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -180,5 +181,15 @@ public class Sandbox {
 	
 	public void testTypes() {
 		Operator op = new OR();
+	}
+	
+	@Test
+	public void testGenerics() {
+		HashMap<String, Number> m1 = new HashMap<String, Number>();
+		HashMap<String, Double> m2 = new HashMap<String, Double>();
+		
+		Number d = new Double(1.0);
+		System.out.println(d instanceof Double);
+		System.out.println(d instanceof Number);
 	}
 }

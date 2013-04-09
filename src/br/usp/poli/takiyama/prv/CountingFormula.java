@@ -283,7 +283,7 @@ public class CountingFormula extends ParameterizedRandomVariable {
 		ParameterizedRandomVariable newPrv = this.prv.applyOneSubstitution(s);
 		HashSet<Constraint> newConstraints = new HashSet<Constraint>();
 		for (Constraint constraint : this.constraints)  {
-			newConstraints.add(constraint.applySubstitution(s));
+			newConstraints.add(constraint.apply(Substitution.getInstance(s)));
 		}
 		
 		return new CountingFormula((StdLogicalVariable) s.secondTerm(), 

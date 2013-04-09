@@ -12,6 +12,7 @@ import br.usp.poli.takiyama.acfove.AggregationParfactor;
 import br.usp.poli.takiyama.acfove.GeneralizedAggregationParfactor;
 import br.usp.poli.takiyama.common.Constraint;
 //import br.usp.poli.takiyama.common.Constraints;
+import br.usp.poli.takiyama.common.InequalityConstraint;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.Parfactors;
 import br.usp.poli.takiyama.common.RandomVariable;
@@ -603,7 +604,7 @@ public final class SimpleParfactor implements Parfactor {
 				&& (secondTermIsConstantBelongingToFirstTermPopulation(substitution) 
 						|| (secondTermIsPresent(substitution) 
 								&& secondTermHasSameDomainOfFirstTerm(substitution)))) {
-			result.add(this.addConstraint(Constraint.getInequalityConstraintFromBinding(substitution)));
+			result.add(this.addConstraint(InequalityConstraint.getInstance(substitution.firstTerm(), substitution.secondTerm())));
 			result.add(this.applySubstitution(substitution));
 		}
 		return result;
@@ -705,9 +706,9 @@ public final class SimpleParfactor implements Parfactor {
 	private SimpleParfactor applySubstitution(Binding substitution) {
 		HashSet<Constraint> substitutedConstraints = new HashSet<Constraint>();
 		for (Constraint constraint : this.constraints) {
-			Constraint result = constraint.applySubstitution(substitution);
+			Constraint result = constraint.apply(Substitution.getInstance(substitution));
 			if (result != null) { // there must be something more elegant
-				substitutedConstraints.add(constraint.applySubstitution(substitution));
+				substitutedConstraints.add(constraint.apply(Substitution.getInstance(substitution)));
 			}
 		}
 		
@@ -797,7 +798,7 @@ public final class SimpleParfactor implements Parfactor {
 			
 			CountingFormula newCountingFormula = 
 					countingFormula.addConstraint(
-							Constraint.getInstance(
+							InequalityConstraint.getInstance(
 									countingFormula.getBoundVariable(), 
 									term
 							)
@@ -867,11 +868,11 @@ public final class SimpleParfactor implements Parfactor {
 	private boolean isInNormalForm() {
 		// i dont know if this will be useful, so the code is ugly
 		for (Constraint constraint : this.constraints) {
-			if (constraint.getSecondTerm() instanceof StdLogicalVariable) {
-				Set<Term> firstSet = getExcludedSet(constraint.getFirstTerm());
-				firstSet.remove(constraint.getSecondTerm());
-				Set<Term> secondSet = getExcludedSet((StdLogicalVariable) constraint.getSecondTerm());
-				secondSet.remove(constraint.getFirstTerm());
+			if (constraint.secondTerm() instanceof StdLogicalVariable) {
+				Set<Term> firstSet = getExcludedSet(constraint.firstTerm());
+				firstSet.remove(constraint.secondTerm());
+				Set<Term> secondSet = getExcludedSet((StdLogicalVariable) constraint.secondTerm());
+				secondSet.remove(constraint.firstTerm());
 				if (! firstSet.equals(secondSet)) {
 					return false;
 				}
@@ -886,11 +887,11 @@ public final class SimpleParfactor implements Parfactor {
 	 * @param x The logical variable.
 	 * @return The excluded set for logical variable X.
 	 */
-	private Set<Term> getExcludedSet(LogicalVariable x) {
+	private Set<Term> getExcludedSet(Term x) {
 		HashSet<Term> excludedSet = new HashSet<Term>();
 		for (Constraint constraint : this.constraints) {
 			if (constraint.contains(x)) {
-				excludedSet.add(constraint.getSecondTerm()); // i do not verify if the other term is in fact the second term of the constraint...
+				excludedSet.add(constraint.secondTerm()); // i do not verify if the other term is in fact the second term of the constraint...
 			}
 		}
 		return excludedSet;
@@ -1042,9 +1043,9 @@ public final class SimpleParfactor implements Parfactor {
 		
 		LinkedList<LogicalVariable> queue = new LinkedList<LogicalVariable>();
 		for (Constraint constraint : this.constraints) {
-			queue.offer(constraint.getFirstTerm());
-			if (constraint.secondTermIsLogicalVariable()) {
-				queue.offer((StdLogicalVariable) constraint.getSecondTerm());
+			queue.offer((LogicalVariable) constraint.firstTerm()); //TODO unchecked cast
+			if (constraint.secondTerm() instanceof LogicalVariable) {
+				queue.offer((StdLogicalVariable) constraint.secondTerm());
 			}
 		}
 		
@@ -1057,9 +1058,9 @@ public final class SimpleParfactor implements Parfactor {
 			HashSet<Constraint> newConstraints = new HashSet<Constraint>(newParfactor.getConstraints()); //safe copy
 			
 			for (Constraint constraint : newParfactor.getConstraints()) {
-				if (constraint.getFirstTerm().equals(logicalVariable) 
-						&& constraint.secondTermIsConstant()) {
-					populationSatisfyingConstraints.remove((Constant) constraint.getSecondTerm());
+				if (constraint.firstTerm().equals(logicalVariable) 
+						&& constraint.secondTerm() instanceof Constant) {
+					populationSatisfyingConstraints.remove((Constant) constraint.secondTerm());
 				}
 			}
 			
@@ -1067,11 +1068,11 @@ public final class SimpleParfactor implements Parfactor {
 				return SimpleParfactor.getConstantInstance();
 			} else if (populationSatisfyingConstraints.size() == 1) {
 				for (Constraint constraint : newConstraints) {
-					if (constraint.getFirstTerm().equals(logicalVariable)) {
-						if (constraint.secondTermIsConstant()) {
+					if (constraint.firstTerm().equals(logicalVariable)) {
+						if (constraint.secondTerm() instanceof Constant) {
 							newParfactor.constraints.remove(constraint);
 						} else {
-							queue.offer((StdLogicalVariable) constraint.getFirstTerm());
+							queue.offer((StdLogicalVariable) constraint.firstTerm());
 						}
 					}
 				}
@@ -1222,18 +1223,18 @@ public final class SimpleParfactor implements Parfactor {
 			// counting formula
 			if (residue.hasCountingFormula()) {
 				for (CountingFormula countingFormula : residue.getCountingFormulas()) {
-					if (constraint.getFirstTerm().equals(countingFormula.getBoundVariable())
-							&& residue.canExpandOn(countingFormula, constraint.getSecondTerm())) {
-						residue = (SimpleParfactor) residue.expand(countingFormula, constraint.getSecondTerm());
+					if (constraint.firstTerm().equals(countingFormula.getBoundVariable())
+							&& residue.canExpandOn(countingFormula, constraint.secondTerm())) {
+						residue = (SimpleParfactor) residue.expand(countingFormula, constraint.secondTerm());
 					}
 				}
 			}
 			
 			if (!this.constraints.contains(constraint)
-					&& residue.factor.contains(constraint.getFirstTerm())
-					&& residue.factor.isInStandardPrv(constraint.getFirstTerm())
-					&& (constraint.secondTermIsConstant() 
-							|| residue.factor.contains((StdLogicalVariable) constraint.getSecondTerm()))) {
+					&& residue.factor.contains(constraint.firstTerm())
+					&& residue.factor.isInStandardPrv(constraint.firstTerm())
+					&& (constraint.secondTerm() instanceof Constant 
+							|| residue.factor.contains((StdLogicalVariable) constraint.secondTerm()))) {
 				List<Parfactor> resultSplit = residue.split(constraint.toBinding());
 				if (resultSplit.size() == 2) { 
 					residue = (SimpleParfactor) resultSplit.get(0);

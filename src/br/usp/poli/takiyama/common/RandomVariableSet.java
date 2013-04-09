@@ -41,7 +41,7 @@ public final class RandomVariableSet {
 		this.prv = prv;
 		this.constraints = new HashSet<Constraint>();
 		for (Constraint c : constraints) {
-			if (c.secondTermIsConstant() && prv.contains(c.getFirstTerm()))
+			if (c.secondTerm() instanceof Constant && prv.contains(c.firstTerm()))
 				this.constraints.add(c);
 		}
 	}
@@ -136,7 +136,7 @@ public final class RandomVariableSet {
 		HashSet<Constraint> constraints = new HashSet<Constraint>();
 		for (StdLogicalVariable lv : this.prv.getParameters()) {
 			for (Constant c : lv.individualsSatisfying(this.constraints)) {
-				constraints.add(Constraint.getInstance(lv, c));
+				constraints.add(InequalityConstraint.getInstance(lv, c));
 			}
 		}
 		return new RandomVariableSet(this.prv, constraints);

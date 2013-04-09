@@ -12,6 +12,7 @@ import br.usp.poli.takiyama.acfove.operator.BooleanOperator;
 import br.usp.poli.takiyama.cfove.ParameterizedFactor;
 import br.usp.poli.takiyama.cfove.SimpleParfactor;
 import br.usp.poli.takiyama.common.Constraint;
+import br.usp.poli.takiyama.common.InequalityConstraint;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.Tuple;
 import br.usp.poli.takiyama.prv.Binding;
@@ -221,13 +222,13 @@ public class AggregationParfactor implements Parfactor {
 						+ otherConstraints.size());
 		
 		for (Constraint c : constraintsOnExtraVariable) {
-			Constraint nc = c.applySubstitution(s);
+			Constraint nc = c.apply(Substitution.getInstance(s));
 			if (nc != null) {
 				allConstraints.add(nc);
 			}
 		}
 		for (Constraint c : otherConstraints) {
-			Constraint nc = c.applySubstitution(s);
+			Constraint nc = c.apply(Substitution.getInstance(s));
 			if (nc != null) {
 				allConstraints.add(c);
 			}
@@ -324,7 +325,7 @@ public class AggregationParfactor implements Parfactor {
 			}
 			break;
 		}
-		Constraint c = Constraint.getInequalityConstraintFromBinding(s); 
+		Constraint c = InequalityConstraint.getInstance(s.firstTerm(), s.secondTerm()); 
 		boolean isNotInConstraints = !isInConstraints(c);
 		return isNotInConstraints && isConsistent;
 	}
@@ -394,7 +395,7 @@ public class AggregationParfactor implements Parfactor {
 	 */
 	private List<Parfactor> splitOnSubstitutionXt(Binding s) {
 		Parfactor split = this.applySubstitution(s);
-		Constraint constraint = Constraint.getInequalityConstraintFromBinding(s);
+		Constraint constraint = InequalityConstraint.getInstance(s.firstTerm(), s.secondTerm());
 		Parfactor residue = this.addConstraint(constraint);
 		List<Parfactor> result = new ArrayList<Parfactor>(2);
 		result.add(split);
@@ -455,7 +456,7 @@ public class AggregationParfactor implements Parfactor {
 		
 		// Builds the aggregation parfactor
 		
-		Constraint constraintFromBinding = Constraint.getInequalityConstraintFromBinding(s);
+		Constraint constraintFromBinding = InequalityConstraint.getInstance(s.firstTerm(), s.secondTerm());
 		ParameterizedRandomVariable cAux = this.child.rename(this.child.getName() + "'");
 		
 		Builder builder = new Builder(this.parent, cAux, this.operator);
@@ -471,7 +472,7 @@ public class AggregationParfactor implements Parfactor {
 		
 		Set<Constraint> constraints = new HashSet<Constraint>(this.otherConstraints);
 		for (Constraint c : this.constraintsOnExtraVariable) {
-			Constraint nc = c.applySubstitution(s);
+			Constraint nc = c.apply(Substitution.getInstance(s));
 			if (nc != null) {
 				constraints.add(nc);
 			}
@@ -564,7 +565,7 @@ public class AggregationParfactor implements Parfactor {
 		
 		// Builds the aggregation parfactor
 		
-		Constraint constraintFromBinding = Constraint.getInequalityConstraintFromBinding(s);
+		Constraint constraintFromBinding = InequalityConstraint.getInstance(s.firstTerm(), s.secondTerm());
 		ParameterizedRandomVariable cAux = this.child.rename(this.child.getName() + "'");
 		
 		Builder builder = new Builder(this.parent, cAux, this.operator);
@@ -578,7 +579,7 @@ public class AggregationParfactor implements Parfactor {
 		
 		Set<Constraint> constraints = new HashSet<Constraint>(this.constraintsOnExtraVariable);
 		for (Constraint c : this.otherConstraints) {
-			Constraint nc = c.applySubstitution(s);
+			Constraint nc = c.apply(Substitution.getInstance(s));
 			if (nc != null) {
 				constraints.add(nc);
 			}
@@ -909,11 +910,11 @@ public class AggregationParfactor implements Parfactor {
 	 */
 	private boolean isInNormalForm() {
 		for (Constraint c : this.getConstraints()) {
-			if (c.getSecondTerm() instanceof StdLogicalVariable) {
-				Set<Term> firstSet = getExcludedSet(c.getFirstTerm());
-				firstSet.remove(c.getSecondTerm());
-				Set<Term> secondSet = getExcludedSet((StdLogicalVariable) c.getSecondTerm());
-				secondSet.remove(c.getFirstTerm());
+			if (c.secondTerm() instanceof LogicalVariable) {
+				Set<Term> firstSet = getExcludedSet(c.firstTerm());
+				firstSet.remove(c.secondTerm());
+				Set<Term> secondSet = getExcludedSet((StdLogicalVariable) c.secondTerm());
+				secondSet.remove(c.firstTerm());
 				if (! firstSet.equals(secondSet)) {
 					return false;
 				}
@@ -928,11 +929,11 @@ public class AggregationParfactor implements Parfactor {
 	 * @param x The logical variable.
 	 * @return The excluded set for logical variable X.
 	 */
-	private Set<Term> getExcludedSet(LogicalVariable x) {
+	private Set<Term> getExcludedSet(Term x) {
 		HashSet<Term> excludedSet = new HashSet<Term>();
 		for (Constraint constraint : this.getConstraints()) {
 			if (constraint.contains(x)) {
-				excludedSet.add(constraint.getSecondTerm()); // i do not verify if the other term is in fact the second term of the constraint...
+				excludedSet.add(constraint.secondTerm()); // i do not verify if the other term is in fact the second term of the constraint...
 			}
 		}
 		return excludedSet;

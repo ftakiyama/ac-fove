@@ -26,6 +26,15 @@ public final class InequalityConstraint extends AbstractConstraint {
 	 *    Constructors
 	 * ************************************************************************/
 	
+	/**
+	 * Creates the inequality constraint composed by the specified terms.
+	 * 
+	 * @param firstTerm The left-hand side of the constraint 
+	 * @param secondTerm The right-hand side of the constraint
+	 * @return An inequality constraint
+	 * @throws IllegalArgumentException if both terms are {@link Constant}s or 
+	 * if both terms are equal
+	 */
 	private InequalityConstraint(Term t1, Term t2) throws IllegalArgumentException {
 		if (t1.equals(t2)) {
 			// trying to create a constraint with equal terms
@@ -84,6 +93,18 @@ public final class InequalityConstraint extends AbstractConstraint {
 	
 	@Override
 	public boolean isConsistentWith(Binding b) {
+		
+		/*
+		 * Tests a more subtle case: is X != a consistent with X/W?
+		 * Well, if we apply the substitution, we obtain W != a which is indeed 
+		 * a valid constraint, but not necessarily correct. 
+		 * Event though X != a, we cannot say the same about W.
+		 * This case is not supposed to happen in the current application,
+		 * because I use only unary bindings (X/a) to call this method.
+		 */
+		if (hasCommonTerm(b) && b.secondTerm() instanceof LogicalVariable) {
+			return false;
+		}
 		Substitution sub = Substitution.getInstance(b);
 		try {
 			apply(sub);
@@ -91,6 +112,14 @@ public final class InequalityConstraint extends AbstractConstraint {
 			return false;
 		}
 		return true;
+	}
+	
+	
+	private boolean hasCommonTerm(Binding b) {
+		return (this.firstTerm().equals(b.firstTerm())) 
+			|| (this.firstTerm().equals(b.secondTerm()))
+			|| (this.secondTerm().equals(b.firstTerm()))
+			|| (this.secondTerm().equals(b.secondTerm()));
 	}
 	
 	
@@ -106,11 +135,11 @@ public final class InequalityConstraint extends AbstractConstraint {
 		if (obj == null) {
 			return false;
 		}
-		if (!(obj instanceof AbstractConstraint)) {
+		if (!(obj instanceof InequalityConstraint)) {
 			return false;
 		}
 		
-		AbstractConstraint other = (AbstractConstraint) obj; 
+		InequalityConstraint other = (InequalityConstraint) obj; 
 		
 		// tests A!=B == A!=B
 		boolean direct = 
@@ -147,7 +176,7 @@ public final class InequalityConstraint extends AbstractConstraint {
 	
 	@Override
 	public String toString() {
-		return firstTerm.toString() + "!=" + secondTerm.toString();
+		return firstTerm.toString() + " != " + secondTerm.toString();
 	}
 	
 	/**

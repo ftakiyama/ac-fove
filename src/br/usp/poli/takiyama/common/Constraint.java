@@ -37,27 +37,28 @@ public interface Constraint {
 	/**
 	 * Applies the substitution in this constraint.
 	 * <p>
-	 * If the resulting constraint is invalid (for instance, q &ne; t, which is
-	 * always true), then throws an {@link IllegalStateException}.
+	 * If the resulting constraint is always false (for instance, q &ne; q), 
+	 * then throws an {@link IllegalStateException}.
 	 * </p>
 	 * <p>
 	 * If the specified substitution does not apply to this constraint, then 
 	 * returns this constraint unchanged.
 	 * </p>
 	 * 
-	 * @param substitution The substitution to apply on the constraint
+	 * @param s The substitution to apply on the constraint
 	 * @return The constraint that results from the application of the
 	 * specified substitution to this constraint, following the rules 
 	 * specified above.
-	 * @throws If the resulting constraint is invalid
+	 * @throws IllegalStateException If the resulting constraint is always
+	 * false
 	 */
-	public Constraint apply(Substitution s) throws java.lang.IllegalStateException;
+	public Constraint apply(Substitution s) throws IllegalStateException;
 	
 		
 	/**
 	 * Returs <code>true</code> if the specified term is in the constraint
 	 * 
-	 * @param term The term to check the existence
+	 * @param t The term to check the existence
 	 * @return <code>true</code> if the term specified equals one of the 
 	 * terms in this constraint, <code>false</code>.
 	 */
@@ -68,7 +69,7 @@ public interface Constraint {
 	 * Returns <code>true</code> if this constraint and the specified 
 	 * constraint have a common term.
 	 * 
-	 * @param constraint The constraint to compare to.
+	 * @param c The constraint to compare to.
 	 * @return <code>true</code> if the constraints have a common term, 
 	 * <code>false</code> otherwise.
 	 */
@@ -88,9 +89,10 @@ public interface Constraint {
 	 * D(W) = D(Z) = {a, b,..., z}. Then:
 	 * <li> X != a is consistent with X/b
 	 * <li> X != Y is consistent with W/Z
-	 * <li> X == Y is consistent with W/Z
 	 * <li> X != a is not consistent with X/W
 	 * <li> X != Y is not consistent with X/W
+	 * <li> X == Y is consistent with W/Z
+	 * <li> X == a is not consistent with X/a
 	 * <li> X == a is not consistent with X/b
 	 * <li> X == a is not consistent with X/W
 	 * <li> X == Y is not consistent with X/W

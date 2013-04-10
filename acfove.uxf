@@ -1142,8 +1142,8 @@ bg=light_gray</panel_attributes>
       <coordinates>
         <x>2808</x>
         <y>1692</y>
-        <w>153</w>
-        <h>81</h>
+        <w>161</w>
+        <h>89</h>
       </coordinates>
       <panel_attributes>lt=&lt;&lt;-</panel_attributes>
       <additional_attributes>144;27;144;54;27;54;27;72</additional_attributes>
@@ -1179,8 +1179,8 @@ bg=light_gray</panel_attributes>
       <coordinates>
         <x>2655</x>
         <y>1773</y>
-        <w>99</w>
-        <h>36</h>
+        <w>107</w>
+        <h>44</h>
       </coordinates>
       <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
       <additional_attributes>90;27;27;27</additional_attributes>
@@ -1232,8 +1232,8 @@ bg=light_gray</panel_attributes>
       <coordinates>
         <x>2457</x>
         <y>1818</y>
-        <w>45</w>
-        <h>90</h>
+        <w>44</w>
+        <h>89</h>
       </coordinates>
       <panel_attributes>lt=&lt;&lt;-</panel_attributes>
       <additional_attributes>27;27;27;72</additional_attributes>
@@ -1293,8 +1293,8 @@ bg=light_gray</panel_attributes>
       <coordinates>
         <x>2520</x>
         <y>1818</y>
-        <w>630</w>
-        <h>234</h>
+        <w>629</w>
+        <h>233</h>
       </coordinates>
       <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
       <additional_attributes>612;216;27;216;27;27</additional_attributes>
@@ -1304,8 +1304,8 @@ bg=light_gray</panel_attributes>
       <coordinates>
         <x>2520</x>
         <y>1818</y>
-        <w>756</w>
-        <h>342</h>
+        <w>755</w>
+        <h>341</h>
       </coordinates>
       <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
       <additional_attributes>738;324;27;324;27;27</additional_attributes>
@@ -1315,8 +1315,8 @@ bg=light_gray</panel_attributes>
       <coordinates>
         <x>2556</x>
         <y>1818</y>
-        <w>639</w>
-        <h>126</h>
+        <w>638</w>
+        <h>125</h>
       </coordinates>
       <panel_attributes>lt=&lt;.</panel_attributes>
       <additional_attributes>27;27;27;108;621;108</additional_attributes>
@@ -1581,8 +1581,8 @@ bg=orange</panel_attributes>
       <coordinates>
         <x>1845</x>
         <y>1917</y>
-        <w>36</w>
-        <h>90</h>
+        <w>44</w>
+        <h>98</h>
       </coordinates>
       <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
       <additional_attributes>27;27;27;81</additional_attributes>
@@ -1592,8 +1592,8 @@ bg=orange</panel_attributes>
       <coordinates>
         <x>1926</x>
         <y>1998</y>
-        <w>81</w>
-        <h>36</h>
+        <w>89</w>
+        <h>44</h>
       </coordinates>
       <panel_attributes>lt=-&gt;&gt;&gt;</panel_attributes>
       <additional_attributes>72;27;27;27</additional_attributes>
@@ -1614,8 +1614,8 @@ bg=orange</panel_attributes>
       <coordinates>
         <x>1926</x>
         <y>2043</y>
-        <w>81</w>
-        <h>36</h>
+        <w>89</w>
+        <h>44</h>
       </coordinates>
       <panel_attributes>lt=-&gt;&gt;&gt;</panel_attributes>
       <additional_attributes>72;27;27;27</additional_attributes>
@@ -1693,8 +1693,8 @@ bg=cyan</panel_attributes>
       <coordinates>
         <x>1701</x>
         <y>2349</y>
-        <w>135</w>
-        <h>108</h>
+        <w>134</w>
+        <h>107</h>
       </coordinates>
       <panel_attributes>lt=&lt;&lt;-</panel_attributes>
       <additional_attributes>117;27;27;90</additional_attributes>
@@ -1704,8 +1704,8 @@ bg=cyan</panel_attributes>
       <coordinates>
         <x>1944</x>
         <y>2520</y>
-        <w>36</w>
-        <h>81</h>
+        <w>44</w>
+        <h>89</h>
       </coordinates>
       <panel_attributes>lt=&lt;&lt;-</panel_attributes>
       <additional_attributes>27;27;27;72</additional_attributes>
@@ -1737,8 +1737,8 @@ bg=cyan</panel_attributes>
       <coordinates>
         <x>1791</x>
         <y>2592</y>
-        <w>117</w>
-        <h>36</h>
+        <w>125</w>
+        <h>44</h>
       </coordinates>
       <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
       <additional_attributes>108;27;27;27</additional_attributes>
@@ -1766,8 +1766,8 @@ bg=cyan</panel_attributes>
       <coordinates>
         <x>1791</x>
         <y>2349</y>
-        <w>189</w>
-        <h>99</h>
+        <w>197</w>
+        <h>107</h>
       </coordinates>
       <panel_attributes>lt=&lt;&lt;-</panel_attributes>
       <additional_attributes>27;27;180;90</additional_attributes>
@@ -1789,8 +1789,8 @@ bg=yellow</panel_attributes>
       <coordinates>
         <x>1701</x>
         <y>2457</y>
-        <w>45</w>
-        <h>153</h>
+        <w>44</w>
+        <h>152</h>
       </coordinates>
       <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
       <additional_attributes>27;135;27;27</additional_attributes>
@@ -1811,8 +1811,8 @@ bg=yellow</panel_attributes>
       <coordinates>
         <x>2070</x>
         <y>2448</y>
-        <w>108</w>
-        <h>45</h>
+        <w>107</w>
+        <h>44</h>
       </coordinates>
       <panel_attributes>lt=&lt;-</panel_attributes>
       <additional_attributes>90;27;27;27</additional_attributes>

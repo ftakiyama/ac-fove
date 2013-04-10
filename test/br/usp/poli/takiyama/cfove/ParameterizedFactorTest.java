@@ -8,7 +8,7 @@ import java.util.HashMap;
 import org.junit.Before;
 import org.junit.Test;
 
-import br.usp.poli.takiyama.common.Tuple;
+import br.usp.poli.takiyama.common.IntTuple;
 import br.usp.poli.takiyama.prv.PRVs;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 
@@ -87,35 +87,35 @@ public class ParameterizedFactorTest {
 		
 		ArrayList<Integer> tuple = new ArrayList<Integer>();
 		tuple.add(0); tuple.add(0); tuple.add(0);
-		Tuple t0 = new Tuple(tuple);
+		IntTuple t0 = new IntTuple(tuple);
 		
 		tuple.clear();
 		tuple.add(0); tuple.add(0); tuple.add(1);
-		Tuple t1 = new Tuple(tuple);
+		IntTuple t1 = new IntTuple(tuple);
 
 		tuple.clear();
 		tuple.add(0); tuple.add(1); tuple.add(0);
-		Tuple t2 = new Tuple(tuple);
+		IntTuple t2 = new IntTuple(tuple);
 
 		tuple.clear();
 		tuple.add(0); tuple.add(1); tuple.add(1);
-		Tuple t3 = new Tuple(tuple);
+		IntTuple t3 = new IntTuple(tuple);
 		
 		tuple.clear();
 		tuple.add(1); tuple.add(0); tuple.add(0);
-		Tuple t4 = new Tuple(tuple);
+		IntTuple t4 = new IntTuple(tuple);
 		
 		tuple.clear();
 		tuple.add(1); tuple.add(0); tuple.add(1);
-		Tuple t5 = new Tuple(tuple);
+		IntTuple t5 = new IntTuple(tuple);
 		
 		tuple.clear();
 		tuple.add(1); tuple.add(1); tuple.add(0);
-		Tuple t6 = new Tuple(tuple);
+		IntTuple t6 = new IntTuple(tuple);
 		
 		tuple.clear();
 		tuple.add(1); tuple.add(1); tuple.add(1);
-		Tuple t7 = new Tuple(tuple);
+		IntTuple t7 = new IntTuple(tuple);
 		
 		assertTrue(factor.getTuple(0).equals(t0) && 
 				   factor.getTuple(1).equals(t1) && 
@@ -151,26 +151,26 @@ public class ParameterizedFactorTest {
 		
 		indexes.add(0);
 		indexes.add(0);
-		System.out.println("Index of tuple " + indexes + ": " + factor.getTupleIndex(new Tuple(indexes)));
-		if (factor.getTupleIndex(new Tuple(indexes)) != 0) allTestsOk = false;
+		System.out.println("Index of tuple " + indexes + ": " + factor.getTupleIndex(new IntTuple(indexes)));
+		if (factor.getTupleIndex(new IntTuple(indexes)) != 0) allTestsOk = false;
 		
 		indexes.clear();
 		indexes.add(0);
 		indexes.add(1);
-		System.out.println("Index of tuple " + indexes + ": " + factor.getTupleIndex(new Tuple(indexes)));
-		if (factor.getTupleIndex(new Tuple(indexes)) != 1) allTestsOk = false;
+		System.out.println("Index of tuple " + indexes + ": " + factor.getTupleIndex(new IntTuple(indexes)));
+		if (factor.getTupleIndex(new IntTuple(indexes)) != 1) allTestsOk = false;
 
 		indexes.clear();
 		indexes.add(1);
 		indexes.add(0);
-		System.out.println("Index of tuple " + indexes + ": " + factor.getTupleIndex(new Tuple(indexes)));
-		if (factor.getTupleIndex(new Tuple(indexes)) != 2) allTestsOk = false;
+		System.out.println("Index of tuple " + indexes + ": " + factor.getTupleIndex(new IntTuple(indexes)));
+		if (factor.getTupleIndex(new IntTuple(indexes)) != 2) allTestsOk = false;
 
 		indexes.clear();
 		indexes.add(1);
 		indexes.add(1);
-		System.out.println("Index of tuple " + indexes + ": " + factor.getTupleIndex(new Tuple(indexes)));
-		if (factor.getTupleIndex(new Tuple(indexes)) != 3) allTestsOk = false;
+		System.out.println("Index of tuple " + indexes + ": " + factor.getTupleIndex(new IntTuple(indexes)));
+		if (factor.getTupleIndex(new IntTuple(indexes)) != 3) allTestsOk = false;
 
 		assertTrue(allTestsOk);
 		

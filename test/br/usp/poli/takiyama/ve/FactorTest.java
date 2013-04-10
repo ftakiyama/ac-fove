@@ -10,7 +10,7 @@ import org.junit.Test;
 import org.junit.Before;
 
 import br.usp.poli.takiyama.common.RandomVariable;
-import br.usp.poli.takiyama.common.Tuple;
+import br.usp.poli.takiyama.common.IntTuple;
 import br.usp.poli.takiyama.ve.Factor;
 
 /**
@@ -72,27 +72,27 @@ public class FactorTest {
 	public void getTuple() {
 		ArrayList<Integer> tuple = new ArrayList<Integer>();
 		tuple.add(0); tuple.add(0);
-		Tuple t0 = new Tuple(tuple);
+		IntTuple t0 = new IntTuple(tuple);
 		
 		tuple.clear();
 		tuple.add(0); tuple.add(1);
-		Tuple t1 = new Tuple(tuple);
+		IntTuple t1 = new IntTuple(tuple);
 
 		tuple.clear();
 		tuple.add(1); tuple.add(0);
-		Tuple t2 = new Tuple(tuple);
+		IntTuple t2 = new IntTuple(tuple);
 
 		tuple.clear();
 		tuple.add(1); tuple.add(1);
-		Tuple t3 = new Tuple(tuple);
+		IntTuple t3 = new IntTuple(tuple);
 		
 		tuple.clear();
 		tuple.add(2); tuple.add(0);
-		Tuple t4 = new Tuple(tuple);
+		IntTuple t4 = new IntTuple(tuple);
 		
 		tuple.clear();
 		tuple.add(2); tuple.add(1);
-		Tuple t5 = new Tuple(tuple);
+		IntTuple t5 = new IntTuple(tuple);
 		
 		assertTrue(factor.getTuple(0).equals(t0) && factor.getTuple(1).equals(t1)
 				&& factor.getTuple(2).equals(t2) && factor.getTuple(3).equals(t3)
@@ -107,32 +107,32 @@ public class FactorTest {
 		
 		indexes.add(0);
 		indexes.add(0);
-		if (factor.getTupleIndex(new Tuple(indexes)) != 0) allTestsOk = false;
+		if (factor.getTupleIndex(new IntTuple(indexes)) != 0) allTestsOk = false;
 		
 		indexes.clear();
 		indexes.add(0);
 		indexes.add(1);
-		if (factor.getTupleIndex(new Tuple(indexes)) != 1) allTestsOk = false;
+		if (factor.getTupleIndex(new IntTuple(indexes)) != 1) allTestsOk = false;
 
 		indexes.clear();
 		indexes.add(1);
 		indexes.add(0);
-		if (factor.getTupleIndex(new Tuple(indexes)) != 2) allTestsOk = false;
+		if (factor.getTupleIndex(new IntTuple(indexes)) != 2) allTestsOk = false;
 
 		indexes.clear();
 		indexes.add(1);
 		indexes.add(1);
-		if (factor.getTupleIndex(new Tuple(indexes)) != 3) allTestsOk = false;
+		if (factor.getTupleIndex(new IntTuple(indexes)) != 3) allTestsOk = false;
 
 		indexes.clear();
 		indexes.add(2);
 		indexes.add(0);
-		if (factor.getTupleIndex(new Tuple(indexes)) != 4) allTestsOk = false;
+		if (factor.getTupleIndex(new IntTuple(indexes)) != 4) allTestsOk = false;
 
 		indexes.clear();
 		indexes.add(2);
 		indexes.add(1);
-		if (factor.getTupleIndex(new Tuple(indexes)) != 5) allTestsOk = false;
+		if (factor.getTupleIndex(new IntTuple(indexes)) != 5) allTestsOk = false;
 
 		assertTrue(allTestsOk);
 	}

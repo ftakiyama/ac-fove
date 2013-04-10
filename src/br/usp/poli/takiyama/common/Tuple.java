@@ -1,80 +1,67 @@
 package br.usp.poli.takiyama.common;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
 
+public final class Tuple<E> {
+	
+	private final List<E> values;
+	
+	/* ************************************************************************
+	 *    Constructors
+	 * ************************************************************************/
 
-/**
- * A tuple is any combination of values of random variables.
- * For example, consider three random variables x1, x2, x3, all binary. So, a
- * valid tuple (x1, x2, x3) is (true, false, false).
- * <br>
- * This implementation store indexes of the values instead of the values. The
- * index of a value is an integer representing the position of that value in
- * the domain of the random variable. If the domain of the 
- * {@link RandomVariable} is not ordered, then this class is useless.
- * 
- * @author ftakiyama
- *
- */
-public final class Tuple {
-	private final ArrayList<Integer> values;
-	
-	/**
-	 * Constructor. Creates a tuple based on a array of integers.
-	 * @param values The values of this tuple.
-	 */
-	public Tuple(ArrayList<Integer> values) {
-		this.values = new ArrayList<Integer>(values);
+	private Tuple() {
+		values = new ArrayList<E>(0);
 	}
 	
-	/**
-	 * Returns true if this tuple contains no elements or is null.
-	 * @return True if this tuple has no elements or is null.
-	 */
-	public boolean isEmpty() {
-		if (this.values == null || this.values.isEmpty()) {
-			return true;
-		} else {
-			return false;
-		}
+	
+	private Tuple(List<E> values) {
+		this.values = new ArrayList<E>(values);
 	}
 	
+	
+	/* ************************************************************************
+	 *    Static factories
+	 * ************************************************************************/
+
 	/**
-	 * Returns the number of elements in this tuple.
-	 * If this tuple is empty or null, return 0.
-	 * @return The number of elements in this tuple. If this tuple is empty or 
-	 * null, return 0.
+	 * Returns an empty tuple.
+	 * 
+	 * @return an empty tuple.
 	 */
-	public int size() {
-		if (this.isEmpty()) {
-			return 0;
-		} else {
-			return this.values.size();
-		}
+	public static <E> Tuple<E> getInstance() {
+		return new Tuple<E>();
 	}
 	
+	
 	/**
-	 * Returns the element at the specified position in this list. 
+	 * Returns a tuple with the elements of the specified list, in the same
+	 * order.
+	 * 
+	 * @param values A list of elements to put in the tuple
+	 * @return A tuple with the specified elements
+	 */
+	public static <E> Tuple<E> getInstance(List<E> values) {
+		return new Tuple<E>(values);
+	}
+	
+	
+	/* ************************************************************************
+	 *    Getters
+	 * ************************************************************************/
+
+	/**
+	 * Returns the element at the specified position in this Tuple.
+	 *  
 	 * @param index Index of the element to return.
-	 * @return Returns the element at the specified position in this list.
+	 * @return Returns the element at the specified position in this tuple.
 	 */
-	public Integer get(int index) {
-		return new ArrayList<Integer>(values).get(index);
+	public E get(int index) {
+		return values.get(index);
 	}
 	
-	
-	/**
-	 * Removes the element at the specified index. All values to the right
-	 * of the index will be shifted to left.
-	 * @see {@link ArrayList#remove}
-	 * @param index The index of the element to be removed.
-	 * @return A copy of this tuple with the element specified removed.
-	 */
-	public Tuple remove(int index) {
-		ArrayList<Integer> newTuple = new ArrayList<Integer>(values);
-		newTuple.remove(index);
-		return new Tuple(newTuple);
-	}
 	
 	/**
 	 * Returns a sub-tuple of this tuple between the specified 
@@ -84,31 +71,75 @@ public final class Tuple {
 	 * @param toIndex high end point (exclusive) of the sub-tuple
 	 * @return A sub-tuple of this tuple
 	 */
-	public Tuple subTuple(int fromIndex, int toIndex) {
-		ArrayList<Integer> temp = new ArrayList<Integer>();
+	public Tuple<E> subTuple(int fromIndex, int toIndex) {
+		List<E> temp = new ArrayList<E>(toIndex - fromIndex);
 		for (int i = fromIndex; i < toIndex; i++) {
-			temp.add(this.values.get(i));
+			temp.add(values.get(i));
 		}
-		return new Tuple(temp);
+		return Tuple.getInstance(temp);
 	}
+	
 	
 	/**
 	 * Returns a sub-tuple of this tuple composed by the elements given
 	 * in the specified list of indexes.
-	 * <br>
+	 * <p>
 	 * For instance, let t = (0, 10, 20, 30) be a tuple. If we want the
 	 * sub-tuple given by indexes {0, 2} then this method would return 
 	 * t' = (0, 20).
+	 * </p>
+	 * 
 	 * @param indexes A list of indexes to extract from this tuple.
 	 * @return A sub-tuple of this tuple based on the list of indexes.
 	 */
-	public Tuple subTuple(int[] indexes) {
-		ArrayList<Integer> temp = new ArrayList<Integer>();
+	public Tuple<E> subTuple(int[] indexes) {
+		List<E> temp = new ArrayList<E>(values.size() - indexes.length);
 		for (int i = 0; i < indexes.length; i++) {
 			temp.add(get(indexes[i]));
 		}
-		return new Tuple(temp); 
+		return Tuple.getInstance(temp); 
 	}
+	
+
+	/**
+	 * Returns the number of elements in this tuple.
+	 * 
+	 * @return The number of elements in this tuple. 
+	 */
+	public int size() {
+		return values.size();
+	}
+	
+	
+	/**
+	 * Returns <code>true</code> if this tuple contains no elements or is null.
+	 * 
+	 * @return <code>True</code> if this tuple has no elements or is null,
+	 * <code>false</code> otherwise.
+	 */
+	public boolean isEmpty() {
+		return (values == null || values.isEmpty());
+	}
+	
+	
+	/* ************************************************************************
+	 *    Setters
+	 * ************************************************************************/
+
+	/**
+	 * Removes the element at the specified index. All values to the right
+	 * of the index will be shifted to left.
+	 * 
+	 * @see {@link ArrayList#remove}
+	 * @param index The index of the element to be removed.
+	 * @return A copy of this tuple with the element specified removed.
+	 */
+	public Tuple<E> remove(int index) {
+		List<E> newValues = new ArrayList<E>(values);
+		newValues.remove(index);
+		return Tuple.getInstance(newValues);
+	}
+	
 	
 	/**
 	 * Replaces the element at the specified position in this tuple with the 
@@ -119,32 +150,47 @@ public final class Tuple {
 	 * @return A new tuple with the element at the specified position replaced
 	 * by the specified element.
 	 */
-	public Tuple getModifiedTuple(int index, Integer element) {
-		ArrayList<Integer> temp = new ArrayList<Integer>(this.values);
+	public Tuple<E> set(int index, E element) {
+		List<E> temp = new ArrayList<E>(values);
 		temp.set(index, element);
-		return new Tuple(temp);
+		return Tuple.getInstance(temp);
 	}
 	
+	
+	/* ************************************************************************
+	 *    hashCode, equals and toString
+	 * ************************************************************************/
+
 	@Override
 	public String toString() {
-		return this.values.toString();
+		return values.toString();
 	}
 	
+		
 	@Override
-	public boolean equals(Object other) {
-		// Tests if both refer to the same object
-		if (this == other)
-	    	return true;
-		// Tests if the Object is an instance of this class
-	    if (!(other instanceof Tuple))
-	    	return false;
-	    // Tests if both have the same attributes
-	    Tuple targetObject = (Tuple) other;
-	    return ((this.values == null) ? targetObject.values == null : this.values.equals(targetObject.values));	    		
+	public boolean equals(Object obj) {
+		if (obj == this)
+	        return true;
+	    if (!(obj instanceof Tuple))
+	        return false;
+	    ListIterator<E> e1 = values.listIterator();
+		@SuppressWarnings("rawtypes")
+	    ListIterator e2 = ((Tuple) obj).values.listIterator();
+	    while(e1.hasNext() && e2.hasNext()) {
+	        E o1 = e1.next();
+	        Object o2 = e2.next();
+	        if (!(o1 == null ? o2 == null : o1.equals(o2)))
+	            return false;
+	    }
+	    return !(e1.hasNext() || e2.hasNext());
 	}
-	
+
+
 	@Override
 	public int hashCode() {
-		return values.hashCode();
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((values == null) ? 0 : values.hashCode());
+		return result;
 	}
 }

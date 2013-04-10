@@ -8,7 +8,7 @@ import java.util.List;
 import java.lang.ArrayIndexOutOfBoundsException;
 
 import br.usp.poli.takiyama.common.RandomVariable;
-import br.usp.poli.takiyama.common.Tuple;
+import br.usp.poli.takiyama.common.IntTuple;
 
 /**
  * Let dom(x) denote the domain of random variable x. 
@@ -69,7 +69,7 @@ public final class Factor {
 	 * @return The index of a tuple in this factor.
 	 * @throws IllegalArgumentException if the tuple is empty.
 	 */
-	public int getTupleIndex(Tuple tuple) throws IllegalArgumentException {
+	public int getTupleIndex(IntTuple tuple) throws IllegalArgumentException {
 		if (tuple.isEmpty()) {
 			throw new IllegalArgumentException("This tuple is empty!");
 		} else if (tuple.size() == 1) {
@@ -87,7 +87,7 @@ public final class Factor {
 	 * @param index The index of the tuple.
 	 * @return A tuple at the position specified by the parameter <b>index</b>.
 	 */
-	public Tuple getTuple(int index) {
+	public IntTuple getTuple(int index) {
 		ArrayList<Integer> tuple = new ArrayList<Integer>();
 		for (int j = randomVariables.size() - 1; j > 0; j--) {
 			int domainSize = this.randomVariables.get(j).getDomainSize();
@@ -96,7 +96,7 @@ public final class Factor {
 		}
 		tuple.add(index);
 		Collections.reverse(tuple);
-		return new Tuple(tuple);
+		return new IntTuple(tuple);
 	}
 	
 	@Override
@@ -134,7 +134,7 @@ public final class Factor {
 		
 		// Print the contents
 		for (int i = 0; i < this.mapping.size(); i++) {
-			Tuple tuple = this.getTuple(i);
+			IntTuple tuple = this.getTuple(i);
 			for (int j = 0; j < tuple.size(); j++) {
 				RandomVariable currentRandomVariable = this.randomVariables.get(j);
 				int domainIndex = tuple.get(j);

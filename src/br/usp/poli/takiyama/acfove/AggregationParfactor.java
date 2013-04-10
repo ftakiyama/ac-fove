@@ -14,7 +14,7 @@ import br.usp.poli.takiyama.cfove.SimpleParfactor;
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.InequalityConstraint;
 import br.usp.poli.takiyama.common.Parfactor;
-import br.usp.poli.takiyama.common.Tuple;
+import br.usp.poli.takiyama.common.IntTuple;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.CountingFormula;
@@ -485,9 +485,9 @@ public class AggregationParfactor implements Parfactor {
 		prvs.add(this.child);
 
 		List<Number> mapping = new ArrayList<Number>();
-		Iterator<Tuple> it = ParameterizedFactor.getIteratorOverTuples(prvs);
+		Iterator<IntTuple> it = ParameterizedFactor.getIteratorOverTuples(prvs);
 		while (it.hasNext()) {
-			Tuple currentTuple = it.next();
+			IntTuple currentTuple = it.next();
 			
 			int rangeIndexOfP = currentTuple.get(0);
 			int rangeIndexOfCAux = currentTuple.get(1);
@@ -505,7 +505,7 @@ public class AggregationParfactor implements Parfactor {
 				double correction = getCorrectionFraction();
 				ArrayList<Integer> tupleValue = new ArrayList<Integer>(1);
 				tupleValue.add(rangeIndexOfP);
-				Tuple t = new Tuple(tupleValue);
+				IntTuple t = new IntTuple(tupleValue);
 				double v = this.factor.getTupleValue(this.factor.getTupleIndex(t));
 				mapping.add(Math.pow(v, correction));
 			} else {
@@ -592,9 +592,9 @@ public class AggregationParfactor implements Parfactor {
 		prvs.add(this.child);
 
 		List<Number> mapping = new ArrayList<Number>();
-		Iterator<Tuple> it = ParameterizedFactor.getIteratorOverTuples(prvs);
+		Iterator<IntTuple> it = ParameterizedFactor.getIteratorOverTuples(prvs);
 		while (it.hasNext()) {
-			Tuple currentTuple = it.next();
+			IntTuple currentTuple = it.next();
 			
 			int rangeIndexOfP = currentTuple.get(0);
 			int rangeIndexOfCAux = currentTuple.get(1);
@@ -612,7 +612,7 @@ public class AggregationParfactor implements Parfactor {
 				double correction = getCorrectionFraction();
 				ArrayList<Integer> tupleValue = new ArrayList<Integer>(1);
 				tupleValue.add(rangeIndexOfP);
-				Tuple t = new Tuple(tupleValue);
+				IntTuple t = new IntTuple(tupleValue);
 				double v = this.factor.getTupleValue(this.factor.getTupleIndex(t));
 				mapping.add(Math.pow(v, correction));
 			} else {
@@ -1038,10 +1038,10 @@ public class AggregationParfactor implements Parfactor {
 		vars.add(cf);
 		vars.add(child);
 		
-		Iterator<Tuple> it = ParameterizedFactor.getIteratorOverTuples(vars);
+		Iterator<IntTuple> it = ParameterizedFactor.getIteratorOverTuples(vars);
 		List<Number> values = new ArrayList<Number>();
 		while (it.hasNext()) {
-			Tuple current = it.next();
+			IntTuple current = it.next();
 			if (aggregationIsConsistent(current, cf)) {
 				values.add(1.0);
 			} else {
@@ -1075,7 +1075,7 @@ public class AggregationParfactor implements Parfactor {
 	 * assignment of values is consistent with the child node value in 
 	 * the tuple
 	 */
-	private boolean aggregationIsConsistent(Tuple t, CountingFormula cf) {
+	private boolean aggregationIsConsistent(IntTuple t, CountingFormula cf) {
 		
 		int cfRangeIndex =  t.get(0);
 		Set<Boolean> s = new HashSet<Boolean>(2 * this.parent.getRangeSize());

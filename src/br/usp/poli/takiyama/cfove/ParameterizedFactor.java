@@ -10,7 +10,7 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 import br.usp.poli.takiyama.common.MathUtils;
-import br.usp.poli.takiyama.common.Tuple;
+import br.usp.poli.takiyama.common.IntTuple;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
@@ -115,7 +115,7 @@ public final class ParameterizedFactor {
 	 * @author ftakiyama
 	 *
 	 */
-	private class Itr implements Iterator<Tuple> {
+	private class Itr implements Iterator<IntTuple> {
 
 		int nextElementToReturn;
 		int lastElementReturned = -1;
@@ -127,7 +127,7 @@ public final class ParameterizedFactor {
 		}
 
 		@Override
-		public Tuple next() {
+		public IntTuple next() {
 			int i = nextElementToReturn;
 			if (i > size) 
 				throw new NoSuchElementException();
@@ -230,7 +230,7 @@ public final class ParameterizedFactor {
 	 * @return The index of a tuple in this factor.
 	 * @throws IllegalArgumentException if the tuple is empty.
 	 */
-	public int getTupleIndex(Tuple tuple) throws IllegalArgumentException {
+	public int getTupleIndex(IntTuple tuple) throws IllegalArgumentException {
 		if (tuple.isEmpty()) {
 			throw new IllegalArgumentException("This tuple is empty!");
 		} else if (tuple.size() == 1) {
@@ -248,7 +248,7 @@ public final class ParameterizedFactor {
 	 * @param index The index of the tuple.
 	 * @return A tuple at the position specified by the parameter <b>index</b>.
 	 */
-	public Tuple getTuple(int index) {
+	public IntTuple getTuple(int index) {
 		ArrayList<Integer> tuple = new ArrayList<Integer>();
 		for (int j = variables.size() - 1; j > 0; j--) {
 			int domainSize = this.variables.get(j).getRangeSize();
@@ -257,7 +257,7 @@ public final class ParameterizedFactor {
 		}
 		tuple.add(index);
 		Collections.reverse(tuple);
-		return new Tuple(tuple);
+		return new IntTuple(tuple);
 	}
 	
 	/**
@@ -271,7 +271,7 @@ public final class ParameterizedFactor {
 	 * @return An iterator over all tuples of a parameterized factor having
 	 * the specified parameterized random variables.
 	 */
-	public static Iterator<Tuple> getIteratorOverTuples(
+	public static Iterator<IntTuple> getIteratorOverTuples(
 			List<ParameterizedRandomVariable> variables) {
 		return new ParameterizedFactor(variables).iterator();
 	}
@@ -284,7 +284,7 @@ public final class ParameterizedFactor {
 	 * random variables define the way the tuples are created.
 	 * @return An iterator over all tuples of this parameterized factor
 	 */
-	private Iterator<Tuple> iterator() {
+	private Iterator<IntTuple> iterator() {
 		return new Itr();
 	}
 	
@@ -323,7 +323,7 @@ public final class ParameterizedFactor {
 		
 		// Print the contents
 		for (int i = 0; i < this.mapping.size(); i++) {
-			Tuple tuple = this.getTuple(i);
+			IntTuple tuple = this.getTuple(i);
 			for (int j = 0; j < tuple.size(); j++) {
 				ParameterizedRandomVariable currentRandomVariable = this.variables.get(j);
 				int domainIndex = tuple.get(j);
@@ -593,12 +593,12 @@ public final class ParameterizedFactor {
 		ArrayList<Number> newMapping = new ArrayList<Number>();
 		for (int factorCursor = 0; factorCursor < this.size(); factorCursor++) {
 			if (marks[factorCursor] == 0) {
-				Tuple currentTuple = this.getTuple(factorCursor); 
+				IntTuple currentTuple = this.getTuple(factorCursor); 
 				Double sum = new Double(0);
 				int tupleIndex;
 				int currentRandomVariableIndex = this.getParameterizedRandomVariableIndex(randomVariable);
 				for (int domainCursor = 0; domainCursor < randomVariable.getRangeSize(); domainCursor++) {
-					Tuple nextTuple = currentTuple.getModifiedTuple(currentRandomVariableIndex, domainCursor);
+					IntTuple nextTuple = currentTuple.getModifiedTuple(currentRandomVariableIndex, domainCursor);
 					tupleIndex = this.getTupleIndex(nextTuple);
 					marks[tupleIndex] = 1;
 					sum = Double.valueOf(Double.valueOf(sum) + this.getTupleValue(tupleIndex));
@@ -630,12 +630,12 @@ public final class ParameterizedFactor {
 		ArrayList<Number> newMapping = new ArrayList<Number>();
 		for (int factorCursor = 0; factorCursor < this.size(); factorCursor++) {
 			if (marks[factorCursor] == 0) {
-				Tuple currentTuple = this.getTuple(factorCursor); 
+				IntTuple currentTuple = this.getTuple(factorCursor); 
 				Double sum = new Double(0);
 				int tupleIndex;
 				int currentRandomVariableIndex = this.getParameterizedRandomVariableIndex(randomVariable);
 				for (int domainCursor = 0; domainCursor < randomVariable.getRangeSize(); domainCursor++) {
-					Tuple nextTuple = currentTuple.getModifiedTuple(currentRandomVariableIndex, domainCursor);
+					IntTuple nextTuple = currentTuple.getModifiedTuple(currentRandomVariableIndex, domainCursor);
 					tupleIndex = this.getTupleIndex(nextTuple);
 					marks[tupleIndex] = 1;
 					sum = Double.valueOf(Double.valueOf(sum) 
@@ -737,9 +737,9 @@ public final class ParameterizedFactor {
 		int[][] commonVariablesMapping = getCommonVariablesMapping(this, secondFactor);
 		
 		for (int i = 0; i < this.size(); i++) {
-			Tuple t1 = this.getTuple(i);
+			IntTuple t1 = this.getTuple(i);
 			for(int j = 0; j < secondFactor.size(); j++) {
-				Tuple t2 = secondFactor.getTuple(j);
+				IntTuple t2 = secondFactor.getTuple(j);
 				if (haveSameSubtuple(t1, t2, commonVariablesMapping)) {
 					newMapping.add(this.getTupleValue(i) * secondFactor.getTupleValue(j));
 				}
@@ -812,9 +812,9 @@ public final class ParameterizedFactor {
 	 * @return True if the tuples have the same value for the sub-tuple, false
 	 * otherwise.
 	 */
-	private boolean haveSameSubtuple(Tuple t1, Tuple t2, int[][] mapping) {
-		Tuple commonSubTuple1 = t1.subTuple(mapping[0]);
-		Tuple commonSubTuple2 = t2.subTuple(mapping[1]);
+	private boolean haveSameSubtuple(IntTuple t1, IntTuple t2, int[][] mapping) {
+		IntTuple commonSubTuple1 = t1.subTuple(mapping[0]);
+		IntTuple commonSubTuple2 = t2.subTuple(mapping[1]);
 		if (commonSubTuple1.equals(commonSubTuple2)) { 
 			return true;
 		}
@@ -867,7 +867,7 @@ public final class ParameterizedFactor {
 	 * @param t The tuple
 	 * @return The value of the specified tuple.
 	 */
-	public Double getValue(Tuple t) {
+	public Double getValue(IntTuple t) {
 		int index = getTupleIndex(t);
 		return mapping.get(index);
 	}

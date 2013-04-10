@@ -7,16 +7,16 @@ import java.util.ArrayList;
 import org.junit.Before;
 import org.junit.Test;
 
-import br.usp.poli.takiyama.common.Tuple;
+import br.usp.poli.takiyama.common.IntTuple;
 
 /**
- * A set of tests to check the methods of {@link Tuple}.
+ * A set of tests to check the methods of {@link IntTuple}.
  * @author ftakiyama
  *
  */
 public class TupleTest {
 
-	private Tuple tuple;
+	private IntTuple tuple;
 	
 	@Before
 	public void initialSetup() {
@@ -31,7 +31,7 @@ public class TupleTest {
 		temp.add(70);
 		temp.add(80);
 		temp.add(90);
-		tuple = new Tuple(temp);
+		tuple = new IntTuple(temp);
 	}
 	
 	@Test
@@ -42,7 +42,7 @@ public class TupleTest {
 		temp.add(20);
 		temp.add(40);
 		temp.add(60);
-		Tuple correctResult = new Tuple(temp);
+		IntTuple correctResult = new IntTuple(temp);
 		
 		assertTrue(tuple.subTuple(indexes).equals(correctResult));
 	}
@@ -60,7 +60,7 @@ public class TupleTest {
 		temp.add(70);
 		temp.add(80);
 		temp.add(90);
-		Tuple correctResult = new Tuple(temp);
+		IntTuple correctResult = new IntTuple(temp);
 
 		assertTrue(tuple.getModifiedTuple(0, 1000).equals(correctResult));
 		

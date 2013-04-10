@@ -14,7 +14,7 @@ import br.usp.poli.takiyama.cfove.SimpleParfactor;
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.InequalityConstraint;
 import br.usp.poli.takiyama.common.Parfactor;
-import br.usp.poli.takiyama.common.Tuple;
+import br.usp.poli.takiyama.common.IntTuple;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
@@ -521,9 +521,9 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 		prvs.add(this.child);
 
 		List<Number> mapping = new ArrayList<Number>();
-		Iterator<Tuple> it = ParameterizedFactor.getIteratorOverTuples(prvs);
+		Iterator<IntTuple> it = ParameterizedFactor.getIteratorOverTuples(prvs);
 		while (it.hasNext()) {
-			Tuple currentTuple = it.next();
+			IntTuple currentTuple = it.next();
 			
 			int rangeIndexOfP = currentTuple.get(0);
 			int rangeIndexOfCAux = currentTuple.get(prvs.size() - 2);
@@ -541,7 +541,7 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 				double correction = getCorrectionFraction();
 				ArrayList<Integer> tupleValue = new ArrayList<Integer>(1);
 				tupleValue.add(rangeIndexOfP);
-				Tuple t = new Tuple(tupleValue);
+				IntTuple t = new IntTuple(tupleValue);
 				double v = this.factor.getTupleValue(this.factor.getTupleIndex(t));
 				mapping.add(Math.pow(v, correction));
 			} else {
@@ -648,9 +648,9 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 		prvs.add(this.child);
 
 		List<Number> mapping = new ArrayList<Number>();
-		Iterator<Tuple> it = ParameterizedFactor.getIteratorOverTuples(prvs);
+		Iterator<IntTuple> it = ParameterizedFactor.getIteratorOverTuples(prvs);
 		while (it.hasNext()) {
-			Tuple currentTuple = it.next();
+			IntTuple currentTuple = it.next();
 			
 			int rangeIndexOfP = currentTuple.get(0);
 			int rangeIndexOfCAux = currentTuple.get(prvs.size() - 2);
@@ -668,7 +668,7 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 				double correction = getCorrectionFraction();
 				ArrayList<Integer> tupleValue = new ArrayList<Integer>(1);
 				tupleValue.add(rangeIndexOfP);
-				Tuple t = new Tuple(tupleValue);
+				IntTuple t = new IntTuple(tupleValue);
 				double v = this.factor.getTupleValue(this.factor.getTupleIndex(t));
 				mapping.add(Math.pow(v, correction));
 			} else {
@@ -772,7 +772,7 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 		List<ParameterizedRandomVariable> prvs = 
 				new ArrayList<ParameterizedRandomVariable>(contextVariables);
 		prvs.add(0, child);
-		Iterator<Tuple> it = ParameterizedFactor.getIteratorOverTuples(prvs);
+		Iterator<IntTuple> it = ParameterizedFactor.getIteratorOverTuples(prvs);
 		
 		ParameterizedFactor currentFactor = calculateSumOutBase(it, prvs);
 		
@@ -791,16 +791,16 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 		return currentFactor;
 	}
 	
-	private ParameterizedFactor calculateSumOutBase(Iterator<Tuple> it, List<ParameterizedRandomVariable> prvs) {
+	private ParameterizedFactor calculateSumOutBase(Iterator<IntTuple> it, List<ParameterizedRandomVariable> prvs) {
 
 		List<Number> base = new ArrayList<Number>();
 
 		while (it.hasNext()) {
-			Tuple t = it.next();
+			IntTuple t = it.next();
 			String childRangeValue = child.getElementFromRange(t.get(0));
 			if (this.parent.getRange().contains(childRangeValue)) {
 				int pindex = parent.getRange().indexOf(childRangeValue);
-				Tuple t1 = t.getModifiedTuple(0, pindex);
+				IntTuple t1 = t.getModifiedTuple(0, pindex);
 				base.add(factor.getValue(t1));
 			} else {
 				base.add(0.0);
@@ -810,12 +810,12 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 		return ParameterizedFactor.getInstance("", prvs, base);
 	}
 	
-	private ParameterizedFactor calculateSumOutFk0(Iterator<Tuple> it, ParameterizedFactor previousFactor) {
+	private ParameterizedFactor calculateSumOutFk0(Iterator<IntTuple> it, ParameterizedFactor previousFactor) {
 		
 		List<Number> fValues = new ArrayList<Number>();
 		
 		while (it.hasNext()) {
-			Tuple t = it.next();
+			IntTuple t = it.next();
 			String x = child.getElementFromRange(t.get(0));
 			Boolean x1 = Boolean.valueOf(x);
 			double sum = 0.0;
@@ -826,8 +826,8 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 					Boolean z1 = Boolean.valueOf(z);
 					int zindex = this.child.getRange().indexOf(z);
 					if (this.operator.applyOn(y1, z1) == x1) {
-						Tuple ty = t.getModifiedTuple(0, yindex);
-						Tuple tz = t.getModifiedTuple(0, zindex);
+						IntTuple ty = t.getModifiedTuple(0, yindex);
+						IntTuple tz = t.getModifiedTuple(0, zindex);
 						sum = sum 
 							+ previousFactor.getValue(ty)
 								* previousFactor.getValue(tz);
@@ -841,11 +841,11 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 		return ParameterizedFactor.getInstance("", prvs, fValues);
 	}
 	
-	private ParameterizedFactor calculateSumOutFk1(Iterator<Tuple> it, ParameterizedFactor previousFactor) {
+	private ParameterizedFactor calculateSumOutFk1(Iterator<IntTuple> it, ParameterizedFactor previousFactor) {
 		List<Number> fValues = new ArrayList<Number>();
 		
 		while (it.hasNext()) {
-			Tuple t = it.next();
+			IntTuple t = it.next();
 			String x = child.getElementFromRange(t.get(0));
 			Boolean x1 = Boolean.valueOf(x);
 			double sum = 0.0;
@@ -859,9 +859,9 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 						Boolean w1 = Boolean.valueOf(w);
 						int windex = this.parent.getRange().indexOf(w);
 						if (this.operator.applyOn(w1, y1, z1) == x1) {
-							Tuple tw = t.getModifiedTuple(0, windex);
-							Tuple ty = t.getModifiedTuple(0, yindex);
-							Tuple tz = t.getModifiedTuple(0, zindex);
+							IntTuple tw = t.getModifiedTuple(0, windex);
+							IntTuple ty = t.getModifiedTuple(0, yindex);
+							IntTuple tz = t.getModifiedTuple(0, zindex);
 							sum = sum 
 								+ factor.getValue(tw)
 									* previousFactor.getValue(ty)
@@ -1006,10 +1006,10 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 		vars.add(child);
 		vars.addAll(contextVariables);
 		
-		Iterator<Tuple> it = ParameterizedFactor.getIteratorOverTuples(vars);
+		Iterator<IntTuple> it = ParameterizedFactor.getIteratorOverTuples(vars);
 		List<Number> values = new ArrayList<Number>();
 		while (it.hasNext()) {
-			Tuple current = it.next();
+			IntTuple current = it.next();
 			if (aggregationIsConsistent(current, cf)) {
 				values.add(1.0);
 			} else {
@@ -1043,7 +1043,7 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 	 * assignment of values is consistent with the child node value in 
 	 * the tuple
 	 */
-	private boolean aggregationIsConsistent(Tuple t, CountingFormula cf) {
+	private boolean aggregationIsConsistent(IntTuple t, CountingFormula cf) {
 		
 		int cfRangeIndex =  t.get(0);
 		Set<Boolean> s = new HashSet<Boolean>(2 * this.parent.getRangeSize());

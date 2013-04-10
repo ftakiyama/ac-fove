@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import br.usp.poli.takiyama.common.RandomVariable;
-import br.usp.poli.takiyama.common.Tuple;
+import br.usp.poli.takiyama.common.IntTuple;
 
 
 /**
@@ -60,12 +60,12 @@ public class FactorOperation {
 		ArrayList<BigDecimal> newMapping = new ArrayList<BigDecimal>();
 		for (int factorCursor = 0; factorCursor < factor.size(); factorCursor++) {
 			if (marks[factorCursor] == 0) {
-				Tuple currentTuple = factor.getTuple(factorCursor); 
+				IntTuple currentTuple = factor.getTuple(factorCursor); 
 				BigDecimal sum = new BigDecimal(0);
 				int tupleIndex;
 				int currentRandomVariableIndex = factor.getRandomVariableIndex(randomVariable);
 				for (int domainCursor = 0; domainCursor < randomVariable.getDomainSize(); domainCursor++) {
-					Tuple nextTuple = currentTuple.getModifiedTuple(currentRandomVariableIndex, domainCursor);
+					IntTuple nextTuple = currentTuple.getModifiedTuple(currentRandomVariableIndex, domainCursor);
 					tupleIndex = factor.getTupleIndex(nextTuple);
 					marks[tupleIndex] = 1;
 					sum = sum.add(factor.getTupleValue(tupleIndex));
@@ -123,9 +123,9 @@ public class FactorOperation {
 		int[][] commonVariablesMapping = getCommonVariablesMapping(firstFactor, secondFactor);
 		
 		for (int i = 0; i < firstFactor.size(); i++) {
-			Tuple t1 = firstFactor.getTuple(i);
+			IntTuple t1 = firstFactor.getTuple(i);
 			for(int j = 0; j < secondFactor.size(); j++) {
-				Tuple t2 = secondFactor.getTuple(j);
+				IntTuple t2 = secondFactor.getTuple(j);
 				if (haveSameSubtuple(t1, t2, commonVariablesMapping)) {
 					newMapping.add(firstFactor.getTupleValue(i).multiply(secondFactor.getTupleValue(j)));
 				}
@@ -198,9 +198,9 @@ public class FactorOperation {
 	 * @return True if the tuples have the same value for the sub-tuple, false
 	 * otherwise.
 	 */
-	private static boolean haveSameSubtuple(Tuple t1, Tuple t2, int[][] mapping) {
-		Tuple commonSubTuple1 = t1.subTuple(mapping[0]);
-		Tuple commonSubTuple2 = t2.subTuple(mapping[1]);
+	private static boolean haveSameSubtuple(IntTuple t1, IntTuple t2, int[][] mapping) {
+		IntTuple commonSubTuple1 = t1.subTuple(mapping[0]);
+		IntTuple commonSubTuple2 = t2.subTuple(mapping[1]);
 		if (commonSubTuple1.equals(commonSubTuple2)) { 
 			return true;
 		}
@@ -300,9 +300,9 @@ public class FactorOperation {
 		int[][] commonVariablesMapping = getCommonVariablesMapping(dividend, divisor);
 		
 		for (int i = 0; i < dividend.size(); i++) {
-			Tuple t1 = dividend.getTuple(i);
+			IntTuple t1 = dividend.getTuple(i);
 			for(int j = 0; j < divisor.size(); j++) {
-				Tuple t2 = divisor.getTuple(j);
+				IntTuple t2 = divisor.getTuple(j);
 				if (haveSameSubtuple(t1, t2, commonVariablesMapping)) {
 					newMapping
 						.add(dividend

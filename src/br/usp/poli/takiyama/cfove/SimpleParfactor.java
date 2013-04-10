@@ -16,7 +16,7 @@ import br.usp.poli.takiyama.common.InequalityConstraint;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.Parfactors;
 import br.usp.poli.takiyama.common.RandomVariable;
-import br.usp.poli.takiyama.common.Tuple;
+import br.usp.poli.takiyama.common.IntTuple;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.CountingFormula;
@@ -832,9 +832,9 @@ public final class SimpleParfactor implements Parfactor {
 //			newValues.add(this.factor.getTupleValue(this.factor.getAllValues().size() - 2));
 //			newValues.add(this.factor.getTupleValue(this.factor.getAllValues().size() - 1));
 
-			Iterator<Tuple> newTuplesIt = ParameterizedFactor.getIteratorOverTuples(newVariables);
+			Iterator<IntTuple> newTuplesIt = ParameterizedFactor.getIteratorOverTuples(newVariables);
 			while (newTuplesIt.hasNext()) {
-				Tuple tuple = newTuplesIt.next();
+				IntTuple tuple = newTuplesIt.next();
 				int rangeIndex = tuple.get(cfIndex);
 				int bucketIndex = tuple.get(cfIndex + 1);
 				String oldHistogram = newCountingFormula.addCount(rangeIndex, bucketIndex, 1); 
@@ -1421,9 +1421,9 @@ public final class SimpleParfactor implements Parfactor {
 			
 			// calculate the values of the new parfactor
 			ArrayList<Number> newValues = new ArrayList<Number>();
-			Iterator<Tuple> newTuplesIterator = 
+			Iterator<IntTuple> newTuplesIterator = 
 					ParameterizedFactor.getIteratorOverTuples(newVariables);
-			Tuple tupleOfNewParfactor = null;
+			IntTuple tupleOfNewParfactor = null;
 			while (newTuplesIterator.hasNext()) {
 				tupleOfNewParfactor = newTuplesIterator.next();
 				double tupleValue = 1.0;

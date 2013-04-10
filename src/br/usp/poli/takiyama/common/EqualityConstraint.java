@@ -3,7 +3,6 @@ package br.usp.poli.takiyama.common;
 import java.util.Iterator;
 
 import br.usp.poli.takiyama.prv.Binding;
-import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;

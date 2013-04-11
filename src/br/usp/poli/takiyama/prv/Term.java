@@ -14,6 +14,33 @@ public interface Term {
 	 */
 	public String value();
 	
+	
+	/*
+	 * The two methods below, isVariable() and isConstant(), are *not*
+	 * good OO practice. But:
+	 * - I am probably the only one that will ever edit this code
+	 * - This code is unlikely to be extended in the near future
+	 * - A Term is either a variable or a constant by definition
+	 */
+	
+	/**
+	 * Returns <code>true</code> if this term is a {@link LogicalVariable}.
+	 * 
+	 * @return <code>true</code> if this term is a {@link LogicalVariable},
+	 * <code>false</code> otherwise.
+	 */
+	public boolean isVariable();
+	
+	
+	/**
+	 * Returns <code>true</code> if this term is a {@link Constant}.
+	 * 
+	 * @return <code>true</code> if this term is a {@link Constant},
+	 * <code>false</code> otherwise.
+	 */
+	public boolean isConstant();
+	
+	
 	@Override	
 	public boolean equals(Object o);	
 	

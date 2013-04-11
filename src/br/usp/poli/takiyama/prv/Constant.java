@@ -68,6 +68,18 @@ public final class Constant implements Term {
 		return value;
 	}
 	
+
+	@Override
+	public boolean isVariable() {
+		return false;
+	}
+	
+	
+	@Override
+	public boolean isConstant() {
+		return !isVariable();
+	}
+	
 	
 	/* ************************************************************************
 	 *    hashCode, equals and toString

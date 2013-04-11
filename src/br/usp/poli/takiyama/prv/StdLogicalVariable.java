@@ -102,6 +102,19 @@ public final class StdLogicalVariable implements LogicalVariable {
 		return name;
 	}
 	
+	
+	@Override
+	public boolean isVariable() {
+		return true;
+	}
+	
+	
+	@Override
+	public boolean isConstant() {
+		return !isVariable();
+	}
+	
+	
 	/* ************************************************************************
 	 *    Getters
 	 * ************************************************************************/

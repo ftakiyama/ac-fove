@@ -19,7 +19,7 @@ import br.usp.poli.takiyama.common.Pool;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.prv.Binding;
-import br.usp.poli.takiyama.prv.CountingFormula;
+import br.usp.poli.takiyama.prv.OldCountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariableNameGenerator;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 import br.usp.poli.takiyama.prv.Substitution;

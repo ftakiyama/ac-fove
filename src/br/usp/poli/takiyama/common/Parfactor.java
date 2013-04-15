@@ -5,7 +5,7 @@ import java.util.Set;
 
 import br.usp.poli.takiyama.cfove.ParameterizedFactor;
 import br.usp.poli.takiyama.prv.Binding;
-import br.usp.poli.takiyama.prv.CountingFormula;
+import br.usp.poli.takiyama.prv.OldCountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
@@ -125,8 +125,8 @@ public interface Parfactor {
 	public List<Parfactor> split(Binding s);
 	public Parfactor count(LogicalVariable lv);
 	public Set<Parfactor> propositionalize(LogicalVariable lv);
-	public Parfactor expand(CountingFormula countingFormula, Term term);
-	public Parfactor fullExpand(CountingFormula countingFormula);
+	public Parfactor expand(OldCountingFormula countingFormula, Term term);
+	public Parfactor fullExpand(OldCountingFormula countingFormula);
 	public Parfactor multiply(Parfactor parfactor);
 	public Parfactor sumOut(ParameterizedRandomVariable prv);
 	public List<Parfactor> splitOnConstraints(Set<Constraint> constraints);

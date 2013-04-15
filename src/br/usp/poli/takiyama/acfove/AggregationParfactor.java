@@ -17,8 +17,8 @@ import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.IntTuple;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.Constant;
-import br.usp.poli.takiyama.prv.CountingFormula;
-import br.usp.poli.takiyama.prv.CountingFormula.Histogram;
+import br.usp.poli.takiyama.prv.OldCountingFormula;
+import br.usp.poli.takiyama.prv.OldCountingFormula.Histogram;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.LogicalVariableNameGenerator;
@@ -802,10 +802,10 @@ public class AggregationParfactor implements Parfactor {
 		constraints.removeAll(constraintsOnExtra);
 				
 		// Build counting formula
-		CountingFormula cf = CountingFormula.getInstance(extra, constraintsOnExtra, child);
+		OldCountingFormula cf = OldCountingFormula.getInstance(extra, constraintsOnExtra, child);
 		
 		List<Number> mapping = new ArrayList<Number>();
-		for (CountingFormula.Histogram<String> h : cf.getCountingFormulaRange()) {
+		for (OldCountingFormula.Histogram<String> h : cf.getCountingFormulaRange()) {
 			int extraPopulationSize = extra.individualsSatisfying(constraintsOnExtra).size();
 			if (h.containsValue(extraPopulationSize)) {
 				int index = cf.getCountingFormulaRange().indexOf(h);
@@ -955,13 +955,13 @@ public class AggregationParfactor implements Parfactor {
 	}
 
 	@Override
-	public Parfactor expand(CountingFormula countingFormula, Term term) {
+	public Parfactor expand(OldCountingFormula countingFormula, Term term) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method!");
 	}
 
 	@Override
-	public Parfactor fullExpand(CountingFormula countingFormula) {
+	public Parfactor fullExpand(OldCountingFormula countingFormula) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method!");
 	}
@@ -1030,7 +1030,7 @@ public class AggregationParfactor implements Parfactor {
 	 */
 	public List<Parfactor> convertToParfactor() {
 		
-		CountingFormula cf = CountingFormula.getInstance(extraVariable, 
+		OldCountingFormula cf = OldCountingFormula.getInstance(extraVariable, 
 				constraintsOnExtraVariable, parent);
 		
 		List<ParameterizedRandomVariable> vars = 
@@ -1075,7 +1075,7 @@ public class AggregationParfactor implements Parfactor {
 	 * assignment of values is consistent with the child node value in 
 	 * the tuple
 	 */
-	private boolean aggregationIsConsistent(IntTuple t, CountingFormula cf) {
+	private boolean aggregationIsConsistent(IntTuple t, OldCountingFormula cf) {
 		
 		int cfRangeIndex =  t.get(0);
 		Set<Boolean> s = new HashSet<Boolean>(2 * this.parent.getRangeSize());

@@ -1,5 +1,6 @@
 package br.usp.poli.takiyama.prv;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import br.usp.poli.takiyama.common.Constraint;
@@ -128,11 +129,14 @@ public final class StdLogicalVariable implements LogicalVariable {
 	@Override
 	public Population individualsSatisfying(Set<Constraint> constraints) {
 		Population pop = Population.getInstance(this.population);
-		for (Constant individual : pop) {
+		Set<Constraint> cbuf = new HashSet<Constraint>(constraints);
+		for (Constant individual : population) {
+			Binding bind = Binding.getInstance(this, individual);
 			for (Constraint constraint : constraints) {
-				Binding bind = Binding.getInstance(this, individual);
-				if (constraint.isConsistentWith(bind)) {
+				if (!constraint.isConsistentWith(bind)) {
 					pop.remove(individual);
+					cbuf.remove(constraint);
+					break;
 				}
 			}
 		}

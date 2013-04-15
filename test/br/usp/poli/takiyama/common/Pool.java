@@ -17,7 +17,7 @@ import br.usp.poli.takiyama.acfove.operator.Or;
 import br.usp.poli.takiyama.cfove.ParameterizedFactor;
 import br.usp.poli.takiyama.cfove.SimpleParfactor;
 import br.usp.poli.takiyama.prv.Binding;
-import br.usp.poli.takiyama.prv.CountingFormula;
+import br.usp.poli.takiyama.prv.OldCountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.PRVs;
@@ -243,7 +243,7 @@ public class Pool {
 		}
 		prvPool.put(
 				name, 
-				CountingFormula.getInstance(
+				OldCountingFormula.getInstance(
 						this.variablesPool.get(boundLogicalVariableName), 
 						constraints, 
 						this.prvPool.get(prvName)));
@@ -2343,8 +2343,8 @@ public class Pool {
 	 * @return A counting formula from the pool, or null if the formula does
 	 * not exist.
 	 */
-	public CountingFormula getCountingFormula(String name) {
-		return (CountingFormula) prvPool.get(name);
+	public OldCountingFormula getCountingFormula(String name) {
+		return (OldCountingFormula) prvPool.get(name);
 	}
 	
 	/**

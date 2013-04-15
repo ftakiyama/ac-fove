@@ -15,7 +15,7 @@ import br.usp.poli.takiyama.common.Pool;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.prv.Binding;
-import br.usp.poli.takiyama.prv.CountingFormula;
+import br.usp.poli.takiyama.prv.OldCountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariableNameGenerator;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
@@ -64,7 +64,7 @@ public class SimpleParfactorTest {
 		objects.setExample2_16();
 		
 		// Expands parfactor on individual x1
-		CountingFormula countingFormula = objects.getCountingFormula("#.A:{A!=x0}[f(A)]");
+		OldCountingFormula countingFormula = objects.getCountingFormula("#.A:{A!=x0}[f(A)]");
 		Term x1 = objects.getLogicalVariable("A").population().individualAt(1);
 		Parfactor result = objects.getSimpleParfactor("g1").expand(countingFormula, x1);
 		

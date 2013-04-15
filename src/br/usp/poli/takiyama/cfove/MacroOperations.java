@@ -8,7 +8,7 @@ import java.util.Stack;
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.RandomVariableSet;
-import br.usp.poli.takiyama.prv.CountingFormula;
+import br.usp.poli.takiyama.prv.OldCountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
@@ -231,7 +231,7 @@ public final class MacroOperations {
 	public static Set<Parfactor> fullExpand(
 			Set<Parfactor> parfactors,
 			Parfactor parfactorToExpand,
-			CountingFormula countingFormula) {
+			OldCountingFormula countingFormula) {
 		
 		parfactors.remove(parfactorToExpand);
 		parfactors.add(parfactorToExpand.fullExpand(countingFormula));

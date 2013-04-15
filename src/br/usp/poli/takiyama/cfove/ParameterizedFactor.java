@@ -12,7 +12,7 @@ import java.util.Set;
 import br.usp.poli.takiyama.common.MathUtils;
 import br.usp.poli.takiyama.common.IntTuple;
 import br.usp.poli.takiyama.prv.Binding;
-import br.usp.poli.takiyama.prv.CountingFormula;
+import br.usp.poli.takiyama.prv.OldCountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
@@ -408,7 +408,7 @@ public final class ParameterizedFactor {
 	
 	public boolean isInStandardPrv(Term term) {
 		for (ParameterizedRandomVariable prv : this.variables) {
-			if (prv.contains(term) && !(prv instanceof CountingFormula)) { // argh
+			if (prv.contains(term) && !(prv instanceof OldCountingFormula)) { // argh
 				return true;
 			}
 		}
@@ -611,7 +611,7 @@ public final class ParameterizedFactor {
 		return getInstance(this.getName(), newRandomVariables, newMapping);
 	}
 	
-	public ParameterizedFactor sumOut(CountingFormula randomVariable) {
+	public ParameterizedFactor sumOut(OldCountingFormula randomVariable) {
 		
 		// Checks if the random variable exists
 		if (getParameterizedRandomVariableIndex(randomVariable) == -1) {
@@ -657,7 +657,7 @@ public final class ParameterizedFactor {
 	 * @param histogramIndex
 	 * @return
 	 */
-	private double getCorrectionForCountingFormula(CountingFormula countingFormula, int histogramIndex) {
+	private double getCorrectionForCountingFormula(OldCountingFormula countingFormula, int histogramIndex) {
 		int productOfValuesInHistogram = 1;
 		for (int rangeIndex = 0; 
 				rangeIndex < countingFormula.getCountedVariableRangeSize(); 

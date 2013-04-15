@@ -69,4 +69,16 @@ public interface LogicalVariable extends Term {
 	 * @param newName The new name
 	 */
 	public LogicalVariable rename(String name);
+	
+	
+	@Override
+	public String toString();
+	
+
+	@Override
+	public int hashCode();
+	
+
+	@Override
+	public boolean equals(Object o);
 }

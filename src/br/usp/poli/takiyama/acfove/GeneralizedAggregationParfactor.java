@@ -16,7 +16,7 @@ import br.usp.poli.takiyama.common.InequalityConstraint;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.IntTuple;
 import br.usp.poli.takiyama.prv.Binding;
-import br.usp.poli.takiyama.prv.CountingFormula;
+import br.usp.poli.takiyama.prv.OldCountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
@@ -289,13 +289,13 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 	}
 
 	@Override
-	public Parfactor expand(CountingFormula countingFormula, Term term) {
+	public Parfactor expand(OldCountingFormula countingFormula, Term term) {
 
 		throw new UnsupportedOperationException("Not implemented!");
 	}
 
 	@Override
-	public Parfactor fullExpand(CountingFormula countingFormula) {
+	public Parfactor fullExpand(OldCountingFormula countingFormula) {
 
 		throw new UnsupportedOperationException("Not implemented!");
 	}
@@ -909,10 +909,10 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 		constraints.removeAll(constraintsOnExtra);
 				
 		// Build counting formula
-		CountingFormula cf = CountingFormula.getInstance(extra, constraintsOnExtra, child);
+		OldCountingFormula cf = OldCountingFormula.getInstance(extra, constraintsOnExtra, child);
 		
 		List<Number> mapping = new ArrayList<Number>();
-		for (CountingFormula.Histogram<String> h : cf.getCountingFormulaRange()) {
+		for (OldCountingFormula.Histogram<String> h : cf.getCountingFormulaRange()) {
 			int extraPopulationSize = extra.individualsSatisfying(constraintsOnExtra).size();
 			if (h.containsValue(extraPopulationSize)) {
 				int index = cf.getCountingFormulaRange().indexOf(h);
@@ -997,7 +997,7 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 	 */
 	public List<Parfactor> convertToParfactor() {
 		
-		CountingFormula cf = CountingFormula.getInstance(extraVariable, 
+		OldCountingFormula cf = OldCountingFormula.getInstance(extraVariable, 
 				constraintsOnExtraVariable, parent);
 		
 		List<ParameterizedRandomVariable> vars = 
@@ -1043,7 +1043,7 @@ public class GeneralizedAggregationParfactor implements Parfactor {
 	 * assignment of values is consistent with the child node value in 
 	 * the tuple
 	 */
-	private boolean aggregationIsConsistent(IntTuple t, CountingFormula cf) {
+	private boolean aggregationIsConsistent(IntTuple t, OldCountingFormula cf) {
 		
 		int cfRangeIndex =  t.get(0);
 		Set<Boolean> s = new HashSet<Boolean>(2 * this.parent.getRangeSize());

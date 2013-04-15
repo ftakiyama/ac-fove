@@ -38,7 +38,7 @@ public interface Constraint {
 	 * Applies the substitution in this constraint.
 	 * <p>
 	 * If the resulting constraint is always false (for instance, q &ne; q), 
-	 * then throws an {@link IllegalStateException}.
+	 * then throws an {@link IllegalArgumentException}.
 	 * </p>
 	 * <p>
 	 * If the specified substitution does not apply to this constraint, then 
@@ -52,7 +52,7 @@ public interface Constraint {
 	 * @throws IllegalStateException If the resulting constraint is always
 	 * false
 	 */
-	public Constraint apply(Substitution s) throws IllegalStateException;
+	public Constraint apply(Substitution s) throws IllegalArgumentException;
 	
 		
 	/**
@@ -77,9 +77,9 @@ public interface Constraint {
 	
 	
 	/**
-	 * Returns <code>true</code> if this constraint is consistent with the
-	 * specified {@link Binding}. A constraint is consistent with a binding if
-	 * the resulting constraint after applying the binding is a valid one.
+	 * Returns <code>true</code> if the specified {@link Binding} satisfies this
+	 * constraint. In other words, returns <code>true</code> if applying
+	 * the specified binding to this constraint results in a valid sentence.
 	 * <p>
 	 * This method also returns <code>false</code> when it is not possible to
 	 * evaluate whether the resulting constraint is valid or not.
@@ -87,15 +87,18 @@ public interface Constraint {
 	 * <p>
 	 * For instance, let X, Y, W and Z be logical variables with D(X) = D(Y) = 
 	 * D(W) = D(Z) = {a, b,..., z}. Then:
-	 * <li> X != a is consistent with X/b
-	 * <li> X != Y is consistent with W/Z
-	 * <li> X != a is not consistent with X/W
-	 * <li> X != Y is not consistent with X/W
-	 * <li> X == Y is consistent with W/Z
-	 * <li> X == a is not consistent with X/a
-	 * <li> X == a is not consistent with X/b
-	 * <li> X == a is not consistent with X/W
-	 * <li> X == Y is not consistent with X/W
+	 * <li> X != a is consistent with X/b (because b != a is true)
+	 * <li> X != Y is consistent with W/Z (because X != Y is still true)
+	 * <li> X != a is not consistent with X/a (because a != a is not true)
+	 * <li> X != a is not consistent with X/W (because W != a is not necessarily
+	 * true)
+	 * <li> X != Y is not consistent with X/W (because W != Y is not necessarily
+	 * true) 
+	 * <li> X == Y is consistent with W/Z (because X == Y is still true)
+	 * <li> X == a is consistent with X/a (because a == a is true)
+	 * <li> X == a is consistent with X/W (because X = a & X = W implies W = a)
+	 * <li> X == Y is consistent with X/W (because X = Y & X = W implies W = Y)
+	 * <li> X == a is not consistent with X/b (because b == a is not true)
 	 * </p>
 	 * 
 	 * @param b The binding to test

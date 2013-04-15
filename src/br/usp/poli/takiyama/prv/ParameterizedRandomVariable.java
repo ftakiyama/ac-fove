@@ -320,8 +320,8 @@ public class ParameterizedRandomVariable {
 	 * or do not have the same number of parameters or do not unify.
 	 */
 	public Substitution getMgu(ParameterizedRandomVariable other) throws IllegalArgumentException {
-		if (other instanceof CountingFormula)
-			return getMgu((CountingFormula) other);
+		if (other instanceof OldCountingFormula)
+			return getMgu((OldCountingFormula) other);
 		
 		if (this.parameters.size() != other.parameters.size()
 				|| this.getName() != other.getName()) {
@@ -396,7 +396,7 @@ public class ParameterizedRandomVariable {
 	 * @throws IllegalArgumentException If the PRVs do not have the same name
 	 * or do not have the same number of parameters or do not unify.
 	 */
-	public Substitution getMgu(CountingFormula countingFormula) 
+	public Substitution getMgu(OldCountingFormula countingFormula) 
 			throws IllegalArgumentException {
 		return countingFormula.getMgu(this);
 	}

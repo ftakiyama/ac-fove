@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import br.usp.poli.takiyama.prv.Constant;
-import br.usp.poli.takiyama.prv.CountingFormula;
+import br.usp.poli.takiyama.prv.OldCountingFormula;
 import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 
@@ -240,7 +240,7 @@ public final class RandomVariableSet {
 	 * @return True if this set represents the same set of random variables
 	 * from the specified counting formula.
 	 */
-	public boolean isEquivalent(CountingFormula cf) {
+	public boolean isEquivalent(OldCountingFormula cf) {
 		return (this.prv.equals(cf.getPrv()) 
 				&& this.constraints.equals(cf.getConstraints()));
 	}

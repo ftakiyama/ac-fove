@@ -39,6 +39,14 @@ public interface Prv {
 	 */
 	public List<LogicalVariable> parameters();
 	
+
+	/**
+	 * Returns the size of the range of this parameterized random variable.
+	 * 
+	 * @return The size of the range of this parameterized random variable.
+	 */
+	public List<RangeElement> range();
+	
 	
 	/**
 	 * Returns the number of ground instances satisfying the specified set of
@@ -49,14 +57,6 @@ public interface Prv {
 	 * constraints.
 	 */
 	public int groundSetSize(Set<Constraint> constraints);
-	
-
-	/**
-	 * Returns the size of the range of this parameterized random variable.
-	 * 
-	 * @return The size of the range of this parameterized random variable.
-	 */
-	public int rangeSize();
 	
 	
 	/**

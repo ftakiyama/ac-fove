@@ -1,21 +1,23 @@
 package br.usp.poli.takiyama.prv;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 public class Substitution {
 	
-	private HashMap<LogicalVariable, Term> bindings;
+	private Map<LogicalVariable, Term> bindings;
 	
 	
 	/**
 	 * Creates an empty substitution.
 	 */
 	private Substitution() {
-		bindings = new HashMap<LogicalVariable, Term>();
+		bindings = new LinkedHashMap<LogicalVariable, Term>();
 	}
 	
 	
@@ -53,11 +55,26 @@ public class Substitution {
 	
 	/**
 	 * Static factory. Creates a substitution based on a single binding.
-	 * @param bindings A {@link Binding}.
+	 * @param binding A {@link Binding}.
 	 * @return A new substitution built from the binding given.
 	 */
 	public static Substitution getInstance(Binding binding) {
 		return new Substitution(binding);
+	}
+	
+	
+	/**
+	 * Returns a substitution based on two bindings.
+	 * 
+	 * @param b1 A {@link Binding}.
+	 * @param b2 A {@link Binding}.
+	 * @return A new substitution built from the binding given.
+	 */
+	public static Substitution getInstance(Binding b1, Binding b2) {
+		List<Binding> args = new ArrayList<Binding>(2);
+		args.add(b1);
+		args.add(b2);
+		return new Substitution(args);
 	}
 	
 	
@@ -116,15 +133,29 @@ public class Substitution {
 	 * Returns true if this substitution contains the binding specified, false
 	 * otherwise.
 	 * @param binding The binding to search for.
-	 * @return True if this substitution contaisn the binding specified, false
+	 * @return True if this substitution contains the binding specified, false
 	 * otherwise.
 	 */
 	public boolean contains(Binding binding) {
-		if (this.bindings.containsKey(binding.firstTerm())) {
-			return this.bindings.get(binding.firstTerm()).equals(binding);
-		} else {
-			return false;
-		}
+		LogicalVariable key = binding.firstTerm();
+		boolean replacedExists = bindings.containsKey(key);
+		boolean replacementExists = bindings.get(key).equals(binding.secondTerm());
+		
+		return  replacedExists && replacementExists;
+	}
+	
+	
+	/**
+	 * Returns <code>true</code> if there is any binding in this substitution
+	 * that replaces the specified {@link LogicalVariable}.
+	 * 
+	 * @param replaced The logical variable being replaced to search for
+	 * @return <code>true</code> if there is any binding in this substitution
+	 * that replaces the specified {@link LogicalVariable}, <code>false</code>
+	 * otherwise.
+	 */
+	public boolean contains(LogicalVariable replaced) {
+		return bindings.containsKey(replaced);
 	}
 	
 	

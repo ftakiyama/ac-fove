@@ -106,10 +106,14 @@ public class StdPrv implements Prv {
 	 * 
 	 * @param prv The StdPrv to copy.
 	 */
-	private StdPrv(StdPrv prv) {
-		parameters = new ArrayList<Term>(prv.parameters);
-		functor = prv.functor;
-		range = new ArrayList<RangeElement>(prv.range);
+	private StdPrv(Prv prv) throws IllegalArgumentException {
+		if (!(prv instanceof StdPrv)) {
+			throw new IllegalArgumentException();
+		}
+		StdPrv std = (StdPrv) prv;
+		parameters = new ArrayList<Term>(std.parameters);
+		functor = std.functor;
+		range = new ArrayList<RangeElement>(std.range);
 	}
 	
 	
@@ -125,7 +129,7 @@ public class StdPrv implements Prv {
 	 * @param t The parameters of the PRV
 	 * @return An instance of StdPrv.
 	 */
-	public static StdPrv getInstance(String f, List<RangeElement> r, List<Term> t) {
+	public static Prv getInstance(String f, List<RangeElement> r, List<Term> t) {
 		return new StdPrv(f, r, t);
 	}
 	
@@ -136,7 +140,7 @@ public class StdPrv implements Prv {
 	 * @param prv The StdPrv to copy.
 	 * @return A copy of the specified StdPrv.
 	 */
-	public static StdPrv getInstance(StdPrv prv) {
+	public static Prv getInstance(Prv prv) {
 		return new StdPrv(prv);
 	}
 
@@ -147,7 +151,7 @@ public class StdPrv implements Prv {
 	 * 
 	 * @return An empty StdPrv
 	 */
-	public static StdPrv getInstance() {
+	public static Prv getInstance() {
 		return new StdPrv();
 	}
 	
@@ -181,6 +185,12 @@ public class StdPrv implements Prv {
 		}
 		return param;
 	}
+	
+
+	@Override
+	public List<RangeElement> range() {
+		return new ArrayList<RangeElement>(range);
+	}
 
 	
 	@Override
@@ -190,12 +200,6 @@ public class StdPrv implements Prv {
 			size = size * v.individualsSatisfying(constraints).size();
 		}
 		return size;
-	}
-	
-
-	@Override
-	public int rangeSize() {
-		return range.size();
 	}
 
 	
@@ -211,7 +215,7 @@ public class StdPrv implements Prv {
 
 	@Override
 	public Prv apply(Substitution s) {
-		StdPrv substituted = StdPrv.getInstance(this);
+		StdPrv substituted = new StdPrv(this);
 		for (Iterator<LogicalVariable> it = s.getSubstitutedIterator(); it.hasNext(); ) {
 			LogicalVariable toReplace = it.next();
 			Term replacement = s.getReplacement(toReplace);
@@ -222,7 +226,8 @@ public class StdPrv implements Prv {
 	
 	
 	/**
-	 * Replaces the term <code>toReplace</code> by the <code>replacement</code> 
+	 * Replaces all occurrences of the term <code>toReplace</code> by the
+	 * <code>replacement</code> 
 	 * in the list of parameters. If the term <code>toReplace</code> does not
 	 * exist, nothing is done.
 	 * 
@@ -231,7 +236,7 @@ public class StdPrv implements Prv {
 	 * <code>toReplace</code>.
 	 */
 	private void replace(Term toReplace, Term replacement) {
-		if (contains(toReplace)) {
+		while (contains(toReplace)) {
 			int substitutedIndex = parameters.indexOf(toReplace);
 			parameters.set(substitutedIndex, replacement);
 		}
@@ -242,4 +247,70 @@ public class StdPrv implements Prv {
 	public Prv rename(String name) {
 		return StdPrv.getInstance(name, range, parameters);
 	}
+	
+	
+	/* ************************************************************************
+	 *    hashCode, equals and toString
+	 * ************************************************************************/
+
+	@Override
+	public String toString() {
+		StringBuilder result = new StringBuilder(functor + " ( ");
+		for (Term term : parameters) {
+			result.append(term).append(" ");
+		}
+		result.append(")");
+		return result.toString();
+	}
+
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((functor == null) ? 0 : functor.hashCode());
+		result = prime * result
+				+ ((parameters == null) ? 0 : parameters.hashCode());
+		result = prime * result + ((range == null) ? 0 : range.hashCode());
+		return result;
+	}
+
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof StdPrv)) {
+			return false;
+		}
+		StdPrv other = (StdPrv) obj;
+		if (functor == null) {
+			if (other.functor != null) {
+				return false;
+			}
+		} else if (!functor.equals(other.functor)) {
+			return false;
+		}
+		if (parameters == null) {
+			if (other.parameters != null) {
+				return false;
+			}
+		} else if (!parameters.equals(other.parameters)) {
+			return false;
+		}
+		if (range == null) {
+			if (other.range != null) {
+				return false;
+			}
+		} else if (!range.equals(other.range)) {
+			return false;
+		}
+		return true;
+	}
+	
+	
 }

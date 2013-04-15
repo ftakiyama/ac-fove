@@ -9,7 +9,7 @@ import br.usp.poli.takiyama.common.MathUtils;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.RandomVariableSet;
 import br.usp.poli.takiyama.log.ConsoleLogger;
-import br.usp.poli.takiyama.prv.CountingFormula;
+import br.usp.poli.takiyama.prv.OldCountingFormula;
 import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 
@@ -125,9 +125,9 @@ public final class CFOVE {
 	private class FullExpand implements Operation {
 
 		private Parfactor parfactor;
-		private CountingFormula countingFormula;
+		private OldCountingFormula countingFormula;
 		
-		FullExpand(Parfactor parfactor, CountingFormula countingFormula) {
+		FullExpand(Parfactor parfactor, OldCountingFormula countingFormula) {
 			this.parfactor = parfactor;
 			this.countingFormula = countingFormula;
 		}
@@ -234,8 +234,8 @@ public final class CFOVE {
 		for (Parfactor p : this.parfactors) {
 			for (ParameterizedRandomVariable prv : p.getParameterizedRandomVariables()) {
 				RandomVariableSet s = RandomVariableSet.getInstance(prv, p.getConstraints());
-				if (prv instanceof CountingFormula
-						&& this.query.isEquivalent((CountingFormula) prv)) {
+				if (prv instanceof OldCountingFormula
+						&& this.query.isEquivalent((OldCountingFormula) prv)) {
 					continue;
 				}
 				if (!s.equals(query)) {
@@ -287,8 +287,8 @@ public final class CFOVE {
 	private void chooseMacroOperation() {
 		for (Parfactor p : parfactors) {
 			for (ParameterizedRandomVariable f : p.getParameterizedRandomVariables()) { 
-				if (f instanceof CountingFormula) {
-					evaluateFullExpand(p, (CountingFormula) f);
+				if (f instanceof OldCountingFormula) {
+					evaluateFullExpand(p, (OldCountingFormula) f);
 				} else if (!RandomVariableSet.getInstance(f, p.getConstraints()).equals(query)) {
 					evaluateGlobalSumOut(f, p.getConstraints());
 				}
@@ -404,7 +404,7 @@ public final class CFOVE {
 	 * @param parfactor The parfactor on which expansion will be made
 	 * @param cf The counting formula to expand
 	 */
-	private void evaluateFullExpand(Parfactor parfactor, CountingFormula cf) {
+	private void evaluateFullExpand(Parfactor parfactor, OldCountingFormula cf) {
 		int resultFactorSize = parfactor.getFactor().size() / cf.getRangeSize();
 		for (int i = 0; 
 			 i < cf.getBoundVariable()
@@ -527,8 +527,8 @@ public final class CFOVE {
 			logger.info("Evaluating parfactor \n" + p.toString());
 			
 			for (ParameterizedRandomVariable f : p.getParameterizedRandomVariables()) { 
-				if (f instanceof CountingFormula) {
-					evaluateFullExpand(p, (CountingFormula) f);
+				if (f instanceof OldCountingFormula) {
+					evaluateFullExpand(p, (OldCountingFormula) f);
 				} else if (!RandomVariableSet.getInstance(f, p.getConstraints()).equals(query)) {
 					evaluateGlobalSumOut(f, p.getConstraints());
 				}

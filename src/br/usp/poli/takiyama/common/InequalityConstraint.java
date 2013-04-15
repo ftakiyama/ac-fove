@@ -40,7 +40,7 @@ public final class InequalityConstraint extends AbstractConstraint {
 			// trying to create a constraint with equal terms
 			throw new IllegalArgumentException();
 		}
-		if (t1 instanceof LogicalVariable || t2 instanceof LogicalVariable) {
+		if (t1.isVariable() || t2.isVariable()) {
 			firstTerm = t1;
 			secondTerm = t2;
 		} else {
@@ -72,7 +72,7 @@ public final class InequalityConstraint extends AbstractConstraint {
 	 * ************************************************************************/
 	
 	@Override
-	public Constraint apply(Substitution s) throws IllegalStateException {
+	public Constraint apply(Substitution s) throws IllegalArgumentException {
 		Term t1 = this.firstTerm;
 		Term t2 = this.secondTerm;
 		for (Iterator<LogicalVariable> it = s.getSubstitutedIterator(); it.hasNext(); ) {
@@ -84,44 +84,51 @@ public final class InequalityConstraint extends AbstractConstraint {
 				t2 = s.getReplacement(replaced);
 			}
 		}
-		if (t1.equals(t2)) {
-			throw new IllegalStateException();
-		}
 		return new InequalityConstraint(t1, t2);
 	}
 
 	
 	@Override
 	public boolean isConsistentWith(Binding b) {
+		boolean isConsistent = false;
+		if (firstTerm.isVariable() && secondTerm.isVariable()) {
+			// Any binding will result in ambiguous constraint
+			isConsistent =  false;
+		} else {		
+			if (isApplicable(b)) {
+				if (b.secondTerm().isVariable()) {
+					// Applying the binding results in ambiguous constraint
+					isConsistent =  false;
+				} else {
+					// Applies the binding and check whether the result is 
+					// a true sentence
+					InequalityConstraint c = new InequalityConstraint(firstTerm, 
+							secondTerm);
+					c.firstTerm = b.secondTerm();
+					isConsistent =  !c.firstTerm.equals(c.secondTerm);
+				}
+			} else {
+				// The binding is not applicable, thus the constraint 
+				// remains the same.
+				isConsistent =  true;
+			}
+		}
+		return isConsistent;
+	}
+	
+	
+	/**
+	 * Returns true if the specified binding can be applied in this
+	 * constraint.
+	 * 
+	 * @param b The binding to test applicability
+	 * @return true if the specified binding can be applied in this
+	 * constraint.
+	 */
+	private boolean isApplicable(Binding b) {
+		return contains(b.firstTerm());
+	}
 		
-		/*
-		 * Tests a more subtle case: is X != a consistent with X/W?
-		 * Well, if we apply the substitution, we obtain W != a which is indeed 
-		 * a valid constraint, but not necessarily correct. 
-		 * Event though X != a, we cannot say the same about W.
-		 * This case is not supposed to happen in the current application,
-		 * because I use only unary bindings (X/a) to call this method.
-		 */
-		if (hasCommonTerm(b) && b.secondTerm() instanceof LogicalVariable) {
-			return false;
-		}
-		Substitution sub = Substitution.getInstance(b);
-		try {
-			apply(sub);
-		} catch (IllegalStateException e) {
-			return false;
-		}
-		return true;
-	}
-	
-	
-	private boolean hasCommonTerm(Binding b) {
-		return (this.firstTerm().equals(b.firstTerm())) 
-			|| (this.firstTerm().equals(b.secondTerm()))
-			|| (this.secondTerm().equals(b.firstTerm()))
-			|| (this.secondTerm().equals(b.secondTerm()));
-	}
-	
 	
 	/* ************************************************************************
 	 *    hashCode, equals and toString

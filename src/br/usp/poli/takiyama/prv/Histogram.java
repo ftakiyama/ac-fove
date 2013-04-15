@@ -39,7 +39,7 @@ public class Histogram<T extends RangeElement> implements RangeElement {
 	 * Creates a copy of the specified histogram.
 	 * @param histogram The histogram to copy
 	 */
-	Histogram(Histogram<T> histogram) {
+	Histogram(Histogram<? extends T> histogram) {
 		this.distribution = 
 			new LinkedHashMap<T, Integer>(histogram.distribution);
 	}

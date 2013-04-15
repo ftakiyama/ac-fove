@@ -194,6 +194,7 @@ public class CountingFormula implements Prv {
 		return new CountingFormula(bound, constraints, prv);
 	}
 	
+	
 	/* ************************************************************************
 	 *    Getters
 	 * ************************************************************************/
@@ -202,6 +203,7 @@ public class CountingFormula implements Prv {
 	public Set<Constraint> constraints() {
 		return new HashSet<Constraint>(constraints);
 	}
+	
 
 	/**
 	 * Returns the name of the PRV associated with this counting formula.
@@ -210,6 +212,7 @@ public class CountingFormula implements Prv {
 	public String name() {
 		return prv.name();
 	}
+	
 
 	@Override
 	public List<LogicalVariable> parameters() {
@@ -218,6 +221,7 @@ public class CountingFormula implements Prv {
 		return param;
 	}
 
+	
 	@Override
 	public int groundSetSize(Set<Constraint> constraints) {
 		int size = 1;
@@ -226,22 +230,88 @@ public class CountingFormula implements Prv {
 		}
 		return size;
 	}
+	
 
 	@Override
 	public List<RangeElement> range() {
 		return new ArrayList<RangeElement>(range);
 	}
+	
+	
+	/**
+	 * Returns the size of the range of the PRV associated with this 
+	 * counting formula.
+	 * 
+	 * @return the size of the range of the PRV associated with this 
+	 * counting formula.
+	 */
+	public int prvRangeSize() {
+		return prv.range().size();
+	}
 
+	
 	@Override
 	public boolean contains(Term t) {
 		return parameters().contains(t);
 	}
 
 	
+	/**
+	 * Returns the count of a value from range(f), given the histogram from the
+	 * range of this counting formula.
+	 * 
+	 * @param hIndex The index of the histogram of this counting formula
+	 * @param e The index of the bucket in the histogram.
+	 * @return The count of the specified value from range(f) for the
+	 * specified element from this counting formula.
+	 */
+	@SuppressWarnings("unchecked")
+	public int getCount(int hIndex, RangeElement e) {
+		/*
+		 * I know that the range is composed of Histogram<RangeElement>, so it
+		 * is safe to cast.
+		 */
+		return ((Histogram<RangeElement>) range.get(hIndex)).getCount(e);
+	}
+	
+	
+	/**
+	 * Returns <code>true</code> if the counting formula can be converted to a 
+	 * standard parameterized random variable, <code>false</code> otherwise.
+	 * <p>
+	 * A counting formula can be converted to standard parameterized random
+	 * variable when the set of constraints is big enough to restrict the
+	 * bound logical variable to a single individual.
+	 * </p>
+	 * 
+	 * @return <code>true</code> if the counting formula can be converted to a 
+	 * standard parameterized random variable, <code>false</code> otherwise.
+	 */
+	public boolean isStdPrv() {
+		return (bound.individualsSatisfying(constraints).size() == 1);
+	}
+	
+	
 	/* ************************************************************************
 	 *    Setters
 	 * ************************************************************************/
 
+	/**
+	 * Adds a constraint to this counting formula. This method returns a new
+	 * instance of the counting formula.
+	 * 
+	 * @param constraint The constraint to be added to the counting formula.
+	 * @return A new counting formula equal to this one with the addition of 
+	 * the constraint specified.
+	 */
+	public CountingFormula add(Constraint constraint) {
+		HashSet<Constraint> constraints = 
+				new HashSet<Constraint>(this.constraints);
+		constraints.add(constraint);
+		return CountingFormula.getInstance(bound, prv, constraints);
+	}
+	
+	
 	@Override
 	public Prv apply(Substitution s) {
 		Prv substituted = StdPrv.getInstance(prv);
@@ -265,6 +335,19 @@ public class CountingFormula implements Prv {
 		return CountingFormula.getInstance(boundLv, (StdPrv) substituted, constraints);
 	}
 
+
+	/**
+	 * Returns the result of applying a substitution to the parameterized
+	 * random variable of this counting formula.
+	 * 
+	 * @param s The substitution to be made.
+	 * @return The parameterized random variable associated with this 
+	 * counting formula with the specified substitution applied.
+	 */
+	public Prv applyToPrv(Substitution s) {
+		return prv.apply(s);
+	}
+	
 	
 	/**
 	 * Returns the set of constraints that result from applying the
@@ -286,12 +369,60 @@ public class CountingFormula implements Prv {
 		return substituted;
 	}
 	
+	
+	/**
+	 * Adds the specified amount to the bucket of the specified histogram.
+	 * <p>
+	 * This method does not modify this counting formula, all operations are
+	 * made on copies of elements from this counting formula.
+	 * </p>
+	 * 
+	 * @param hIndex The index of the histogram in the range of this counting 
+	 * formula
+	 * @param e The bucket where addition will be made
+	 * @param n The amount to add
+	 * @return The histogram with the specified amount added to the specified
+	 * bucket.
+	 */
+	public RangeElement increaseCount(int hIndex, RangeElement e, int n) {
+		Histogram<RangeElement> hist = new Histogram<RangeElement>(range.get(hIndex));
+		hist.addCount(e, n);
+		return hist;
+	}
+	
+	
 	@Override
 	public Prv rename(String name) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("Not implemented!");
 	}
+	
 
+	/**
+	 * Converts this counting formula to a standard parameterized random 
+	 * variable when its bound logical variable is constrained to a single 
+	 * individual.
+	 * <p>
+	 * If conversion is not possible, returns this counting formula.
+	 * </p>
+	 * 
+	 * @return This counting formula converted to a standard parameterized 
+	 * random variable.
+	 */
+	public Prv toStdPrv() {
+		Population constrainedIndividuals = bound.individualsSatisfying(constraints);
+		Prv result;
+		if (constrainedIndividuals.size() != 1) {
+			result = this;
+		} else {
+			Constant loneIndividual = constrainedIndividuals.iterator().next();
+			Binding b = Binding.getInstance(bound, loneIndividual);
+			Substitution s = Substitution.getInstance(b);
+			result = prv.apply(s);
+		}
+		return result;
+	}
+	
+	
 	/* ************************************************************************
 	 *    hashCode, equals and toString
 	 * ************************************************************************/

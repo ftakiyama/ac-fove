@@ -222,6 +222,14 @@ public class CountingFormula implements Prv {
 		param.remove(bound);
 		return param;
 	}
+	
+	
+	@Override
+	public List<Term> terms() {
+		List<Term> terms = new ArrayList<Term>(prv.terms());
+		terms.remove(bound);
+		return terms;
+	}
 
 	
 	@Override

@@ -41,9 +41,9 @@ public class BindingTest {
 		 * X/x1 - x1
 		 * X/x1 - x2
 		 */
-		LogicalVariable x = PRVs.getLogicalVariable("X", "x", 2);
-		LogicalVariable y = PRVs.getLogicalVariable("Y", "x", 2);
-		LogicalVariable w = PRVs.getLogicalVariable("W", "x", 2);
+		LogicalVariable x = Prvs.getLogicalVariable("X", "x", 2);
+		LogicalVariable y = Prvs.getLogicalVariable("Y", "x", 2);
+		LogicalVariable w = Prvs.getLogicalVariable("W", "x", 2);
 		Constant x1 = Constant.getInstance("x1");
 		Constant x2 = Constant.getInstance("x2");
 		

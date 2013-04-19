@@ -187,6 +187,12 @@ public class StdPrv implements Prv {
 		return param;
 	}
 	
+	
+	@Override
+	public List<Term> terms() {
+		return new ArrayList<Term>(parameters);
+	}
+	
 
 	@Override
 	public List<RangeElement> range() {

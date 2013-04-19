@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import br.usp.poli.takiyama.common.IntTuple;
-import br.usp.poli.takiyama.prv.PRVs;
+import br.usp.poli.takiyama.prv.Prvs;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 
 public class ParameterizedFactorTest {
@@ -25,17 +25,17 @@ public class ParameterizedFactorTest {
 		for (int i = 0; i < 3; i++) {
 			String name = "f" + i;
 			variables.put(name,
-						  PRVs.getBooleanPrvWithOneParameter(name, i));
+						  Prvs.getBooleanPrvWithOneParameter(name, i));
 		}
 		for (int i = 0; i < 3; i++) {
 			String name = "g" + i;
 			variables.put(name,
-						  PRVs.getBooleanPrvWithTwoParameters(name, i, i + 1));
+						  Prvs.getBooleanPrvWithTwoParameters(name, i, i + 1));
 		}
 		for (int i = 0; i < 3; i++) {
 			String name = "h" + i;
 			variables.put(name,
-						  PRVs.getBooleanPrvWithThreeParameters(name, i, i + 1, i + 2));
+						  Prvs.getBooleanPrvWithThreeParameters(name, i, i + 1, i + 2));
 		}
 		
 		// Test factors

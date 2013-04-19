@@ -20,7 +20,7 @@ import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.OldCountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.StdLogicalVariable;
-import br.usp.poli.takiyama.prv.PRVs;
+import br.usp.poli.takiyama.prv.Prvs;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
@@ -73,7 +73,7 @@ public class Pool {
 	 * @param populationSize The size of the population
 	 */
 	private void createLogicalVariable(String name, String prefix, int populationSize) {
-		variablesPool.put(name, PRVs.getLogicalVariable(name, prefix, populationSize));
+		variablesPool.put(name, Prvs.getLogicalVariable(name, prefix, populationSize));
 	}
 	
 	/**
@@ -83,7 +83,7 @@ public class Pool {
 	 * @param variables An array of names of logical variables from this PRV.
 	 */
 	private void createPrv(String name, LogicalVariable ... variables) {
-		prvPool.put(name, PRVs.getBooleanPrv(name, variables));
+		prvPool.put(name, Prvs.getBooleanPrv(name, variables));
 	}
 	
 	/**
@@ -123,7 +123,7 @@ public class Pool {
 			}
 		}
 		
-		prvPool.put(name, PRVs.getBooleanPrv(name, terms.toArray(new Term[terms.size()])));
+		prvPool.put(name, Prvs.getBooleanPrv(name, terms.toArray(new Term[terms.size()])));
 	}
 	
 	

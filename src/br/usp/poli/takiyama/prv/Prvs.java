@@ -3,18 +3,92 @@ package br.usp.poli.takiyama.prv;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Stack;
+
+import br.usp.poli.takiyama.common.Constraint;
+import br.usp.poli.takiyama.common.EqualityConstraint;
 
 /**
- * Creates objects from br.usp.poli.takiyama.cfove.prv for testing purposes.
- * @author ftakiyama
+ * Operations for {@link Prv}.
+ * 
+ * @author Felipe Takiyama
  *
  */
-public final class PRVs {
+public final class Prvs {
 	
+
+	public static Substitution mgu(Prv prv1, Prv prv2) throws IllegalArgumentException {
+		
+		if (!areUnifiable(prv1, prv2)) {
+			throw new IllegalArgumentException();
+		}
+		
+		Stack<Constraint> buffer = pushEquations(prv1, prv2);
+		List<Binding> mgu = new ArrayList<Binding>();
+		
+		while (!buffer.isEmpty()) {
+			EqualityConstraint equation = (EqualityConstraint) buffer.pop();
+			if (hasIdenticalTerms(equation)) {
+				// do nothing
+			} else if (equation.firstTerm().isVariable()) {
+				Binding b = equation.toBinding();
+				buffer = apply(b, buffer);
+				mgu.add(b);
+			} else if (equation.secondTerm().isVariable()) {
+				Binding b = equation.toInverseBinding();
+				buffer = apply(b, buffer);
+				mgu.add(b);
+			} else {
+				throw new IllegalArgumentException();
+			}
+		}
+		
+		Substitution result = Substitution.getInstance(mgu);
+		return result;
+	}
+	
+	private static boolean areUnifiable(Prv prv1, Prv prv2) {
+		boolean sameFunctor = prv1.name().equals(prv2.name());
+		boolean sameNumberOfParam = prv1.terms().size() == prv2.terms().size();
+		return sameFunctor && sameNumberOfParam;
+	}
+	
+	private static Stack<Constraint> pushEquations(Prv prv1, Prv prv2) {
+		Stack<Constraint> result = new Stack<Constraint>();
+		for (int i = 0; i < prv1.terms().size(); i++) {
+			Term t1 = prv1.terms().get(i);
+			Term t2 = prv2.terms().get(i);
+			result.push(EqualityConstraint.getInstance(t1, t2));
+		}
+		return result;
+	}
+	
+	private static boolean hasIdenticalTerms(Constraint c) {
+		return c.firstTerm().equals(c.secondTerm());
+	}
+		
+	private static Stack<Constraint> apply(Binding b, Stack<Constraint> buffer) {
+		Substitution s = Substitution.getInstance(b);
+		for (Constraint e : buffer) {
+			e = (EqualityConstraint) e.apply(s);
+		}
+		return buffer;
+	}
+	
+	/* *************************************************************************
+	 *     Deprecated methods
+	 * ************************************************************************/
+	
+	/**
+	 * @deprecated
+	 */
 	public static Constant getConstant(String value) {
 		return Constant.getInstance(value);
 	}
 	
+	/**
+	 * @deprecated
+	 */
 	public static LogicalVariable getLogicalVariable(
 			String name, 
 			String individualPrefix, 
@@ -30,6 +104,9 @@ public final class PRVs {
 		return StdLogicalVariable.getInstance(name, pop);
 	}
 	
+	/**
+	 * @deprecated
+	 */
 	public static ParameterizedRandomVariable getPrv(
 			String functorName,
 			List<String> range,
@@ -52,6 +129,9 @@ public final class PRVs {
 		return ParameterizedRandomVariable.getInstance(functor, terms);
 	}
 	
+	/**
+	 * @deprecated
+	 */
 	public static ParameterizedRandomVariable getBooleanPrv(
 			String functorName,
 			List<String> parameters,
@@ -65,6 +145,9 @@ public final class PRVs {
 		return getPrv(functorName, range, parameters, populationSizes);
 	}
 	
+	/**
+	 * @deprecated
+	 */
 	public static ParameterizedRandomVariable getBooleanPrv(
 			String functorName,
 			StdLogicalVariable... parameters) 
@@ -84,7 +167,10 @@ public final class PRVs {
 		
 	}
 	
+	
+
 	/**
+	 * @deprecated
 	 * Returns a parameterized random variable with boolean range, with the
 	 * specified name and terms.
 	 * <br>
@@ -111,6 +197,9 @@ public final class PRVs {
 		return ParameterizedRandomVariable.getInstance(functor, Arrays.asList(terms));
 	}
 	
+	/**
+	 * @deprecated
+	 */
 	public static ParameterizedRandomVariable getBooleanPrvWithoutParameter(
 			String functorName) 
 			throws IllegalArgumentException {
@@ -121,6 +210,9 @@ public final class PRVs {
 		return getBooleanPrv(functorName, parameters, populationSizes);
 	}
 	
+	/**
+	 * @deprecated
+	 */
 	public static ParameterizedRandomVariable getBooleanPrvWithOneParameter(
 			String functorName,
 			int populationSize) 
@@ -134,6 +226,9 @@ public final class PRVs {
 		return getBooleanPrv(functorName, parameters, populationSizes);
 	}
 	
+	/**
+	 * @deprecated
+	 */
 	public static ParameterizedRandomVariable getBooleanPrvWithTwoParameters(
 			String functorName,
 			int populationSizeForFirstParameter,
@@ -150,6 +245,9 @@ public final class PRVs {
 		return getBooleanPrv(functorName, parameters, populationSizes);
 	}
 
+	/**
+	 * @deprecated
+	 */
 	public static ParameterizedRandomVariable getBooleanPrvWithThreeParameters(
 			String functorName,
 			int populationSizeForFirstParameter,

@@ -1,6 +1,7 @@
 package br.usp.poli.takiyama.prv;
 
 /**
+ * @deprecated
  * Individuals are things in the world that is being described (e.g., a 
  * particular house or a particular booking may be individuals) [Poole, 2010]
  * 

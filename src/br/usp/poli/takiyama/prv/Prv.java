@@ -6,14 +6,15 @@ import java.util.Set;
 
 import br.usp.poli.takiyama.common.Constraint;
 
+/**
+ * PRV stands for Parameterized Random Variable, a structure that represents 
+ * sets of random variables.
+ * 
+ * @author Felipe Takiyama
+ *
+ */
 public interface Prv {
 
-	// use apply(Substitution)
-	//public Prv apply(Binding s); 
-	
-	// i dont remember why i took it out
-	//public RangeElement rangeElementAt(int index); 
-	
 	/**
 	 * Returns the set of constraints associated with this PRV. If there are
 	 * no constraints associated with this PRV, returns an empty set.
@@ -39,6 +40,16 @@ public interface Prv {
 	 * @return A list of the logical variables of this PRV.
 	 */
 	public List<LogicalVariable> parameters();
+	
+	
+	/**
+	 * Returns a list containing the terms that appear in this
+	 * PRV. The order of terms is the same as from when the PRV was 
+	 * created.
+	 * 
+	 * @return A list of the terms of this PRV.
+	 */
+	public List<Term> terms();
 	
 
 	/**

@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import br.usp.poli.takiyama.common.MathUtils;
 import br.usp.poli.takiyama.common.IntTuple;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.OldCountingFormula;
@@ -17,6 +16,7 @@ import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 import br.usp.poli.takiyama.prv.Term;
+import br.usp.poli.takiyama.utils.MathUtils;
 
 public final class ParameterizedFactor {
 	private final String name; // this should be an optional attribute
@@ -406,6 +406,12 @@ public final class ParameterizedFactor {
 		return false;
 	}
 	
+	
+	/**
+	 * @deprecated 
+	 * This is ugly, find out another way to separate StdPrv from Counting
+	 * formulas.
+	 */
 	public boolean isInStandardPrv(Term term) {
 		for (ParameterizedRandomVariable prv : this.variables) {
 			if (prv.contains(term) && !(prv instanceof OldCountingFormula)) { // argh

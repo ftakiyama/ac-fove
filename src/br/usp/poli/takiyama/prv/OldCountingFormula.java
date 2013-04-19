@@ -9,6 +9,7 @@ import java.util.Set;
 import br.usp.poli.takiyama.common.Constraint;
 
 /**
+ * @deprecated
  * Definition by [Kisynski, 2010]:
  * <br>
  * A counting formula is of the form #<sub>A:C<sub>A</sub></sub>[f(...,A,...)], 

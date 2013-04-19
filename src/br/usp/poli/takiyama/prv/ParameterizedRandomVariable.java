@@ -14,6 +14,7 @@ import com.google.common.collect.ImmutableSet;
 
 
 /**
+ * @deprecated
  * A parameterized random variable is either a logical atom or a term. 
  * That is, it is of the form p(t1,...,tn), where each ti is a logical variable 
  * or a constant and p is a functor. Each functor has a set of values called 

@@ -1,5 +1,6 @@
 package br.usp.poli.takiyama.prv;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -7,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import br.usp.poli.takiyama.common.Constraint;
+import br.usp.poli.takiyama.utils.MathUtils;
 
 /**
  * Definition by [Kisynski, 2010]:
@@ -289,6 +291,18 @@ public class CountingFormula implements Prv {
 	 */
 	public boolean isStdPrv() {
 		return (bound.individualsSatisfying(constraints).size() == 1);
+	}
+
+	
+	/**
+	 * Returns the value of the multinomial defined by the values in buckets 
+	 * from specified histogram.
+	 */
+	@Override
+	public BigDecimal getSumOutCorrection(RangeElement e) {
+		@SuppressWarnings("unchecked")
+		Histogram<RangeElement> h = (Histogram<RangeElement>) e;
+		return new BigDecimal(MathUtils.multinomial(h.toMultinomial()));
 	}
 	
 	

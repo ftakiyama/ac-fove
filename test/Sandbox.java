@@ -1,5 +1,6 @@
 
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -24,6 +25,8 @@ import br.usp.poli.takiyama.prv.LogicalVariableNameGenerator;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
+import br.usp.poli.takiyama.utils.MathUtils;
+
 
 public class Sandbox {
 	
@@ -183,7 +186,6 @@ public class Sandbox {
 		Operator op = new OR();
 	}
 	
-	@Test
 	public void testGenerics() {
 		HashMap<String, Number> m1 = new HashMap<String, Number>();
 		HashMap<String, Double> m2 = new HashMap<String, Double>();
@@ -191,5 +193,25 @@ public class Sandbox {
 		Number d = new Double(1.0);
 		System.out.println(d instanceof Double);
 		System.out.println(d instanceof Number);
+		
+	}
+	
+	public void testRecursion() {
+		inc(0);
+	}
+	
+	private int inc(int i) {
+		System.out.println(i);
+		return inc(++i);
+	}
+	
+	@Test
+	public void testPow() {
+		for (int i = 0; i < 100; i++) {
+			int p = 1;
+			int q = 2;
+			BigDecimal iBig = new BigDecimal(i);
+			System.out.println(iBig + " => " + MathUtils.pow(iBig, p, q));
+		}
 	}
 }

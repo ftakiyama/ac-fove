@@ -27,6 +27,7 @@ import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 import br.usp.poli.takiyama.prv.Population;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
+import br.usp.poli.takiyama.utils.Lists;
 import br.usp.poli.takiyama.utils.Sets;
 
 /**
@@ -558,7 +559,7 @@ public final class SimpleParfactor implements Parfactor {
 			}			
 		}
 		
-		if (Sets.intersection(logicalVariablesFromFirstParfactor,
+		if (Lists.intersection(logicalVariablesFromFirstParfactor,
 							  new ArrayList<StdLogicalVariable>(parfactor.getLogicalVariables()))
 				.isEmpty()) {
 			return true;

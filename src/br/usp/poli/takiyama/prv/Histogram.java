@@ -1,7 +1,10 @@
 package br.usp.poli.takiyama.prv;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+
+import br.usp.poli.takiyama.utils.MathUtils.Multinomial;
 
 /**
  * This class represents the elements of the range of a counting formula.
@@ -109,6 +112,18 @@ public class Histogram<T extends RangeElement> implements RangeElement {
 	 */
 	void setCount(T rangeValue, int amount) {
 		distribution.put(rangeValue, amount);
+	}
+	
+	
+	/**
+	 * Converts the values contained in each bucket to a {@link Multinomial}
+	 * object.
+	 * 
+	 * @return This histogram converted to a Multinomial.
+	 */
+	Multinomial toMultinomial() {
+		List<Integer> values = new ArrayList<Integer>(distribution.values());
+		return Multinomial.getInstance(values);
 	}
 	
 	

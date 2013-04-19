@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 
 /**
+ * @deprecated
  * A tuple is any combination of values of random variables.
  * For example, consider three random variables x1, x2, x3, all binary. So, a
  * valid tuple (x1, x2, x3) is (true, false, false).

@@ -34,6 +34,13 @@ public class Builder {
 	}
 
 	
+	/**
+	 * Returns a boolean StdPrv. Its range is {false, true}
+	 * @param functor
+	 * @param range
+	 * @param vars
+	 * @return
+	 */
 	public static Prv getStdPrv(String functor, Term ... vars) {
 		List<RangeElement> range = new ArrayList<RangeElement>(2);
 		range.add(Bool.valueOf(false));

@@ -5,13 +5,13 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import br.usp.poli.takiyama.common.Constraint;
-import br.usp.poli.takiyama.common.MathUtils;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.RandomVariableSet;
 import br.usp.poli.takiyama.log.ConsoleLogger;
 import br.usp.poli.takiyama.prv.OldCountingFormula;
 import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
+import br.usp.poli.takiyama.utils.MathUtils;
 
 import static br.usp.poli.takiyama.cfove.MacroOperations.*;
 
@@ -473,7 +473,7 @@ public final class CFOVE {
 		return MathUtils.combination(
 				lv.individualsSatisfying(constraints).size()
 					+ prv.getRangeSize() - 1, 
-				prv.getRangeSize() - 1);
+				prv.getRangeSize() - 1).intValue();
 	}
 	
 	/**

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 /**
+ * @deprecated
  * A predicate symbol is a word that starts with a lower-case letter. 
  * Constants and predicate symbols are distinguishable by their context in a 
  * knowledge base. 

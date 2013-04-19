@@ -1,5 +1,6 @@
 package br.usp.poli.takiyama.prv;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
@@ -103,6 +104,14 @@ public interface Prv {
 	 */
 	public Prv rename(String name);
 	
+	
+	/**
+	 * Returns the correction factor used in lifted elimination.
+	 *  
+	 * @param e The range element in this PRV to be processed.
+	 * @return The correction factor used in lifted elimination
+	 */
+	public BigDecimal getSumOutCorrection(RangeElement e);
 	
 	@Override
 	public boolean equals(Object o);

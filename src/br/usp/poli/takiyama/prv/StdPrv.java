@@ -1,5 +1,6 @@
 package br.usp.poli.takiyama.prv;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -208,6 +209,15 @@ public class StdPrv implements Prv {
 		return parameters.contains(t);
 	}
 
+	
+	/**
+	 * Returns {@link BigDecimal#ONE}.
+	 */
+	@Override
+	public BigDecimal getSumOutCorrection(RangeElement e) {
+		return BigDecimal.ONE;
+	}
+	
 	
 	/* ************************************************************************
 	 *    Setters

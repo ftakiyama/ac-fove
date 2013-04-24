@@ -12,4 +12,7 @@ public class ToDo {
 	// TODO: Create a PRV interface (not necessarily with this name)
 	// TODO: Remove 'extends' from CountingFormula >> lots of casts to remove ambiguity
 	// TODO: Use Builder pattern to create data structure in examples
+	
+	// TODO Builder<T> interface
+	// TODO Builder for StdParfactor
 }

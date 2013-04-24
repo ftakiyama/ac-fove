@@ -6,12 +6,17 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 public class Substitution {
 	
 	private Map<LogicalVariable, Term> bindings;
 	
+	
+	/* ************************************************************************
+	 *    Constructors
+	 * ************************************************************************/
 	
 	/**
 	 * Creates an empty substitution.
@@ -22,7 +27,7 @@ public class Substitution {
 	
 	
 	/**
-	 * Constructor. Creates a substitution based on a single binding
+	 * Creates a substitution based on a single binding
 	 * @param binding A {@link Binding} 
 	 */
 	private Substitution(Binding binding) {
@@ -32,7 +37,7 @@ public class Substitution {
 	
 	
 	/**
-	 * Constructor. Creates a substitution based on a list of bindings.
+	 * Creates a substitution based on a list of bindings.
 	 * @param bindings A {@link List} of {@link Binding}s. 
 	 */
 	private Substitution(List<Binding> bindings) {
@@ -43,8 +48,12 @@ public class Substitution {
 	}
 	
 	
+	/* ************************************************************************
+	 *    Static factories
+	 * ************************************************************************/
+	
 	/**
-	 * Static factory. Creates a substitution based on a list of bindings.
+	 * Returns a substitution based on a list of bindings.
 	 * @param bindings A {@link List} of {@link Binding}s.
 	 * @return A new substitution built from the list given.
 	 */
@@ -54,7 +63,7 @@ public class Substitution {
 	
 	
 	/**
-	 * Static factory. Creates a substitution based on a single binding.
+	 * Returns a substitution based on a single binding.
 	 * @param binding A {@link Binding}.
 	 * @return A new substitution built from the binding given.
 	 */
@@ -86,12 +95,17 @@ public class Substitution {
 	 */
 	private void add(Binding b) throws IllegalArgumentException {
 		if (bindings.containsKey(b.firstTerm())) {
-			throw new IllegalArgumentException(b.firstTerm() + " is already being replaced.");
+			throw new IllegalArgumentException(b.firstTerm() 
+					+ " is already being replaced.");
 		}
 		bindings.put(b.firstTerm(), b.secondTerm());
 	}
 	
 	
+	/* ************************************************************************
+	 *    Getters
+	 * ************************************************************************/
+
 	/** 
 	 * @deprecated
 	 * Returns a set containing all the logical variables that are in the first
@@ -118,9 +132,11 @@ public class Substitution {
 	
 	/**
 	 * Returns the replacement of a given logical variable in this substitution.
+	 * <p>
 	 * For instance, if the substitution is given by the set 
-	 * {X\Y, Z\r}, then calling this method with the parameter 'X' will
+	 * {X/Y, Z/r}, then calling this method with the parameter 'X' will
 	 * return the logical variable 'Y'.
+	 * </p>
 	 * @param substituted The variable being substituted
 	 * @return The replacement of a given logical variable in this substitution
 	 */
@@ -191,8 +207,8 @@ public class Substitution {
 	
 	
 	/**
-	 * Returns true if this substitution unifies v1 and v2.
-	 * 
+	 * Returns <code>true</code> if this substitution unifies the specified
+	 * {@link Prv}
 	 * <p>
 	 * A substitution &theta; is a unifier of two parameterized random variables 
 	 * f (ti1,...,tik ) and f(tj1,...,tjk) if 
@@ -201,15 +217,61 @@ public class Substitution {
 	 * <p> 
 	 * We then say that the two parameterized random variables unify [Kisynski, 2010].
 	 * </p>
-	 * @param v1 The first {@link ParameterizedRandomVariable}.
-	 * @param v2 The second {@link ParameterizedRandomVariable}.
-	 * @return True if this substitution unifies v1 and v2, false otherwise.
+	 * @param prv1 The first {@link Prv}.
+	 * @param prv2 The second {@link Prv}.
+	 * @return <code>true</code> if this substitution the specified PRVs,
+	 * <code>false</code> otherwise.
 	 */
-	public boolean isUnifier(ParameterizedRandomVariable v1, ParameterizedRandomVariable v2) {		
-		return v1.applySubstitution(this).equals(v2.applySubstitution(this));
+	public boolean isUnifier(Prv prv1, Prv prv2) {		
+		return prv1.apply(this).equals(prv2.apply(this));
 	}
 	
 	
+	/**
+	 * Returns the number of {@link Binding}s in this substitution.
+	 * 
+	 * @return the number of {@link Binding}s in this substitution.
+	 */
+	public int size() {
+		return bindings.size();
+	}
+	
+	
+	/**
+	 * Converts this Substitution to a {@link List} of {@link Binding}s.
+	 * 
+	 * @return this Substitution as a {@link List} of {@link Binding}s.
+	 */
+	public List<Binding> asList() {
+		List<Binding> binds = new ArrayList<Binding>(bindings.size());
+		for (LogicalVariable t1 : bindings.keySet()) {
+			Binding b = Binding.getInstance(t1, bindings.get(t1));
+			binds.add(b);
+		}
+		return binds;
+	}
+	
+	
+	/**
+	 * Retrieves, but does not remove, the first {@link Binding} inserted in 
+	 * this substitution, throwing an exception if this is empty.
+	 *   
+	 * @return The first Binding inserted in this substitution.
+	 * @throws NoSuchElementException if this substitution is empty.
+	 */
+	public Binding first() throws NoSuchElementException {
+		if (bindings.isEmpty()) {
+			throw new NoSuchElementException();
+		} else {
+			return asList().get(0);
+		}
+	}
+	
+	
+	/* ************************************************************************
+	 *    hashCode, equals and toString
+	 * ************************************************************************/
+
 	@Override
 	public String toString() {
 		StringBuilder result = new StringBuilder("{ ");

@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import br.usp.poli.takiyama.cfove.SimpleParfactor;
+import br.usp.poli.takiyama.cfove.StdParfactor;
 import br.usp.poli.takiyama.prv.Prv;
 
 /**
@@ -39,10 +40,23 @@ public final class StdSplitResult implements SplitResult {
 		residue = StdDistribution.of();
 	}
 	
+	
+	/**
+	 * Creates a split result with two parfactors.
+	 * 
+	 * @param result The result of the split
+	 * @param residue The residue of the split
+	 */
+	private StdSplitResult(Parfactor result, Parfactor residue) {
+		this.result = result;
+		this.residue = StdDistribution.of(residue);
+	}
+	
 //	private StdSplitResult(Parfactor result, Distribution residue) {
 //		this.result = result; // use defensive copy!
 //		this.residue = residue;
 //	}
+	
 	
 	/* ************************************************************************
 	 *    Static factories
@@ -52,9 +66,22 @@ public final class StdSplitResult implements SplitResult {
 	 * Returns an empty instance of SplitResult.
 	 * @return An empty instance of SplitResult.
 	 */
-	public static StdSplitResult getInstance() {
+	public static SplitResult getInstance() {
 		return new StdSplitResult();
 	}
+	
+	
+	/**
+	 * Returns a split result with two parfactors.
+	 * 
+	 * @param result The result of the split
+	 * @param residue The residue of the split
+	 * @return A split result with two parfactors.
+	 */
+	public static SplitResult getInstance(Parfactor result, Parfactor residue) {
+		return new StdSplitResult(result, residue);
+	}
+	
 	
 	/* ************************************************************************
 	 *    Getters
@@ -68,16 +95,19 @@ public final class StdSplitResult implements SplitResult {
 		return new HashSet<Prv>(0);
 	}
 
+	
 	@Override
 	public Parfactor result() {
-		return SimpleParfactor.getInstance(result);
+		return StdParfactor.getInstance(result);
 	}
 
+	
 	@Override
 	public Distribution residue() {
 		return StdDistribution.of(residue);
 	}
 
+	
 	/**
 	 * Returns <code>true</code> if this is an empty split result. This 
 	 * condition is met if both the result and the residues are not associated
@@ -87,6 +117,7 @@ public final class StdSplitResult implements SplitResult {
 	public boolean isEmpty() {
 		return ((result == null) && residue.isEmpty());
 	}
+	
 	
 	/* ************************************************************************
 	 *    hashCode, equals and toString
@@ -102,6 +133,7 @@ public final class StdSplitResult implements SplitResult {
 		return result;
 	}
 
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -130,6 +162,7 @@ public final class StdSplitResult implements SplitResult {
 		}
 		return true;
 	}
+	
 	
 	@Override
 	public String toString() {

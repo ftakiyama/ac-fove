@@ -17,7 +17,7 @@ import org.junit.Test;
 import br.usp.poli.takiyama.acfove.operator.And;
 import br.usp.poli.takiyama.common.Parfactors;
 import br.usp.poli.takiyama.common.Pool;
-import br.usp.poli.takiyama.common.Parfactor;
+import br.usp.poli.takiyama.common.ParfactorI;
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.OldCountingFormula;

@@ -13,7 +13,7 @@ import br.usp.poli.takiyama.acfove.GeneralizedAggregationParfactor;
 import br.usp.poli.takiyama.common.Constraint;
 //import br.usp.poli.takiyama.common.Constraints;
 import br.usp.poli.takiyama.common.InequalityConstraint;
-import br.usp.poli.takiyama.common.Parfactor;
+import br.usp.poli.takiyama.common.ParfactorI;
 import br.usp.poli.takiyama.common.Parfactors;
 import br.usp.poli.takiyama.common.RandomVariable;
 import br.usp.poli.takiyama.common.IntTuple;
@@ -36,7 +36,7 @@ import br.usp.poli.takiyama.utils.Sets;
  * @author ftakiyama
  *
  */
-public final class SimpleParfactor implements Parfactor {
+public final class SimpleParfactor implements ParfactorI {
 	
 	private final HashSet<Constraint> constraints;
 	//private final ArrayList<ParameterizedRandomVariable> variables;
@@ -84,9 +84,9 @@ public final class SimpleParfactor implements Parfactor {
 	 * Returns a new instance SimpleParfactor that is the copy of the specified
 	 * Parfactor.
 	 * @param p The parfactor to copy
-	 * @see Parfactor
+	 * @see ParfactorI
 	 */
-	public static Parfactor getInstance(Parfactor p) {
+	public static ParfactorI getInstance(ParfactorI p) {
 		return new SimpleParfactor(p.constraints(), p.factor());
 	}
 
@@ -253,7 +253,7 @@ public final class SimpleParfactor implements Parfactor {
 	 *    Lifted elimination
 	 * ************************************************************************/
 	
-	public Parfactor sumOut(ParameterizedRandomVariable prv) {
+	public ParfactorI sumOut(ParameterizedRandomVariable prv) {
 		List<ParameterizedRandomVariable> newVariables = this.factor.getParameterizedRandomVariables();
 		newVariables.remove(prv);
 		
@@ -393,7 +393,7 @@ public final class SimpleParfactor implements Parfactor {
 	
 	// Sum out counting formula
 	
-	public Parfactor sumOut(OldCountingFormula countingFormula) {
+	public ParfactorI sumOut(OldCountingFormula countingFormula) {
 		
 		List<ParameterizedRandomVariable> newVariables = this.factor.getParameterizedRandomVariables();
 		newVariables.remove(countingFormula);
@@ -423,7 +423,7 @@ public final class SimpleParfactor implements Parfactor {
 	 *    MULTIPLICATION
 	 * ************************************************************************/
 	
-	public Parfactor multiply(Parfactor parfactor) {
+	public ParfactorI multiply(ParfactorI parfactor) {
 		
 		if (parfactor instanceof AggregationParfactor) {
 			AggregationParfactor ap = (AggregationParfactor) parfactor;
@@ -495,7 +495,7 @@ public final class SimpleParfactor implements Parfactor {
 	}
 	
 	// TODO: check when parfactor is an agg parfactor...
-	public boolean canMultipliy(Parfactor parfactor) {
+	public boolean canMultipliy(ParfactorI parfactor) {
 		if (parfactor instanceof AggregationParfactor) {
 			AggregationParfactor ap = (AggregationParfactor) parfactor;
 			return ap.canMultiply(this);
@@ -598,8 +598,8 @@ public final class SimpleParfactor implements Parfactor {
 	 * result from the split. If the conditions for splitting are not met, 
 	 * returns an EMPTY list.
 	 */
-	public List<Parfactor> split(Binding substitution) {
-		List<Parfactor> result = new ArrayList<Parfactor>();
+	public List<ParfactorI> split(Binding substitution) {
+		List<ParfactorI> result = new ArrayList<ParfactorI>();
 		if (firstTermIsPresent(substitution) 
 				&& secondTermIsNotInConstraints(substitution)
 				&& (secondTermIsConstantBelongingToFirstTermPopulation(substitution) 
@@ -746,17 +746,17 @@ public final class SimpleParfactor implements Parfactor {
 	 * @return This parfactor propositionalized on the specified logical
 	 * variable.
 	 */
-	public Set<Parfactor> propositionalize(LogicalVariable logicalVariable) {
-		Set<Parfactor> result = new HashSet<Parfactor>();
-		Parfactor parfactorToSplit = this;
+	public Set<ParfactorI> propositionalize(LogicalVariable logicalVariable) {
+		Set<ParfactorI> result = new HashSet<ParfactorI>();
+		ParfactorI parfactorToSplit = this;
 		for (Constant individual : logicalVariable.individualsSatisfying(this.constraints)) {
-			List<Parfactor> splitResult = parfactorToSplit.split(Binding.getInstance(logicalVariable, individual));
+			List<ParfactorI> splitResult = parfactorToSplit.split(Binding.getInstance(logicalVariable, individual));
 			result.add(splitResult.get(1));
 			parfactorToSplit = splitResult.get(0);
 		}
 		
 		// I'm not sure if this is necessary
-		Parfactor residue = parfactorToSplit.replaceLogicalVariablesConstrainedToSingleConstant();
+		ParfactorI residue = parfactorToSplit.replaceLogicalVariablesConstrainedToSingleConstant();
 		if (!residue.isConstant()) {
 			result.add(residue);
 		}
@@ -789,7 +789,7 @@ public final class SimpleParfactor implements Parfactor {
 	 * @return This parfactor with the specified counting formula expanded on
 	 * the specified term.
 	 */
-	public Parfactor expand(OldCountingFormula countingFormula, Term term) {
+	public ParfactorI expand(OldCountingFormula countingFormula, Term term) {
 		if (canExpandOn(countingFormula, term)) {
 
 			// Creates the new set of parameterized random variables:
@@ -982,8 +982,8 @@ public final class SimpleParfactor implements Parfactor {
 				&& term instanceof Constant; //TODO take it out
 	}
 	
-	public Parfactor fullExpand(OldCountingFormula countingFormula) {
-		Parfactor toExpand = this;
+	public ParfactorI fullExpand(OldCountingFormula countingFormula) {
+		ParfactorI toExpand = this;
 		int countingFormulaIndex = 
 				toExpand
 					.getFactor()
@@ -1040,7 +1040,7 @@ public final class SimpleParfactor implements Parfactor {
 	 * The algorithm used is based on the work of Mackworth (1977) and
 	 * Kisysnki (2010).
 	 */
-	public Parfactor replaceLogicalVariablesConstrainedToSingleConstant() {
+	public ParfactorI replaceLogicalVariablesConstrainedToSingleConstant() {
 		
 		LinkedList<LogicalVariable> queue = new LinkedList<LogicalVariable>();
 		for (Constraint constraint : this.constraints) {
@@ -1092,7 +1092,7 @@ public final class SimpleParfactor implements Parfactor {
 	 * @TODO make it privates
 	 * @return This parfactor with all its logical variables renamed.
 	 */
-	public Parfactor renameLogicalVariables() {
+	public ParfactorI renameLogicalVariables() {
 		// Using hash set because I don't need repetition
 		HashSet<StdLogicalVariable> logicalVariables = new HashSet<StdLogicalVariable>();
 		for (ParameterizedRandomVariable prv : this.factor.getParameterizedRandomVariables()) {
@@ -1128,9 +1128,9 @@ public final class SimpleParfactor implements Parfactor {
 	 * obtained by spliting this parfactor on the MGU. The remaining elements
 	 * are the residual parfactors from the split.
 	 */
-	public List<Parfactor> splitOnMgu(Substitution mgu) throws ArrayIndexOutOfBoundsException {
+	public List<ParfactorI> splitOnMgu(Substitution mgu) throws ArrayIndexOutOfBoundsException {
 		SimpleParfactor result = this;
-		ArrayList<Parfactor> residualParfactors = new ArrayList<Parfactor>();
+		ArrayList<ParfactorI> residualParfactors = new ArrayList<ParfactorI>();
 		Iterator<LogicalVariable> mguIterator = mgu.getSubstitutedIterator();
 		
 		while (mguIterator.hasNext()) {
@@ -1150,7 +1150,7 @@ public final class SimpleParfactor implements Parfactor {
 				}
 				
 				if (replacement instanceof Constant || result.factor.contains((StdLogicalVariable) replacement)) { //TODO replace it by split conditions //TODO take instanceof out
-					List<Parfactor> resultSplit = result.split(binding);
+					List<ParfactorI> resultSplit = result.split(binding);
 					if (resultSplit.size() == 2) { 
 						result = (SimpleParfactor) resultSplit.get(1);
 						residualParfactors.add(resultSplit.get(0));
@@ -1216,9 +1216,9 @@ public final class SimpleParfactor implements Parfactor {
 	 * splitting this parfactor on the set of specified constraints. The
 	 * remaining parfactors are the by-product parfactors.
 	 */
-	public List<Parfactor> splitOnConstraints(Set<Constraint> constraints) {
+	public List<ParfactorI> splitOnConstraints(Set<Constraint> constraints) {
 		SimpleParfactor residue = this;
-		ArrayList<Parfactor> byProductParfactors = new ArrayList<Parfactor>();
+		ArrayList<ParfactorI> byProductParfactors = new ArrayList<ParfactorI>();
 		for (Constraint constraint : constraints) {
 			
 			// counting formula
@@ -1236,7 +1236,7 @@ public final class SimpleParfactor implements Parfactor {
 					&& residue.factor.isInStandardPrv(constraint.firstTerm())
 					&& (constraint.secondTerm() instanceof Constant 
 							|| residue.factor.contains((StdLogicalVariable) constraint.secondTerm()))) {
-				List<Parfactor> resultSplit = residue.split(constraint.toBinding());
+				List<ParfactorI> resultSplit = residue.split(constraint.toBinding());
 				if (resultSplit.size() == 2) { 
 					residue = (SimpleParfactor) resultSplit.get(0);
 					byProductParfactors.add(resultSplit.get(1));
@@ -1260,13 +1260,13 @@ public final class SimpleParfactor implements Parfactor {
 	 * @param parfactor The parfactor to unify with.
 	 * @return A set of shattered parfactors.
 	 */
-	public Set<Parfactor> unify(Parfactor parfactor) {
-		Parfactor g1 = this.replaceLogicalVariablesConstrainedToSingleConstant();
-		Parfactor g2 = parfactor.replaceLogicalVariablesConstrainedToSingleConstant();
+	public Set<ParfactorI> unify(ParfactorI parfactor) {
+		ParfactorI g1 = this.replaceLogicalVariablesConstrainedToSingleConstant();
+		ParfactorI g2 = parfactor.replaceLogicalVariablesConstrainedToSingleConstant();
 		g1 = g1.renameLogicalVariables();
 		g2 = g2.renameLogicalVariables();
 		
-		Set<Parfactor> unifiedSet = new HashSet<Parfactor>();
+		Set<ParfactorI> unifiedSet = new HashSet<ParfactorI>();
 		unifiedSet.add(g1);
 		unifiedSet.add(g2);
 		boolean updatedSet = true;
@@ -1299,10 +1299,10 @@ public final class SimpleParfactor implements Parfactor {
 						int secondVariableIndex = g2.getFactor().getParameterizedRandomVariableIndex(secondVariable);
 						
 						if (Parfactors.isConsistent(mgu, allConstraints)) {
-							List<Parfactor> firstSplitOnMgu = g1.splitOnMgu(mgu);
-							List<Parfactor> secondSplitOnMgu = g2.splitOnMgu(mgu);
-							Parfactor firstResult = firstSplitOnMgu.remove(0);
-							Parfactor secondResult = secondSplitOnMgu.remove(0);
+							List<ParfactorI> firstSplitOnMgu = g1.splitOnMgu(mgu);
+							List<ParfactorI> secondSplitOnMgu = g2.splitOnMgu(mgu);
+							ParfactorI firstResult = firstSplitOnMgu.remove(0);
+							ParfactorI secondResult = secondSplitOnMgu.remove(0);
 							
 							HashSet<Constraint> constraintsFromFirstResult =
 								new HashSet<Constraint>(
@@ -1329,10 +1329,10 @@ public final class SimpleParfactor implements Parfactor {
 										.getConstraints());
 							}
 							
-							List<Parfactor> firstSplitOnConstraints = 
+							List<ParfactorI> firstSplitOnConstraints = 
 								firstResult.splitOnConstraints(
 										constraintsFromSecondResult);
-							List<Parfactor> secondSplitOnConstraints = 
+							List<ParfactorI> secondSplitOnConstraints = 
 								secondResult.splitOnConstraints(
 										constraintsFromFirstResult);
 							unifiedSet.remove(g1);
@@ -1359,7 +1359,7 @@ public final class SimpleParfactor implements Parfactor {
 		return unifiedSet;
 	}
 	
-	public Parfactor restoreLogicalVariableNames() {
+	public ParfactorI restoreLogicalVariableNames() {
 		
 		HashSet<StdLogicalVariable> logicalVariables = new HashSet<StdLogicalVariable>();
 		for (ParameterizedRandomVariable prv : this.factor.getParameterizedRandomVariables()) {
@@ -1388,7 +1388,7 @@ public final class SimpleParfactor implements Parfactor {
 	 *    Counting
 	 * ************************************************************************/
 	
-	public Parfactor count(LogicalVariable logicalVariable) 
+	public ParfactorI count(LogicalVariable logicalVariable) 
 			throws IllegalArgumentException {
 		
 		if (canBeCounted(logicalVariable)) {

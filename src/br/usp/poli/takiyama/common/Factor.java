@@ -11,6 +11,7 @@ import java.util.NoSuchElementException;
 import br.usp.poli.takiyama.prv.Prv;
 import br.usp.poli.takiyama.prv.RangeElement;
 import br.usp.poli.takiyama.prv.StdPrv;
+import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
 import br.usp.poli.takiyama.utils.Lists;
 import br.usp.poli.takiyama.utils.MathUtils;
@@ -133,15 +134,15 @@ public class Factor implements Iterable<Tuple<RangeElement>> {
 	
 	
 	/**
-	 * Returns a constant parameterized factor with one PRV.
+	 * Returns a constant factor with one PRV.
 	 * <p>
 	 * A constant parameterized factor returns the value 1 for all tuples in 
 	 * the factor.
 	 * </p>
 	 * 
 	 * @see #getInstance(List)
-	 * @param variables A ordered list of {@link Prv}
-	 * @return A constant parameterized factor with the specified PRVs.
+	 * @param variable A {@link Prv}
+	 * @return A constant factor with the specified PRV.
 	 */
 	public static Factor getInstance(Prv variable) {
 		List<Prv> variables = new ArrayList<Prv>(1);
@@ -150,6 +151,18 @@ public class Factor implements Iterable<Tuple<RangeElement>> {
 		return Factor.getInstance(variables);
 	}
 	
+	
+	/**
+	 * Returns a constant factor with no PRVs.
+	 *  
+	 * @see #getInstance(List)
+	 * @return A constant factor with no PRVs.
+	 */
+	public static Factor getInstance() {
+		List<Prv> empty = new ArrayList<Prv>(0);
+		return Factor.getInstance(empty);
+	}
+
 	
 	/* ************************************************************************
 	 *    Getters
@@ -453,6 +466,20 @@ public class Factor implements Iterable<Tuple<RangeElement>> {
 		return true;
 	}
 	
+	
+	/**
+	 * Returns <code>true</code> if this factor is constant.
+	 * 
+	 * @return <code>true</code> if this factor is constant, <code>false</code>
+	 * otherwise.
+	 * @see #getInstance()
+	 */
+	public boolean isConstant() {
+		boolean noVariables = variables.isEmpty();
+		boolean oneValue = (values.size() == 1);
+		boolean valueIsOne = (oneValue ? values.get(0).equals(BigDecimal.ONE) : false);
+		return noVariables && oneValue && valueIsOne;
+	}
 
 	/* ************************************************************************
 	 *    hashCode, equals and toString
@@ -532,6 +559,28 @@ public class Factor implements Iterable<Tuple<RangeElement>> {
 		result += thickRule + "\n";
 		
 		return result;
+	}
+	
+	
+	/* ************************************************************************
+	 *    Setters
+	 * ************************************************************************/
+
+	/**
+	 * Returns the result of applying the specified substitution to this
+	 * Factor. The substitution is applied to PRVs in this Factor, but its
+	 * values are not modified.
+	 * @param s The substitution to apply
+	 * @return The result of applying the specified substitution to this
+	 * Factor
+	 */
+	public Factor apply(Substitution s) {
+		List<Prv> substitutedVars = new ArrayList<Prv>(variables.size());
+		for (Prv prv : variables) {
+			Prv substituted = prv.apply(s);
+			substitutedVars.add(substituted);
+		}
+		return Factor.getInstance(name, substitutedVars, values);
 	}
 	
 	

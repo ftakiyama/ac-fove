@@ -9,7 +9,6 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import br.usp.poli.takiyama.common.Builder;
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.InequalityConstraint;
 
@@ -23,8 +22,8 @@ public class CountingFormulaTest {
 	@Test
 	public void testSubstitutionAx1_simpleCf() {
 		
-		LogicalVariable a = Builder.getLogicalVariable("A", "x", 10);
-		Prv f = Builder.getStdPrv("f", a);
+		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 10);
+		Prv f = StdPrv.getBooleanInstance("f", a);
 		Prv cf = CountingFormula.getInstance(a, f); 
 		
 		Constant x1 = a.population().individualAt(0);
@@ -45,16 +44,16 @@ public class CountingFormulaTest {
 	@Test
 	public void testSubstitutionAB_simpleCf() {
 		
-		LogicalVariable a = Builder.getLogicalVariable("A", "x", 10);
-		Prv f = Builder.getStdPrv("f", a);
+		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 10);
+		Prv f = StdPrv.getBooleanInstance("f", a);
 		Prv cf = CountingFormula.getInstance(a, f); 
 		
-		LogicalVariable b = Builder.getLogicalVariable("B", "x", 10);
+		LogicalVariable b = StdLogicalVariable.getInstance("B", "x", 10);
 		Substitution s = Substitution.getInstance(Binding.getInstance(a, b));
 		
 		Prv result = cf.apply(s);
 		
-		f = Builder.getStdPrv("f", b);
+		f = StdPrv.getBooleanInstance("f", b);
 		Prv answer = CountingFormula.getInstance(b, f);
 		
 		assertTrue(result.equals(answer));
@@ -68,11 +67,11 @@ public class CountingFormulaTest {
 	@Test
 	public void testSubstitutionBx1_simpleCf() {
 
-		LogicalVariable a = Builder.getLogicalVariable("A", "x", 10);
-		Prv f = Builder.getStdPrv("f", a);
+		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 10);
+		Prv f = StdPrv.getBooleanInstance("f", a);
 		Prv cf = CountingFormula.getInstance(a, f); 
 		
-		LogicalVariable b = Builder.getLogicalVariable("B", "x", 10);
+		LogicalVariable b = StdLogicalVariable.getInstance("B", "x", 10);
 		Constant x = Constant.getInstance("x1");
 		Substitution s = Substitution.getInstance(Binding.getInstance(b, x));
 		
@@ -91,8 +90,8 @@ public class CountingFormulaTest {
 	@Test
 	public void testSubstitutionAx1_constrainedCf() {
 		
-		LogicalVariable a = Builder.getLogicalVariable("A", "x", 10);
-		Prv f = Builder.getStdPrv("f", a);
+		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 10);
+		Prv f = StdPrv.getBooleanInstance("f", a);
 		Constant x1 = Constant.getInstance("x1");
 		Constraint c = InequalityConstraint.getInstance(a, x1);
 		Prv cf = CountingFormula.getInstance(a, f, c); 
@@ -114,18 +113,18 @@ public class CountingFormulaTest {
 	@Test
 	public void testSubstitutionAB_constrainedCf() {
 		
-		LogicalVariable a = Builder.getLogicalVariable("A", "x", 10);
-		Prv f = Builder.getStdPrv("f", a);
+		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 10);
+		Prv f = StdPrv.getBooleanInstance("f", a);
 		Constant x1 = Constant.getInstance("x1");
 		Constraint c = InequalityConstraint.getInstance(a, x1);
 		Prv cf = CountingFormula.getInstance(a, f, c); 
 		
-		LogicalVariable b = Builder.getLogicalVariable("B", "x", 10);
+		LogicalVariable b = StdLogicalVariable.getInstance("B", "x", 10);
 		Substitution s = Substitution.getInstance(Binding.getInstance(a, b));
 		
 		Prv result = cf.apply(s);
 		
-		f = Builder.getStdPrv("f", b);
+		f = StdPrv.getBooleanInstance("f", b);
 		Constraint cb = InequalityConstraint.getInstance(b, x1);
 		Prv answer = CountingFormula.getInstance(b, f, cb);
 		
@@ -140,13 +139,13 @@ public class CountingFormulaTest {
 	@Test
 	public void testSubstitutionBx1_constrainedCf() {
 		
-		LogicalVariable a = Builder.getLogicalVariable("A", "x", 10);
-		Prv f = Builder.getStdPrv("f", a);
+		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 10);
+		Prv f = StdPrv.getBooleanInstance("f", a);
 		Constant x1 = Constant.getInstance("x1");
 		Constraint c = InequalityConstraint.getInstance(a, x1);
 		Prv cf = CountingFormula.getInstance(a, f, c); 
 		
-		LogicalVariable b = Builder.getLogicalVariable("B", "x", 10);
+		LogicalVariable b = StdLogicalVariable.getInstance("B", "x", 10);
 		Substitution s = Substitution.getInstance(Binding.getInstance(b, x1));
 		
 		Prv result = cf.apply(s);
@@ -164,9 +163,9 @@ public class CountingFormulaTest {
 	@Test
 	public void testSubstitutionAx1_complexCf() {
 		
-		LogicalVariable a = Builder.getLogicalVariable("A", "x", 10);
-		LogicalVariable b = Builder.getLogicalVariable("B", "x", 10);
-		Prv f = Builder.getStdPrv("f", a, b);
+		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 10);
+		LogicalVariable b = StdLogicalVariable.getInstance("B", "x", 10);
+		Prv f = StdPrv.getBooleanInstance("f", a, b);
 		Constant x1 = Constant.getInstance("x1");
 		Constraint c = InequalityConstraint.getInstance(a, x1);
 		Prv cf = CountingFormula.getInstance(a, f, c); 
@@ -188,9 +187,9 @@ public class CountingFormulaTest {
 	@Test
 	public void testSubstitutionAB_complexCf() {
 		
-		LogicalVariable a = Builder.getLogicalVariable("A", "x", 10);
-		LogicalVariable b = Builder.getLogicalVariable("B", "x", 10);
-		Prv f = Builder.getStdPrv("f", a, b);
+		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 10);
+		LogicalVariable b = StdLogicalVariable.getInstance("B", "x", 10);
+		Prv f = StdPrv.getBooleanInstance("f", a, b);
 		Constant x1 = Constant.getInstance("x1");
 		Constraint c = InequalityConstraint.getInstance(a, x1);
 		Prv cf = CountingFormula.getInstance(a, f, c); 
@@ -199,7 +198,7 @@ public class CountingFormulaTest {
 
 		Prv result = cf.apply(s);
 		
-		f = Builder.getStdPrv("f", b, b);
+		f = StdPrv.getBooleanInstance("f", b, b);
 		c = InequalityConstraint.getInstance(b, x1);
 		Prv answer = CountingFormula.getInstance(b, f, c);
 		
@@ -215,24 +214,24 @@ public class CountingFormulaTest {
 	@Test
 	public void testSubstitutionAB_BC_complexCf() {
 		
-		LogicalVariable a = Builder.getLogicalVariable("A", "x", 10);
-		LogicalVariable b = Builder.getLogicalVariable("B", "x", 10);
-		Prv f = Builder.getStdPrv("f", a, b);
+		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 10);
+		LogicalVariable b = StdLogicalVariable.getInstance("B", "x", 10);
+		Prv f = StdPrv.getBooleanInstance("f", a, b);
 		Constant x1 = Constant.getInstance("x1");
 		Constraint c = InequalityConstraint.getInstance(a, x1);
 		Prv cf = CountingFormula.getInstance(a, f, c); 
 		
-		LogicalVariable d = Builder.getLogicalVariable("C", "x", 10);
+		LogicalVariable d = StdLogicalVariable.getInstance("C", "x", 10);
 		Substitution s = Substitution.getInstance(Binding.getInstance(a, b), 
 				Binding.getInstance(b, d));
 
 		Prv result = cf.apply(s);
 		
-		f = Builder.getStdPrv("f", b, d);
+		f = StdPrv.getBooleanInstance("f", b, d);
 		c = InequalityConstraint.getInstance(b, x1);
 		Prv answer1 = CountingFormula.getInstance(b, f, c);
 		
-		f = Builder.getStdPrv("f", d, d);
+		f = StdPrv.getBooleanInstance("f", d, d);
 		c = InequalityConstraint.getInstance(d, x1);
 		Prv answer2 = CountingFormula.getInstance(d, f, c);
 		
@@ -247,9 +246,9 @@ public class CountingFormulaTest {
 	@Test
 	public void testSubstitutionBx1_complexCf() {
 		
-		LogicalVariable a = Builder.getLogicalVariable("A", "x", 10);
-		LogicalVariable b = Builder.getLogicalVariable("B", "x", 10);
-		Prv f = Builder.getStdPrv("f", a, b);
+		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 10);
+		LogicalVariable b = StdLogicalVariable.getInstance("B", "x", 10);
+		Prv f = StdPrv.getBooleanInstance("f", a, b);
 		Constant x1 = Constant.getInstance("x1");
 		Constraint c = InequalityConstraint.getInstance(a, x1);
 		Prv cf = CountingFormula.getInstance(a, f, c); 
@@ -258,7 +257,7 @@ public class CountingFormulaTest {
 
 		Prv result = cf.apply(s);
 		
-		f = Builder.getStdPrv("f", a, x1);
+		f = StdPrv.getBooleanInstance("f", a, x1);
 		Prv answer = CountingFormula.getInstance(a, f, c);
 		
 		assertTrue(result.equals(answer));
@@ -273,9 +272,9 @@ public class CountingFormulaTest {
 	@Test
 	public void testSubstitutionAB_Bx1_complexCf() {
 		
-		LogicalVariable a = Builder.getLogicalVariable("A", "x", 10);
-		LogicalVariable b = Builder.getLogicalVariable("B", "x", 10);
-		Prv f = Builder.getStdPrv("f", a, b);
+		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 10);
+		LogicalVariable b = StdLogicalVariable.getInstance("B", "x", 10);
+		Prv f = StdPrv.getBooleanInstance("f", a, b);
 		Constant x1 = Constant.getInstance("x1");
 		Constraint c = InequalityConstraint.getInstance(a, x1);
 		Prv cf = CountingFormula.getInstance(a, f, c); 
@@ -285,10 +284,10 @@ public class CountingFormulaTest {
 
 		Prv result = cf.apply(s);
 		
-		f = Builder.getStdPrv("f", a, x1);
+		f = StdPrv.getBooleanInstance("f", a, x1);
 		Prv answer1 = CountingFormula.getInstance(a, f, c);
 		
-		f = Builder.getStdPrv("f", b, b);
+		f = StdPrv.getBooleanInstance("f", b, b);
 		c = InequalityConstraint.getInstance(b, x1);
 		Prv answer2 = CountingFormula.getInstance(b, f, c);
 		

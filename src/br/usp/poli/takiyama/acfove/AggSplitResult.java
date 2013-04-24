@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import br.usp.poli.takiyama.cfove.SimpleParfactor;
+import br.usp.poli.takiyama.cfove.StdParfactor;
 import br.usp.poli.takiyama.common.Distribution;
 import br.usp.poli.takiyama.common.Marginal;
 import br.usp.poli.takiyama.common.Parfactor;
@@ -30,6 +31,7 @@ public final class AggSplitResult implements SplitResult {
 	 */
 	private final Marginal<? extends Prv> marginal; 
 	
+	
 	/* ************************************************************************
 	 *    Constructors
 	 * ************************************************************************/
@@ -38,9 +40,10 @@ public final class AggSplitResult implements SplitResult {
 	 * Creates an empty Aggregation Split Result.
 	 */
 	private AggSplitResult() {
-		result = SimpleParfactor.getConstantInstance();
+		result = StdParfactor.getInstance();
 		marginal = UnconstrainedMarginal.getInstance();
 	}
+	
 
 	/* ************************************************************************
 	 *    Static factories
@@ -55,6 +58,7 @@ public final class AggSplitResult implements SplitResult {
 		return new HashSet<Prv>(marginal.eliminables());
 	}
 
+	
 	/**
 	 * Returns the result of the split, which is an instance of 
 	 * {@link SimpleParfactor}.
@@ -62,18 +66,21 @@ public final class AggSplitResult implements SplitResult {
 	 */
 	@Override
 	public Parfactor result() {
-		return SimpleParfactor.getInstance(result);
+		return StdParfactor.getInstance(result);
 	}
+	
 
 	@Override
 	public Distribution residue() {
 		return StdDistribution.of(marginal.distribution());
 	}
 	
+	
 	@Override
 	public boolean isEmpty() {
 		return (result.isConstant() && marginal.isEmpty());
 	}
+	
 	
 	/* ************************************************************************
 	 *    hashCode, equals and toString
@@ -90,6 +97,7 @@ public final class AggSplitResult implements SplitResult {
 		return result;
 	}
 
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -119,6 +127,7 @@ public final class AggSplitResult implements SplitResult {
 		return true;
 	}
 
+	
 	@Override
 	public String toString() {
 		return marginal + "\n" + result;

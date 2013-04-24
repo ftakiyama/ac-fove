@@ -6,7 +6,7 @@ import java.util.Set;
 import java.util.Stack;
 
 import br.usp.poli.takiyama.common.Constraint;
-import br.usp.poli.takiyama.common.Parfactor;
+import br.usp.poli.takiyama.common.ParfactorI;
 import br.usp.poli.takiyama.common.RandomVariableSet;
 import br.usp.poli.takiyama.prv.OldCountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
@@ -39,28 +39,28 @@ public final class MacroOperations {
 	 * @return The specified set of parfactors shattered, or an empty set if
 	 * the specified set is also empty.
 	 */
-	public static Set<Parfactor> shatter(Set<Parfactor> parfactors) {
+	public static Set<ParfactorI> shatter(Set<ParfactorI> parfactors) {
 		
 		if (parfactors.isEmpty()) 
 			return parfactors;
 		
-		Stack<Parfactor> parfactorsToProcess = new Stack<Parfactor>();
+		Stack<ParfactorI> parfactorsToProcess = new Stack<ParfactorI>();
 		parfactorsToProcess.addAll(parfactors);
 		parfactors = null;
 		
-		Set<Parfactor> shatteredSet = new HashSet<Parfactor>();
-		Set<Parfactor> shatteredPool = new HashSet<Parfactor>();
+		Set<ParfactorI> shatteredSet = new HashSet<ParfactorI>();
+		Set<ParfactorI> shatteredPool = new HashSet<ParfactorI>();
 		
 		while (!parfactorsToProcess.isEmpty()) {
-			Parfactor p1 = parfactorsToProcess.pop();
+			ParfactorI p1 = parfactorsToProcess.pop();
 			while (!parfactorsToProcess.isEmpty()) {
-				Parfactor p2;
+				ParfactorI p2;
 				try {
 					p2 = parfactorsToProcess.pop();
 				} catch (EmptyStackException e) {
 					continue;
 				}
-				Set<Parfactor> unifiedSet = p1.unify(p2);
+				Set<ParfactorI> unifiedSet = p1.unify(p2);
 				if (unifiedSet.size() == 2
 						&& unifiedSet.contains(p1)
 						&& unifiedSet.contains(p2)) {
@@ -106,12 +106,12 @@ public final class MacroOperations {
 	 * @return The specified set of parfactors shattered, or an empty set if
 	 * the specified set is also empty.
 	 */
-	public static Set<Parfactor> shatter (
-			Set<Parfactor> parfactors, 
+	public static Set<ParfactorI> shatter (
+			Set<ParfactorI> parfactors, 
 			RandomVariableSet query) {
 		
-		HashSet<Parfactor> shatteredSet = new HashSet<Parfactor>(parfactors);
-		for (Parfactor p : parfactors) {
+		HashSet<ParfactorI> shatteredSet = new HashSet<ParfactorI>(parfactors);
+		for (ParfactorI p : parfactors) {
 			if (p.contains(query.getPrv())) {
 				HashSet<Constraint> constraints = 
 						new HashSet<Constraint>(query.getConstraints());
@@ -144,11 +144,11 @@ public final class MacroOperations {
 	 * @return The specified set of parfactors modified so that the logical
 	 * variable no longer appears free in the specified parfactor.
 	 */
-	public static Set<Parfactor> countingConvert(
-			Set<Parfactor> parfactors, 
-			Parfactor parfactorToProcess, 
+	public static Set<ParfactorI> countingConvert(
+			Set<ParfactorI> parfactors, 
+			ParfactorI parfactorToProcess, 
 			LogicalVariable lv) {
-		Parfactor result = parfactorToProcess.count(lv);
+		ParfactorI result = parfactorToProcess.count(lv);
 		parfactors.add(result);
 		parfactors.remove(parfactorToProcess);
 		return parfactors;
@@ -182,9 +182,9 @@ public final class MacroOperations {
 	 * @return The specified set of parfactors with the parfactor 
 	 * propositionalized in individuals of the specified logival variable.
 	 */
-	public static Set<Parfactor> propositionalize(
-			Set<Parfactor> parfactors,
-			Parfactor parfactorToPropositionalize,
+	public static Set<ParfactorI> propositionalize(
+			Set<ParfactorI> parfactors,
+			ParfactorI parfactorToPropositionalize,
 			LogicalVariable freeLogicalVariable) {
 		parfactors.remove(parfactorToPropositionalize);
 		parfactors.addAll(parfactorToPropositionalize.propositionalize(freeLogicalVariable));
@@ -228,9 +228,9 @@ public final class MacroOperations {
 	 * in the specified parfactor for all individuals satisfying the constraints
 	 * of the counting formula.
 	 */
-	public static Set<Parfactor> fullExpand(
-			Set<Parfactor> parfactors,
-			Parfactor parfactorToExpand,
+	public static Set<ParfactorI> fullExpand(
+			Set<ParfactorI> parfactors,
+			ParfactorI parfactorToExpand,
 			OldCountingFormula countingFormula) {
 		
 		parfactors.remove(parfactorToExpand);
@@ -271,14 +271,14 @@ public final class MacroOperations {
 	 * represented by the specified PRV subject to the specified set of
 	 * constraints eliminated.
 	 */
-	public static Set<Parfactor> globalSumOut(
-			Set<Parfactor> parfactors,
+	public static Set<ParfactorI> globalSumOut(
+			Set<ParfactorI> parfactors,
 			ParameterizedRandomVariable variableToEliminate,
 			Set<Constraint> constraints) {
 		
-		Parfactor result = SimpleParfactor.getConstantInstance();
-		Set<Parfactor> parfactorsCopy = new HashSet<Parfactor>(parfactors);
-		for (Parfactor parfactor : parfactorsCopy) {
+		ParfactorI result = SimpleParfactor.getConstantInstance();
+		Set<ParfactorI> parfactorsCopy = new HashSet<ParfactorI>(parfactors);
+		for (ParfactorI parfactor : parfactorsCopy) {
 			if (parfactor.contains(variableToEliminate) 
 					&& parfactor.getConstraints().containsAll(constraints)) {
 				result = result.multiply(parfactor);

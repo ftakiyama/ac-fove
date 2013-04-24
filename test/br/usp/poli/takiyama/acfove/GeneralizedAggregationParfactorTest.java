@@ -8,7 +8,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import br.usp.poli.takiyama.common.Parfactor;
+import br.usp.poli.takiyama.common.ParfactorI;
 import br.usp.poli.takiyama.common.Pool;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
@@ -37,9 +37,9 @@ public class GeneralizedAggregationParfactorTest {
 		
 		GeneralizedAggregationParfactor ag = objects.getGenAggParfactor("g1");
 		
-		List<Parfactor> result = ag.convertToParfactor();
+		List<ParfactorI> result = ag.convertToParfactor();
 		
-		List<Parfactor> answer = new ArrayList<Parfactor>(2);
+		List<ParfactorI> answer = new ArrayList<ParfactorI>(2);
 		answer.add(objects.getSimpleParfactor("g3"));
 		answer.add(objects.getSimpleParfactor("g2"));
 		
@@ -63,9 +63,9 @@ public class GeneralizedAggregationParfactorTest {
 		
 		GeneralizedAggregationParfactor ag = objects.getGenAggParfactor("g4");
 		
-		List<Parfactor> result = ag.convertToParfactor();
+		List<ParfactorI> result = ag.convertToParfactor();
 		
-		List<Parfactor> answer = new ArrayList<Parfactor>(2);
+		List<ParfactorI> answer = new ArrayList<ParfactorI>(2);
 		answer.add(objects.getSimpleParfactor("g6"));
 		answer.add(objects.getSimpleParfactor("g5"));
 		
@@ -89,9 +89,9 @@ public class GeneralizedAggregationParfactorTest {
 		
 		GeneralizedAggregationParfactor ag = objects.getGenAggParfactor("ag1");
 		Binding substitution = objects.getBinding("B/1");
-		List<Parfactor> result = ag.split(substitution);
+		List<ParfactorI> result = ag.split(substitution);
 		
-		List<Parfactor> answer = objects.getParfactorList("m1");
+		List<ParfactorI> answer = objects.getParfactorList("m1");
 		
 		assertTrue(result.equals(answer));
 	}
@@ -114,9 +114,9 @@ public class GeneralizedAggregationParfactorTest {
 
 		GeneralizedAggregationParfactor ag = objects.getGenAggParfactor("ag1");
 		Binding substitution = objects.getBinding("A/1");
-		List<Parfactor> result = ag.split(substitution);
+		List<ParfactorI> result = ag.split(substitution);
 		
-		List<Parfactor> answer = objects.getParfactorList("m2");  
+		List<ParfactorI> answer = objects.getParfactorList("m2");  
 				
 		assertTrue(result.equals(answer));
 	}
@@ -139,9 +139,9 @@ public class GeneralizedAggregationParfactorTest {
 
 		GeneralizedAggregationParfactor ag = objects.getGenAggParfactor("ag1");
 		Binding substitution = objects.getBinding("A/B");
-		List<Parfactor> result = ag.split(substitution);
+		List<ParfactorI> result = ag.split(substitution);
 		
-		List<Parfactor> answer = objects.getParfactorList("m3");
+		List<ParfactorI> answer = objects.getParfactorList("m3");
 		
 		assertTrue(result.equals(answer));
 	}
@@ -164,9 +164,9 @@ public class GeneralizedAggregationParfactorTest {
 
 		GeneralizedAggregationParfactor ag = objects.getGenAggParfactor("ag1");
 		Binding substitution = objects.getBinding("B/A");
-		List<Parfactor> result = ag.split(substitution);
+		List<ParfactorI> result = ag.split(substitution);
 		
-		List<Parfactor> answer = objects.getParfactorList("m4");
+		List<ParfactorI> answer = objects.getParfactorList("m4");
 		
 		assertTrue(result.equals(answer));
 	}
@@ -188,9 +188,9 @@ public class GeneralizedAggregationParfactorTest {
 
 		GeneralizedAggregationParfactor ag = objects.getGenAggParfactor("ag2");
 		Binding substitution = objects.getBinding("B/1");
-		List<Parfactor> result = ag.split(substitution);
+		List<ParfactorI> result = ag.split(substitution);
 		
-		List<Parfactor> answer = objects.getParfactorList("m5");
+		List<ParfactorI> answer = objects.getParfactorList("m5");
 		
 		assertTrue(result.equals(answer));
 	}
@@ -213,9 +213,9 @@ public class GeneralizedAggregationParfactorTest {
 
 		GeneralizedAggregationParfactor ag = objects.getGenAggParfactor("ag2");
 		Binding substitution = objects.getBinding("A/1");
-		List<Parfactor> result = ag.split(substitution);
+		List<ParfactorI> result = ag.split(substitution);
 		
-		List<Parfactor> answer = objects.getParfactorList("m6");
+		List<ParfactorI> answer = objects.getParfactorList("m6");
 		
 		assertTrue(result.equals(answer));
 		
@@ -239,9 +239,9 @@ public class GeneralizedAggregationParfactorTest {
 
 		GeneralizedAggregationParfactor ag = objects.getGenAggParfactor("ag2");
 		Binding substitution = objects.getBinding("A/B");
-		List<Parfactor> result = ag.split(substitution);
+		List<ParfactorI> result = ag.split(substitution);
 		
-		List<Parfactor> answer = objects.getParfactorList("m7");
+		List<ParfactorI> answer = objects.getParfactorList("m7");
 		
 		assertTrue(result.equals(answer));
 		
@@ -265,9 +265,9 @@ public class GeneralizedAggregationParfactorTest {
 
 		GeneralizedAggregationParfactor ag = objects.getGenAggParfactor("ag2");
 		Binding substitution = objects.getBinding("B/A");
-		List<Parfactor> result = ag.split(substitution);
+		List<ParfactorI> result = ag.split(substitution);
 		
-		List<Parfactor> answer = objects.getParfactorList("m8");
+		List<ParfactorI> answer = objects.getParfactorList("m8");
 		
 		assertTrue(result.equals(answer));
 	}
@@ -290,11 +290,11 @@ public class GeneralizedAggregationParfactorTest {
 		
 		objects.setGenAggParfactorMultiplicationTest();
 		
-		Parfactor g4 = objects.getGenAggParfactor("g4");
-		Parfactor g5 = objects.getSimpleParfactor("g5");
-		Parfactor result = g4.multiply(g5);
+		ParfactorI g4 = objects.getGenAggParfactor("g4");
+		ParfactorI g5 = objects.getSimpleParfactor("g5");
+		ParfactorI result = g4.multiply(g5);
 		
-		Parfactor answer = objects.getGenAggParfactor("g6");
+		ParfactorI answer = objects.getGenAggParfactor("g6");
 		
 		assertTrue(result.equals(answer));
 	}
@@ -317,11 +317,11 @@ public class GeneralizedAggregationParfactorTest {
 
 		objects.setGenAggParfactorMultiplicationTest();
 		
-		Parfactor g1 = objects.getSimpleParfactor("g1");
-		Parfactor g2 = objects.getGenAggParfactor("ga");
-		Parfactor result = g2.multiply(g1);
+		ParfactorI g1 = objects.getSimpleParfactor("g1");
+		ParfactorI g2 = objects.getGenAggParfactor("ga");
+		ParfactorI result = g2.multiply(g1);
 		
-		Parfactor answer = objects.getGenAggParfactor("gar");
+		ParfactorI answer = objects.getGenAggParfactor("gar");
 
 		assertTrue(result.equals(answer));
 	}
@@ -336,10 +336,10 @@ public class GeneralizedAggregationParfactorTest {
 		
 		objects.setGenAggParfactorMultiplicationTest();
 		
-		Parfactor g1 = objects.getSimpleParfactor("g1");
-		Parfactor g2 = objects.getGenAggParfactor("ga");
-		Parfactor result = g2.multiply(g1);
-		Parfactor sameResult = g1.multiply(g2); 
+		ParfactorI g1 = objects.getSimpleParfactor("g1");
+		ParfactorI g2 = objects.getGenAggParfactor("ga");
+		ParfactorI result = g2.multiply(g1);
+		ParfactorI sameResult = g1.multiply(g2); 
 		
 		assertTrue(result.equals(sameResult) 
 				&& sameResult.equals(result));
@@ -360,12 +360,12 @@ public class GeneralizedAggregationParfactorTest {
 		
 		objects.setGenAggParfactorSumOutTest();
 		
-		Parfactor agg = objects.getGenAggParfactor("g6");
+		ParfactorI agg = objects.getGenAggParfactor("g6");
 		ParameterizedRandomVariable prv = 
 				objects.getParameterizedRandomVariable("matched_6");
-		Parfactor result = agg.sumOut(prv); 
+		ParfactorI result = agg.sumOut(prv); 
 		
-		Parfactor answer = objects.getSimpleParfactor("g7");
+		ParfactorI answer = objects.getSimpleParfactor("g7");
 		
 		assertTrue(result.equals(answer));
 	}

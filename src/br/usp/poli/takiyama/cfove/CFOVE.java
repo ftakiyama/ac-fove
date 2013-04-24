@@ -5,7 +5,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import br.usp.poli.takiyama.common.Constraint;
-import br.usp.poli.takiyama.common.Parfactor;
+import br.usp.poli.takiyama.common.ParfactorI;
 import br.usp.poli.takiyama.common.RandomVariableSet;
 import br.usp.poli.takiyama.log.ConsoleLogger;
 import br.usp.poli.takiyama.prv.OldCountingFormula;
@@ -19,10 +19,10 @@ public final class CFOVE {
 	
 	// Input
 	private RandomVariableSet query;
-	private HashSet<Parfactor> parfactors;
+	private HashSet<ParfactorI> parfactors;
 	
 	// Output
-	private Parfactor marginalDistribution;
+	private ParfactorI marginalDistribution;
 	
 	// State variables
 	private HashSet<RandomVariableSet> variablesToEliminate;
@@ -60,7 +60,7 @@ public final class CFOVE {
 		@Override
 		public void execute() {
 			updateVariableSets();
-			CFOVE.this.parfactors = new HashSet<Parfactor>(globalSumOut(parfactors, variableToEliminate, constraints));
+			CFOVE.this.parfactors = new HashSet<ParfactorI>(globalSumOut(parfactors, variableToEliminate, constraints));
 		}
 		
 		/**
@@ -87,17 +87,17 @@ public final class CFOVE {
 	
 	private class CountingConvert implements Operation {
 		
-		private Parfactor parfactor;
+		private ParfactorI parfactor;
 		private StdLogicalVariable logicalVariable;
 		
-		CountingConvert(Parfactor parfactor, StdLogicalVariable logicalVariable) {
+		CountingConvert(ParfactorI parfactor, StdLogicalVariable logicalVariable) {
 			this.parfactor = parfactor;
 			this.logicalVariable = logicalVariable;
 		}
 		
 		@Override
 		public void execute() {
-			CFOVE.this.parfactors = new HashSet<Parfactor>( 
+			CFOVE.this.parfactors = new HashSet<ParfactorI>( 
 					countingConvert( 
 							parfactors, parfactor, logicalVariable));
 			updateVariableSets();
@@ -124,18 +124,18 @@ public final class CFOVE {
 	
 	private class FullExpand implements Operation {
 
-		private Parfactor parfactor;
+		private ParfactorI parfactor;
 		private OldCountingFormula countingFormula;
 		
-		FullExpand(Parfactor parfactor, OldCountingFormula countingFormula) {
+		FullExpand(ParfactorI parfactor, OldCountingFormula countingFormula) {
 			this.parfactor = parfactor;
 			this.countingFormula = countingFormula;
 		}
 		
 		@Override
 		public void execute() {
-			Set<Parfactor> result = fullExpand(parfactors, parfactor, countingFormula);
-			CFOVE.this.parfactors = new HashSet<Parfactor>(shatter(result, query));
+			Set<ParfactorI> result = fullExpand(parfactors, parfactor, countingFormula);
+			CFOVE.this.parfactors = new HashSet<ParfactorI>(shatter(result, query));
 			updateVariableSets();
 		}
 		
@@ -157,18 +157,18 @@ public final class CFOVE {
 	
 	private class Propositionalize implements Operation {
 
-		private Parfactor parfactor;
+		private ParfactorI parfactor;
 		private StdLogicalVariable logicalVariable;
 		
-		Propositionalize(Parfactor parfactor, StdLogicalVariable logicalVariable) {
+		Propositionalize(ParfactorI parfactor, StdLogicalVariable logicalVariable) {
 			this.parfactor = parfactor;
 			this.logicalVariable = logicalVariable;
 		}
 		
 		@Override
 		public void execute() {
-			Set<Parfactor> result = propositionalize(parfactors, parfactor, logicalVariable);
-			CFOVE.this.parfactors = new HashSet<Parfactor>(shatter(result, query));
+			Set<ParfactorI> result = propositionalize(parfactors, parfactor, logicalVariable);
+			CFOVE.this.parfactors = new HashSet<ParfactorI>(shatter(result, query));
 			updateVariableSets();
 		}
 		
@@ -192,8 +192,8 @@ public final class CFOVE {
 	 * Constructor.
 	 * 
 	 */
-	public CFOVE(Set<Parfactor> parfactors, RandomVariableSet query) {
-		this.parfactors = new HashSet<Parfactor>(parfactors);
+	public CFOVE(Set<ParfactorI> parfactors, RandomVariableSet query) {
+		this.parfactors = new HashSet<ParfactorI>(parfactors);
 		this.query = query;
 		this.variablesToEliminate = new HashSet<RandomVariableSet>();
 		this.lowestCost = INFINITE;
@@ -205,10 +205,10 @@ public final class CFOVE {
 	 * Run the C-FOVE algorithm for the set of parfactors and the
 	 * set of random variables specified in the constructor. 
 	 */
-	public Parfactor run() {
-		this.parfactors = new HashSet<Parfactor>(shatter(parfactors, query));
+	public ParfactorI run() {
+		this.parfactors = new HashSet<ParfactorI>(shatter(parfactors, query));
 		getVariablesToEliminate();
-		this.parfactors = new HashSet<Parfactor>(shatter(parfactors));
+		this.parfactors = new HashSet<ParfactorI>(shatter(parfactors));
 		while (thereAreVariablesToEliminate()) {
 			chooseMacroOperation();
 			executeMacroOperation();
@@ -231,7 +231,7 @@ public final class CFOVE {
 	 */
 	private void getVariablesToEliminate() {
 		this.variablesToEliminate.clear();
-		for (Parfactor p : this.parfactors) {
+		for (ParfactorI p : this.parfactors) {
 			for (ParameterizedRandomVariable prv : p.getParameterizedRandomVariables()) {
 				RandomVariableSet s = RandomVariableSet.getInstance(prv, p.getConstraints());
 				if (prv instanceof OldCountingFormula
@@ -285,7 +285,7 @@ public final class CFOVE {
 	 * State variables are updated as lower cost operations are found.
 	 */
 	private void chooseMacroOperation() {
-		for (Parfactor p : parfactors) {
+		for (ParfactorI p : parfactors) {
 			for (ParameterizedRandomVariable f : p.getParameterizedRandomVariables()) { 
 				if (f instanceof OldCountingFormula) {
 					evaluateFullExpand(p, (OldCountingFormula) f);
@@ -317,7 +317,7 @@ public final class CFOVE {
 				new HashSet<ParameterizedRandomVariable>();
 		HashSet<Constraint> resultConstraints = new HashSet<Constraint>();
 		
-		for (Parfactor parfactor : this.parfactors) {
+		for (ParfactorI parfactor : this.parfactors) {
 			if (parfactor.contains(variableToEliminate) 
 					&& parfactor.getConstraints().containsAll(constraints)) {
 				resultVariables.addAll(parfactor.getParameterizedRandomVariables());
@@ -404,7 +404,7 @@ public final class CFOVE {
 	 * @param parfactor The parfactor on which expansion will be made
 	 * @param cf The counting formula to expand
 	 */
-	private void evaluateFullExpand(Parfactor parfactor, OldCountingFormula cf) {
+	private void evaluateFullExpand(ParfactorI parfactor, OldCountingFormula cf) {
 		int resultFactorSize = parfactor.getFactor().size() / cf.getRangeSize();
 		for (int i = 0; 
 			 i < cf.getBoundVariable()
@@ -432,7 +432,7 @@ public final class CFOVE {
 	 * @param parfactor The parfactor on which the operation will be performed
 	 * @param lv The logical variable to eliminate using counting
 	 */
-	private void evaluateCountingConvert(Parfactor parfactor, StdLogicalVariable lv) {
+	private void evaluateCountingConvert(ParfactorI parfactor, StdLogicalVariable lv) {
 		if (parfactor.getFactor().isUnique(lv)) {
 			ParameterizedRandomVariable variableToCount = 
 					parfactor.getFactor().getVariableToCount(lv);
@@ -485,7 +485,7 @@ public final class CFOVE {
 	 * @param parfactor The parfactor on which propositionalization will be made
 	 * @param lv The logical variable to propositionalizes
 	 */
-	private void evaluatePropositionalize(Parfactor parfactor, StdLogicalVariable lv) {
+	private void evaluatePropositionalize(ParfactorI parfactor, StdLogicalVariable lv) {
 		int resultFactorSize = 
 				lv.individualsSatisfying(parfactor.getConstraints()).size()
 				* parfactor.getFactor().size();
@@ -521,8 +521,8 @@ public final class CFOVE {
 	}
 	
 	// Debug only
-	public void runStep(Set<Parfactor> parfactors) {
-		for (Parfactor p : parfactors) {
+	public void runStep(Set<ParfactorI> parfactors) {
+		for (ParfactorI p : parfactors) {
 			
 			logger.info("Evaluating parfactor \n" + p.toString());
 			
@@ -543,7 +543,7 @@ public final class CFOVE {
 	}
 	
 	// Debug only
-	public Set<Parfactor> executeStep(Set<Parfactor> parfactor) {
+	public Set<ParfactorI> executeStep(Set<ParfactorI> parfactor) {
 		runStep(parfactor);
 		executeMacroOperation();
 		return this.parfactors;

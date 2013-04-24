@@ -2,6 +2,7 @@ package br.usp.poli.takiyama.prv;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -154,6 +155,22 @@ public class StdPrv implements Prv {
 	 */
 	public static Prv getInstance() {
 		return new StdPrv();
+	}
+	
+	
+	/**
+	 * Returns a Boolean StdPrv. Its range is {false, true}
+	 * 
+	 * @param f The name of the functor
+	 * @param vars Terms that parameterized the functor
+	 * @return a Boolean StdPrv with range {false, true}
+	 */
+	public static Prv getBooleanInstance(String f, Term ... vars) {
+		List<RangeElement> range = new ArrayList<RangeElement>(2);
+		range.add(Bool.valueOf(false));
+		range.add(Bool.valueOf(true));
+		List<Term> terms = Arrays.asList(vars);
+		return new StdPrv(f, range, terms);
 	}
 	
 	

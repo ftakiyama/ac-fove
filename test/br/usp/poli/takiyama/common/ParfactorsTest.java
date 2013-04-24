@@ -36,12 +36,12 @@ public class ParfactorsTest {
 		
 		objects.setGenAggUnificationTest();
 		
-		Parfactor g1 = objects.getGenAggParfactor("g.1.in.1");
-		Parfactor g2 = objects.getGenAggParfactor("g.1.in.2");
+		ParfactorI g1 = objects.getGenAggParfactor("g.1.in.1");
+		ParfactorI g2 = objects.getGenAggParfactor("g.1.in.2");
 		
-		Set<Parfactor> result = Parfactors.unify(g1, g2);
+		Set<ParfactorI> result = Parfactors.unify(g1, g2);
 		
-		Set<Parfactor> answer = new HashSet<Parfactor>(3);
+		Set<ParfactorI> answer = new HashSet<ParfactorI>(3);
 		answer.add(objects.getGenAggParfactor("g.1.out.1"));
 		answer.add(objects.getGenAggParfactor("g.1.out.2"));
 		answer.add(objects.getGenAggParfactor("g.1.out.3"));
@@ -55,10 +55,10 @@ public class ParfactorsTest {
 		
 		objects.setGenAggUnificationTest();
 		
-		Parfactor g1 = objects.getGenAggParfactor("g.2.in.1");
-		Parfactor g2 = objects.getGenAggParfactor("g.2.in.2");
+		ParfactorI g1 = objects.getGenAggParfactor("g.2.in.1");
+		ParfactorI g2 = objects.getGenAggParfactor("g.2.in.2");
 		
-		Set<Parfactor> result = Parfactors.unify(g1, g2);
+		Set<ParfactorI> result = Parfactors.unify(g1, g2);
 		
 		ParameterizedRandomVariable resultAuxChild = ParameterizedRandomVariable.getEmptyInstance();
 		Iterator<ParameterizedRandomVariable> it = buffer.iterator();
@@ -66,7 +66,7 @@ public class ParfactorsTest {
 			resultAuxChild = it.next();
 		}
 		
-		Set<Parfactor> answer = new HashSet<Parfactor>(3);
+		Set<ParfactorI> answer = new HashSet<ParfactorI>(3);
 		answer.add(objects.getGenAggParfactor("g.2.out.1"));
 		answer.add(objects.getGenAggParfactor("g.2.out.2"));
 		answer.add(objects.getGenAggParfactor("g.2.out.3"));
@@ -82,10 +82,10 @@ public class ParfactorsTest {
 		
 		objects.setGenAggUnificationTest();
 		
-		Parfactor g1 = objects.getGenAggParfactor("g.3.in.1");
-		Parfactor g2 = objects.getGenAggParfactor("g.3.in.2");
+		ParfactorI g1 = objects.getGenAggParfactor("g.3.in.1");
+		ParfactorI g2 = objects.getGenAggParfactor("g.3.in.2");
 		
-		Set<Parfactor> result = Parfactors.unify(g1, g2);
+		Set<ParfactorI> result = Parfactors.unify(g1, g2);
 		
 		ParameterizedRandomVariable resultAuxChild = ParameterizedRandomVariable.getEmptyInstance();
 		Iterator<ParameterizedRandomVariable> it = buffer.iterator();
@@ -93,7 +93,7 @@ public class ParfactorsTest {
 			resultAuxChild = it.next();
 		}
 		
-		Set<Parfactor> answer = new HashSet<Parfactor>(4);
+		Set<ParfactorI> answer = new HashSet<ParfactorI>(4);
 		answer.add(objects.getGenAggParfactor("g.3.out.1"));
 		answer.add(objects.getGenAggParfactor("g.3.out.2"));
 		answer.add(objects.getGenAggParfactor("g.3.out.3"));
@@ -110,16 +110,16 @@ public class ParfactorsTest {
 		
 		objects.setGenAggUnificationTest();
 		
-		Parfactor g1 = objects.getGenAggParfactor("g.4.in.1");
-		Parfactor g2 = objects.getGenAggParfactor("g.4.in.2");
+		ParfactorI g1 = objects.getGenAggParfactor("g.4.in.1");
+		ParfactorI g2 = objects.getGenAggParfactor("g.4.in.2");
 		
-		Set<Parfactor> result = Parfactors.unify(g1, g2);
+		Set<ParfactorI> result = Parfactors.unify(g1, g2);
 		
-		Set<Parfactor> answer1 = new HashSet<Parfactor>(2);
+		Set<ParfactorI> answer1 = new HashSet<ParfactorI>(2);
 		answer1.add(objects.getGenAggParfactor("g.4.out.1"));
 		answer1.add(objects.getGenAggParfactor("g.4.out.2"));
 		
-		Set<Parfactor> answer2 = new HashSet<Parfactor>(2);
+		Set<ParfactorI> answer2 = new HashSet<ParfactorI>(2);
 		answer1.add(objects.getGenAggParfactor("g.4.out.3"));
 		answer1.add(objects.getGenAggParfactor("g.4.out.4"));
 		
@@ -132,16 +132,16 @@ public class ParfactorsTest {
 		
 		objects.setGenAggUnificationTest();
 		
-		Parfactor g1 = objects.getGenAggParfactor("g.5.in.1");
-		Parfactor g2 = objects.getGenAggParfactor("g.5.in.2");
+		ParfactorI g1 = objects.getGenAggParfactor("g.5.in.1");
+		ParfactorI g2 = objects.getGenAggParfactor("g.5.in.2");
 		
-		Set<Parfactor> result = Parfactors.unify(g1, g2);
+		Set<ParfactorI> result = Parfactors.unify(g1, g2);
 		
-		Set<Parfactor> answer1 = new HashSet<Parfactor>(2);
+		Set<ParfactorI> answer1 = new HashSet<ParfactorI>(2);
 		answer1.add(objects.getGenAggParfactor("g.5.out.1"));
 		answer1.add(objects.getGenAggParfactor("g.5.out.2"));
 		
-		Set<Parfactor> answer2 = new HashSet<Parfactor>(2);
+		Set<ParfactorI> answer2 = new HashSet<ParfactorI>(2);
 		answer1.add(objects.getGenAggParfactor("g.5.out.3"));
 		answer1.add(objects.getGenAggParfactor("g.5.out.4"));
 		
@@ -154,12 +154,12 @@ public class ParfactorsTest {
 		
 		objects.setGenAggUnificationTest();
 		
-		Parfactor g1 = objects.getGenAggParfactor("g.6.in.1");
-		Parfactor g2 = objects.getGenAggParfactor("g.6.in.2");
+		ParfactorI g1 = objects.getGenAggParfactor("g.6.in.1");
+		ParfactorI g2 = objects.getGenAggParfactor("g.6.in.2");
 		
-		Set<Parfactor> result = Parfactors.unify(g1, g2);
+		Set<ParfactorI> result = Parfactors.unify(g1, g2);
 		
-		Set<Parfactor> answer = new HashSet<Parfactor>(4);
+		Set<ParfactorI> answer = new HashSet<ParfactorI>(4);
 		answer.add(objects.getGenAggParfactor("g.6.out.1"));
 		answer.add(objects.getGenAggParfactor("g.6.out.2"));
 		answer.add(objects.getGenAggParfactor("g.6.out.3"));
@@ -173,10 +173,10 @@ public class ParfactorsTest {
 		
 		objects.setGenAggUnificationTest();
 		
-		Parfactor g1 = objects.getGenAggParfactor("g.7.in.1");
-		Parfactor g2 = objects.getGenAggParfactor("g.7.in.2");
+		ParfactorI g1 = objects.getGenAggParfactor("g.7.in.1");
+		ParfactorI g2 = objects.getGenAggParfactor("g.7.in.2");
 		
-		Set<Parfactor> result = Parfactors.unify(g1, g2);
+		Set<ParfactorI> result = Parfactors.unify(g1, g2);
 		
 		ParameterizedRandomVariable resultAuxChild = ParameterizedRandomVariable.getEmptyInstance();
 		Iterator<ParameterizedRandomVariable> it = buffer.iterator();
@@ -184,7 +184,7 @@ public class ParfactorsTest {
 			resultAuxChild = it.next();
 		}
 		
-		Set<Parfactor> answer = new HashSet<Parfactor>(5);
+		Set<ParfactorI> answer = new HashSet<ParfactorI>(5);
 		answer.add(objects.getGenAggParfactor("g.7.out.1"));
 		answer.add(objects.getGenAggParfactor("g.7.out.2"));
 		answer.add(objects.getGenAggParfactor("g.7.out.3"));

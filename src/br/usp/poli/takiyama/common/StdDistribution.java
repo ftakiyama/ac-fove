@@ -58,9 +58,9 @@ public final class StdDistribution implements Distribution {
 		if (p1 == null) {
 			throw new NullPointerException();
 		}
-		StdDistribution dist = new StdDistribution(1);
-		dist.add(p1);
-		return dist;
+		Set<Parfactor> set = new HashSet<Parfactor>(2);
+		set.add(p1);
+		return new StdDistribution(set);
 	}
 	
 	/**
@@ -74,10 +74,10 @@ public final class StdDistribution implements Distribution {
 		if (p1 == null || p2 == null) {
 			throw new NullPointerException();
 		}
-		StdDistribution dist = new StdDistribution(2);
-		dist.add(p1);
-		dist.add(p2);
-		return dist;
+		Set<Parfactor> set = new HashSet<Parfactor>(2);
+		set.add(p1);
+		set.add(p2);
+		return new StdDistribution(set);
 	}
 	
 	/**

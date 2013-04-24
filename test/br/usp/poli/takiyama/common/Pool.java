@@ -43,7 +43,7 @@ public class Pool {
 	private HashMap<String, RandomVariableSet> randomVariableSetPool;
 	private HashMap<String, AggregationParfactor> aggParfactorPool;
 	private HashMap<String, Binding> bindingPool;
-	private HashMap<String, List<Parfactor>> parfactorListPool;
+	private HashMap<String, List<ParfactorI>> parfactorListPool;
 	private HashMap<String, GeneralizedAggregationParfactor> genAggParfactorPool;
 	
 	// maybe I could separate factors in a separated pool.
@@ -60,7 +60,7 @@ public class Pool {
 		this.randomVariableSetPool = new HashMap<String, RandomVariableSet>();
 		this.aggParfactorPool = new HashMap<String, AggregationParfactor>();
 		this.bindingPool = new HashMap<String, Binding>();
-		this.parfactorListPool = new HashMap<String, List<Parfactor>>();
+		this.parfactorListPool = new HashMap<String, List<ParfactorI>>();
 		this.genAggParfactorPool = new HashMap<String, GeneralizedAggregationParfactor>();
 	}
 	
@@ -667,7 +667,7 @@ public class Pool {
 	 * @param parfactors The name of the remaining parfactors to add.
 	 */
 	private void createParfactorList(String name, String ... parfactors) {
-		ArrayList<Parfactor> pList = new ArrayList<Parfactor>();
+		ArrayList<ParfactorI> pList = new ArrayList<ParfactorI>();
 		
 		if (parfactors == null || parfactors.length == 0) {
 			throw new IllegalArgumentException("Empty list of parfactors!");
@@ -2393,9 +2393,9 @@ public class Pool {
 	 * @throws IllegalArgumentException If a specified parfactor is not
 	 * in the pool
 	 */
-	public Set<Parfactor> getSimpleParfactorSet(String ... name) 
+	public Set<ParfactorI> getSimpleParfactorSet(String ... name) 
 			throws IllegalArgumentException {
-		HashSet<Parfactor> parfactors = new HashSet<Parfactor>(name.length);
+		HashSet<ParfactorI> parfactors = new HashSet<ParfactorI>(name.length);
 		for (String parfactor : name) {
 			if (simpleParfactorPool.containsKey(parfactor)) 
 				parfactors.add(simpleParfactorPool.get(parfactor));
@@ -2462,7 +2462,7 @@ public class Pool {
 	 * @return A list of parfactors from the pool
 	 * @throws IllegalArgumentException If the list does not exist
 	 */
-	public List<Parfactor> getParfactorList(String name) throws IllegalArgumentException {
+	public List<ParfactorI> getParfactorList(String name) throws IllegalArgumentException {
 		if (parfactorListPool.containsKey(name)) {
 			return parfactorListPool.get(name);
 		} else {

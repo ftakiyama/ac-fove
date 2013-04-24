@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import br.usp.poli.takiyama.cfove.MacroOperations;
 import br.usp.poli.takiyama.common.Constraint;
-import br.usp.poli.takiyama.common.Parfactor;
+import br.usp.poli.takiyama.common.ParfactorI;
 import br.usp.poli.takiyama.common.Pool;
 
 /**
@@ -33,15 +33,15 @@ public class MacroOperationsTest {
 		
 		objects.setExample2_5_2_7forShattering();
 		
-		HashSet<Parfactor> toShatter = new HashSet<Parfactor>();
+		HashSet<ParfactorI> toShatter = new HashSet<ParfactorI>();
 		toShatter.add(objects.getSimpleParfactor("g1"));
 		toShatter.add(objects.getSimpleParfactor("g2"));
 		toShatter.add(objects.getSimpleParfactor("g3"));
 		toShatter.add(objects.getSimpleParfactor("g4"));
 		
-		Set<Parfactor> result = MacroOperations.shatter(toShatter);
+		Set<ParfactorI> result = MacroOperations.shatter(toShatter);
 		
-		HashSet<Parfactor> answer = new HashSet<Parfactor>();
+		HashSet<ParfactorI> answer = new HashSet<ParfactorI>();
 		answer.add(objects.getSimpleParfactor("g1"));
 		answer.add(objects.getSimpleParfactor("g4"));
 		answer.add(objects.getSimpleParfactor("g5"));
@@ -57,18 +57,18 @@ public class MacroOperationsTest {
 		
 		objects.setExample2_5_2_7forCountingConvert();
 		
-		HashSet<Parfactor> toCount = new HashSet<Parfactor>();
+		HashSet<ParfactorI> toCount = new HashSet<ParfactorI>();
 		toCount.add(objects.getSimpleParfactor("g1"));
 		toCount.add(objects.getSimpleParfactor("g9"));
 		toCount.add(objects.getSimpleParfactor("g11"));
 		
-		Set<Parfactor> result = MacroOperations
+		Set<ParfactorI> result = MacroOperations
 			.countingConvert(
 					toCount, 
 					objects.getSimpleParfactor("g9"), 
 					objects.getLogicalVariable("Lot"));
 		
-		HashSet<Parfactor> answer = new HashSet<Parfactor>();
+		HashSet<ParfactorI> answer = new HashSet<ParfactorI>();
 		answer.add(objects.getSimpleParfactor("g1"));
 		answer.add(objects.getSimpleParfactor("g11"));
 		answer.add(objects.getSimpleParfactor("g12"));
@@ -81,18 +81,18 @@ public class MacroOperationsTest {
 		
 		objects.setPropositionalizationMacroTest();
 		
-		HashSet<Parfactor> toPropositionalize = new HashSet<Parfactor>();
+		HashSet<ParfactorI> toPropositionalize = new HashSet<ParfactorI>();
 		toPropositionalize.add(objects.getSimpleParfactor("g1"));
 		toPropositionalize.add(objects.getSimpleParfactor("g2"));
 		toPropositionalize.add(objects.getSimpleParfactor("g3"));
 		toPropositionalize.add(objects.getSimpleParfactor("g4"));
 		
-		Set<Parfactor> result = MacroOperations.propositionalize(
+		Set<ParfactorI> result = MacroOperations.propositionalize(
 				toPropositionalize, 
 				objects.getSimpleParfactor("g3"), 
 				objects.getLogicalVariable("Lot"));
 		
-		HashSet<Parfactor> answer = new HashSet<Parfactor>();
+		HashSet<ParfactorI> answer = new HashSet<ParfactorI>();
 		answer.add(objects.getSimpleParfactor("g1"));
 		answer.add(objects.getSimpleParfactor("g4"));
 		answer.add(objects.getSimpleParfactor("g2.0"));
@@ -110,16 +110,16 @@ public class MacroOperationsTest {
 		
 		objects.setFullExpandTest();
 		
-		HashSet<Parfactor> toExpand = new HashSet<Parfactor>();
+		HashSet<ParfactorI> toExpand = new HashSet<ParfactorI>();
 		toExpand.add(objects.getSimpleParfactor("g1"));
 		toExpand.add(objects.getSimpleParfactor("g2"));
 		
-		Set<Parfactor> result = MacroOperations.fullExpand(
+		Set<ParfactorI> result = MacroOperations.fullExpand(
 				toExpand,
 				objects.getSimpleParfactor("g2"),
 				objects.getCountingFormula("#.A[f]"));
 		
-		HashSet<Parfactor> answer = new HashSet<Parfactor>();
+		HashSet<ParfactorI> answer = new HashSet<ParfactorI>();
 		answer.add(objects.getSimpleParfactor("g1.0"));
 		answer.add(objects.getSimpleParfactor("g1.1"));
 		answer.add(objects.getSimpleParfactor("g1.2"));
@@ -136,7 +136,7 @@ public class MacroOperationsTest {
 		HashSet<Constraint> constraints =  new HashSet<Constraint>();
 		constraints.add(objects.getConstraint("Lot != 1"));
 		
-		HashSet<Parfactor> input = new HashSet<Parfactor>();
+		HashSet<ParfactorI> input = new HashSet<ParfactorI>();
 		input.add(objects.getSimpleParfactor("g1"));
 		input.add(objects.getSimpleParfactor("g4"));
 		input.add(objects.getSimpleParfactor("g5"));
@@ -144,12 +144,12 @@ public class MacroOperationsTest {
 		input.add(objects.getSimpleParfactor("g7"));
 		input.add(objects.getSimpleParfactor("g8"));
 		
-		Set<Parfactor> output = MacroOperations.globalSumOut(
+		Set<ParfactorI> output = MacroOperations.globalSumOut(
 				input,
 				objects.getParameterizedRandomVariable("sprinkler"),
 				constraints);
 		
-		Set<Parfactor> answer = new HashSet<Parfactor>();
+		Set<ParfactorI> answer = new HashSet<ParfactorI>();
 		answer.add(objects.getSimpleParfactor("g1"));
 		answer.add(objects.getSimpleParfactor("g4"));
 		answer.add(objects.getSimpleParfactor("g5"));
@@ -166,19 +166,19 @@ public class MacroOperationsTest {
 		
 		HashSet<Constraint> constraints =  new HashSet<Constraint>();
 		
-		HashSet<Parfactor> input = new HashSet<Parfactor>();
+		HashSet<ParfactorI> input = new HashSet<ParfactorI>();
 		input.add(objects.getSimpleParfactor("g1"));
 		input.add(objects.getSimpleParfactor("g4"));
 		input.add(objects.getSimpleParfactor("g5"));
 		input.add(objects.getSimpleParfactor("g7"));
 		input.add(objects.getSimpleParfactor("g9"));
 		
-		Set<Parfactor> output = MacroOperations.globalSumOut(
+		Set<ParfactorI> output = MacroOperations.globalSumOut(
 				input,
 				objects.getParameterizedRandomVariable("sprinkler[Lot/1]"),
 				constraints);
 		
-		Set<Parfactor> answer = new HashSet<Parfactor>();
+		Set<ParfactorI> answer = new HashSet<ParfactorI>();
 		answer.add(objects.getSimpleParfactor("g1"));
 		answer.add(objects.getSimpleParfactor("g4"));
 		answer.add(objects.getSimpleParfactor("g9"));
@@ -194,17 +194,17 @@ public class MacroOperationsTest {
 		
 		HashSet<Constraint> constraints =  new HashSet<Constraint>();
 		
-		HashSet<Parfactor> input = new HashSet<Parfactor>();
+		HashSet<ParfactorI> input = new HashSet<ParfactorI>();
 		input.add(objects.getSimpleParfactor("g1"));
 		input.add(objects.getSimpleParfactor("g11"));
 		input.add(objects.getSimpleParfactor("g12"));
 		
-		Set<Parfactor> output = MacroOperations.globalSumOut(
+		Set<ParfactorI> output = MacroOperations.globalSumOut(
 				input,
 				objects.getParameterizedRandomVariable("rain"),
 				constraints);
 		
-		Set<Parfactor> answer = new HashSet<Parfactor>();
+		Set<ParfactorI> answer = new HashSet<ParfactorI>();
 		answer.add(objects.getSimpleParfactor("g13"));
 		
 		assertTrue(output.equals(answer));

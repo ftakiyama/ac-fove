@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import br.usp.poli.takiyama.common.Constraint;
-import br.usp.poli.takiyama.common.Parfactor;
+import br.usp.poli.takiyama.common.ParfactorI;
 import br.usp.poli.takiyama.common.Pool;
 import br.usp.poli.takiyama.common.RandomVariableSet;
 import br.usp.poli.takiyama.prv.LogicalVariable;
@@ -40,7 +40,7 @@ public class CFOVETest {
 
 		System.out.println("Step 2 - Operation selection");
 		
-		Set<Parfactor> input = new HashSet<Parfactor>(4);
+		Set<ParfactorI> input = new HashSet<ParfactorI>(4);
 		input = objects.getSimpleParfactorSet("g1","g4","g5","g6","g7","g8");
 		
 		RandomVariableSet q = objects.getRandomVariableSet("wg:lot");
@@ -71,7 +71,7 @@ public class CFOVETest {
 		
 		System.out.println("Step 3 - Operation selection");
 		
-		Set<Parfactor> input = new HashSet<Parfactor>(5);
+		Set<ParfactorI> input = new HashSet<ParfactorI>(5);
 		input = objects.getSimpleParfactorSet("g1","g4","g5","g7","g9");
 		
 		RandomVariableSet q = objects.getRandomVariableSet("wg:lot");
@@ -112,7 +112,7 @@ public class CFOVETest {
 		
 		System.out.println("Step 4 - Operation selection");
 		
-		Set<Parfactor> input = new HashSet<Parfactor>(4);
+		Set<ParfactorI> input = new HashSet<ParfactorI>(4);
 		input = objects.getSimpleParfactorSet("g1","g4","g9","g10");
 		
 		RandomVariableSet q = objects.getRandomVariableSet("wg:lot");
@@ -153,7 +153,7 @@ public class CFOVETest {
 
 		System.out.println("Step 5 - Operation selection");
 		
-		Set<Parfactor> input = new HashSet<Parfactor>(3);
+		Set<ParfactorI> input = new HashSet<ParfactorI>(3);
 		input = objects.getSimpleParfactorSet("g1","g9","g11");
 		
 		RandomVariableSet q = objects.getRandomVariableSet("wg:lot");
@@ -161,7 +161,7 @@ public class CFOVETest {
 		CFOVE cfove = new CFOVE(input, q);
 		cfove.runStep(input);
 		
-		Parfactor parfactor = objects.getSimpleParfactor("g9");
+		ParfactorI parfactor = objects.getSimpleParfactor("g9");
 		LogicalVariable logicalVariable = objects.getLogicalVariable("Lot");
 		
 		StringBuilder str = new StringBuilder();
@@ -182,7 +182,7 @@ public class CFOVETest {
 		
 		System.out.println("Step 6 - Operation selection");
 
-		Set<Parfactor> input = new HashSet<Parfactor>(3);
+		Set<ParfactorI> input = new HashSet<ParfactorI>(3);
 		input = objects.getSimpleParfactorSet("g1","g11","g12");
 		
 		RandomVariableSet q = objects.getRandomVariableSet("wg:lot");
@@ -211,13 +211,13 @@ public class CFOVETest {
 	@Test
 	public void exampleComputationFirstStep() {
 		
-		Set<Parfactor> input = new HashSet<Parfactor>(4);
+		Set<ParfactorI> input = new HashSet<ParfactorI>(4);
 		input = objects.getSimpleParfactorSet("g1","g2","g3","g4");
 		
-		Set<Parfactor> result = new HashSet<Parfactor>(6);
+		Set<ParfactorI> result = new HashSet<ParfactorI>(6);
 		result = MacroOperations.shatter(input);
 				
-		Set<Parfactor> answer = new HashSet<Parfactor>(6);
+		Set<ParfactorI> answer = new HashSet<ParfactorI>(6);
 		answer = objects.getSimpleParfactorSet("g1","g4","g5","g6","g7","g8");
 		
 		assertTrue(result.equals(answer));
@@ -231,10 +231,10 @@ public class CFOVETest {
 		
 		System.out.println("Step 2");
 		
-		Set<Parfactor> input = new HashSet<Parfactor>(6);
+		Set<ParfactorI> input = new HashSet<ParfactorI>(6);
 		input = objects.getSimpleParfactorSet("g1","g4","g5","g6","g7","g8");
 		
-		Set<Parfactor> result = new HashSet<Parfactor>(5);
+		Set<ParfactorI> result = new HashSet<ParfactorI>(5);
 		Set<Constraint> c = new HashSet<Constraint>();
 		c.add(objects.getConstraint("Lot != 1"));
 		RandomVariableSet q = RandomVariableSet.getInstance (
@@ -242,7 +242,7 @@ public class CFOVETest {
 		CFOVE cfove = new CFOVE(input, q);
 		result = cfove.executeStep(input); //must put all state variables here
  		
-		Set<Parfactor> answer = new HashSet<Parfactor>(5);
+		Set<ParfactorI> answer = new HashSet<ParfactorI>(5);
 		answer = objects.getSimpleParfactorSet("g1","g4","g5","g7","g9");
 		
 		assertTrue(result.equals(answer));
@@ -256,10 +256,10 @@ public class CFOVETest {
 
 		System.out.println("Step 3");
 		
-		Set<Parfactor> input = new HashSet<Parfactor>(5);
+		Set<ParfactorI> input = new HashSet<ParfactorI>(5);
 		input = objects.getSimpleParfactorSet("g1","g4","g5","g7","g9");
 		
-		Set<Parfactor> result = new HashSet<Parfactor>(4);
+		Set<ParfactorI> result = new HashSet<ParfactorI>(4);
 		Set<Constraint> c = new HashSet<Constraint>();
 		c.add(objects.getConstraint("Lot != 1"));
 		RandomVariableSet q = RandomVariableSet.getInstance (
@@ -267,7 +267,7 @@ public class CFOVETest {
 		CFOVE cfove = new CFOVE(input, q);
 		result = cfove.executeStep(input); //must put all state variables here
  		
-		Set<Parfactor> answer = new HashSet<Parfactor>(4);
+		Set<ParfactorI> answer = new HashSet<ParfactorI>(4);
 		answer = objects.getSimpleParfactorSet("g1","g4","g9","g10");
 		
 		assertTrue(result.equals(answer));
@@ -281,10 +281,10 @@ public class CFOVETest {
 
 		System.out.println("Step 4");
 		
-		Set<Parfactor> input = new HashSet<Parfactor>(4);
+		Set<ParfactorI> input = new HashSet<ParfactorI>(4);
 		input = objects.getSimpleParfactorSet("g1","g4","g9","g10");
 		
-		Set<Parfactor> result = new HashSet<Parfactor>(3);
+		Set<ParfactorI> result = new HashSet<ParfactorI>(3);
 		Set<Constraint> c = new HashSet<Constraint>();
 		c.add(objects.getConstraint("Lot != 1"));
 		RandomVariableSet q = RandomVariableSet.getInstance (
@@ -292,7 +292,7 @@ public class CFOVETest {
 		CFOVE cfove = new CFOVE(input, q);
 		result = cfove.executeStep(input); //must put all state variables here
  		
-		Set<Parfactor> answer = new HashSet<Parfactor>(3);
+		Set<ParfactorI> answer = new HashSet<ParfactorI>(3);
 		answer = objects.getSimpleParfactorSet("g1","g9","g11");
 		
 		assertTrue(result.equals(answer));
@@ -306,10 +306,10 @@ public class CFOVETest {
 
 		System.out.println("Step 5");
 		
-		Set<Parfactor> input = new HashSet<Parfactor>(3);
+		Set<ParfactorI> input = new HashSet<ParfactorI>(3);
 		input = objects.getSimpleParfactorSet("g1","g9","g11");
 		
-		Set<Parfactor> result = new HashSet<Parfactor>(3);
+		Set<ParfactorI> result = new HashSet<ParfactorI>(3);
 		Set<Constraint> c = new HashSet<Constraint>();
 		c.add(objects.getConstraint("Lot != 1"));
 		RandomVariableSet q = RandomVariableSet.getInstance (
@@ -317,7 +317,7 @@ public class CFOVETest {
 		CFOVE cfove = new CFOVE(input, q);
 		result = cfove.executeStep(input); //must put all state variables here
  		
-		Set<Parfactor> answer = new HashSet<Parfactor>(3);
+		Set<ParfactorI> answer = new HashSet<ParfactorI>(3);
 		answer = objects.getSimpleParfactorSet("g1","g11","g12");
 		
 		assertTrue(result.equals(answer));
@@ -331,10 +331,10 @@ public class CFOVETest {
 
 		System.out.println("Step 6");
 		
-		Set<Parfactor> input = new HashSet<Parfactor>(3);
+		Set<ParfactorI> input = new HashSet<ParfactorI>(3);
 		input = objects.getSimpleParfactorSet("g1","g11","g12");
 		
-		Set<Parfactor> result = new HashSet<Parfactor>(1);
+		Set<ParfactorI> result = new HashSet<ParfactorI>(1);
 		Set<Constraint> c = new HashSet<Constraint>();
 		c.add(objects.getConstraint("Lot != 1"));
 		RandomVariableSet q = RandomVariableSet.getInstance (
@@ -342,7 +342,7 @@ public class CFOVETest {
 		CFOVE cfove = new CFOVE(input, q);
 		result = cfove.executeStep(input); //must put all state variables here
  		
-		Set<Parfactor> answer = new HashSet<Parfactor>(1);
+		Set<ParfactorI> answer = new HashSet<ParfactorI>(1);
 		answer = objects.getSimpleParfactorSet("g13");	
 		
 		System.out.println("Result: \n" + result);
@@ -358,7 +358,7 @@ public class CFOVETest {
 	@Test
 	public void exampleComputation() {
 		
-		Set<Parfactor> input = new HashSet<Parfactor>(4);
+		Set<ParfactorI> input = new HashSet<ParfactorI>(4);
 		input = objects.getSimpleParfactorSet("g1","g2","g3","g4");
 		
 		Set<Constraint> c = new HashSet<Constraint>();
@@ -366,9 +366,9 @@ public class CFOVETest {
 		RandomVariableSet q = RandomVariableSet.getInstance (
 				objects.getParameterizedRandomVariable("wet_grass"), c);
 		CFOVE cfove = new CFOVE(input, q);
-		Parfactor result = cfove.run(); 
+		ParfactorI result = cfove.run(); 
 		
-		Set<Parfactor> answer = new HashSet<Parfactor>(1);
+		Set<ParfactorI> answer = new HashSet<ParfactorI>(1);
 		answer = objects.getSimpleParfactorSet("g13");	
 		
 		System.out.println("Result: \n" + result);

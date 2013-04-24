@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import br.usp.poli.takiyama.common.Builder;
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.InequalityConstraint;
 
@@ -17,8 +16,8 @@ public class ConstraintTest {
 	 */
 	@Test
 	public void testInequalityConsistencyXY_Xq() {
-		LogicalVariable x = Builder.getLogicalVariable("X", "x", 10);
-		LogicalVariable y = Builder.getLogicalVariable("Y", "x", 10);
+		LogicalVariable x = StdLogicalVariable.getInstance("X", "x", 10);
+		LogicalVariable y = StdLogicalVariable.getInstance("Y", "x", 10);
 		Constant q = x.population().individualAt(0);
 		
 		Constraint c = InequalityConstraint.getInstance(x, y);
@@ -33,8 +32,8 @@ public class ConstraintTest {
 	 */
 	@Test
 	public void testInequalityConsistencyXY_Yq() {
-		LogicalVariable x = Builder.getLogicalVariable("X", "x", 10);
-		LogicalVariable y = Builder.getLogicalVariable("Y", "x", 10);
+		LogicalVariable x = StdLogicalVariable.getInstance("X", "x", 10);
+		LogicalVariable y = StdLogicalVariable.getInstance("Y", "x", 10);
 		Constant q = x.population().individualAt(0);
 		
 		Constraint c = InequalityConstraint.getInstance(x, y);
@@ -49,9 +48,9 @@ public class ConstraintTest {
 	 */
 	@Test
 	public void testInequalityConsistencyXY_XW() {
-		LogicalVariable x = Builder.getLogicalVariable("X", "x", 10);
-		LogicalVariable y = Builder.getLogicalVariable("Y", "x", 10);
-		LogicalVariable w = Builder.getLogicalVariable("W", "x", 10);
+		LogicalVariable x = StdLogicalVariable.getInstance("X", "x", 10);
+		LogicalVariable y = StdLogicalVariable.getInstance("Y", "x", 10);
+		LogicalVariable w = StdLogicalVariable.getInstance("W", "x", 10);
 		
 		Constraint c = InequalityConstraint.getInstance(x, y);
 		Binding b = Binding.getInstance(x, w);
@@ -65,9 +64,9 @@ public class ConstraintTest {
 	 */
 	@Test
 	public void testInequalityConsistencyXY_YW() {
-		LogicalVariable x = Builder.getLogicalVariable("X", "x", 10);
-		LogicalVariable y = Builder.getLogicalVariable("Y", "x", 10);
-		LogicalVariable w = Builder.getLogicalVariable("W", "x", 10);
+		LogicalVariable x = StdLogicalVariable.getInstance("X", "x", 10);
+		LogicalVariable y = StdLogicalVariable.getInstance("Y", "x", 10);
+		LogicalVariable w = StdLogicalVariable.getInstance("W", "x", 10);
 		
 		Constraint c = InequalityConstraint.getInstance(x, y);
 		Binding b = Binding.getInstance(y, w);
@@ -81,8 +80,8 @@ public class ConstraintTest {
 	 */
 	@Test
 	public void testInequalityConsistencyXt_Yq() {
-		LogicalVariable x = Builder.getLogicalVariable("X", "x", 10);
-		LogicalVariable y = Builder.getLogicalVariable("Y", "x", 10);
+		LogicalVariable x = StdLogicalVariable.getInstance("X", "x", 10);
+		LogicalVariable y = StdLogicalVariable.getInstance("Y", "x", 10);
 		Constant t = Constant.getInstance("x1");
 		Constant q = Constant.getInstance("x1");
 				
@@ -98,9 +97,9 @@ public class ConstraintTest {
 	 */
 	@Test
 	public void testInequalityConsistencyXt_YW() {
-		LogicalVariable x = Builder.getLogicalVariable("X", "x", 10);
-		LogicalVariable y = Builder.getLogicalVariable("Y", "x", 10);
-		LogicalVariable w = Builder.getLogicalVariable("W", "x", 10);
+		LogicalVariable x = StdLogicalVariable.getInstance("X", "x", 10);
+		LogicalVariable y = StdLogicalVariable.getInstance("Y", "x", 10);
+		LogicalVariable w = StdLogicalVariable.getInstance("W", "x", 10);
 		Constant t = Constant.getInstance("x1");
 				
 		Constraint c = InequalityConstraint.getInstance(x, t);
@@ -115,8 +114,8 @@ public class ConstraintTest {
 	 */
 	@Test
 	public void testInequalityConsistencyXt_XW() {
-		LogicalVariable x = Builder.getLogicalVariable("X", "x", 10);
-		LogicalVariable w = Builder.getLogicalVariable("W", "x", 10);
+		LogicalVariable x = StdLogicalVariable.getInstance("X", "x", 10);
+		LogicalVariable w = StdLogicalVariable.getInstance("W", "x", 10);
 		Constant t = Constant.getInstance("x1");
 				
 		Constraint c = InequalityConstraint.getInstance(x, t);
@@ -131,7 +130,7 @@ public class ConstraintTest {
 	 */
 	@Test
 	public void testInequalityConsistencyXt_Xt() {
-		LogicalVariable x = Builder.getLogicalVariable("X", "x", 10);
+		LogicalVariable x = StdLogicalVariable.getInstance("X", "x", 10);
 		Constant t = Constant.getInstance("x1");
 		Constant q = Constant.getInstance("x1");
 				
@@ -147,7 +146,7 @@ public class ConstraintTest {
 	 */
 	@Test
 	public void testInequalityConsistencyXt_Xq() {
-		LogicalVariable x = Builder.getLogicalVariable("X", "x", 10);
+		LogicalVariable x = StdLogicalVariable.getInstance("X", "x", 10);
 		Constant t = Constant.getInstance("x1");
 		Constant q = Constant.getInstance("x2");
 				

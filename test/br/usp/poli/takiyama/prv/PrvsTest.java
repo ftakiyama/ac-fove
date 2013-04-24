@@ -4,8 +4,6 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import br.usp.poli.takiyama.common.Builder;
-
 
 public class PrvsTest {
 	
@@ -17,14 +15,14 @@ public class PrvsTest {
 	 */
 	@Test
 	public void testMgu() {
-		LogicalVariable x1 = Builder.getLogicalVariable("X1", "x", 10);
-		LogicalVariable x2 = Builder.getLogicalVariable("X2", "x", 10);
-		LogicalVariable x4 = Builder.getLogicalVariable("X4", "x", 10);
+		LogicalVariable x1 = StdLogicalVariable.getInstance("X1", "x", 10);
+		LogicalVariable x2 = StdLogicalVariable.getInstance("X2", "x", 10);
+		LogicalVariable x4 = StdLogicalVariable.getInstance("X4", "x", 10);
 		
 		Constant c1 = x1.population().individualAt(1);
 		
-		Prv f1 = Builder.getStdPrv("f", x1, x2);
-		Prv f2 = Builder.getStdPrv("f", c1, x4);
+		Prv f1 = StdPrv.getBooleanInstance("f", x1, x2);
+		Prv f2 = StdPrv.getBooleanInstance("f", c1, x4);
 		
 		Substitution result = Prvs.mgu(f1, f2);
 		

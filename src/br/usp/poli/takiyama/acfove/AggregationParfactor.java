@@ -13,7 +13,7 @@ import br.usp.poli.takiyama.cfove.ParameterizedFactor;
 import br.usp.poli.takiyama.cfove.SimpleParfactor;
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.InequalityConstraint;
-import br.usp.poli.takiyama.common.Parfactor;
+import br.usp.poli.takiyama.common.ParfactorI;
 import br.usp.poli.takiyama.common.IntTuple;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.Constant;
@@ -27,7 +27,7 @@ import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
 
 
-public class AggregationParfactor implements Parfactor {
+public class AggregationParfactor implements ParfactorI {
 
 	private final ParameterizedRandomVariable parent;
 	private final ParameterizedRandomVariable child;
@@ -198,7 +198,7 @@ public class AggregationParfactor implements Parfactor {
 	}
 
 	@Override
-	public Parfactor restoreLogicalVariableNames() {
+	public ParfactorI restoreLogicalVariableNames() {
 		AggregationParfactor ap = this;
 		for (StdLogicalVariable lv : this.getLogicalVariables()) {
 			Binding s = Binding.getInstance(lv, LogicalVariableNameGenerator.restore(lv));
@@ -262,8 +262,8 @@ public class AggregationParfactor implements Parfactor {
 	}
 	
 	@Override
-	public List<Parfactor> split(Binding s) {
-		List<Parfactor> splitParfactors = new ArrayList<Parfactor>(2);
+	public List<ParfactorI> split(Binding s) {
+		List<ParfactorI> splitParfactors = new ArrayList<ParfactorI>(2);
 		switch (getSubstitutionType(s)) {
 		case X_t:
 			splitParfactors = splitOnSubstitutionXt(s);
@@ -393,11 +393,11 @@ public class AggregationParfactor implements Parfactor {
 	 * @return A list where the first position is occupied by g[X/t] and the
 	 * second position is the residual parfactor.
 	 */
-	private List<Parfactor> splitOnSubstitutionXt(Binding s) {
-		Parfactor split = this.applySubstitution(s);
+	private List<ParfactorI> splitOnSubstitutionXt(Binding s) {
+		ParfactorI split = this.applySubstitution(s);
 		Constraint constraint = InequalityConstraint.getInstance(s.firstTerm(), s.secondTerm());
-		Parfactor residue = this.addConstraint(constraint);
-		List<Parfactor> result = new ArrayList<Parfactor>(2);
+		ParfactorI residue = this.addConstraint(constraint);
+		List<ParfactorI> result = new ArrayList<ParfactorI>(2);
 		result.add(split);
 		result.add(residue);
 		return result;
@@ -452,7 +452,7 @@ public class AggregationParfactor implements Parfactor {
 	 * parfactor and the
 	 * second position is the simple parfactor.
 	 */
-	private List<Parfactor> splitOnSubstitutionAt(Binding s) {
+	private List<ParfactorI> splitOnSubstitutionAt(Binding s) {
 		
 		// Builds the aggregation parfactor
 		
@@ -515,7 +515,7 @@ public class AggregationParfactor implements Parfactor {
 		ParameterizedFactor fc = ParameterizedFactor.getInstance("fc", prvs, mapping);
 		SimpleParfactor split = SimpleParfactor.getInstance(constraints, fc);
 		
-		List<Parfactor> result = new ArrayList<Parfactor>(2);
+		List<ParfactorI> result = new ArrayList<ParfactorI>(2);
 		result.add(residue);
 		result.add(split);
 		return result;
@@ -555,7 +555,7 @@ public class AggregationParfactor implements Parfactor {
 	 * parfactor and the
 	 * second position is the simple parfactor.
 	 */
-	private List<Parfactor> splitOnSubstitutionXA(Binding s) {
+	private List<ParfactorI> splitOnSubstitutionXA(Binding s) {
 		
 		/* This method is actually the same as splitOnSubstitutionAt.
 		 * The only difference is on the set of constraints on the simple
@@ -622,7 +622,7 @@ public class AggregationParfactor implements Parfactor {
 		ParameterizedFactor fc = ParameterizedFactor.getInstance("fc", prvs, mapping);
 		SimpleParfactor split = SimpleParfactor.getInstance(constraints, fc);
 		
-		List<Parfactor> result = new ArrayList<Parfactor>(2);
+		List<ParfactorI> result = new ArrayList<ParfactorI>(2);
 		result.add(residue);
 		result.add(split);
 		return result;
@@ -636,7 +636,7 @@ public class AggregationParfactor implements Parfactor {
 	 * ************************************************************************/
 	
 	@Override
-	public Parfactor multiply(Parfactor parfactor) throws IllegalArgumentException {
+	public ParfactorI multiply(ParfactorI parfactor) throws IllegalArgumentException {
 		if (!canMultiply(parfactor)) {
 			throw new IllegalArgumentException(this 
 					+ "\n cannot be multiplied by \n" 
@@ -664,7 +664,7 @@ public class AggregationParfactor implements Parfactor {
 	 * @return True if this parfactor can be multiplied by the specified
 	 * parfactor, false otherwise.
 	 */
-	public boolean canMultiply(Parfactor p) {
+	public boolean canMultiply(ParfactorI p) {
 		if (p instanceof GeneralizedAggregationParfactor
 				|| p instanceof AggregationParfactor) {
 			return false;
@@ -696,11 +696,11 @@ public class AggregationParfactor implements Parfactor {
 	 * ************************************************************************/
 	
 	@Override
-	public Parfactor sumOut(ParameterizedRandomVariable prv) {
+	public ParfactorI sumOut(ParameterizedRandomVariable prv) {
 		
 		Set<Constraint> c = new HashSet<Constraint>(this.otherConstraints);
 		ParameterizedFactor f = calculateSumOutFactor();
-		Parfactor result;
+		ParfactorI result;
 		if (childHasExtra()) {
 			result = countChildVariable(f);
 		} else {
@@ -793,7 +793,7 @@ public class AggregationParfactor implements Parfactor {
 	 * to be counted
 	 * @return The result of counting the variable from the specified factor.
 	 */
-	private Parfactor countChildVariable(ParameterizedFactor f) {
+	private ParfactorI countChildVariable(ParameterizedFactor f) {
 		
 		// build constraints on C_E
 		StdLogicalVariable extra = getExtraInChild();
@@ -818,7 +818,7 @@ public class AggregationParfactor implements Parfactor {
 		String name = f.getName();
 		List<ParameterizedRandomVariable> variables = f.getParameterizedRandomVariables();
 		ParameterizedFactor nf = ParameterizedFactor.getInstance(name, variables, mapping);
-		Parfactor result = SimpleParfactor.getInstance(constraints, nf);
+		ParfactorI result = SimpleParfactor.getInstance(constraints, nf);
 		return result;
 	}
 	
@@ -943,55 +943,55 @@ public class AggregationParfactor implements Parfactor {
 	
 	
 	@Override
-	public Parfactor count(LogicalVariable lv) {
+	public ParfactorI count(LogicalVariable lv) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method!");
 	}
 
 	@Override
-	public Set<Parfactor> propositionalize(LogicalVariable lv) {
+	public Set<ParfactorI> propositionalize(LogicalVariable lv) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method!");
 	}
 
 	@Override
-	public Parfactor expand(OldCountingFormula countingFormula, Term term) {
+	public ParfactorI expand(OldCountingFormula countingFormula, Term term) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method!");
 	}
 
 	@Override
-	public Parfactor fullExpand(OldCountingFormula countingFormula) {
+	public ParfactorI fullExpand(OldCountingFormula countingFormula) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method!");
 	}
 
 	@Override
-	public Parfactor replaceLogicalVariablesConstrainedToSingleConstant() {
+	public ParfactorI replaceLogicalVariablesConstrainedToSingleConstant() {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method!");
 	}
 
 	@Override
-	public Parfactor renameLogicalVariables() {
+	public ParfactorI renameLogicalVariables() {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method!");
 	}
 
 	@Override
-	public List<Parfactor> splitOnMgu(Substitution mgu) {
+	public List<ParfactorI> splitOnMgu(Substitution mgu) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method!");
 	}
 
 	@Override
-	public List<Parfactor> splitOnConstraints(Set<Constraint> constraints) {
+	public List<ParfactorI> splitOnConstraints(Set<Constraint> constraints) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method!");
 	}
 
 	@Override
-	public Set<Parfactor> unify(Parfactor parfactor) {
+	public Set<ParfactorI> unify(ParfactorI parfactor) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method!");
 	}
@@ -1028,7 +1028,7 @@ public class AggregationParfactor implements Parfactor {
 	 * @return The result of converting this aggregation parfactor into 
 	 * standard parfactors.
 	 */
-	public List<Parfactor> convertToParfactor() {
+	public List<ParfactorI> convertToParfactor() {
 		
 		OldCountingFormula cf = OldCountingFormula.getInstance(extraVariable, 
 				constraintsOnExtraVariable, parent);
@@ -1051,10 +1051,10 @@ public class AggregationParfactor implements Parfactor {
 		
 		// first parfactor
 		ParameterizedFactor factor = ParameterizedFactor.getInstance("", vars, values);
-		Parfactor parfactor = SimpleParfactor.getInstance(this.otherConstraints, factor);
+		ParfactorI parfactor = SimpleParfactor.getInstance(this.otherConstraints, factor);
 		factor = null; // object won't be used further
 		
-		List<Parfactor> result = new ArrayList<Parfactor>(2);
+		List<ParfactorI> result = new ArrayList<ParfactorI>(2);
 		result.add(parfactor);
 		
 		// second parfactor

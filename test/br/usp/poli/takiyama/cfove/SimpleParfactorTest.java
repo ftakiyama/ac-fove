@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import br.usp.poli.takiyama.common.Parfactors;
 import br.usp.poli.takiyama.common.Pool;
-import br.usp.poli.takiyama.common.Parfactor;
+import br.usp.poli.takiyama.common.ParfactorI;
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.OldCountingFormula;
@@ -44,7 +44,7 @@ public class SimpleParfactorTest {
 		
 		// Splits the parfactor on substitution {B/x1}
 		Binding binding = Binding.getInstance(objects.getLogicalVariable("B"), objects.getLogicalVariable("B").population().individualAt(0));
-		List<Parfactor> result = objects.getSimpleParfactor("g1").split(binding);
+		List<ParfactorI> result = objects.getSimpleParfactor("g1").split(binding);
 		
 		// Creates the correct answer
 		List<SimpleParfactor> answer = new ArrayList<SimpleParfactor>();
@@ -66,10 +66,10 @@ public class SimpleParfactorTest {
 		// Expands parfactor on individual x1
 		OldCountingFormula countingFormula = objects.getCountingFormula("#.A:{A!=x0}[f(A)]");
 		Term x1 = objects.getLogicalVariable("A").population().individualAt(1);
-		Parfactor result = objects.getSimpleParfactor("g1").expand(countingFormula, x1);
+		ParfactorI result = objects.getSimpleParfactor("g1").expand(countingFormula, x1);
 		
 		// Creates the correct answer
-		Parfactor answer = objects.getSimpleParfactor("g1'");
+		ParfactorI answer = objects.getSimpleParfactor("g1'");
 		
 		assertTrue(result.equals(answer));
 	}
@@ -84,10 +84,10 @@ public class SimpleParfactorTest {
 		
 		// Replaces every logical variable constrained to a single constant
 		// with this constant
-		Parfactor result = objects.getSimpleParfactor("g1").replaceLogicalVariablesConstrainedToSingleConstant();
+		ParfactorI result = objects.getSimpleParfactor("g1").replaceLogicalVariablesConstrainedToSingleConstant();
 		
 		// Creates the correct answer
-		Parfactor answer = objects.getSimpleParfactor("g2");
+		ParfactorI answer = objects.getSimpleParfactor("g2");
 		
 		assertTrue(result.equals(answer));
 	}
@@ -104,12 +104,12 @@ public class SimpleParfactorTest {
 		objects.setExample2_19();
 		
 		// Rename the logical variables in each parfactor to avoid name conflicts
-		Parfactor result1 = objects.getSimpleParfactor("g1").renameLogicalVariables();
-		Parfactor result2 = objects.getSimpleParfactor("g2").renameLogicalVariables();
+		ParfactorI result1 = objects.getSimpleParfactor("g1").renameLogicalVariables();
+		ParfactorI result2 = objects.getSimpleParfactor("g2").renameLogicalVariables();
 		
 		// Correct answer
-		Parfactor answer1 = objects.getSimpleParfactor("g1'");
-		Parfactor answer2 = objects.getSimpleParfactor("g2'");
+		ParfactorI answer1 = objects.getSimpleParfactor("g1'");
+		ParfactorI answer2 = objects.getSimpleParfactor("g2'");
 		
 		assertTrue(result1.equals(answer1) && result2.equals(answer2));
 	}
@@ -146,16 +146,16 @@ public class SimpleParfactorTest {
 		
 		objects.setExample2_21();
 		
-		ArrayList<Parfactor> parfactorsToSplit = new ArrayList<Parfactor>();
+		ArrayList<ParfactorI> parfactorsToSplit = new ArrayList<ParfactorI>();
 		
 		parfactorsToSplit.add(objects.getSimpleParfactor("g3"));
 		parfactorsToSplit.add(objects.getSimpleParfactor("g4"));
 		
-		HashSet<Parfactor> splitParfactors = new HashSet<Parfactor>();
+		HashSet<ParfactorI> splitParfactors = new HashSet<ParfactorI>();
 		Substitution mgu = objects.getSubstitution("mgu");
 		
-		for (Parfactor parfactor : parfactorsToSplit) {
-			splitParfactors.addAll((ArrayList<Parfactor>) parfactor.splitOnMgu(mgu)); 
+		for (ParfactorI parfactor : parfactorsToSplit) {
+			splitParfactors.addAll((ArrayList<ParfactorI>) parfactor.splitOnMgu(mgu)); 
 		}
 		
 		HashSet<SimpleParfactor> answer = new HashSet<SimpleParfactor>();
@@ -185,15 +185,15 @@ public class SimpleParfactorTest {
 		
 		objects.setExample2_22();
 		
-		ArrayList<Parfactor> parfactorsToSplit = new ArrayList<Parfactor>();
+		ArrayList<ParfactorI> parfactorsToSplit = new ArrayList<ParfactorI>();
 		
 		parfactorsToSplit.add(objects.getSimpleParfactor("g4"));
 		parfactorsToSplit.add(objects.getSimpleParfactor("g5"));
 		parfactorsToSplit.add(objects.getSimpleParfactor("g6"));
 		
-		HashSet<Parfactor> splitParfactors = new HashSet<Parfactor>();
+		HashSet<ParfactorI> splitParfactors = new HashSet<ParfactorI>();
 		
-		splitParfactors.addAll((ArrayList<Parfactor>) objects.getSimpleParfactor("g5").splitOnConstraints(objects.getSimpleParfactor("g4").getConstraints()));
+		splitParfactors.addAll((ArrayList<ParfactorI>) objects.getSimpleParfactor("g5").splitOnConstraints(objects.getSimpleParfactor("g4").getConstraints()));
 		splitParfactors.add(objects.getSimpleParfactor("g4"));
 		splitParfactors.add(objects.getSimpleParfactor("g6"));
 		
@@ -229,7 +229,7 @@ public class SimpleParfactorTest {
 		
 		LogicalVariableNameGenerator.reset();
 		
-		HashSet<Parfactor> splitParfactors = new HashSet<Parfactor>();
+		HashSet<ParfactorI> splitParfactors = new HashSet<ParfactorI>();
 		splitParfactors.addAll(objects.getSimpleParfactor("g1").unify(objects.getSimpleParfactor("g2")));
 		
 		HashSet<SimpleParfactor> answer = new HashSet<SimpleParfactor>();
@@ -254,7 +254,7 @@ public class SimpleParfactorTest {
 		
 		LogicalVariableNameGenerator.reset();
 		
-		HashSet<Parfactor> unifiedParfactors = new HashSet<Parfactor>();
+		HashSet<ParfactorI> unifiedParfactors = new HashSet<ParfactorI>();
 		unifiedParfactors.addAll(objects.getSimpleParfactor("g1").unify(objects.getSimpleParfactor("g2")));
 		
 		HashSet<SimpleParfactor> answer = new HashSet<SimpleParfactor>();
@@ -276,7 +276,7 @@ public class SimpleParfactorTest {
 		
 		LogicalVariableNameGenerator.reset();
 		
-		HashSet<Parfactor> unifiedParfactors = new HashSet<Parfactor>();
+		HashSet<ParfactorI> unifiedParfactors = new HashSet<ParfactorI>();
 		unifiedParfactors.addAll(objects.getSimpleParfactor("g1").unify(objects.getSimpleParfactor("g2")));
 		
 		HashSet<SimpleParfactor> answer = new HashSet<SimpleParfactor>();
@@ -298,7 +298,7 @@ public class SimpleParfactorTest {
 		
 		LogicalVariableNameGenerator.reset();
 		
-		HashSet<Parfactor> unifiedParfactors = new HashSet<Parfactor>();
+		HashSet<ParfactorI> unifiedParfactors = new HashSet<ParfactorI>();
 		unifiedParfactors.addAll(objects.getSimpleParfactor("g1").unify(objects.getSimpleParfactor("g2")));
 		
 		HashSet<SimpleParfactor> answer = new HashSet<SimpleParfactor>();
@@ -315,8 +315,8 @@ public class SimpleParfactorTest {
 		
 		objects.setCountingTestWithoutConstraints();
 		
-		Parfactor result = objects.getSimpleParfactor("g1").count(objects.getLogicalVariable("A"));
-		Parfactor answer = objects.getSimpleParfactor("g2");
+		ParfactorI result = objects.getSimpleParfactor("g1").count(objects.getLogicalVariable("A"));
+		ParfactorI answer = objects.getSimpleParfactor("g2");
 		
 		assertTrue(result.equals(answer));
 	}
@@ -332,8 +332,8 @@ public class SimpleParfactorTest {
 		
 		objects.setCountingTestWithConstraint();
 		
-		Parfactor result = objects.getSimpleParfactor("g1").count(objects.getLogicalVariable("A"));
-		Parfactor answer = objects.getSimpleParfactor("g2");
+		ParfactorI result = objects.getSimpleParfactor("g1").count(objects.getLogicalVariable("A"));
+		ParfactorI answer = objects.getSimpleParfactor("g2");
 		
 		assertTrue(result.equals(answer));
 	}
@@ -347,8 +347,8 @@ public class SimpleParfactorTest {
 		
 		objects.setExample2_17WithoutConstraints();
 		
-		Parfactor result = objects.getSimpleParfactor("g1").count(objects.getLogicalVariable("A"));
-		Parfactor answer = objects.getSimpleParfactor("g2");
+		ParfactorI result = objects.getSimpleParfactor("g1").count(objects.getLogicalVariable("A"));
+		ParfactorI answer = objects.getSimpleParfactor("g2");
 		
 		assertTrue(result.equals(answer));
 	}
@@ -361,8 +361,8 @@ public class SimpleParfactorTest {
 		
 		objects.setExample2_17();
 		
-		Parfactor result = objects.getSimpleParfactor("g1").count(objects.getLogicalVariable("A"));
-		Parfactor answer = objects.getSimpleParfactor("g2");
+		ParfactorI result = objects.getSimpleParfactor("g1").count(objects.getLogicalVariable("A"));
+		ParfactorI answer = objects.getSimpleParfactor("g2");
 		
 		assertTrue(result.equals(answer));
 	}
@@ -377,9 +377,9 @@ public class SimpleParfactorTest {
 		
 		objects.setPropositionalizationTest();
 		
-		Set<Parfactor> result = objects.getSimpleParfactor("g").propositionalize(objects.getLogicalVariable("A"));
+		Set<ParfactorI> result = objects.getSimpleParfactor("g").propositionalize(objects.getLogicalVariable("A"));
 		
-		Set<Parfactor> answer = new HashSet<Parfactor>();
+		Set<ParfactorI> answer = new HashSet<ParfactorI>();
 		answer.add(objects.getSimpleParfactor("g1"));
 		answer.add(objects.getSimpleParfactor("g2"));
 		answer.add(objects.getSimpleParfactor("g3"));
@@ -392,8 +392,8 @@ public class SimpleParfactorTest {
 		
 		objects.setSumOutCountingFormulaWithCardinality1Test();
 		
-		Parfactor result = objects.getSimpleParfactor("g").sumOut(objects.getCountingFormula("#.A[f]"));
-		Parfactor answer = objects.getSimpleParfactor("g_answer");
+		ParfactorI result = objects.getSimpleParfactor("g").sumOut(objects.getCountingFormula("#.A[f]"));
+		ParfactorI answer = objects.getSimpleParfactor("g_answer");
 		
 		assertTrue(result.equals(answer));
 	}
@@ -403,8 +403,8 @@ public class SimpleParfactorTest {
 		
 		objects.setSumOutCountingFormulaWithCardinality2Test();
 		
-		Parfactor result = objects.getSimpleParfactor("g").sumOut(objects.getCountingFormula("#.A[f]"));
-		Parfactor answer = objects.getSimpleParfactor("g_answer");
+		ParfactorI result = objects.getSimpleParfactor("g").sumOut(objects.getCountingFormula("#.A[f]"));
+		ParfactorI answer = objects.getSimpleParfactor("g_answer");
 		
 		assertTrue(result.equals(answer));
 	}
@@ -414,8 +414,8 @@ public class SimpleParfactorTest {
 		
 		objects.setSumOutCountingFormulaWithCardinality10Test();
 		
-		Parfactor result = objects.getSimpleParfactor("g").sumOut(objects.getCountingFormula("#.A[f]"));
-		Parfactor answer = objects.getSimpleParfactor("g_answer");
+		ParfactorI result = objects.getSimpleParfactor("g").sumOut(objects.getCountingFormula("#.A[f]"));
+		ParfactorI answer = objects.getSimpleParfactor("g_answer");
 		
 		assertTrue(result.equals(answer));
 	}
@@ -431,8 +431,8 @@ public class SimpleParfactorTest {
 		
 		objects.setExample2_13();
 		
-		Parfactor result = objects.getSimpleParfactor("g").sumOut(objects.getCountingFormula("#.A[f]"));
-		Parfactor answer = objects.getSimpleParfactor("g_answer");
+		ParfactorI result = objects.getSimpleParfactor("g").sumOut(objects.getCountingFormula("#.A[f]"));
+		ParfactorI answer = objects.getSimpleParfactor("g_answer");
 		
 		assertTrue(result.equals(answer));
 	}

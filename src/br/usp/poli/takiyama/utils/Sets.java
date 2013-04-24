@@ -10,6 +10,10 @@ import java.util.Set;
  */
 public final class Sets {
 	
+	private Sets() { 
+		// avoids instantiation
+	}
+	
 	public static final <T> Set<T> union(Set<T> set1, Set<T> set2) {
 		Set<T> set = new HashSet<T>();
 		

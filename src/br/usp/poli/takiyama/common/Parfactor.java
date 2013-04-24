@@ -3,78 +3,14 @@ package br.usp.poli.takiyama.common;
 import java.util.List;
 import java.util.Set;
 
-import br.usp.poli.takiyama.cfove.ParameterizedFactor;
-import br.usp.poli.takiyama.prv.Binding;
-import br.usp.poli.takiyama.prv.OldCountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
-import br.usp.poli.takiyama.prv.StdLogicalVariable;
-import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
+import br.usp.poli.takiyama.prv.Prv;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
 
-/**
- * A parfactor represents a set of factors. This set is obtained by applying
- * ground substitutions satisfying constraints to all logical variables 
- * present in the parameterized random variables of the parfactor.
- * <br>
- * <br>
- * The <code>Parfactor</code> interface enforces the implementation of the 
- * following basic operations: sum out and multiplication. 
- * 
- * @author ftakiyama
- *
- */
 public interface Parfactor {
 	
-	/**
-	 * Checks if the specified variable exists in this parfactor.
-	 * 
-	 * @param variable The parameterized random variable to check
-	 * @return True if the specified variable exists in this parfactor,
-	 * false otherwise.
-	 */
-	public boolean contains(ParameterizedRandomVariable variable); // I think I will use it on global sum out.
-		
-	/**
-	 * @deprecated
-	 * Returns the parameterized factor associated with this parfactor
-	 * 
-	 * @return The parameterized factor associated with this parfactor
-	 */
-	public ParameterizedFactor getFactor();
-	
-	/**
-	 * Returns the parameterized factor associated with this parfactor
-	 * 
-	 * @return The parameterized factor associated with this parfactor
-	 */
-	public ParameterizedFactor factor();
-	
-	/**
-	 * 
-	 * @return
-	 */
-	public List<ParameterizedRandomVariable> getParameterizedRandomVariables();
-	
-	/**
-	 * Returns the child parameterized random variable of this parfactor. This
-	 * method is applicable only for aggregation parfactors. If the parfactor
-	 * is not an aggregation parfactor, this method should return null.
-	 * <br>
-	 * Not the best solution, but useful as a first solution.
-	 * TODO: put aggregation methods into another interface
-	 * 
-	 * @return The child parameterized random variable of the parfactor.
-	 */
-	public ParameterizedRandomVariable getChildVariable();
-	
-	/**
-	 * @deprecated
-	 * Returns the set of all constraints in this parfactor.
-	 * 
-	 * @return The set of all constraints in this parfactor.
-	 */
-	public Set<Constraint> getConstraints();
+	// Getters
 	
 	/**
 	 * Returns the set of all constraints in this parfactor.
@@ -83,24 +19,26 @@ public interface Parfactor {
 	 */
 	public Set<Constraint> constraints();
 	
+	
 	/**
-	 * @deprecated
-	 * Returns the set of all logical variables in parameterized random
-	 * variables in this parfactor.
+	 * Returns the {@link Factor} associated with this parfactor
 	 * 
-	 * @return The set of all logical variables in parameterized random
-	 * variables in this parfactor.
+	 * @return The factor associated with this parfactor
 	 */
-	public Set<StdLogicalVariable> getLogicalVariables();
+	public Factor factor();
+	
 	
 	/**
 	 * Returns the set of all logical variables in parameterized random
-	 * variables in this parfactor.
+	 * variables from this parfactor.
 	 * 
 	 * @return The set of all logical variables in parameterized random
-	 * variables in this parfactor.
+	 * variables from this parfactor.
 	 */
-	public Set<StdLogicalVariable> logicalVariables();
+	public Set<LogicalVariable> logicalVariables();
+	
+	public List<Prv> prvs();
+	
 	
 	/**
 	 * Retunrs the number of factors this parfactor represents.
@@ -109,43 +47,129 @@ public interface Parfactor {
 	 */
 	public int size();
 	
+	
 	/**
-	 * Returns true if the parfactor is constant, that is, the neutral
-	 * term in multiplication.
+	 * Returns the result of applying the specified substitution to this
+	 * Parfactor. The substitution is applied to PRVs and constraints.
 	 * 
-	 * @return True if the parfactor is constant, false otherwise.
+	 * @param s The substitution to apply
+	 * @return The result of applying the specified substitution to this
+	 * Parfactor
+	 */
+	public Parfactor apply(Substitution s);
+	
+	
+	/**
+	 * Returns <code>true</code> if the specified {@link Prv} exists in this 
+	 * parfactor.
+	 * 
+	 * @param prv The parameterized random variable to search
+	 * @return <code>true</code> if the specified {@link Prv} exists in this 
+	 * parfactor, false otherwise.
+	 */
+	public boolean contains(Prv prv);
+	
+	
+	// Status check
+	
+	/**
+	 * Returns <code>true</code> if the parfactor is constant (the neutral
+	 * term in multiplication).
+	 * 
+	 * @return <code>true</code> if the parfactor is constant, 
+	 * <code>false</code> otherwise.
 	 */
 	public boolean isConstant();
 	
 	
-	/* ************************************************************************
-	 *   ENABLING OPERATIONS
-	 * ************************************************************************/
+	/**
+	 * Returns <code>true</code> if the specified logical variable can be 
+	 * counted in this parfactor, <code>false</code> otherwise.
+	 * <p>
+	 * A logical variable is 'countable' when it occurs free in only one 
+	 * parameterized random variable in the parfactor.
+	 * </p>
+	 * 
+	 * @param lv The logical variable to test for countability.
+	 * @return <code>true</code> if the specified logical variable can be 
+	 * counted in this parfactor, <code>false</code> otherwise.
+	 */
+	public boolean isCountable(LogicalVariable lv);
 	
-	public List<Parfactor> split(Binding s);
-	public Parfactor count(LogicalVariable lv);
-	public Set<Parfactor> propositionalize(LogicalVariable lv);
-	public Parfactor expand(OldCountingFormula countingFormula, Term term);
-	public Parfactor fullExpand(OldCountingFormula countingFormula);
-	public Parfactor multiply(Parfactor parfactor);
-	public Parfactor sumOut(ParameterizedRandomVariable prv);
-	public List<Parfactor> splitOnConstraints(Set<Constraint> constraints);
-	
-	
-	/* Unification */
 	
 	/**
-	 * Restores the names of all logical variables in the parfactor that
-	 * were changed using {@link LogicalVariableNameGenerator}.
-	 * @return A new instance of this parfactor, with all logical variables
-	 * restored to their old names.
+	 * Returns <code>true</code> if the specified {@link Prv} can
+	 * be expanded on the specified term.
+	 * 
+	 * @param cf The PRV to be expanded
+	 * @param t The term to expand the counting formula on
+	 * @return <code>true</code> if the specified PRV can
+	 * be expanded on the specified term, <code>false</code> otherwise
 	 */
-	public Parfactor restoreLogicalVariableNames();
+	public boolean isExpandable(Prv cf, Term t);
 	
-	public Parfactor replaceLogicalVariablesConstrainedToSingleConstant();
-	public Parfactor renameLogicalVariables();
-	public List<Parfactor> splitOnMgu(Substitution mgu);
 	
-	public Set<Parfactor> unify(Parfactor parfactor);
+	/**
+	 * Returns <code>true</code> if this parfactor can be multiplied by the
+	 * specified parfactor.
+	 * 
+	 * @param other The parfactor to multiply with
+	 * @return <code>true</code> if this parfactor can be multiplied by the
+	 * specified parfactor, <code>false</code> otherwise
+	 */
+	public boolean isMultipliable(Parfactor other);
+	
+	
+	/**
+	 * Returns <code>true</code> if this parfactor can be split on the
+	 * specified substitution.
+	 * 
+	 * @param s The substitution to split this parfactor on
+	 * @return <code>true</code> if this parfactor can be split on the
+	 * specified substitution, <code>false</code> otherwise.
+	 */
+	public boolean isSplittable(Substitution s);
+	
+	
+	// Enabling operations
+	
+	public Parfactor count(LogicalVariable lv);
+	
+	public Parfactor expand(Prv cf, Term t);
+	
+	public Parfactor multiply(Parfactor other);
+	
+	//public Parfactor propositionalize();
+	
+	/**
+	 * Splits this parfactor on the specified substitution.
+	 * 
+	 * @param s The substitution upon which this parfactor is to be split
+	 * @return The result of splitting this parfactor on the specified
+	 * substitution.
+	 * @throws IllegalArgumentException If this parfactor is not splittable on
+	 * the specified substitution.
+	 */
+	public SplitResult splitOn(Substitution s) throws IllegalArgumentException;
+	
+	public Parfactor sumOut(Prv prv);
+	
+	
+	// Unification
+	
+//	public Parfactor renameLogicalVariables();
+//	
+//	public Parfactor restoreLogicalVariables();
+//	
+//	public Parfactor simplifyLogicalVariables();
+		
+	@Override
+	public boolean equals(Object o);
+
+	@Override
+	public int hashCode();
+	
+	@Override
+	public String toString();
 	
 }

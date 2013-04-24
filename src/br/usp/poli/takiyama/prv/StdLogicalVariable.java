@@ -1,6 +1,8 @@
 package br.usp.poli.takiyama.prv;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import br.usp.poli.takiyama.common.Constraint;
@@ -91,6 +93,28 @@ public final class StdLogicalVariable implements LogicalVariable {
 	
 	public static LogicalVariable getInstance(String name, Population pop) {
 		return new StdLogicalVariable(name, pop);
+	}
+	
+
+	/**
+	 * Returns a StdLogicalVariable with the specified name. Its population
+	 * will have the specified size, and each individual is a {@link Constant}
+	 * whose name is given by <code>prefix</code> + <code>index</code>. 
+	 * Index starts on 1.
+	 * 
+	 * @param name THe name of the variable
+	 * @param prefix Prefix of each individual in the population
+	 * @param size The size of the population
+	 * @return a StdLogicalVariable with the specified name and population size
+	 */
+	public static LogicalVariable getInstance(String name, String prefix, 
+			int size) {
+		List<Constant> individuals = new ArrayList<Constant>(size);
+		for (int i = 1; i <= size; i++) {
+			individuals.add(Constant.getInstance(prefix + i));
+		}
+		Population population = Population.getInstance(individuals);
+		return new StdLogicalVariable(name, population);
 	}
 	
 	

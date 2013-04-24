@@ -79,15 +79,21 @@ public final class Shatter extends AbstractMacroOperation {
 		// set the distribution to the shatteredSet
 	}
 	
+	// return na primeira oportunidade em que f1 in p1 e f2 em p2 unificam
 	private SplitResult unify(Parfactor p1, Parfactor p2) {
 //		for (Prv prv1 : p1.prvs()) {
 //			for (Prv prv2 : p2.prvs()) {
-//				SplitResult result = Parfactors.unify(p1, prv1, p2, prv2);
+//				SplitResult result = unify(p1, prv1, p2, prv2);
 //				if (!result.isEmpty()) {
 //					return result;
 //				}
 //			}
 //		}
 		return StdSplitResult.getInstance();
+	}
+	
+	// unifica os parfactors p1 e p2 nas vari‡veis prv1 e prv2
+	private SplitResult unify(Parfactor p1, Prv prv1, Parfactor p2, Prv prv2) {
+		return null;
 	}
 }

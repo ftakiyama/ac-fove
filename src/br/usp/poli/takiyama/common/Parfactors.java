@@ -35,15 +35,15 @@ public class Parfactors {
 		return true;
 	}
 	
-	public static Set<Parfactor> restoreLogicalVariableNames(Set<Parfactor> parfactors) {
-		Set<Parfactor> renamedParfactors = new HashSet<Parfactor>();
-		for (Parfactor p : parfactors) {
+	public static Set<ParfactorI> restoreLogicalVariableNames(Set<ParfactorI> parfactors) {
+		Set<ParfactorI> renamedParfactors = new HashSet<ParfactorI>();
+		for (ParfactorI p : parfactors) {
 			renamedParfactors.add(p.restoreLogicalVariableNames());
 		}
 		return renamedParfactors;
 	}
 	
-	public static Set<Parfactor> unify(Parfactor p1, Parfactor p2) {
+	public static Set<ParfactorI> unify(ParfactorI p1, ParfactorI p2) {
 		
 //		Parfactor [] parfactor = new Parfactor[2];
 //		parfactor[0] = p1;

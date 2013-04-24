@@ -11,6 +11,8 @@ import org.junit.Test;
 import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.Prv;
+import br.usp.poli.takiyama.prv.StdLogicalVariable;
+import br.usp.poli.takiyama.prv.StdPrv;
 import br.usp.poli.takiyama.prv.Term;
 
 
@@ -39,11 +41,11 @@ public class FactorTest {
 	@Test
 	public void testSumOutFirstVar() {
 		
-		Term x = Builder.getLogicalVariable("X", "x", 10);
-		Term y = Builder.getLogicalVariable("Y", "x", 10);
+		Term x = StdLogicalVariable.getInstance("X", "x", 10);
+		Term y = StdLogicalVariable.getInstance("Y", "x", 10);
 		
-		Prv f = Builder.getStdPrv("f", x);
-		Prv g = Builder.getStdPrv("g", x, y);
+		Prv f = StdPrv.getBooleanInstance("f", x);
+		Prv g = StdPrv.getBooleanInstance("g", x, y);
 		
 		List<Prv> vars = new ArrayList<Prv>(2);
 		vars.add(f);
@@ -95,11 +97,11 @@ public class FactorTest {
 	@Test
 	public void testSumOutSecondVar() {
 		
-		Term x = Builder.getLogicalVariable("X", "x", 10);
-		Term y = Builder.getLogicalVariable("Y", "x", 10);
+		Term x = StdLogicalVariable.getInstance("X", "x", 10);
+		Term y = StdLogicalVariable.getInstance("Y", "x", 10);
 		
-		Prv f = Builder.getStdPrv("f", x);
-		Prv g = Builder.getStdPrv("g", x, y);
+		Prv f = StdPrv.getBooleanInstance("f", x);
+		Prv g = StdPrv.getBooleanInstance("g", x, y);
 		
 		List<Prv> vars = new ArrayList<Prv>(2);
 		vars.add(f);
@@ -153,11 +155,11 @@ public class FactorTest {
 	@Test
 	public void testSumOutCountingFormula() {
 		
-		Term a = Builder.getLogicalVariable("A", "x", 2);
-		Term b = Builder.getLogicalVariable("B", "x", 3);
+		Term a = StdLogicalVariable.getInstance("A", "x", 2);
+		Term b = StdLogicalVariable.getInstance("B", "x", 3);
 		
-		Prv f = Builder.getStdPrv("f", a);
-		Prv h = Builder.getStdPrv("h", b);
+		Prv f = StdPrv.getBooleanInstance("f", a);
+		Prv h = StdPrv.getBooleanInstance("h", b);
 		Prv cf = CountingFormula.getInstance((LogicalVariable) a, f);
 		
 		List<Prv> vars = new ArrayList<Prv>(2);
@@ -230,11 +232,11 @@ public class FactorTest {
 	@Test
 	public void testSumOutBiggerCountingFormula() {
 		
-		Term a = Builder.getLogicalVariable("A", "x", 10);
-		Term b = Builder.getLogicalVariable("B", "x", 3);
+		Term a = StdLogicalVariable.getInstance("A", "x", 10);
+		Term b = StdLogicalVariable.getInstance("B", "x", 3);
 		
-		Prv f = Builder.getStdPrv("f", a);
-		Prv h = Builder.getStdPrv("h", b);
+		Prv f = StdPrv.getBooleanInstance("f", a);
+		Prv h = StdPrv.getBooleanInstance("h", b);
 		Prv cf = CountingFormula.getInstance((LogicalVariable) a, f);
 		
 		List<Prv> vars = new ArrayList<Prv>(2);
@@ -288,11 +290,11 @@ public class FactorTest {
 	@Test
 	public void testPowExponent2() {
 		
-		Term a = Builder.getLogicalVariable("A", "x", 10);
-		Term b = Builder.getLogicalVariable("B", "x", 3);
+		Term a = StdLogicalVariable.getInstance("A", "x", 10);
+		Term b = StdLogicalVariable.getInstance("B", "x", 3);
 		
-		Prv f = Builder.getStdPrv("f", a);
-		Prv h = Builder.getStdPrv("h", b);
+		Prv f = StdPrv.getBooleanInstance("f", a);
+		Prv h = StdPrv.getBooleanInstance("h", b);
 		
 		List<Prv> vars = new ArrayList<Prv>(2);
 		vars.add(f);
@@ -349,11 +351,11 @@ public class FactorTest {
 	@Test
 	public void testPowSqrt() {
 		
-		Term a = Builder.getLogicalVariable("A", "x", 10);
-		Term b = Builder.getLogicalVariable("B", "x", 3);
+		Term a = StdLogicalVariable.getInstance("A", "x", 10);
+		Term b = StdLogicalVariable.getInstance("B", "x", 3);
 		
-		Prv f = Builder.getStdPrv("f", a);
-		Prv h = Builder.getStdPrv("h", b);
+		Prv f = StdPrv.getBooleanInstance("f", a);
+		Prv h = StdPrv.getBooleanInstance("h", b);
 		
 		List<Prv> vars = new ArrayList<Prv>(2);
 		vars.add(f);
@@ -418,11 +420,11 @@ public class FactorTest {
 	@Test
 	public void testSimpleMultiplication() {
 
-		Term x = Builder.getLogicalVariable("X", "x", 10);
-		Term y = Builder.getLogicalVariable("Y", "x", 10);
+		Term x = StdLogicalVariable.getInstance("X", "x", 10);
+		Term y = StdLogicalVariable.getInstance("Y", "x", 10);
 		
-		Prv f = Builder.getStdPrv("f", x);
-		Prv h = Builder.getStdPrv("h", x, y);
+		Prv f = StdPrv.getBooleanInstance("f", x);
+		Prv h = StdPrv.getBooleanInstance("h", x, y);
 		
 		List<Prv> vars1 = new ArrayList<Prv>(1);
 		vars1.add(f);

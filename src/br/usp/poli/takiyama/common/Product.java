@@ -14,19 +14,19 @@ import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
  */
 public class Product {
 
-	private final Set<Parfactor> parfactors;
+	private final Set<ParfactorI> parfactors;
 	private final RandomVariableSet rvSet;
 	
-	private Product(RandomVariableSet rvSet, Set<Parfactor> parfactors) {
+	private Product(RandomVariableSet rvSet, Set<ParfactorI> parfactors) {
 		this.rvSet = RandomVariableSet.getInstance(rvSet);
-		this.parfactors = new HashSet<Parfactor>(parfactors);
+		this.parfactors = new HashSet<ParfactorI>(parfactors);
 	}
 	
-	private Product(Set<Parfactor> parfactors) {
+	private Product(Set<ParfactorI> parfactors) {
 		ParameterizedRandomVariable prv = ParameterizedRandomVariable.getEmptyInstance();
 		Set<Constraint> constraints = new HashSet<Constraint>(0);
 		this.rvSet = RandomVariableSet.getInstance(prv, constraints);
-		this.parfactors = new HashSet<Parfactor>(parfactors);
+		this.parfactors = new HashSet<ParfactorI>(parfactors);
 	}
 	
 	@Override
@@ -47,7 +47,7 @@ public class Product {
 	@Override
 	public String toString() {
 		StringBuilder result = new StringBuilder(this.rvSet.toString());
-		for (Parfactor p : this.parfactors) {
+		for (ParfactorI p : this.parfactors) {
 			result.append(p.toString()).append("\n");
 		}
 		return result.toString();

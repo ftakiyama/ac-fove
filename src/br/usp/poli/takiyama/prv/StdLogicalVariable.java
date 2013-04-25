@@ -75,22 +75,52 @@ public final class StdLogicalVariable implements LogicalVariable {
 		name = lv.value();
 		population = lv.population();
 	}
+	
+	
+	/**
+	 * Creates an empty LogicalVariable, with no name and empty population.
+	 */
+	private StdLogicalVariable() {
+		name = "";
+		population = Population.getInstance();
+	}
 		
 	
 	/* ************************************************************************
 	 *    Static factories
 	 * ************************************************************************/
 	
+	/**
+	 * Returns a {@link StdLogicalVariable} with no name and
+	 * empty population.
+	 * 
+	 * @return An empty LogicalVariable
+	 */
 	public static LogicalVariable getInstance() {
-		return new StdLogicalVariable("", Population.getInstance());
+		return new StdLogicalVariable();
 	}
 	
 	
+	/**
+	 * Returns a {@link StdLogicalVariable} with the same name and 
+	 * population as the specified logical variable.
+	 * 
+	 * @param lv The logical variable to "copy" 
+	 * @return A "copy" of the specified logical variable
+	 */
 	public static LogicalVariable getInstance(LogicalVariable lv) {
 		return new StdLogicalVariable(lv);
 	}
 	
 	
+	/**
+	 * Returns a {@link StdLogicalVariable} with the specified name and
+	 * population.
+	 * 
+	 * @param name The name of the logical variable
+	 * @param pop The population associated with the logical variable
+	 * @return A LogicalVariable with the specified attributes
+	 */
 	public static LogicalVariable getInstance(String name, Population pop) {
 		return new StdLogicalVariable(name, pop);
 	}
@@ -140,6 +170,12 @@ public final class StdLogicalVariable implements LogicalVariable {
 	}
 	
 	
+	@Override
+	public boolean isEmpty() {
+		return name.isEmpty() && (population.size() == 0);
+	}
+	
+	
 	/* ************************************************************************
 	 *    Getters
 	 * ************************************************************************/
@@ -183,6 +219,30 @@ public final class StdLogicalVariable implements LogicalVariable {
 //		}
 //		return (this.population.size() - consistentConstraints.size());
 //	}
+
+	
+	@Override
+	public Set<Term> excludedSet(Set<Constraint> constraints) {
+		Set<Term> excludedSet = new HashSet<Term>();
+		for (Constraint constraint : constraints) {
+			if (constraint.contains(this)) {
+				if (this.equals(constraint.firstTerm())) {
+					excludedSet.add(constraint.secondTerm());
+				} else {
+					excludedSet.add(constraint.firstTerm());
+				}
+			}
+		}
+		return excludedSet;
+	}
+
+	
+	@Override
+	public int numberOfIndividualsSatisfying(Set<Constraint> constraints) {
+		int domainSize = population.size();
+		int excludedSetSize = excludedSet(constraints).size();
+		return domainSize - excludedSetSize;
+	}
 	
 	
 	/* ************************************************************************
@@ -194,7 +254,7 @@ public final class StdLogicalVariable implements LogicalVariable {
 		return this.name;
 	}
 	
-	
+
 	@Override
 	public boolean equals(Object other) {
 		// Tests if both refer to the same object

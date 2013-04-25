@@ -137,7 +137,27 @@ public interface Parfactor {
 	
 	public Parfactor expand(Prv cf, Term t);
 	
+	/**
+	 * Returns the result of multiplying this parfactor with the specified
+	 * parfactor.
+	 * 
+	 * @param other The parfactor to multiply by
+	 * @return The result of multiplying this parfactor with the specified
+	 * parfactor
+	 */
 	public Parfactor multiply(Parfactor other);
+	
+	
+	/**
+	 * Returns the result of multiplying this parfactor with the specified
+	 * parfactor. This method is a complement to {@link #multiply(Parfactor)},
+	 * when its caller is a {@link StdParfactor}.
+	 * 
+	 * @param other The parfactor to multiply by
+	 * @return The result of multiplying this parfactor with the specified
+	 * parfactor, if the specified parfactor is a {@link StdParfactor}.
+	 */
+	public Parfactor finishMultiplication(Parfactor other);
 	
 	//public Parfactor propositionalize();
 	
@@ -151,6 +171,7 @@ public interface Parfactor {
 	 * the specified substitution.
 	 */
 	public SplitResult splitOn(Substitution s) throws IllegalArgumentException;
+	
 	
 	public Parfactor sumOut(Prv prv);
 	

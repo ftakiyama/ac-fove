@@ -233,6 +233,12 @@ public class CountingFormula implements Prv {
 
 	
 	@Override
+	public LogicalVariable boundVariable() {
+		return StdLogicalVariable.getInstance(bound);
+	}
+	
+	
+	@Override
 	public int groundSetSize(Set<Constraint> constraints) {
 		int size = 1;
 		for (LogicalVariable v : parameters()) {

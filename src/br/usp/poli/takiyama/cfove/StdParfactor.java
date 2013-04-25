@@ -19,6 +19,7 @@ import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.Prv;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
+import br.usp.poli.takiyama.utils.Sets;
 
 public final class StdParfactor implements Parfactor {
 
@@ -35,11 +36,13 @@ public final class StdParfactor implements Parfactor {
 		private Set<Constraint> restrictions;
 		private List<Prv> prvs;
 		private List<BigDecimal> values;
+		private Factor factor;
 		
 		public StdParfactorBuilder() {
 			restrictions = new HashSet<Constraint>();
 			prvs = new ArrayList<Prv>();
 			values = new ArrayList<BigDecimal>();
+			factor = null;
 		}
 		
 		public StdParfactorBuilder constraints(Constraint ... c) {
@@ -47,8 +50,18 @@ public final class StdParfactor implements Parfactor {
 			return this;
 		}
 		
+		public StdParfactorBuilder constraints(Set<Constraint> c) {
+			restrictions.addAll(c);
+			return this;
+		}
+			
 		public StdParfactorBuilder variables(Prv ... prv) {
 			prvs.addAll(Arrays.asList(prv));
+			return this;
+		}
+		
+		public StdParfactorBuilder variables(List<Prv> prv) {
+			prvs.addAll(prv);
 			return this;
 		}
 		
@@ -56,11 +69,21 @@ public final class StdParfactor implements Parfactor {
 			values.addAll(Arrays.asList(v));
 			return this;
 		}
+
+		public StdParfactorBuilder values(List<BigDecimal> v) {
+			values.addAll(v);
+			return this;
+		}
 		
 		public StdParfactorBuilder values(double ... v) {
 			for (double d : v) {
 				values.add(BigDecimal.valueOf(d));
 			}
+			return this;
+		}
+		
+		public StdParfactorBuilder factor(Factor f) {
+			factor = f;
 			return this;
 		}
 		
@@ -94,7 +117,12 @@ public final class StdParfactor implements Parfactor {
 	 * @param builder A Standard Parfactor Builder
 	 */
 	private StdParfactor(StdParfactorBuilder builder) {
-		Factor factor = Factor.getInstance("", builder.prvs, builder.values);
+		Factor factor;
+		if (builder.factor == null) {
+			factor = Factor.getInstance("", builder.prvs, builder.values);
+		} else {
+			factor = builder.factor;
+		}
 		this.constraints = new HashSet<Constraint>(builder.restrictions);
 		this.factor = Factor.getInstance(factor);
 	}
@@ -179,15 +207,40 @@ public final class StdParfactor implements Parfactor {
 	
 
 	@Override
-	public int size() {
+	public int size() throws IllegalStateException {
+		if (!isInNormalForm()) {
+			throw new IllegalStateException("Parfactor not in normal form");
+		}		
 		int size = 1;
+		Set<Constraint> toVisit = new HashSet<Constraint>(constraints);
 		for (LogicalVariable lv : logicalVariables()) {
-			size = size * lv.individualsSatisfying(constraints).size();
+			size = size * lv.numberOfIndividualsSatisfying(toVisit);
+			toVisit = remove(toVisit, lv);
 		}
 		return size;
 	}
 	
-
+	
+	/**
+	 * Returns the specified set of constraints with all constraints that
+	 * contain the specified term removed.
+	 * 
+	 * @param constraints A set of constraints
+	 * @param t The term to search in constraints
+	 * @return The specified set of constraints with all constraints that
+	 * contain the specified term removed.
+	 */
+	private Set<Constraint> remove(Set<Constraint> constraints, Term t) {
+		Set<Constraint> allConstraints = new HashSet<Constraint>(constraints);
+		for (Constraint c : allConstraints) {
+			if (c.contains(t)) {
+				constraints.remove(c);
+			}
+		}
+		return constraints;
+	}
+	
+	
 	@Override
 	public Parfactor apply(Substitution s) {
 		Set<Constraint> substitutedConstraints = applyToConstraints(s);
@@ -254,11 +307,25 @@ public final class StdParfactor implements Parfactor {
 	 */
 	@Override
 	public boolean isExpandable(Prv cf, Term t) {
+		
+		// Is counting formula?
+		boolean isCountingFormula = !cf.boundVariable().isEmpty();
+		
+		// Is it present in this parfactor?
 		boolean belongsHere = factor.variables().contains(cf);
+		
+		// Is this parfactor in normal form?
 		boolean isInNormalForm = isInNormalForm();
+		
+		// Does t not appear on any constraint from the counting formula?
 		boolean isCountable = !contains(cf.constraints(), t);
-		boolean isOrthogonal = isOrthogonal(cf, t); 
-		return belongsHere && isInNormalForm && isCountable && isOrthogonal;
+		
+		// For each term Y that appears in constraints from the counting
+		// formula, is there a constraint Y != t in this parfactor?
+		boolean isOrthogonal = isOrthogonal(cf, t);
+		
+		return isCountingFormula && belongsHere && isInNormalForm 
+				&& isCountable && isOrthogonal;
 	}
 	
 
@@ -276,10 +343,10 @@ public final class StdParfactor implements Parfactor {
 		// This algorithm does not look very clever
 		for (Constraint c : constraints) {
 			if (c.firstTerm().isVariable() && c.secondTerm().isVariable()) {
-				Term x = c.firstTerm();
-				Term y = c.secondTerm();
-				Set<Term> ex = getExcludedSet(x, constraints);
-				Set<Term> ey = getExcludedSet(y, constraints);
+				LogicalVariable x = (LogicalVariable) c.firstTerm();
+				LogicalVariable y = (LogicalVariable) c.secondTerm();
+				Set<Term> ex = x.excludedSet(constraints);
+				Set<Term> ey = y.excludedSet(constraints);
 				ex.remove(y);
 				ey.remove(x);
 				if (!ex.equals(ey)) {
@@ -288,33 +355,6 @@ public final class StdParfactor implements Parfactor {
 			}
 		}
 		return true;
-	}
-	
-	
-	/**
-	 * Returns the excluded set for logical variable X, that is, the set of
-	 * terms t such that (X &ne; t) &in; C (constraints of this parfactor).
-	 * <p>
-	 * If the specified term is a {@link Constant}, returns an empty set.
-	 * </p> 
-	 * @param x The logical variable that defines the excluded set.
-	 * @return The excluded set for the specified term, or an empty set if
-	 * the specified term is a constant.
-	 */
-	private Set<Term> getExcludedSet(Term x, Set<Constraint> constraints) {
-		Set<Term> excludedSet = new HashSet<Term>();
-		if (x.isVariable()) {
-			for (Constraint constraint : constraints) {
-				if (constraint.contains(x)) {
-					if (x.equals(constraint.firstTerm())) {
-						excludedSet.add(constraint.secondTerm());
-					} else {
-						excludedSet.add(constraint.firstTerm());
-					}
-				}
-			}
-		}
-		return excludedSet;
 	}
 	
 		
@@ -360,10 +400,9 @@ public final class StdParfactor implements Parfactor {
 	 * otherwise
 	 */
 	private boolean isOrthogonal(Prv cf, Term t) {
-		Set<Term> ea = getExcludedSet(t, cf.constraints());
-		for (Term y : ea) {
+		for (Term y : cf.boundVariable().excludedSet(cf.constraints())) {
 			if (y.isVariable()) {
-				Set<Term> ey = getExcludedSet(y, constraints);
+				Set<Term> ey = ((LogicalVariable) y).excludedSet(constraints);
 				if (!ey.contains(t)) {
 					return false;
 				}
@@ -430,12 +469,52 @@ public final class StdParfactor implements Parfactor {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
 
 	@Override
 	public Parfactor multiply(Parfactor other) {
-		// TODO Auto-generated method stub
-		return null;
+		return other.finishMultiplication(this);
 	}
+	
+	
+	@Override
+	public Parfactor finishMultiplication(Parfactor other) {
+		/*
+		 * I am sure that 'other' is a StdParfactor, because this method is
+		 * not called by AggParfactors.
+		 * I am pretty sure this will not cover all the cases when a new 
+		 * type of parfactor is invented, but I cannot predict all 
+		 * possible expansions (if there will be one) ;)
+		 * 
+		 * 'other' is the parfactor that called multiply(), thus to keep
+		 * consistency:
+		 * other = index i 
+		 * this = index j
+		 */
+		
+		// Creates intermediate parfactor g = <Ci U Cj, Vi U Vj, Fi x Fj> 
+		Set<Constraint> union = Sets.union(other.constraints(), constraints);
+		Factor fixfj = other.factor().multiply(factor);
+		Parfactor g = new StdParfactorBuilder().constraints(union)
+				.factor(fixfj).build();
+		
+		// Correction exponents
+		int giSize = other.size(); 
+		int gjSize = size();
+		int gSize = g.size();
+		
+		// Creates factor Fi^ri x Fj^rj
+		Factor fi = other.factor().pow(giSize, gSize);
+		Factor fj = factor.pow(gjSize, gSize);
+		Factor fixfjCorrected = fi.multiply(fj); // order is important here
+		
+		// Creates the product parfactor g' = <Ci U Cj, Vi U Vj, Fi^ri x Fj^rj>
+		Parfactor product = new StdParfactorBuilder().constraints(union)
+				.factor(fixfjCorrected).build();
+		
+		return product;
+	}
+	
 
 	/**
 	 * Splits this parfactor on the specified substitution. The result of

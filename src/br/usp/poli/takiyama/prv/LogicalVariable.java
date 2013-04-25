@@ -3,6 +3,7 @@ package br.usp.poli.takiyama.prv;
 import java.util.Set;
 
 import br.usp.poli.takiyama.common.Constraint;
+import br.usp.poli.takiyama.common.InequalityConstraint;
 
 /**
  * A logical variable is a word starting with an upper-case letter or the 
@@ -69,6 +70,37 @@ public interface LogicalVariable extends Term {
 	 * @param newName The new name
 	 */
 	public LogicalVariable rename(String name);
+	
+	
+	/**
+	 * Returns the excluded set for this Logical Variable, that is, the set of
+	 * terms t such that (X &ne; t) &in; C (specified set of constraints).
+	 *  
+	 * @param constraints A set of {@link InequalityConstraint}
+	 * @return The excluded set for this logical variable
+	 */
+	public Set<Term> excludedSet(Set<Constraint> constraints);
+	
+	
+	/**
+	 * Returns the number of individuals satisfying the specified set of
+	 * constraints.
+	 * 
+	 * @param constraints A set of {@link InequalityConstraint}
+	 * @return the number of individuals satisfying the specified set of
+	 * constraints.
+	 */
+	public int numberOfIndividualsSatisfying(Set<Constraint> constraints);
+	
+	
+	/**
+	 * Returns <code>true</code> if this logical variable has no name and its
+	 * population is empty.
+	 * 
+	 * @return <code>true</code> if this is an empty logical variable, 
+	 * <code>false</code> otherwise
+	 */
+	public boolean isEmpty();
 	
 	
 	@Override

@@ -61,6 +61,14 @@ public interface Prv {
 	
 	
 	/**
+	 * Returns the bound {@link LogicalVariable} to this PRV.
+	 * 
+	 * @return the bound LogicalVariable to this PRV.
+	 */
+	public LogicalVariable boundVariable();
+	
+	
+	/**
 	 * Returns the number of ground instances satisfying the specified set of
 	 * constraints.
 	 * 

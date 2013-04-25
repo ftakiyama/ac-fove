@@ -11,12 +11,14 @@ import org.junit.Test;
 
 import br.usp.poli.takiyama.cfove.StdParfactor.StdParfactorBuilder;
 import br.usp.poli.takiyama.common.Constraint;
+import br.usp.poli.takiyama.common.FactorTest;
 import br.usp.poli.takiyama.common.InequalityConstraint;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.SplitResult;
 import br.usp.poli.takiyama.common.StdSplitResult;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.Constant;
+import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.Prv;
 import br.usp.poli.takiyama.prv.RangeElement;
@@ -202,8 +204,156 @@ public class StdParfactorTest {
 		assertTrue(product.equals(answer));
 	}
 	
+	
+	/**
+	 * Range for PRV e(C), specified above.
+	 * @see testMultiplication (broken link)
+	 */
 	private enum Color implements RangeElement {
 		GREEN, ORANGE, RED;
 	}
 	
+	
+	/**
+	 * Sums out #.A[f(A)]  from factor
+	 * <p>
+	 * <table border="1">
+	 * <tr><th>#.A[f(A)]</th><th>h(B)</th><th>values</th></tr>
+	 * <tr><td>(#.false = 0, #.true = 1)</td><td>false</td><td>1</td></tr>
+	 * <tr><td>(#.false = 0, #.true = 1)</td><td>true</td><td>10</td></tr>
+	 * <tr><td>(#.false = 1, #.true = 0)</td><td>false</td><td>100</td></tr>
+	 * <tr><td>(#.false = 1, #.true = 0)</td><td>true</td><td>1000</td></tr>
+	 * </table>
+	 * </p>
+	 * which results in factor
+	 * <p>
+	 * <table border="1">
+	 * <tr><th>h(B)</th><th>values</th></tr>
+	 * <tr><td>false</td><td>101</td></tr>
+	 * <tr><td>true</td><td>1010</td></tr>
+	 * </table>
+	 * </p>
+	 */
+	@Test
+	public void sumOutCountingFormulaWithCardinality1() {
+		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 1);
+		LogicalVariable b = StdLogicalVariable.getInstance("B", "x", 3);
+		
+		Prv f = StdPrv.getBooleanInstance("f", a);
+		Prv h = StdPrv.getBooleanInstance("h", b);
+		Prv cf = CountingFormula.getInstance(a, f);
+		
+		double [] vals = {1.0, 10.0, 100.0, 1000.0};
+		Parfactor input = new StdParfactorBuilder().variables(cf, h)
+				.values(vals).build();
+		
+		Parfactor result = input.sumOut(cf);
+		
+		double [] ansVals = {101.0, 1010.0};
+		Parfactor answer = new StdParfactorBuilder().variables(h)
+				.values(ansVals).build();
+
+		assertTrue(result.equals(answer));
+	}
+	
+	
+	/**
+	 * @see FactorTest#testSumOutCountingFormula()
+	 */
+	@Test
+	public void sumOutCountingFormulaWithCardinality2() {
+		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 2);
+		LogicalVariable b = StdLogicalVariable.getInstance("B", "x", 3);
+		
+		Prv f = StdPrv.getBooleanInstance("f", a);
+		Prv h = StdPrv.getBooleanInstance("h", b);
+		Prv cf = CountingFormula.getInstance(a, f);
+		
+		double [] vals = {1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0};
+		Parfactor input = new StdParfactorBuilder().variables(cf, h)
+				.values(vals).build();
+		
+		Parfactor result = input.sumOut(cf);
+		
+		double [] ansVals = {10201.0, 102010.0};
+		Parfactor answer = new StdParfactorBuilder().variables(h)
+				.values(ansVals).build();
+
+		assertTrue(result.equals(answer));
+	}
+	
+	
+	/**
+	 * @see FactorTest#testSumOutBiggerCountingFormula()
+	 */
+	@Test
+	public void sumOutCountingFormulaWithCardinality10() {
+		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 10);
+		LogicalVariable b = StdLogicalVariable.getInstance("B", "x", 3);
+		
+		Prv f = StdPrv.getBooleanInstance("f", a);
+		Prv h = StdPrv.getBooleanInstance("h", b);
+		Prv cf = CountingFormula.getInstance(a, f);
+		
+		double [] vals = new double[22];
+		Arrays.fill(vals, 1.0);
+		Parfactor input = new StdParfactorBuilder().variables(cf, h)
+				.values(vals).build();
+		
+		Parfactor result = input.sumOut(cf);
+		
+		double [] ansVals = {1024.0, 1024.0};
+		Parfactor answer = new StdParfactorBuilder().variables(h)
+				.values(ansVals).build();
+
+		assertTrue(result.equals(answer));
+	}
+	
+	
+	/**
+	 * Example 2.13 from Kisysnki (2010) [adapted]. Sums out 
+	 * #.A:{A&ne;B}[f(A)] from factor
+	 * <p>
+	 * <table border="1">
+	 * <tr><th>#.A:{A&ne;B}[f(A)]</th><th>h(B)</th><th>values</th></tr>
+	 * <tr><td>(#.false = 0, #.true = 2)</td><td>false</td><td>1</td></tr>
+	 * <tr><td>(#.false = 0, #.true = 2)</td><td>true</td><td>10</td></tr>
+	 * <tr><td>(#.false = 1, #.true = 1)</td><td>false</td><td>100</td></tr>
+	 * <tr><td>(#.false = 1, #.true = 1)</td><td>true</td><td>1000</td></tr>
+	 * <tr><td>(#.false = 2, #.true = 0)</td><td>false</td><td>10000</td></tr>
+	 * <tr><td>(#.false = 2, #.true = 0)</td><td>true</td><td>100000</td></tr>
+	 * </table>
+	 * </p>
+	 * which results in factor
+	 * <p>
+	 * <table border="1">
+	 * <tr><th>h(B)</th><th>values</th></tr>
+	 * <tr><td>false</td><td>10201</td></tr>
+	 * <tr><td>true</td><td>102010</td></tr>
+	 * </table>
+	 * </p>
+	 */
+	@Test
+	public void sumOutCountingFormula() {
+		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 3);
+		LogicalVariable b = StdLogicalVariable.getInstance("B", "x", 3);
+		
+		Prv f = StdPrv.getBooleanInstance("f", a);
+		Prv h = StdPrv.getBooleanInstance("h", b);
+		
+		Constraint ab = InequalityConstraint.getInstance(a, b);
+		Prv cf = CountingFormula.getInstance(a, f, ab);
+		
+		double [] vals = {1.0, 10.0, 100.0, 1000.0, 10000.0, 100000.0};
+		Parfactor input = new StdParfactorBuilder().variables(cf, h)
+				.values(vals).build();
+		
+		Parfactor result = input.sumOut(cf);
+		
+		double [] ansVals = {10201.0, 102010.0};
+		Parfactor answer = new StdParfactorBuilder().variables(h)
+				.values(ansVals).build();
+
+		assertTrue(result.equals(answer));
+	}
 }

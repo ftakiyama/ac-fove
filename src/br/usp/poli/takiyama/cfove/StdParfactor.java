@@ -442,15 +442,26 @@ public final class StdParfactor implements Parfactor {
 	public boolean isSplittable(Substitution s) {
 		boolean isSplittable;
 		if (s.size() != 1) {
+			// Split method only works for 1 binding
 			isSplittable =  false;
 		} else {
 			Binding b = s.first();
 			Term x = b.firstTerm();
 			Term t = b.secondTerm();
+			
+			// Can the substitution be applied to logical variables in this parfactor?
 			boolean isApplicable = logicalVariables().contains(x);
+			
+			// Is the replacement absent from constraints in this parfactor?
 			boolean isNotInConstraints = !contains(constraints, t);
+			
+			// Does the substitution make sense?
 			boolean isValidSubstitution = b.isValid();
+			
+			// If we are replacing for a logical variable, is it present in
+			// this parfactor?
 			boolean isLogicalVariable = (t.isVariable() ? logicalVariables().contains(t) : true);
+			
 			isSplittable = isApplicable && isNotInConstraints 
 							&& isValidSubstitution && isLogicalVariable; 
 		}
@@ -554,8 +565,22 @@ public final class StdParfactor implements Parfactor {
 	
 	@Override
 	public Parfactor sumOut(Prv prv) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		// Creates the intermediate parfactor g = <C,V\{f},F'>
+		Factor sumOut = factor.sumOut(prv);
+		Parfactor g = new StdParfactorBuilder().constraints(constraints)
+				.factor(sumOut).build();
+		
+		// Correction exponent r = |gi|/|g|
+		int gSize = g.size();
+		int thisSize = size();
+		
+		// Creates the eliminated parfactor g' = <C,V\{f},F'^r>
+		Factor corrected = sumOut.pow(thisSize, gSize);
+		Parfactor summedOut = new StdParfactorBuilder().constraints(constraints)
+				.factor(corrected).build();
+		
+		return summedOut;
 	}
 	
 	

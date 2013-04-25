@@ -76,7 +76,7 @@ public class CountingFormula implements Prv {
 			}
 		}
 		
-		int allowedDomainSize = this.bound.individualsSatisfying(constraints).size();
+		int allowedDomainSize = this.bound.numberOfIndividualsSatisfying(constraints);
 		Histogram<RangeElement> histogram = new Histogram<RangeElement>(prv.range());
 		generateHistograms(this.range, allowedDomainSize, histogram, 0);
 	}
@@ -173,7 +173,7 @@ public class CountingFormula implements Prv {
 	
 	
 	/**
-	 * Returns a counting formula without constraints.
+	 * Returns a counting formula with one constraint.
 	 * 
 	 * @param boundVariable The logical variable bound to this counting
 	 * formula (that is, the variable being counted)

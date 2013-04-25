@@ -131,6 +131,13 @@ public interface Parfactor {
 	public boolean isSplittable(Substitution s);
 	
 	
+	/*
+	 * There is no method to check whether a PRV can be eliminated (summed
+	 * out) from this parfactor because this verification requires a full
+	 * scan of all parfactors in the distribution. In this special case,
+	 * the verification must be done by a higher level class.
+	 */
+	
 	// Enabling operations
 	
 	public Parfactor count(LogicalVariable lv);
@@ -159,8 +166,7 @@ public interface Parfactor {
 	 */
 	public Parfactor finishMultiplication(Parfactor other);
 	
-	//public Parfactor propositionalize();
-	
+		
 	/**
 	 * Splits this parfactor on the specified substitution.
 	 * 
@@ -173,6 +179,12 @@ public interface Parfactor {
 	public SplitResult splitOn(Substitution s) throws IllegalArgumentException;
 	
 	
+	/**
+	 * Eliminates the specified {@link Prv} and returns the result.
+	 * 
+	 * @param prv The PRV to eliminate
+	 * @return The result of eliminating the specified PRV from this parfactor
+	 */
 	public Parfactor sumOut(Prv prv);
 	
 	

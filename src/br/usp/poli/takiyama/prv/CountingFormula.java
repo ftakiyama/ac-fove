@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import br.usp.poli.takiyama.common.Constraint;
+import br.usp.poli.takiyama.common.InequalityConstraint;
 import br.usp.poli.takiyama.utils.MathUtils;
 
 /**
@@ -332,11 +333,55 @@ public class CountingFormula implements Prv {
 	 * @return A new counting formula equal to this one with the addition of 
 	 * the constraint specified.
 	 */
-	public CountingFormula add(Constraint constraint) {
+	private CountingFormula add(Constraint constraint) {
 		HashSet<Constraint> constraints = 
 				new HashSet<Constraint>(this.constraints);
 		constraints.add(constraint);
 		return CountingFormula.getInstance(bound, prv, constraints);
+	}
+	
+	
+	/**
+	 * Returns this counting formula with the specified term removed. The
+	 * remotion is done by adding a {@link InequalityConstraint} involving
+	 * the bound logical variable from this counting formula and the 
+	 * specified term to the set of constraints.
+	 * 
+	 * @param t The term to "remove"
+	 * @return This counting formula with the specified term removed
+	 */
+	public Prv remove(Term t) {
+		Constraint constraintOnTerm = InequalityConstraint.getInstance(bound, t);
+		CountingFormula result =  add(constraintOnTerm);
+		
+		return result;
+	}
+	
+	
+	/**
+	 * Returns the {@link Prv} associated with this counting formula with
+	 * the the bound logical variable replaced by the specified term.
+	 * 
+	 * @param t The replacement for the bound logical variable
+	 * @return the {@link Prv} associated with this counting formula with
+	 * the the bound logical variable replaced by the specified term.
+	 */
+	public Prv takeOut(Term t) {
+		Binding b = Binding.getInstance(bound, t);
+		Substitution s = Substitution.getInstance(b);
+		return prv.apply(s);
+	}
+	
+	
+	/**
+	 * Returns this counting formula converted to {@link StdPrv}, if this
+	 * conversion is possible. Otherwise, returns this counting formula.
+	 * 
+	 * @return This counting formula converted to {@link StdPrv}, if this
+	 * conversion is possible. Otherwise, returns this counting formula.
+	 */
+	public Prv simplify() {
+		return (this.isStdPrv()) ? this.toStdPrv() : this;
 	}
 	
 	

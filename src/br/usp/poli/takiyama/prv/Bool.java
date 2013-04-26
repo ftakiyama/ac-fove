@@ -61,6 +61,14 @@ public final class Bool implements RangeElement {
 	}
 	
 	
+	/**
+	 * Throws {@link UnsupportedOperationException}.
+	 */
+	public RangeElement combine(RangeElement e) {
+		throw new UnsupportedOperationException("Not implemented");
+	}
+	
+	
 	/* ************************************************************************
 	 *    hashCode, equals and toString
 	 * ************************************************************************/

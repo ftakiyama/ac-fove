@@ -211,6 +211,13 @@ public class StdParfactorTest {
 	 */
 	private enum Color implements RangeElement {
 		GREEN, ORANGE, RED;
+
+		/**
+		 * Throws {@link UnsupportedOperationException}.
+		 */
+		public RangeElement combine(RangeElement e) {
+			throw new UnsupportedOperationException("Not implemented");
+		}
 	}
 	
 	
@@ -219,10 +226,10 @@ public class StdParfactorTest {
 	 * <p>
 	 * <table border="1">
 	 * <tr><th>#.A[f(A)]</th><th>h(B)</th><th>values</th></tr>
-	 * <tr><td>(#.false = 0, #.true = 1)</td><td>false</td><td>1</td></tr>
-	 * <tr><td>(#.false = 0, #.true = 1)</td><td>true</td><td>10</td></tr>
-	 * <tr><td>(#.false = 1, #.true = 0)</td><td>false</td><td>100</td></tr>
-	 * <tr><td>(#.false = 1, #.true = 0)</td><td>true</td><td>1000</td></tr>
+	 * <tr><td>(#.false = 1, #.true = 0)</td><td>false</td><td>1</td></tr>
+	 * <tr><td>(#.false = 1, #.true = 0)</td><td>true</td><td>10</td></tr>
+	 * <tr><td>(#.false = 0, #.true = 1)</td><td>false</td><td>100</td></tr>
+	 * <tr><td>(#.false = 0, #.true = 1)</td><td>true</td><td>1000</td></tr>
 	 * </table>
 	 * </p>
 	 * which results in factor
@@ -235,7 +242,7 @@ public class StdParfactorTest {
 	 * </p>
 	 */
 	@Test
-	public void sumOutCountingFormulaWithCardinality1() {
+	public void testSumOutCountingFormulaWithCardinality1() {
 		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 1);
 		LogicalVariable b = StdLogicalVariable.getInstance("B", "x", 3);
 		
@@ -261,7 +268,7 @@ public class StdParfactorTest {
 	 * @see FactorTest#testSumOutCountingFormula()
 	 */
 	@Test
-	public void sumOutCountingFormulaWithCardinality2() {
+	public void testSumOutCountingFormulaWithCardinality2() {
 		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 2);
 		LogicalVariable b = StdLogicalVariable.getInstance("B", "x", 3);
 		
@@ -287,7 +294,7 @@ public class StdParfactorTest {
 	 * @see FactorTest#testSumOutBiggerCountingFormula()
 	 */
 	@Test
-	public void sumOutCountingFormulaWithCardinality10() {
+	public void testSumOutCountingFormulaWithCardinality10() {
 		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 10);
 		LogicalVariable b = StdLogicalVariable.getInstance("B", "x", 3);
 		
@@ -334,7 +341,7 @@ public class StdParfactorTest {
 	 * </p>
 	 */
 	@Test
-	public void sumOutCountingFormula() {
+	public void testSumOutCountingFormula() {
 		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 3);
 		LogicalVariable b = StdLogicalVariable.getInstance("B", "x", 3);
 		
@@ -353,6 +360,87 @@ public class StdParfactorTest {
 		double [] ansVals = {10201.0, 102010.0};
 		Parfactor answer = new StdParfactorBuilder().variables(h)
 				.values(ansVals).build();
+
+		assertTrue(result.equals(answer));
+	}
+	
+	
+	/**
+	 * Example 2.16 from Kisysnki (2010) [adapted]. Expands  
+	 * #.A:{A&ne;x1}[f(A)] from parfactor 
+	 * g = &langle; &empty;, {#.A:{A&ne;x1}[f(A)],h(B)}, F1 &rangle;
+	 * on constant x2. We use D(A) = {x1, x2, x3}. Factor F1 is given by
+	 * <p>
+	 * <table border="1">
+	 * <tr><th>#.A:{A&ne;x1}[f(A)]</th><th>h(B)</th><th>values</th></tr>
+	 * <tr><td>(#.false = 2, #.true = 0)</td><td>false</td><td>0.2</td></tr>
+	 * <tr><td>(#.false = 2, #.true = 0)</td><td>true</td><td>0.3</td></tr>
+	 * <tr><td>(#.false = 1, #.true = 1)</td><td>false</td><td>0.5</td></tr>
+	 * <tr><td>(#.false = 1, #.true = 1)</td><td>true</td><td>0.7</td></tr>
+	 * <tr><td>(#.false = 0, #.true = 2)</td><td>false</td><td>0.11</td></tr>
+	 * <tr><td>(#.false = 0, #.true = 2)</td><td>true</td><td>0.13</td></tr>
+	 * </table>
+	 * </p>
+	 * <p>
+	 * The result is parfactor 
+	 * g = &langle; &empty;, {#.A:{A&ne;x1', A&ne;x2}[f(A)],h(B)}, F2 &rangle;,
+	 * where F2 is
+	 * </p>
+	 * <p>
+	 * <table border="1">
+	 * <tr><th>#.A:{A&ne;x1, A&ne;x2}[f(A)]</th><th>f(x2)</th><th>h(B)</th><th>values</th></tr>
+	 * <tr><td>(#.false = 1, #.true = 0)</td><td>false</td><td>false</td><td>0.2</td></tr>
+	 * <tr><td>(#.false = 1, #.true = 0)</td><td>false</td><td>true</td><td>0.3</td></tr>
+	 * <tr><td>(#.false = 1, #.true = 0)</td><td>true</td><td>false</td><td>0.5</td></tr>
+	 * <tr><td>(#.false = 1, #.true = 0)</td><td>true</td><td>true</td><td>0.7</td></tr>
+	 * <tr><td>(#.false = 0, #.true = 1)</td><td>false</td><td>false</td><td>0.5</td></tr>
+	 * <tr><td>(#.false = 0, #.true = 1)</td><td>false</td><td>true</td><td>0.7</td></tr>
+	 * <tr><td>(#.false = 0, #.true = 1)</td><td>true</td><td>false</td><td>0.11</td></tr>
+	 * <tr><td>(#.false = 0, #.true = 1)</td><td>true</td><td>true</td><td>0.13</td></tr>
+	 * </table>
+	 * </p>
+	 * <p>
+	 * The result can also be written as 
+	 * </p>
+	 * <p>
+	 * <table border="1">
+	 * <tr><th>f(x3)</th><th>f(x2)</th><th>h(B)</th><th>values</th></tr>
+	 * <tr><td>false</td><td>false</td><td>false</td><td>0.2</td></tr>
+	 * <tr><td>false</td><td>false</td><td>true</td><td>0.3</td></tr>
+	 * <tr><td>false</td><td>true</td><td>false</td><td>0.5</td></tr>
+	 * <tr><td>false</td><td>true</td><td>true</td><td>0.7</td></tr>
+	 * <tr><td>true</td><td>false</td><td>false</td><td>0.5</td></tr>
+	 * <tr><td>true</td><td>false</td><td>true</td><td>0.7</td></tr>
+	 * <tr><td>true</td><td>true</td><td>false</td><td>0.11</td></tr>
+	 * <tr><td>true</td><td>true</td><td>true</td><td>0.13</td></tr>
+	 * </table>
+	 * </p>
+	 */
+	@Test
+	public void testExpansion() {
+		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 3);
+		LogicalVariable b = StdLogicalVariable.getInstance("B", "x", 3);
+		
+		Constant x1 = Constant.getInstance("x1");
+		Constant x2 = Constant.getInstance("x2");
+		Constant x3 = Constant.getInstance("x3");
+		
+		Prv f = StdPrv.getBooleanInstance("f", a);
+		Prv h = StdPrv.getBooleanInstance("h", b);
+		Prv f_x2 = StdPrv.getBooleanInstance("f", x2);
+		Prv f_x3 = StdPrv.getBooleanInstance("f", x3);
+		
+		Constraint a_x1 = InequalityConstraint.getInstance(a, x1);
+		
+		Prv cf = CountingFormula.getInstance(a, f, a_x1);
+		
+		Parfactor input = new StdParfactorBuilder().variables(cf, h)
+				.values(0.2, 0.3, 0.5, 0.7, 0.11, 0.13).build();
+		
+		Parfactor result = input.expand(cf, x2);
+		
+		Parfactor answer = new StdParfactorBuilder().variables(f_x3, f_x2, h)
+				.values(0.2, 0.3, 0.5, 0.7, 0.5, 0.7, 0.11, 0.13).build();
 
 		assertTrue(result.equals(answer));
 	}

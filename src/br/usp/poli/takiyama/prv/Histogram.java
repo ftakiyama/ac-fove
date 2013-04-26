@@ -76,6 +76,20 @@ public class Histogram<T extends RangeElement> implements RangeElement {
 	
 	
 	/**
+	 * Returns <code>true</code> if this histogram contains the specified
+	 * bucket.
+	 * 
+	 * @param bucket The bucket to search for
+	 * @return <code>true</code> if this histogram contains the specified
+	 * bucket, <code>false</code> otherwise
+	 * @see #combine(RangeElement)
+	 */
+	private boolean contains(RangeElement bucket) {
+		return distribution.containsKey(bucket);
+	}
+	
+	
+	/**
 	 * Returns true if this histogram contains a bucket with the 
 	 * specified count.
 	 * 
@@ -124,6 +138,24 @@ public class Histogram<T extends RangeElement> implements RangeElement {
 	Multinomial toMultinomial() {
 		List<Integer> values = new ArrayList<Integer>(distribution.values());
 		return Multinomial.getInstance(values);
+	}
+	
+	
+	/**
+	 * Returns this histogram with the count of the specified bucket 
+	 * incremented by 1.
+	 * 
+	 */
+	public RangeElement combine(RangeElement e) {
+		RangeElement result = null;
+		if (contains(e)) {
+			Histogram<RangeElement> copy = new Histogram<RangeElement>(this);
+			copy.addCount(e, 1);
+			result = copy;
+		} else {
+			throw new IllegalArgumentException();
+		}
+		return result;
 	}
 	
 	

@@ -48,6 +48,18 @@ public final class Tuple<E> {
 	}
 	
 	
+	/**
+	 * Returns a tuple with the elements of the specified tuple, in the same
+	 * order.
+	 * 
+	 * @param t The tuple to copy
+	 * @return A copy of the specified tuple
+	 */
+	public static <E> Tuple<E> getInstance(Tuple<E> t) {
+		return new Tuple<E>(t.values);
+	}
+	
+	
 	/* ************************************************************************
 	 *    Getters
 	 * ************************************************************************/

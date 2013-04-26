@@ -14,9 +14,12 @@ import br.usp.poli.takiyama.common.InequalityConstraint;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.SplitResult;
 import br.usp.poli.takiyama.common.StdSplitResult;
+import br.usp.poli.takiyama.common.Tuple;
 import br.usp.poli.takiyama.prv.Binding;
+import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.Prv;
+import br.usp.poli.takiyama.prv.RangeElement;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
 import br.usp.poli.takiyama.utils.Sets;
@@ -475,10 +478,89 @@ public final class StdParfactor implements Parfactor {
 		return null;
 	}
 
+	
 	@Override
 	public Parfactor expand(Prv cf, Term t) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		// Creates the new set of PRVs
+		List<Prv> vars = getExpandedVariables(cf, t);
+		
+		// Creates a constant factor with the new set of PRVs
+		Factor newStructure = Factor.getInstance(vars);
+		
+		// Creates an array to store the values of the new parfactor
+		int cfIndex = factor.variables().indexOf(cf);
+		Prv takenOut = vars.get(cfIndex + 1);
+		int newSize = factor.size() * takenOut.range().size();
+		List<BigDecimal> vals = new ArrayList<BigDecimal>(newSize);
+		
+		// Combines the new histogram with PRV that was taken out to get the
+		// corresponding value in this factor
+		for (Tuple<RangeElement> tuple : newStructure) {
+			Tuple<RangeElement> combined = combine(tuple, cfIndex, cfIndex + 1);
+			vals.add(factor.getValue(combined));
+		}
+		
+		// Converts the counting formula to StdPrv if possible
+		vars.set(cfIndex, ((CountingFormula)vars.get(cfIndex)).simplify());
+		
+		// Creates the expanded factor
+		Parfactor expanded = new StdParfactorBuilder().constraints(constraints)
+				.variables(vars).values(vals).build();
+		
+		return expanded;
+	}
+	
+	
+	/**
+	 * Creates the new set of parameterized random variables for 
+	 * {@link #expand(Prv, Term)}.
+	 * <p>
+	 * Let c =  #_A:CA [f(...,A,...)] and 
+	 *     c' = #_A:(CA U {A != t}) [f(...,A,...)].
+	 * </p>
+	 * <p>
+	 * Then V' = V \ {c} U {c'}
+	 * </p>
+	 * 
+	 * @param cf The counting formula to expand
+	 * @param t The term to be taken out from the counting formula
+	 * @return the new set of parameterized random variables for 
+	 * {@link #expand(Prv, Term)}.
+	 */
+	private List<Prv> getExpandedVariables(Prv cf, Term t) {
+		List<Prv> vars = new ArrayList<Prv>(factor.variables());
+		int cfIndex = vars.indexOf(cf);
+		
+		Prv expanded = ((CountingFormula) cf).remove(t);
+		Prv takenOut = ((CountingFormula) cf).takeOut(t);
+		
+		vars.set(cfIndex, expanded);
+		vars.add(cfIndex + 1, takenOut);
+		
+		return vars;
+	}
+	
+	// tenho que dar um jeito de converter de volta para histograma...
+	/**
+	 * Returns the combination of elements at the specified indexes in the 
+	 * specified tuple. The combined element is put in position <code>i</code> 
+	 * and position <code>j</code> is removed.
+	 * 
+	 * @see #expand(Prv, Term)
+	 * @param t The tuple to manipulate
+	 * @param i The index of the counting formula
+	 * @param j The index of a 'taken out' PRV
+	 * @return The combination of elements at the specified indexes in the 
+	 * specified tuple.
+	 */
+	private Tuple<RangeElement> combine(Tuple<RangeElement> t, int i, int j) {
+		Tuple<RangeElement> tuple = Tuple.getInstance(t);
+		RangeElement newHistogram = t.get(i).combine(t.get(j));
+		tuple = tuple.set(i, newHistogram);
+		tuple = tuple.remove(j);
+		
+		return tuple;
 	}
 	
 

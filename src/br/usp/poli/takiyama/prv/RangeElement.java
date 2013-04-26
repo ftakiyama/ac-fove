@@ -7,5 +7,7 @@ package br.usp.poli.takiyama.prv;
  *
  */
 public interface RangeElement {
+
+	public RangeElement combine(RangeElement e);
 	//public RangeElement apply(Operator<? extends RangeElement> op);
 }

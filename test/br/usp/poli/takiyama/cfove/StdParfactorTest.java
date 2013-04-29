@@ -444,4 +444,227 @@ public class StdParfactorTest {
 
 		assertTrue(result.equals(answer));
 	}
+	
+	
+	/**
+	 * Counts PRV f on parfactor g = &langle; &empty;, {f(A)}, F1 &rangle;
+	 * where
+	 * <p>
+	 * F1
+	 * <table border="1">
+	 * <tr><th>f(A)</th><th>values</th></tr>
+	 * <tr><td>false</td><td>2</td></tr>
+	 * <tr><td>true</td><td>3</td></tr>
+	 * </table>
+	 * </p>
+	 * <p>
+	 * D(A) = {x1,x2,x3}. The result of this
+	 * operation is parfactor g' = &langle; &empty;, {#.A[f(A)]}, F2 &rangle;, 
+	 * where 
+	 * <p>
+	 * F2
+	 * <table border="1">
+	 * <tr><th>#.A[f(A)]</th><th>values</th></tr>
+	 * <tr><td>(#.false = 3, #.true = 0)</td><td>8</td></tr>
+	 * <tr><td>(#.false = 2, #.true = 1)</td><td>12</td></tr>
+	 * <tr><td>(#.false = 1, #.true = 2)</td><td>18</td></tr>
+	 * <tr><td>(#.false = 0, #.true = 3)</td><td>27</td></tr>
+	 * </table>
+	 * </p>
+	 */
+	@Test
+	public void testCountingWithoutConstraints() {
+		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 3);
+		
+		Prv f = StdPrv.getBooleanInstance("f", a);
+		Prv cf = CountingFormula.getInstance(a, f);
+		
+		Parfactor input = new StdParfactorBuilder().variables(f)
+				.values(2, 3).build();
+		
+		Parfactor result = input.count(a);
+		
+		Parfactor answer = new StdParfactorBuilder().variables(cf)
+				.values(8, 12, 18, 27).setScale(3).build();
+
+		assertTrue(result.equals(answer));
+	}
+	
+	
+	/**
+	 * Tests exception throwing for counting.
+	 * Tries to count a logical variable that does not exist in the parfactor.
+	 */
+	@Test(expected=IllegalArgumentException.class)
+	public void testCoutingException() {
+		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 3);
+		LogicalVariable b = StdLogicalVariable.getInstance("B", "x", 3);
+		
+		Prv f = StdPrv.getBooleanInstance("f", a);
+		
+		Parfactor input = new StdParfactorBuilder().variables(f)
+				.values(2, 3).setScale(2).build();
+		
+		input.count(b);
+	}
+	
+	
+	/**
+	 * Counts logical variable A on parfactor 
+	 * g = &langle; {A&ne;x1}, {f(A)}, F1 &rangle;
+	 * where
+	 * <p>
+	 * F1
+	 * <table border="1">
+	 * <tr><th>f(A)</th><th>values</th></tr>
+	 * <tr><td>false</td><td>2</td></tr>
+	 * <tr><td>true</td><td>3</td></tr>
+	 * </table>
+	 * </p>
+	 * <p>
+	 * D(A) = {x1,x2,x3}. The result of this
+	 * operation is parfactor g' = &langle; &empty;, {#.A[f(A)]}, F2 &rangle;, 
+	 * where 
+	 * <p>
+	 * F2
+	 * <table border="1">
+	 * <tr><th>#.A[f(A)]</th><th>values</th></tr>
+	 * <tr><td>(#.false = 2, #.true = 1)</td><td>4</td></tr>
+	 * <tr><td>(#.false = 1, #.true = 2)</td><td>6</td></tr>
+	 * <tr><td>(#.false = 0, #.true = 3)</td><td>9</td></tr>
+	 * </table>
+	 * </p>
+	 */
+	@Test
+	public void testCountingWithConstraints() {
+		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 3);
+		
+		Constant x1 = Constant.getInstance("x1");
+		
+		Constraint a_x1 = InequalityConstraint.getInstance(a, x1);
+		
+		Prv f = StdPrv.getBooleanInstance("f", a);
+		Prv cf = CountingFormula.getInstance(a, f, a_x1);
+		
+		Parfactor input = new StdParfactorBuilder().constraints(a_x1)
+				.variables(f).values(2, 3).build();
+		
+		Parfactor result = input.count(a);
+		
+		Parfactor answer = new StdParfactorBuilder().variables(cf)
+				.values(4, 6, 9).setScale(2).build();
+
+		assertTrue(result.equals(answer));
+	}
+	
+	
+	/**
+	 * Counts logical variable A on parfactor 
+	 * g = &langle; &empty;, {f(A), h(B)}, F1 &rangle;
+	 * where
+	 * <p>
+	 * F1
+	 * <table border="1">
+	 * <tr><th>f(A)</th><th>h(B)</th><th>values</th></tr>
+	 * <tr><td>false</td><td>false</td><td>2</td></tr>
+	 * <tr><td>false</td><td>true</td><td>3</td></tr>
+	 * <tr><td>true</td><td>false</td><td>5</td></tr>
+	 * <tr><td>true</td><td>true</td><td>7</td></tr>
+	 * </table>
+	 * </p>
+	 * <p>
+	 * D(A) = {x1,x2,x3}. The result of this
+	 * operation is parfactor g' = &langle; &empty;, {#.A[f(A)],h(B)}, F2 &rangle;, 
+	 * where 
+	 * <p>
+	 * F2
+	 * <table border="1">
+	 * <tr><th>#.A[f(A)]</th><th>h(B)</th><th>values</th></tr>
+	 * <tr><td>(#.false = 3, #.true = 0)</td><td>false</td><td>8</td></tr>
+	 * <tr><td>(#.false = 3, #.true = 0)</td><td>true</td><td>27</td></tr>
+	 * <tr><td>(#.false = 2, #.true = 1)</td><td>false</td><td>20</td></tr>
+	 * <tr><td>(#.false = 2, #.true = 1)</td><td>true</td><td>63</td></tr>
+	 * <tr><td>(#.false = 1, #.true = 2)</td><td>false</td><td>50</td></tr>
+	 * <tr><td>(#.false = 1, #.true = 2)</td><td>true</td><td>147</td></tr>
+	 * <tr><td>(#.false = 0, #.true = 3)</td><td>false</td><td>125</td></tr>
+	 * <tr><td>(#.false = 0, #.true = 3)</td><td>true</td><td>343</td></tr>
+	 * </table>
+	 * </p>
+	 */
+	@Test
+	public void testCountingrWithoutConstraintsAndTwoVariables() {
+		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 3);
+		LogicalVariable b = StdLogicalVariable.getInstance("B", "x", 3);
+		
+		Prv f = StdPrv.getBooleanInstance("f", a);
+		Prv h = StdPrv.getBooleanInstance("h", b);
+		Prv cf = CountingFormula.getInstance(a, f);
+		
+		Parfactor input = new StdParfactorBuilder().variables(f, h)
+				.values(2, 3, 5, 7).build();
+		
+		Parfactor result = input.count(a);
+		
+		Parfactor answer = new StdParfactorBuilder().variables(cf, h)
+				.values(8, 27, 20, 63, 50, 147, 125, 343).setScale(3).build();
+		
+		assertTrue(result.equals(answer));
+	}
+	
+	
+	/**
+	 * Counts logical variable A on parfactor 
+	 * g = &langle; {A&ne;B}, {f(A), h(B)}, F1 &rangle;
+	 * where
+	 * <p>
+	 * F1
+	 * <table border="1">
+	 * <tr><th>f(A)</th><th>h(B)</th><th>values</th></tr>
+	 * <tr><td>false</td><td>false</td><td>2</td></tr>
+	 * <tr><td>false</td><td>true</td><td>3</td></tr>
+	 * <tr><td>true</td><td>false</td><td>5</td></tr>
+	 * <tr><td>true</td><td>true</td><td>7</td></tr>
+	 * </table>
+	 * </p>
+	 * <p>
+	 * D(A) = {x1,x2,x3}. The result of this
+	 * operation is parfactor 
+	 * g' = &langle; &empty;, {#.A:{A&ne;B}[f(A)],h(B)}, F2 &rangle;, 
+	 * where 
+	 * <p>
+	 * F2
+	 * <table border="1">
+	 * <tr><th>#.A:{A&ne;B}[f(A)]</th><th>h(B)</th><th>values</th></tr>
+	 * <tr><td>(#.false = 2, #.true = 0)</td><td>false</td><td>4</td></tr>
+	 * <tr><td>(#.false = 2, #.true = 0)</td><td>true</td><td>9</td></tr>
+	 * <tr><td>(#.false = 1, #.true = 1)</td><td>false</td><td>10</td></tr>
+	 * <tr><td>(#.false = 1, #.true = 1)</td><td>true</td><td>21</td></tr>
+	 * <tr><td>(#.false = 0, #.true = 2)</td><td>false</td><td>25</td></tr>
+	 * <tr><td>(#.false = 0, #.true = 2)</td><td>true</td><td>49</td></tr>
+	 * </table>
+	 * </p>
+	 */
+	@Test
+	public void testCount() {
+		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 3);
+		LogicalVariable b = StdLogicalVariable.getInstance("B", "x", 3);
+
+		Constraint ab = InequalityConstraint.getInstance(a, b);
+		
+		Prv f = StdPrv.getBooleanInstance("f", a);
+		Prv h = StdPrv.getBooleanInstance("h", b);
+		Prv cf = CountingFormula.getInstance(a, f, ab);
+		
+		Parfactor input = new StdParfactorBuilder().constraints(ab)
+				.variables(f, h).values(2, 3, 5, 7).build();
+		
+		Parfactor result = input.count(a);
+				
+		double [] vals = {4.0, 9.0, 10.0, 21.0, 25.0, 49.0};
+		Parfactor answer = new StdParfactorBuilder().variables(cf, h)
+				.values(vals).setScale(2).build();
+		
+		assertTrue(result.equals(answer));
+	}
+	
 }

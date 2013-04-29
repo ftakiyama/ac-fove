@@ -140,9 +140,27 @@ public interface Parfactor {
 	
 	// Enabling operations
 	
+	/**
+	 * Returns the result of eliminating the specified free logical variable 
+	 * from this parfactor. 
+	 * 
+	 * @param lv The logical variable to eliminate
+	 */
 	public Parfactor count(LogicalVariable lv);
 	
+	
+	/**
+	 * Returns the result of expanding the specified counting formula on the
+	 * specified term in this parfactor. 
+	 * 
+	 * @param cf The counting formula to expand
+	 * @param t The term on which to expand the counting formula. It is 
+	 * usually a {@link Constant}.
+	 * @return The result of expanding the specified counting formula on the
+	 * specified term in this parfactor. 
+	 */
 	public Parfactor expand(Prv cf, Term t);
+	
 	
 	/**
 	 * Returns the result of multiplying this parfactor with the specified

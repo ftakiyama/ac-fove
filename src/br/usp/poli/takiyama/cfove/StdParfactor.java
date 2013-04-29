@@ -20,6 +20,8 @@ import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.Prv;
 import br.usp.poli.takiyama.prv.RangeElement;
+import br.usp.poli.takiyama.prv.StdLogicalVariable;
+import br.usp.poli.takiyama.prv.StdPrv;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
 import br.usp.poli.takiyama.utils.Sets;
@@ -31,7 +33,7 @@ public final class StdParfactor implements Parfactor {
 
 	
 	/* ************************************************************************
-	 *    Builder
+	 *    Builders
 	 * ************************************************************************/
 	
 	public static class StdParfactorBuilder implements Builder<StdParfactor> {
@@ -46,6 +48,14 @@ public final class StdParfactor implements Parfactor {
 			prvs = new ArrayList<Prv>();
 			values = new ArrayList<BigDecimal>();
 			factor = null;
+		}
+		
+		public StdParfactorBuilder(Parfactor p) {
+			this();
+			restrictions.addAll(p.constraints());
+			prvs.addAll(p.prvs());
+			values.addAll(p.factor().values());
+			factor = Factor.getInstance(p.factor());
 		}
 		
 		public StdParfactorBuilder constraints(Constraint ... c) {
@@ -85,6 +95,16 @@ public final class StdParfactor implements Parfactor {
 			return this;
 		}
 		
+		// to control scale on junit tests
+		public StdParfactorBuilder setScale(int scale) {
+			List<BigDecimal> vals = new ArrayList<BigDecimal>(values.size());
+			for (BigDecimal bg : values) {
+				vals.add(bg.setScale(scale));
+			}
+			values = vals;
+			return this;
+		}
+		
 		public StdParfactorBuilder factor(Factor f) {
 			factor = f;
 			return this;
@@ -96,6 +116,156 @@ public final class StdParfactor implements Parfactor {
 		}
 		
 	}
+	
+	
+	/**
+	 * Encapsulates counting algorithm.
+	 * <p>
+	 * Counting a free logical variable eliminates it from the parfactor using
+	 * a counting formula.
+	 * </p>
+	 * 
+	 * @author Felipe Takiyama
+	 *
+	 */
+	private class Counter extends StdParfactorBuilder {
+		
+		// PRV that contains the logical variable being counted
+		private Prv counted;
+		
+		// The logical variable being counted
+		private LogicalVariable bound;
+		
+		// Subset of constraints that contains the bound logical variable
+		private Set<Constraint> constraintsOnBound;
+		
+		// A counting formula that replaces PRV 'counted'
+		private Prv countingFormula;
+		
+		// Index of 'counted' in the list of PRVs
+		private int countedIndex;
+		
+		/*
+		 * I use super.factor to navigate through the old factor, and
+		 * super.prvs/super.values to set the values for the new factor
+		 */
+		
+		/**
+		 * Creates a Counter using the specified parfactor. The 'counted'
+		 * parfactor will be built based on the specified parfactor.
+		 * 
+		 * @param p The parfactor on which counting will take place.
+		 */
+		private Counter(Parfactor p) {
+			super(p);
+			counted = StdPrv.getInstance();
+			bound = StdLogicalVariable.getInstance();
+			constraintsOnBound = new HashSet<Constraint>(super.restrictions.size());
+			countingFormula = StdPrv.getInstance();
+			countedIndex = 0;
+		}
+		
+		/**
+		 * Counts the specified free logical variable in this parfactor.
+		 * 
+		 * @param lv The logical variable to count
+		 * @return A {@link StdParfactorBuilder} with the result of counting.
+		 */
+		private Counter count(LogicalVariable lv) {
+			setBound(lv);
+			partitionOnBound();
+			setPrvOnOnBound();
+			setCountingFormulaOnBound();
+			replaceCountedWithCountingFormula();
+			setValues();
+			return this;
+		}
+		
+		/**
+		 * Sets the free logical variable to be bound during count.
+		 * @param lv The logical variable to bound
+		 */
+		private void setBound(LogicalVariable lv) {
+			bound = StdLogicalVariable.getInstance(lv);
+		}
+		
+		/**
+		 * Splits constraints from this parfactor in two subsets, one that
+		 * involves the bound logical variable and another that does not.
+		 */
+		private void partitionOnBound() {
+			for (Constraint c : super.restrictions) {
+				if (c.contains(bound)) {
+					constraintsOnBound.add(c);
+				}
+			}
+			super.restrictions.removeAll(constraintsOnBound);
+		}
+		
+		/**
+		 * Searches the PRV in parfactor being processed that contains the 
+		 * bound logical variable as a parameter. This method assumes that
+		 * there is only one PRV satisfying this condition.
+		 * 
+		 * @see StdParfactor#isCountable(LogicalVariable)
+		 */
+		private void setPrvOnOnBound() {
+			counted = super.factor.getVariableHaving(bound);
+			countedIndex = super.prvs.indexOf(counted);
+		}
+		
+		/**
+		 * Builds the counting formula that will replace PRV on bound logical
+		 * variable in the new parfactor
+		 */
+		private void setCountingFormulaOnBound() {
+			countingFormula = CountingFormula.getInstance(bound, counted, constraintsOnBound);
+		}
+		
+		/**
+		 * Replaces the old PRV being counted with its corresponding counting
+		 * formula.
+		 */
+		private void replaceCountedWithCountingFormula() {
+			super.prvs.set(countedIndex, countingFormula);
+		}
+		
+		/**
+		 * Builds the array that defines the values in the new parfactor.
+		 */
+		private void setValues() {
+			
+			/**
+			 * for each tuple t in F'
+			 *     value = 1
+			 *     for each range element e in PRV's range
+			 *         t' = t with counting formula replaced by e
+			 *         value = value * F(t)^h(e)
+			 *     add value to v[]
+			 */
+			
+			super.values = new ArrayList<BigDecimal>();
+			Factor newStructure = Factor.getInstance(super.prvs);
+			
+			for (Tuple<RangeElement> tuple : newStructure) {
+				BigDecimal value = BigDecimal.ONE;
+				for (RangeElement e : counted.range()) {
+					Tuple<RangeElement> old = tuple.set(countedIndex, e);
+					CountingFormula cf = (CountingFormula) countingFormula;
+					int count = cf.getCount(tuple.get(countedIndex), e);
+					
+					/*
+					 * TODO Something wrong here. Values getting .00 ?
+					 */
+					value = value.multiply(super.factor.getValue(old).pow(count));
+				}
+				super.values.add(value);
+			}
+			// Erase factor so it does not overwrites constructor
+			super.factor = null;
+		}
+	}
+	
 	
 	/* ************************************************************************
 	 *    Constructors
@@ -473,11 +643,13 @@ public final class StdParfactor implements Parfactor {
 	
 	
 	@Override
-	public Parfactor count(LogicalVariable lv) {
-		// TODO Auto-generated method stub
-		return null;
+	public Parfactor count(LogicalVariable lv) throws IllegalArgumentException {
+		if (!isCountable(lv)) {
+			throw new IllegalArgumentException();
+		}
+		return new Counter(this).count(lv).build();
 	}
-
+	
 	
 	@Override
 	public Parfactor expand(Prv cf, Term t) {

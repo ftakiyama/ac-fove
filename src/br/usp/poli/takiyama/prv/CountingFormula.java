@@ -37,7 +37,8 @@ public class CountingFormula implements Prv {
 	private final LogicalVariable bound;
 	private final Set<Constraint> constraints;
 	private final Prv prv; 
-	private final List<Histogram<? extends RangeElement>> range;
+	//private final List<Histogram<? extends RangeElement>> range;
+	private final List<Histogram<RangeElement>> range;
 	
 	
 	/* ************************************************************************
@@ -65,7 +66,7 @@ public class CountingFormula implements Prv {
 		this.prv = StdPrv.getInstance(prv);
 		this.bound = StdLogicalVariable.getInstance(bound);
 		this.constraints = new HashSet<Constraint>(constraints);
-		this.range = new ArrayList<Histogram<? extends RangeElement>>(); 
+		this.range = new ArrayList<Histogram<RangeElement>>(); 
 		
 		if (!prv.contains(bound)) {
 			throw new IllegalArgumentException();
@@ -108,7 +109,7 @@ public class CountingFormula implements Prv {
 	 * @param histogram The current histogram being built
 	 * @param currentBucket The current bucket index
 	 */
-	private void generateHistograms(List<Histogram<? extends RangeElement>> allHistograms, 
+	private void generateHistograms(List<Histogram<RangeElement>> allHistograms, 
 			int maxCount, Histogram<RangeElement> histogram, int currentBucket) {
 		
 		if (currentBucket == histogram.size() - 1 || maxCount == 0) {
@@ -274,21 +275,22 @@ public class CountingFormula implements Prv {
 
 	
 	/**
-	 * Returns the count of a value from range(f), given the histogram from the
-	 * range of this counting formula.
+	 * Returns the count of <code>bucket</code> for the specified 
+	 * {@link Histogram}. If the specified histogram is not a {@link Histogram}
+	 * or it is not in the range of this counting formula, returns -1.
 	 * 
-	 * @param hIndex The index of the histogram of this counting formula
-	 * @param e The index of the bucket in the histogram.
-	 * @return The count of the specified value from range(f) for the
-	 * specified element from this counting formula.
+	 * @param histogram The histogram to analyze
+	 * @param bucket The bucket from which the counting must be done
+	 * @return The count for the specified bucket in the specified histogram,
+	 *  or -1 when there is no such bucket or histogram.
 	 */
-	@SuppressWarnings("unchecked")
-	public int getCount(int hIndex, RangeElement e) {
-		/*
-		 * I know that the range is composed of Histogram<RangeElement>, so it
-		 * is safe to cast.
-		 */
-		return ((Histogram<RangeElement>) range.get(hIndex)).getCount(e);
+	public int getCount(RangeElement histogram, RangeElement bucket) {
+		int count = -1;
+		if (range.contains(histogram)) {
+			int hIndex = range.indexOf(histogram);
+			count = range.get(hIndex).getCount(bucket);
+		}
+		return count;
 	}
 	
 	

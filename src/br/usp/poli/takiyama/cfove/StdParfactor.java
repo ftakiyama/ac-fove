@@ -7,11 +7,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import br.usp.poli.takiyama.common.AggregationParfactor;
 import br.usp.poli.takiyama.common.Builder;
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.Factor;
 import br.usp.poli.takiyama.common.InequalityConstraint;
+import br.usp.poli.takiyama.common.MultiplicationChecker;
 import br.usp.poli.takiyama.common.Parfactor;
+import br.usp.poli.takiyama.common.ParfactorVisitor;
 import br.usp.poli.takiyama.common.SplitResult;
 import br.usp.poli.takiyama.common.StdSplitResult;
 import br.usp.poli.takiyama.common.Tuple;
@@ -590,7 +593,9 @@ public final class StdParfactor implements Parfactor {
 	 */
 	@Override
 	public boolean isMultipliable(Parfactor other) {
-		throw new UnsupportedOperationException("Not implemented!");
+		MultiplicationChecker parfactors = new MultiplicationChecker();
+		accept(parfactors, other);
+		return parfactors.areMultipliable();
 	}
 
 	
@@ -836,6 +841,18 @@ public final class StdParfactor implements Parfactor {
 		
 		return summedOut;
 	}
+
+	public void accept(ParfactorVisitor visitor, Parfactor p) {
+		p.accept(visitor, this);
+	}
+	
+	public void accept(ParfactorVisitor visitor, StdParfactor p) {
+		visitor.visit(this, p);
+	}
+	
+	public void accept(ParfactorVisitor visitor, AggregationParfactor p) {
+		visitor.visit(p, this);
+	}	
 	
 	
 	/* ************************************************************************

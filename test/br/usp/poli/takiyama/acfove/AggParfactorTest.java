@@ -13,7 +13,9 @@ import br.usp.poli.takiyama.cfove.StdParfactor;
 import br.usp.poli.takiyama.cfove.StdParfactor.StdParfactorBuilder;
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.InequalityConstraint;
+import br.usp.poli.takiyama.common.MultiplicationChecker;
 import br.usp.poli.takiyama.common.Parfactor;
+import br.usp.poli.takiyama.common.ParfactorVisitor;
 import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.Or;
@@ -170,5 +172,36 @@ public class AggParfactorTest {
 		Parfactor inverse = g1.multiply(g2);
 		
 		assertTrue(direct.equals(inverse));
+	}
+	
+	@Test
+	public void testMultiplicationCheck() {
+		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 100);
+		LogicalVariable b = StdLogicalVariable.getInstance("B", "x", 100);
+		
+		Prv p = StdPrv.getBooleanInstance("p", a, b);
+		Prv c = StdPrv.getBooleanInstance("c", b);
+		
+		Constant x1 = Constant.getInstance("x1");
+		Constant x2 = Constant.getInstance("x2");
+		Constant x3 = Constant.getInstance("x3");
+		
+		Constraint a_x1 = InequalityConstraint.getInstance(a, x1);
+		Constraint a_x2 = InequalityConstraint.getInstance(a, x2);
+		Constraint a_b = InequalityConstraint.getInstance(a, b);
+		Constraint b_x3 = InequalityConstraint.getInstance(b, x3);
+		
+		double [] f1 = {0.1234, 0.9876};
+		
+		Parfactor g1 = new StdParfactorBuilder()
+				.constraints(a_x1, a_x2, a_b, b_x3).variables(p).values(f1).build();
+
+		double [] f2 = {0.5425, 0.6832};
+		
+		Parfactor g2 = new AggParfactorBuilder(p, c, Or.OR)
+				.constraints(a_x1, a_x2, a_b, b_x3).values(f2).build();
+				
+		assertTrue(g1.isMultipliable(g1) && g1.isMultipliable(g2)
+				&& g2.isMultipliable(g1) && !g2.isMultipliable(g2));
 	}
 }

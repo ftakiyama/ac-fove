@@ -6,14 +6,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import br.usp.poli.takiyama.cfove.StdParfactor;
 import br.usp.poli.takiyama.common.AggregationParfactor;
 import br.usp.poli.takiyama.common.Builder;
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.Distribution;
 import br.usp.poli.takiyama.common.Factor;
 import br.usp.poli.takiyama.common.InequalityConstraint;
+import br.usp.poli.takiyama.common.MultiplicationChecker;
 import br.usp.poli.takiyama.common.Parfactor;
+import br.usp.poli.takiyama.common.ParfactorVisitor;
 import br.usp.poli.takiyama.common.SplitResult;
+import br.usp.poli.takiyama.common.VisitableParfactor;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.LogicalVariable;
@@ -27,7 +31,7 @@ import br.usp.poli.takiyama.prv.Term;
 import br.usp.poli.takiyama.utils.Lists;
 import br.usp.poli.takiyama.utils.Sets;
 
-public class AggParfactor implements AggregationParfactor {
+public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 
 	private final Prv parent;
 	private final Prv child;
@@ -591,7 +595,10 @@ public class AggParfactor implements AggregationParfactor {
 	@Override
 	public boolean isMultipliable(Parfactor other) {
 		// TODO need to think how to do this. Maybe apply the same technique used to multiply (invert operands and call auxiliary method)
-		throw new UnsupportedOperationException("Not implemented!");
+		//accept(new MultiplicationChecker(), this, other);
+		MultiplicationChecker parfactors = new MultiplicationChecker();
+		accept(parfactors, other);
+		return parfactors.areMultipliable();
 	}
 
 	
@@ -676,6 +683,19 @@ public class AggParfactor implements AggregationParfactor {
 		return null;
 	}
 
+	
+	public void accept(ParfactorVisitor visitor, Parfactor p) {
+		p.accept(visitor, this);
+	}
+	
+	public void accept(ParfactorVisitor visitor, StdParfactor p) {
+		visitor.visit(this, p);
+	}
+	
+	public void accept(ParfactorVisitor visitor, AggregationParfactor p) {
+		visitor.visit(this, p);
+	}
+	
 
 	@Override
 	public int hashCode() {

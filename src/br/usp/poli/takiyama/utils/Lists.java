@@ -13,6 +13,10 @@ import java.util.Set;
  */
 public final class Lists {
 	
+	private Lists() {
+		// avoids instantiation
+	}
+	
 	/**
 	 * Returns the list resulting from the union of the specified lists.
 	 * <p>
@@ -35,6 +39,27 @@ public final class Lists {
         return new ArrayList<T>(set);
 	}
 	
+	
+	/**
+	 * Returns the result of removing the elements of <code>list2</code> from
+	 * <code>list1</code>. The order of elements in <code>list1</code> is
+	 * preserved.
+	 * 
+	 * @param <T> The type of element contained in the list
+	 * @param list1 The minuend
+	 * @param list2 The subtrahend
+	 * @return The list resulting from subtracting the second list from the
+	 * first list.
+	 */
+	public static final <T> List<T> difference(List<T> list1, List<T> list2) {
+		Set<T> set = new LinkedHashSet<T>(list1.size());
+		
+		set.addAll(list1);
+		set.removeAll(list2);
+		
+		return new ArrayList<T>(set);
+	}
+	
 
 	public static final <T> List<T> intersection(List<T> list1, List<T> list2) {
 		List<T> list = new ArrayList<T>();
@@ -46,5 +71,33 @@ public final class Lists {
         }
 
         return list;
+	}
+	
+	
+	/**
+	 * Returns a list containing one element.
+	 * @param <T> The type of element contained in the list 
+	 * @param e1 The element to put in the list
+	 * @return a list containing the specified elements.
+	 */
+	public static final <T> List<T> listOf(T e1) {
+		List<T> list = new ArrayList<T>(1);
+		list.add(e1);
+		return list;
+	}
+	
+	
+	/**
+	 * Returns a list containing the specified elements.
+	 * @param <T> The type of element contained in the list 
+	 * @param e1 The first element of the list
+	 * @param e2 The second element of the list
+	 * @return a list containing the specified elements.
+	 */
+	public static final <T> List<T> listOf(T e1, T e2) {
+		List<T> list = new ArrayList<T>(2);
+		list.add(e1);
+		list.add(e2);
+		return list;
 	}
 }

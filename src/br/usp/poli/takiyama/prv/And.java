@@ -14,21 +14,25 @@ public final class And implements Operator<Bool> {
 	 */
 	public static final And AND = new And();
 	
+	
 	/**
 	 * Private constructor that enforces non-instantiability.
 	 */
 	private And() { }
+	
 	
 	@Override
 	public Bool applyOn(Bool e1, Bool e2) {
 		return Bool.valueOf(e1.value() && e2.value());
 	}
 
+	
 	@Override
 	public Bool applyOn(Bool e1, Bool e2, Bool e3) {
 		return Bool.valueOf(e1.value() && e2.value() && e3.value());
 	}
 
+	
 	@Override
 	public Bool applyOn(Set<Bool> s) throws IllegalArgumentException,
 	  		NullPointerException {
@@ -49,6 +53,7 @@ public final class And implements Operator<Bool> {
 		return Bool.valueOf(result);
 	}
 
+	
 	@Override
 	public Bool apply(Bool e, int n) throws IllegalArgumentException,
 			NullPointerException {
@@ -61,6 +66,13 @@ public final class And implements Operator<Bool> {
 		}
 		return e; // trivial operation for boolean elements
 	}
+	
+	
+	@Override
+	public Class<Bool> getTypeArgument() {
+		return Bool.class;
+	}
+	
 	
 	@Override
 	public String toString() {

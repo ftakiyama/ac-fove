@@ -20,9 +20,13 @@ import br.usp.poli.takiyama.common.Pool;
 import br.usp.poli.takiyama.common.ParfactorI;
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.prv.Binding;
+import br.usp.poli.takiyama.prv.Bool;
 import br.usp.poli.takiyama.prv.OldCountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariableNameGenerator;
+import br.usp.poli.takiyama.prv.Operator;
+import br.usp.poli.takiyama.prv.Or;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
+import br.usp.poli.takiyama.prv.RangeElement;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
 import br.usp.poli.takiyama.utils.MathUtils;
@@ -170,21 +174,7 @@ public class Sandbox {
 		Marginal<E> m;
 	}
 	
-	private interface Operator {
-		
-	}
 	
-	private interface GenOperator<E extends Object> extends Operator {
-		
-	}
-	
-	private class OR implements GenOperator<Boolean> {
-		 
-	}
-	
-	public void testTypes() {
-		Operator op = new OR();
-	}
 	
 	public void testGenerics() {
 		HashMap<String, Number> m1 = new HashMap<String, Number>();
@@ -205,7 +195,6 @@ public class Sandbox {
 		return inc(++i);
 	}
 	
-	@Test
 	public void testPow() {
 		for (int i = 0; i < 100; i++) {
 			int p = 1;
@@ -213,5 +202,31 @@ public class Sandbox {
 			BigDecimal iBig = new BigDecimal(i);
 			System.out.println(iBig + " => " + MathUtils.pow(iBig, p, q));
 		}
+	}
+	
+	private interface Ope {
+		
+	}
+	private interface Op<T> extends Ope {
+		public T apply(T e1);
+	}
+	
+	private class Ou implements Op<Bool> {
+
+		@Override
+		public Bool apply(Bool e1) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		
+	}
+	
+	@Test
+	public void testGeneric() {
+		RangeElement a = Bool.FALSE;
+		RangeElement b = Bool.TRUE;
+		
+		Ope op = new Ou();
 	}
 }

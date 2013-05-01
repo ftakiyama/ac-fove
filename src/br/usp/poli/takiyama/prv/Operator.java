@@ -42,6 +42,7 @@ public interface Operator<E extends RangeElement> {
 	 */
 	public E applyOn(E e1, E e2, E e3);
 	
+	
 	/**
 	 * Applies the operator to all elements in the specified set.
 	 * <p>
@@ -63,6 +64,7 @@ public interface Operator<E extends RangeElement> {
 	 */
 	public E applyOn(Set<E> s) throws IllegalArgumentException, NullPointerException;
 	
+	
 	/**
 	 * Applies the operator to the specified element the specified number of
 	 * times.
@@ -81,4 +83,7 @@ public interface Operator<E extends RangeElement> {
 	 * @throws NullPointerException if the specified element is null
 	 */
 	public E apply(E e, int n) throws IllegalArgumentException, NullPointerException;
+	
+	
+	public Class<E> getTypeArgument();
 }

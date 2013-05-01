@@ -37,6 +37,12 @@ public interface Parfactor {
 	 */
 	public Set<LogicalVariable> logicalVariables();
 	
+	
+	/**
+	 * Returns the set of all {@link Prv} in this parfactor.
+	 * 
+	 * @return the set of all PRVs in this parfactor.
+	 */
 	public List<Prv> prvs();
 	
 	
@@ -182,7 +188,7 @@ public interface Parfactor {
 	 * @return The result of multiplying this parfactor with the specified
 	 * parfactor, if the specified parfactor is a {@link StdParfactor}.
 	 */
-	public Parfactor finishMultiplication(Parfactor other);
+	public Parfactor multiplicationHelper(Parfactor other);
 	
 		
 	/**

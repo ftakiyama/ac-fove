@@ -738,15 +738,15 @@ public final class StdParfactor implements Parfactor {
 
 	@Override
 	public Parfactor multiply(Parfactor other) {
-		return other.finishMultiplication(this);
+		return other.multiplicationHelper(this);
 	}
 	
 	
 	@Override
-	public Parfactor finishMultiplication(Parfactor other) {
+	public Parfactor multiplicationHelper(Parfactor other) {
 		/*
 		 * I am sure that 'other' is a StdParfactor, because this method is
-		 * not called by AggParfactors.
+		 * not called by AggregationParfactors.multiply()
 		 * I am pretty sure this will not cover all the cases when a new 
 		 * type of parfactor is invented, but I cannot predict all 
 		 * possible expansions (if there will be one) ;)

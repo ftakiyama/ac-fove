@@ -66,10 +66,14 @@ public class Factor implements Iterable<Tuple<RangeElement>> {
 	
 	/**
 	 * Returns the expected size of this factor.
+	 * 
 	 * @return The expected size of this factor.
 	 */
 	private static int getSize(List<? extends Prv> variables) {
 		int size = 1;
+		if (variables.isEmpty()) {
+			size = 0;
+		}
 		for (Prv prv : variables) {
 			size = size * prv.range().size();
 		}
@@ -102,6 +106,22 @@ public class Factor implements Iterable<Tuple<RangeElement>> {
 	
 	
 	/**
+	 * Returns a parameterized factor with one PRV.
+	 *  
+	 * @param name The name of this factor
+	 * @param variable A {@link Prv}.
+	 * @param values A ordered list of {@link Number}
+	 */
+	public static Factor getInstance(String name, Prv variable, 
+			List<BigDecimal> values) {
+		List<Prv> variables = new ArrayList<Prv>(1);
+		variables.add(variable);
+		
+		return Factor.getInstance(name, variables, values);
+	}
+	
+	
+	/**
 	 * Returns a parameterized factor with the same variables and values as
 	 * the specified factor.
 	 * 
@@ -117,7 +137,7 @@ public class Factor implements Iterable<Tuple<RangeElement>> {
 	/**
 	 * Returns a constant parameterized factor.
 	 * <p>
-	 * A constant parameterized factor returns the value 1 for all tuples in 
+	 * A constant factor returns the value 1 for all tuples in 
 	 * the factor.
 	 * </p>
 	 * 
@@ -136,7 +156,7 @@ public class Factor implements Iterable<Tuple<RangeElement>> {
 	/**
 	 * Returns a constant factor with one PRV.
 	 * <p>
-	 * A constant parameterized factor returns the value 1 for all tuples in 
+	 * A constant factor returns the value 1 for all tuples in 
 	 * the factor.
 	 * </p>
 	 * 
@@ -153,10 +173,13 @@ public class Factor implements Iterable<Tuple<RangeElement>> {
 	
 	
 	/**
-	 * Returns a constant factor with no PRVs.
+	 * Returns an empty factor.
+	 * <p>
+	 * An empty factor has no values, nor variables.
+	 * </p>
 	 *  
 	 * @see #getInstance(List)
-	 * @return A constant factor with no PRVs.
+	 * @return An empty factor.
 	 */
 	public static Factor getInstance() {
 		List<Prv> empty = new ArrayList<Prv>(0);
@@ -469,18 +492,39 @@ public class Factor implements Iterable<Tuple<RangeElement>> {
 	
 	/**
 	 * Returns <code>true</code> if this factor is constant.
+	 * <p>
+	 * A constant factor returns the value 1 for all tuples in the factor.
+	 * </p>
 	 * 
 	 * @return <code>true</code> if this factor is constant, <code>false</code>
 	 * otherwise.
-	 * @see #getInstance()
 	 */
 	public boolean isConstant() {
+		for (BigDecimal val : values) {
+			if (!val.equals(BigDecimal.ONE)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	
+	/**
+	 * Returns <code>true</code> if this factor is empty.
+	 * <p>
+	 * An empty factor has no variables, nor values.
+	 * </p>
+	 * 
+	 * @return  <code>true</code> if this factor is empty, <code>false</code>
+	 * otherwise.
+	 */
+	public boolean isEmpty() {
 		boolean noVariables = variables.isEmpty();
-		boolean oneValue = (values.size() == 1);
-		boolean valueIsOne = (oneValue ? values.get(0).equals(BigDecimal.ONE) : false);
-		return noVariables && oneValue && valueIsOne;
+		boolean noValues = values.isEmpty();
+		return noVariables && noValues;
 	}
 
+	
 	/* ************************************************************************
 	 *    hashCode, equals and toString
 	 * ************************************************************************/

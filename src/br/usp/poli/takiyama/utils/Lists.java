@@ -1,5 +1,6 @@
 package br.usp.poli.takiyama.utils;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -99,5 +100,74 @@ public final class Lists {
 		list.add(e1);
 		list.add(e2);
 		return list;
+	}
+	
+	
+	/**
+	 * Returns a list containing the specified elements.
+	 * @param <T> The type of element contained in the list 
+	 * @param e1 The first element of the list
+	 * @param e2 The second element of the list
+	 * @param e3 The second element of the list
+	 * @return a list containing the specified elements.
+	 */
+	public static final <T> List<T> listOf(T e1, T e2, T e3) {
+		List<T> list = new ArrayList<T>(2);
+		list.add(e1);
+		list.add(e2);
+		list.add(e3);
+		return list;
+	}
+	
+	
+	/**
+	 * TODO Make it more generic
+	 * Puts the specified element the specified number of times in the list.
+	 * The list is cleared before filling it.
+	 * 
+	 * @param <T> The type of element to put in the list 
+	 * @param list The container where the  elements will be put
+	 * @param element The element to fill the list
+	 * @param num The number of elements to put in the list
+	 * @throws IllegalArgumentException If <code>num</code> < 0.
+	 */
+	public static final <T> void fill(List<T> list, T element, int num)
+			throws IllegalArgumentException {
+		if (num < 0) {
+			throw new IllegalArgumentException();
+		}
+		list.clear();
+		for (int i = 0; i < num; i++) {
+			list.add(element);
+		}
+	}
+	
+	
+	/**
+	 * Returns <code>true</code> if the specified lists of {@link BigDecimal}
+	 * are equal. Equality is verified using 
+	 * {@link BigDecimal#compareTo(BigDecimal)}, which does not take into
+	 * account the scale of numbers. Thus, {2.0} and {2.00} are considered
+	 * to be the same list.
+	 * 
+	 * @param arg1 The first list to compare
+	 * @param arg2 The second list to compare
+	 * @return <code>true</code> if the specified lists of {@link BigDecimal}
+	 * are equal 
+	 * @see BigDecimal#compareTo(BigDecimal)
+	 */
+	public static final boolean areEqual(List<BigDecimal> arg1, List<BigDecimal> arg2) {
+		boolean areEqual = true;
+		if (arg1.size() == arg2.size()) {
+			for (int i = 0; i < arg1.size(); i++) {
+				if (arg1.get(i).compareTo(arg2.get(i)) != 0) {
+					areEqual = false;
+					break;
+				}
+			}
+		} else {
+			areEqual = false;
+		}
+		return areEqual;
 	}
 }

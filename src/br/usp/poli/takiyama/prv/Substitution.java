@@ -176,6 +176,25 @@ public class Substitution {
 	
 	
 	/**
+	 * Returns <code>true</code> if there is any binding in this substitution
+	 * containing the specified {@link Term}.
+	 * <p>
+	 * Note that this method differs from {@link #contains(LogicalVariable)} 
+	 * in that all terms are searched for, not only the logical variables 
+	 * being replaced.
+	 * </p>
+	 * 
+	 * @param t The term to search for
+	 * @return <code>true</code> if there is any binding in this substitution
+	 * containing the specified {@link Term}, <code>false</code>
+	 * otherwise.
+	 */
+	public boolean has(Term t) {
+		return (bindings.containsKey(t) || bindings.containsValue(t));
+	}
+	
+	
+	/**
 	 * Returns true if the specified logical variables have the same replacement
 	 * in this substitution. That is, if the specified variables are X and Y,
 	 * this method returns true if there is a term t such that X/t and Y/t are

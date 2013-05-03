@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 
+import br.usp.poli.takiyama.utils.Lists;
+
 public final class Tuple<E> {
 	
 	private final List<E> values;
@@ -57,6 +59,19 @@ public final class Tuple<E> {
 	 */
 	public static <E> Tuple<E> getInstance(Tuple<E> t) {
 		return new Tuple<E>(t.values);
+	}
+	
+	
+	/**
+	 * Returns a tuple with one element.
+	 * 
+	 * @param <E> The type of element to put in the tuple
+	 * @param value The value to put in the tuple
+	 * @return A tuple with the specified element
+	 */
+	public static <E> Tuple<E> getInstance(E value) {
+		List<E> single = Lists.listOf(value);
+		return new Tuple<E>(single);
 	}
 	
 	

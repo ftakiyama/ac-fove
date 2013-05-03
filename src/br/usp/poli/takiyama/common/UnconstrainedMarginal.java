@@ -1,14 +1,16 @@
 package br.usp.poli.takiyama.common;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import br.usp.poli.takiyama.prv.Prv;
 import br.usp.poli.takiyama.prv.StdPrv;
 
-public class UnconstrainedMarginal implements Marginal<StdPrv> {
+public class UnconstrainedMarginal implements Marginal<Prv> {
 
-	private final Set<StdPrv> eliminables;
+	private final Set<? extends Prv> eliminables;
 	private final Distribution distribution;
 	
 	/* ************************************************************************
@@ -43,6 +45,11 @@ public class UnconstrainedMarginal implements Marginal<StdPrv> {
 //		this.distribution = new StdDistribution(marginal.distribution());
 //	}
 	
+	private UnconstrainedMarginal(Prv eliminable, Parfactor p) {
+		this.eliminables = Collections.singleton(eliminable);
+		this.distribution = StdDistribution.of(p);
+	}
+	
 	/* ************************************************************************
 	 *    Static factories
 	 * ************************************************************************/
@@ -67,13 +74,18 @@ public class UnconstrainedMarginal implements Marginal<StdPrv> {
 		return new UnconstrainedMarginal(eliminables, distribution);
 	}
 	
+	
+	public static UnconstrainedMarginal getInstance(Prv eliminable, Parfactor p) {
+		return new UnconstrainedMarginal(eliminable, p);
+	}
+	
 	/* ************************************************************************
 	 *    Getters
 	 * ************************************************************************/
 
 	@Override
-	public Set<StdPrv> eliminables() {
-		return new HashSet<StdPrv>(eliminables);
+	public Set<Prv> eliminables() {
+		return new HashSet<Prv>(eliminables);
 	}
 
 	@Override

@@ -3,6 +3,7 @@
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -13,6 +14,10 @@ import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.experimental.runners.Enclosed;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 import br.usp.poli.takiyama.acfove.operator.And;
 import br.usp.poli.takiyama.common.Parfactors;
@@ -29,204 +34,97 @@ import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 import br.usp.poli.takiyama.prv.RangeElement;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
+import br.usp.poli.takiyama.utils.Lists;
 import br.usp.poli.takiyama.utils.MathUtils;
 
 
+@RunWith(Enclosed.class)
 public class Sandbox {
 	
-	private void getHistogram(List<String> H, int maxCount, ArrayList<Integer> h, int currentIndex) {
-		if (currentIndex == h.size() - 1 || maxCount == 0) {
-			h.set(currentIndex, maxCount);
-			H.add(h.toString());
-			return;
-		}
-		int count = maxCount;
-		while (count >= 0) {
-			h.set(currentIndex, count);
-			getHistogram(H, maxCount-count, h, currentIndex+1);
-			count--;
+	@RunWith(Parameterized.class)
+	public static class Test1 {
+		@Parameters(name = "{index}: {0} * {0} = {1}")
+		public static Collection<Object[]> data() {
+			Object data[][] = new Object[][] { 
+					{1, 1},  
+					{2, 4},  
+					{3, 9} 
+					};
+			return Arrays.asList(data);
 		}
 		
-	}
-	
-	public void testHistogramGeneration() {
-		ArrayList<String> H = new ArrayList<String>();
-		ArrayList<Integer> h = new ArrayList<Integer>(10);
-		h.add(0);
-		h.add(0);
-		h.add(0);
-		getHistogram(H, 3, h, 0);
-		System.out.println(H);
-	}
-	
-	private class SubSandbox {
-		int a;
-		SubSandbox(int a) {
+		private int a;
+		private int b;
+		
+		public Test1(int a, int b) {
 			this.a = a;
+			this.b = b;
 		}
 		
-		void set(int a) {
+		@Test
+		public void test() {
+			assertEquals(a*a, b);
+		}
+	}
+	
+	@RunWith(Parameterized.class)
+	public static class Test2 {
+		@Parameters(name = "{index}: {0} multi {0} = {1}")
+		public static Collection<Object[]> data() {
+			Object data[][] = new Object[][] { 
+					{1, 1},  
+					{2, 4},  
+					{3, 9} 
+					};
+			return Arrays.asList(data);
+		}
+		
+		private int a;
+		private int b;
+		
+		public Test2(int a, int b) {
 			this.a = a;
+			this.b = b;
 		}
 		
-		@Override
-		public String toString() {
-			return "sub " + a;
-		}
-	}
-	
-	public void testObjectReference() {
-		SubSandbox s1 = new SubSandbox(1);
-		SubSandbox s2 = s1;
-		
-		System.out.println(s1);
-		s2.set(3);
-		System.out.println(s2);		
-	}
-	
-	/**
-	 * Calculates the binomial coefficient C(n,k).
-	 * <br>
-	 * This method returns 0 if n = 0 and k > 0. It throws an
-	 * IllegalArgumentException if any specified argument is negative.
-	 * 
-	 * @param n A nonnegative integer
-	 * @param k A nonnegative integer
-	 * @return The binomial coefficient C(n,k).
-	 * @throws IllegalArgumentException If the specified arguments are
-	 * negative (at least one of them)
-	 */
-	public int combination(int n, int k) throws IllegalArgumentException {
-		int r = 1;
-		
-		if (n < 0 || k < 0) {
-			throw new IllegalArgumentException("Cannot calculate combination" 
-					+ " for negative numbers.");
-		}
-		
-		if (n == 0) return 0;
-		//if (k == 0 && n >= 0) return 1;
-		
-		for (int i = 1; i <= k; i++) {
-			r = r * (n - k + i) / i;
-		}
-		return r;
-	}
-	
-	public void testCombination() {
-		for (int n = 0; n < 11; n++) {
-			for (int k = 0; k < 11; k++) {
-				System.out.println("C(" + n + "," + k + ") = " + combination(n,k));		
-			}
+		@Test
+		public void test() {
+			assertEquals(a*a, b);
 		}
 	}
 	
-
-	public void testArrayString() {
-		Pool p = new Pool();
-		p.setExample2_5_2_7(5);
-		for (int i = 1; i <= 13; i++)
-			System.out.println(p.getSimpleParfactor("g" + i));
-	}
-	
-	public void testArrayListReference() {
-		ArrayList<StringBuilder> a = new ArrayList<StringBuilder>();
-		StringBuilder s = new StringBuilder("1");
-		a.add(s);
-		s.append(" 2");
-		a.add(s);
-		System.out.println(s);
-	}
-	
-	
-	public void testConversionToBase2() {
-		for (int n = 3; n < 1000000; n++) {
-			double log = Math.log(n) / Math.log(2);
-			int m = ((int) log) + 1;
-			String bin = Integer.toBinaryString(n);
+	public static class ListTest {
+		
+		@Test
+		public void testEqualityOfEmptyLists() {
+			List<BigDecimal> list1 = new ArrayList<BigDecimal>(0);
+			List<BigDecimal> list2 = new ArrayList<BigDecimal>(0);
+			assertTrue(Lists.areEqual(list1, list2));
+		}
+		
+		@Test
+		public void testEquality() {
+			List<BigDecimal> list1 = new ArrayList<BigDecimal>(1);
+			List<BigDecimal> list2 = new ArrayList<BigDecimal>(1);
 			
-			System.out.format("%d %d %s\n", n, m, bin);
+			list1.add(BigDecimal.ONE);
+			list2.add(BigDecimal.valueOf(1));
 			
-			if (m != bin.length()) {
-				System.out.println("Meh: " + n);	
-				break;
-			}
+			assertTrue(Lists.areEqual(list1, list2));
+		}
+		
+		@Test
+		public void testEqualityTwoElements() {
+			List<BigDecimal> list1 = new ArrayList<BigDecimal>(2);
+			List<BigDecimal> list2 = new ArrayList<BigDecimal>(2);
+			
+			list1.add(BigDecimal.ONE);
+			list1.add(BigDecimal.ONE);
+			list2.add(BigDecimal.valueOf(1));
+			list2.add(BigDecimal.valueOf(1.0));
+			
+			assertTrue(Lists.areEqual(list1, list2));
 		}
 	}
 	
-	public void testFillArray() {
-		int populationSize = 3;
-		double [] f1 = new double[8 * populationSize];
-		Arrays.fill(f1, 0, 4, 1);
-		Arrays.fill(f1, 4, 8, 0);
-		for (int i = 1; i < populationSize; i++) {
-			Arrays.fill(f1, 8 * i, 8 * i + 4, 0);
-			Arrays.fill(f1, 8 * i + 4, 8 * (i + 1), 1);
-		}
-		System.out.print(Arrays.toString(f1));
-	}
-	
-	public interface Marginal<E extends ParameterizedRandomVariable> {
-		
-	}
-	
-	public class MarginalDecorator<E extends ParameterizedRandomVariable> {
-		Marginal<E> m;
-	}
-	
-	
-	
-	public void testGenerics() {
-		HashMap<String, Number> m1 = new HashMap<String, Number>();
-		HashMap<String, Double> m2 = new HashMap<String, Double>();
-		
-		Number d = new Double(1.0);
-		System.out.println(d instanceof Double);
-		System.out.println(d instanceof Number);
-		
-	}
-	
-	public void testRecursion() {
-		inc(0);
-	}
-	
-	private int inc(int i) {
-		System.out.println(i);
-		return inc(++i);
-	}
-	
-	public void testPow() {
-		for (int i = 0; i < 100; i++) {
-			int p = 1;
-			int q = 2;
-			BigDecimal iBig = new BigDecimal(i);
-			System.out.println(iBig + " => " + MathUtils.pow(iBig, p, q));
-		}
-	}
-	
-	private interface Ope {
-		
-	}
-	private interface Op<T> extends Ope {
-		public T apply(T e1);
-	}
-	
-	private class Ou implements Op<Bool> {
-
-		@Override
-		public Bool apply(Bool e1) {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		
-	}
-	
-	@Test
-	public void testGeneric() {
-		RangeElement a = Bool.FALSE;
-		RangeElement b = Bool.TRUE;
-		
-		Ope op = new Ou();
-	}
 }

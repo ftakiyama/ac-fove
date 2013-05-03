@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import br.usp.poli.takiyama.cfove.StdParfactor;
+import br.usp.poli.takiyama.cfove.StdParfactor.StdParfactorBuilder;
 import br.usp.poli.takiyama.common.AggregationParfactor;
 import br.usp.poli.takiyama.common.Builder;
 import br.usp.poli.takiyama.common.Constraint;
@@ -17,6 +18,8 @@ import br.usp.poli.takiyama.common.MultiplicationChecker;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.ParfactorVisitor;
 import br.usp.poli.takiyama.common.SplitResult;
+import br.usp.poli.takiyama.common.StdSplitResult;
+import br.usp.poli.takiyama.common.Tuple;
 import br.usp.poli.takiyama.common.VisitableParfactor;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.Constant;
@@ -29,6 +32,7 @@ import br.usp.poli.takiyama.prv.StdPrv;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
 import br.usp.poli.takiyama.utils.Lists;
+import br.usp.poli.takiyama.utils.MathUtils;
 import br.usp.poli.takiyama.utils.Sets;
 
 public class AggParfactor implements AggregationParfactor, VisitableParfactor {
@@ -60,7 +64,7 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 
 		// mandatory parameters 
 		private final Prv p;
-		private final Prv c;
+		private Prv c; // not final to allow renaming
 		private final Operator<? extends RangeElement> op;
 		private final LogicalVariable lv;
 		
@@ -137,11 +141,20 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 		
 		public AggParfactorBuilder factor(Factor f) throws IllegalArgumentException {
 			if (f.variables().size() == 1 && f.variables().get(0).equals(p)) {
-				f = Factor.getInstance(f);
+				this.f = Factor.getInstance(f);
 				return this;
 			} else {
 				throw new IllegalArgumentException();
 			}
+		}
+		
+		/**
+		 * Sets the factor to a constant factor with the parent PRV.
+		 * @return
+		 */
+		public AggParfactorBuilder factor() {
+			f = Factor.getInstance(p);
+			return this;
 		}
 		
 		public AggParfactorBuilder values(double ... v) {
@@ -155,6 +168,11 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 		public AggParfactorBuilder values(List<BigDecimal> v) {
 			values.clear();
 			values.addAll(v);
+			return this;
+		}
+		
+		AggParfactorBuilder child(Prv c) {
+			this.c = c;
 			return this;
 		}
 		
@@ -180,6 +198,9 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 		
 		private Split(LogicalVariable replaced, Term replacement) {
 			// I think there should a better way to do this
+			
+			
+			
 			if (replaced.equals(extraVar)) {
 				if (replacement.isConstant()) {
 					Constant c = (Constant) replacement;
@@ -382,6 +403,131 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 		 * substitution.
 		 */
 		Constraint toInequalityConstraint();
+	}
+	
+	
+	private class Splitter {
+		
+		private final SplitterType splitter;
+		
+		private Splitter(AggregationParfactor agg, Substitution s)  {
+			if (s.has(extraVar)) {
+				splitter = new SplitterInvolvingExtra(agg, s);
+			} else {
+				splitter = new SplitterWithoutExtra(agg, s);
+			}
+		}
+		
+		private SplitResult split() {
+			return splitter.split();
+		}
+		
+		private class SplitterInvolvingExtra implements SplitterType {
+
+			private Substitution substitution;
+			private AggregationParfactor parfactorToSplit;
+			private Prv auxChild;
+			
+			private SplitterInvolvingExtra(AggregationParfactor agg, Substitution s) {
+				substitution = s;
+				parfactorToSplit = agg;
+				setAuxChild();
+			}
+			
+			private void setAuxChild() {
+				Prv child = parfactorToSplit.child();
+				auxChild = child.rename(child.name() + "'");
+			}
+			
+			@Override
+			public SplitResult split() {
+				return AggSplitResult.getInstance(result(), residue(), auxChild);
+			}
+
+			private AggregationParfactor residue() {
+				Constraint c = substitution.first().toInequalityConstraint();
+				return new AggParfactorBuilder(parfactorToSplit).constraint(c)
+						.child(auxChild).build();
+			}
+			
+			private Parfactor result() {
+				Set<Constraint> constraints = applyToConstraints(substitution);
+				List<Prv> prvs = setPrvs();
+				List<BigDecimal> values = setValues(prvs);
+				return new StdParfactorBuilder().constraints(constraints)
+						.variables(prvs).values(values).build();
+			}
+			
+			private List<Prv> setPrvs() {
+				Prv p = parfactorToSplit.parent().apply(substitution);
+				Prv c = parfactorToSplit.child();
+				return Lists.listOf(p, auxChild, c);
+			}
+			
+			private List<BigDecimal> setValues(List<Prv> prvs) {
+				List<BigDecimal> values = new ArrayList<BigDecimal>();
+				Factor newStructure = Factor.getInstance(prvs);
+				for (Tuple<? extends RangeElement> tuple : newStructure) {
+					RangeElement p = tuple.get(0);
+					RangeElement cAux = tuple.get(1);
+					RangeElement c = tuple.get(2);
+					if (apply(operator, p, cAux).equals(c)) {
+						values.add(correctedValue(p));
+					} else {
+						values.add(BigDecimal.ZERO);
+					}
+				}
+				return values;
+			}
+			
+			private BigDecimal correctedValue(RangeElement pVal) {
+				Tuple<RangeElement> t = Tuple.getInstance(pVal);
+				BigDecimal base = parfactorToSplit.factor().getValue(t);
+				Prv p = replaceExtra();
+				int rp = p.groundSetSize(constraintsNotOnExtra);
+				int rc = parfactorToSplit.child().groundSetSize(constraintsNotOnExtra);
+				return MathUtils.pow(base, rp, rc);
+			}
+			
+			private Prv replaceExtra() {
+				Binding b = Binding.getInstance(extraVar, extraVar.population().individualAt(0));
+				Substitution s = Substitution.getInstance(b);
+				Prv p = parfactorToSplit.parent().apply(s);
+				return p;
+			}
+			
+		}
+		
+		private class SplitterWithoutExtra implements SplitterType {
+
+			private Substitution substitution;
+			private AggregationParfactor parfactorToSplit;
+			
+			private SplitterWithoutExtra(AggregationParfactor agg, Substitution s) {
+				substitution = s;
+				parfactorToSplit = agg;
+			}
+			
+			@Override
+			public SplitResult split() {
+				return StdSplitResult.getInstance(result(), residue());
+			}
+			
+			private AggregationParfactor residue() {
+				Constraint c = substitution.first().toInequalityConstraint();
+				return new AggParfactorBuilder(parfactorToSplit).constraint(c).build();
+			}
+			
+			private Parfactor result() {
+				return parfactorToSplit.apply(substitution);
+			}
+			
+		}
+	}
+	
+	
+	private interface SplitterType {
+		public SplitResult split();
 	}
 	
 	
@@ -654,8 +800,8 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 	
 	@Override
 	public SplitResult splitOn(Substitution s) throws IllegalArgumentException {
-		// TODO Auto-generated method stub
-		return null;
+		Splitter result = new Splitter(this, s);
+		return result.split();
 	}
 
 	@Override
@@ -674,7 +820,12 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 	private <T extends RangeElement> T apply(Operator<T> op, RangeElement e1) {
 		return op.apply(op.getTypeArgument().cast(e1), 2);
 	}
-
+	
+	private <T extends RangeElement> T apply(Operator<T> op, RangeElement e1, RangeElement e2) {
+		T t1 = op.getTypeArgument().cast(e1);
+		T t2 = op.getTypeArgument().cast(e2);
+		return op.applyOn(t1, t2);
+	}
 	
 
 	@Override

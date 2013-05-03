@@ -1,5 +1,8 @@
 package br.usp.poli.takiyama.prv;
 
+import br.usp.poli.takiyama.common.Constraint;
+import br.usp.poli.takiyama.common.InequalityConstraint;
+
 /**
  * A binding is an ordered pair of terms (t1, t2). The first term (t1) must be a 
  * {@link LogicalVariable} and the second term (t2) may be a {@link Constant}
@@ -102,6 +105,16 @@ public class Binding {
 			isValid = firstTerm.population().equals(lv.population());
 		}
 		return isValid;
+	}
+	
+	
+	/**
+	 * Returns this binding converted to {@link InequalityConstraint}.
+	 * 
+	 * @return This binding converted to inequality constraint
+	 */
+	public Constraint toInequalityConstraint() {
+		return InequalityConstraint.getInstance(firstTerm, secondTerm);
 	}
 	
 	

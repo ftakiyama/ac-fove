@@ -55,10 +55,14 @@ public final class StdParfactor implements Parfactor {
 		
 		public StdParfactorBuilder(Parfactor p) {
 			this();
-			restrictions.addAll(p.constraints());
-			prvs.addAll(p.prvs());
-			values.addAll(p.factor().values());
-			factor = Factor.getInstance(p.factor());
+//			restrictions.addAll(p.constraints());
+//			prvs.addAll(p.prvs());
+//			values.addAll(p.factor().values());
+//			factor = Factor.getInstance(p.factor());
+			constraints(p.constraints());
+			variables(p.prvs());
+			values(p.factor().values());
+			factor(p.factor());
 		}
 		
 		public StdParfactorBuilder constraints(Constraint ... c) {

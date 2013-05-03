@@ -147,7 +147,7 @@ public class Factor implements Iterable<Tuple<RangeElement>> {
 	public static Factor getInstance(List<? extends Prv> variables) {
 		int size = getSize(variables);
 		List<BigDecimal> values = new ArrayList<BigDecimal>(size);
-		Collections.fill(values, BigDecimal.ONE);
+		Lists.fill(values, BigDecimal.ONE, size);
 		
 		return new Factor("1", variables, values);
 	}
@@ -552,7 +552,7 @@ public class Factor implements Iterable<Tuple<RangeElement>> {
 	    		 					: variables.equals(targetObject.variables)) 
 	    		&&
     		   ((values == null) ? targetObject.values == null 
-    			   				 : values.equals(targetObject.values)); 		
+    			   				 : Lists.areEqual(values, targetObject.values)); 		
 	}
 	
 	

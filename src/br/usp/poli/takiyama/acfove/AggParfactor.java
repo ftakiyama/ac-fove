@@ -406,6 +406,9 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 	}
 	
 	
+	/**
+	 * This class encapsulates the splitting algorithm
+	 */
 	private class Splitter {
 		
 		private final SplitterType splitter;
@@ -526,6 +529,12 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 	}
 	
 	
+	/**
+	 * This class represents possible types of splits. There two of them:
+	 * split involving parent's extra logical variable and split not involving
+	 * the extra variable.
+	 *
+	 */
 	private interface SplitterType {
 		public SplitResult split();
 	}
@@ -740,8 +749,11 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 
 	@Override
 	public boolean isMultipliable(Parfactor other) {
-		// TODO need to think how to do this. Maybe apply the same technique used to multiply (invert operands and call auxiliary method)
-		//accept(new MultiplicationChecker(), this, other);
+		/*
+		 * Uses a ParfactorVisitor to discover the type of 'other'.
+		 * The algorithm to check if parfactors are multipliable is
+		 * encapsulated in MultiplicationChecker.
+		 */
 		MultiplicationChecker parfactors = new MultiplicationChecker();
 		accept(parfactors, other);
 		return parfactors.areMultipliable();
@@ -807,7 +819,9 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 	@Override
 	public Parfactor sumOut(Prv prv) {
 		// TODO Auto-generated method stub
-		RangeElement r = apply(operator, parent.range().get(0));
+		
+		// Example
+		// RangeElement r = apply(operator, parent.range().get(0));
 		return null;
 	}
 	
@@ -835,15 +849,33 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 	}
 
 	
+	@Override
 	public void accept(ParfactorVisitor visitor, Parfactor p) {
+		/*
+		 * As p has an unknown type, it is necessary to call its accept()
+		 * method. JVM will infer its runtime type and call the appropriate
+		 * method, which is one of the methods with the signature below. 
+		 */
 		p.accept(visitor, this);
 	}
 	
+	
+	@Override
 	public void accept(ParfactorVisitor visitor, StdParfactor p) {
+		/*
+		 * I know this parfactor is an AggregationParfactor, and that p is a
+		 * StdParfactor, thus types for visit() are defined.
+		 */
 		visitor.visit(this, p);
 	}
 	
+	
+	@Override
 	public void accept(ParfactorVisitor visitor, AggregationParfactor p) {
+		/*
+		 * I know this parfactor is an AggregationParfactor, and that p is a
+		 * AggregationParfactor, thus types for visit() are defined.
+		 */
 		visitor.visit(this, p);
 	}
 	

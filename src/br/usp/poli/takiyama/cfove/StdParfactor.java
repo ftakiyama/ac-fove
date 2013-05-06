@@ -55,10 +55,6 @@ public final class StdParfactor implements Parfactor {
 		
 		public StdParfactorBuilder(Parfactor p) {
 			this();
-//			restrictions.addAll(p.constraints());
-//			prvs.addAll(p.prvs());
-//			values.addAll(p.factor().values());
-//			factor = Factor.getInstance(p.factor());
 			constraints(p.constraints());
 			variables(p.prvs());
 			values(p.factor().values());
@@ -592,11 +588,13 @@ public final class StdParfactor implements Parfactor {
 	}
 
 	
-	/**
-	 * Throws {@link UnsupportedOperationException}.
-	 */
 	@Override
 	public boolean isMultipliable(Parfactor other) {
+		/*
+		 * Uses a ParfactorVisitor to discover the type of 'other'.
+		 * The algorithm to check if parfactors are multipliable is
+		 * encapsulated in MultiplicationChecker.
+		 */
 		MultiplicationChecker parfactors = new MultiplicationChecker();
 		accept(parfactors, other);
 		return parfactors.areMultipliable();
@@ -659,6 +657,7 @@ public final class StdParfactor implements Parfactor {
 		return new Counter(this).count(lv).build();
 	}
 	
+	// TODO encapsulate expand, split, sum out and multiplication
 	
 	@Override
 	public Parfactor expand(Prv cf, Term t) {
@@ -845,15 +844,21 @@ public final class StdParfactor implements Parfactor {
 		
 		return summedOut;
 	}
+	
 
+	@Override
 	public void accept(ParfactorVisitor visitor, Parfactor p) {
 		p.accept(visitor, this);
 	}
 	
+	
+	@Override
 	public void accept(ParfactorVisitor visitor, StdParfactor p) {
 		visitor.visit(this, p);
 	}
 	
+	
+	@Override
 	public void accept(ParfactorVisitor visitor, AggregationParfactor p) {
 		visitor.visit(p, this);
 	}	

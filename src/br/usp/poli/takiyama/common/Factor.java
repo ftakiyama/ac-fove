@@ -628,6 +628,22 @@ public class Factor implements Iterable<Tuple<RangeElement>> {
 	}
 	
 	
+	/**
+	 * Returns a copy of this factor with the value of the specified tuple
+	 * replaced by the specified value.
+	 * 
+	 * @param tuple The tuple whose value must be modified
+	 * @param value The new value of the tuple
+	 * @return a copy of this factor with the value of the specified tuple
+	 * replaced by the specified value.
+	 */
+	public Factor set(Tuple<RangeElement> tuple, BigDecimal value) {
+		List<BigDecimal> vals = new ArrayList<BigDecimal>(values);
+		vals.set(getIndex(tuple), value);
+		return Factor.getInstance(name, variables, vals);
+	}
+	
+	
 	/* ************************************************************************
 	 *    Multiplication, Power and Sum Out
 	 * ************************************************************************/

@@ -52,7 +52,8 @@ public interface AggregationParfactor extends Parfactor {
 	
 	
 	/**
-	 * Returns the set of constraints not on the extra logical variable.
+	 * Returns the set of constraints that do not involve the extra 
+	 * logical variable.
 	 * 
 	 * @return The set of constraints not on the extra logical variable.
 	 */

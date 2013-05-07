@@ -236,4 +236,46 @@ public class AggParfactorTest {
 		}
 	}
 	
+
+	public static class SumOutTest {
+		// TODO use theory
+		private final static LogicalVariable person = StdLogicalVariable.getInstance("Person", "p", 5);
+		private final static Prv matched6 = StdPrv.getBooleanInstance("matched_6", person);
+		private final static Prv jackpotWon = StdPrv.getBooleanInstance("jackpot_won");
+
+		private final static double [] fSum = {0.9999999965, 0.0000000035};
+		
+		private final static Parfactor g1 = new AggParfactorBuilder(matched6, jackpotWon, Or.OR).values(fSum).build();
+		
+		@Test
+		public void testSimpleSumOut() {
+			// not elegant, but more readable
+			BigDecimal [] f0 = new BigDecimal[2];
+			BigDecimal [] f1 = new BigDecimal[2];
+			BigDecimal [] f2 = new BigDecimal[2];
+			
+			f0[0] = BigDecimal.valueOf(fSum[0]);
+			f0[1] = BigDecimal.valueOf(fSum[1]);
+			
+			f1[0] = f0[0].multiply(f0[0]);
+			f1[1] = f0[0].multiply(f0[1]).add(f0[1].multiply(f0[0])).add(f0[1].multiply(f0[1]));
+			
+			f2[0] = BigDecimal.valueOf(fSum[0]).multiply(f1[0]).multiply(f1[0]);
+			
+			
+			f2[1] = BigDecimal.valueOf(fSum[0]).multiply(f1[0]).multiply(f1[1])
+					.add(BigDecimal.valueOf(fSum[0]).multiply(f1[1]).multiply(f1[0]))
+					.add(BigDecimal.valueOf(fSum[0]).multiply(f1[1]).multiply(f1[1]))
+					.add(BigDecimal.valueOf(fSum[1]).multiply(f1[0]).multiply(f1[0]))
+					.add(BigDecimal.valueOf(fSum[1]).multiply(f1[0]).multiply(f1[1]))
+					.add(BigDecimal.valueOf(fSum[1]).multiply(f1[1]).multiply(f1[0]))
+					.add(BigDecimal.valueOf(fSum[1]).multiply(f1[1]).multiply(f1[1]));
+			
+			Parfactor expected = new StdParfactorBuilder().variables(jackpotWon).values(f2).build();
+			
+			Parfactor result = g1.sumOut(matched6);
+			
+			assertEquals(expected, result);
+		}
+	}
 }

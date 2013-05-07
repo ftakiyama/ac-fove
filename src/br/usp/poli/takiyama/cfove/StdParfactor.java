@@ -98,7 +98,10 @@ public final class StdParfactor implements Parfactor {
 			return this;
 		}
 		
-		// to control scale on junit tests
+		/**
+		 * @deprecated
+		 * Used to control scale of big decimal in junit tests
+		 */
 		public StdParfactorBuilder setScale(int scale) {
 			List<BigDecimal> vals = new ArrayList<BigDecimal>(values.size());
 			for (BigDecimal bg : values) {

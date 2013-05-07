@@ -558,6 +558,148 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 	}
 	
 	
+	/**
+	 * This class encapsulates sum out algorithm
+	 */
+	private class Eliminator {
+		
+		private final AggregationParfactor parfactor;
+		private final StdParfactorBuilder builder;
+		
+		private Eliminator(AggregationParfactor ag) {
+			this.parfactor = ag;
+			this.builder = new StdParfactorBuilder();
+		}
+		
+		private Parfactor eliminate() {
+			Set<Constraint> constraints = parfactor.constraints();
+			Prv child = parfactor.child();
+			Factor factor = setFactor();
+			
+			Parfactor result = builder.constraints(constraints)
+					.variables(child).factor(factor).build();
+			
+			if (childHasParameterNotInParent()) {
+				LogicalVariable extraParameter = getExtraParameterFromChild();
+				result = result.count(extraParameter);
+			}
+			
+			return result;
+		}
+		
+		private Factor setFactor() {
+			Factor current = getBase();
+			int domainSize = parfactor.extraVariable()
+					.numberOfIndividualsSatisfying(parfactor.constraintsOnExtra());
+			String binSize = Integer.toBinaryString(domainSize);
+			
+			List<RangeElement> childRange = parfactor.child().range();
+			for (int k = 1; k < binSize.length(); k++) {
+				Factor previous = Factor.getInstance(current);
+				for (RangeElement x : childRange) { // for GAP, must be for (Tuple<RangeElement> tuple : previous)
+					BigDecimal sum;
+					if (binSize.charAt(k) == '0') {
+						sum = getDoubleComposition(previous, x);
+					} else {
+						sum = getTripleComposition(previous, x);
+					}
+					Tuple<RangeElement> xTuple = Tuple.getInstance(x);
+					current = current.set(xTuple, sum);
+				}
+			}
+			
+			return current;
+		}
+		
+		private BigDecimal getDoubleComposition(Factor factor, RangeElement x) {
+			BigDecimal sum = BigDecimal.ZERO;
+			List<RangeElement> childRange = parfactor.child().range();
+			for (RangeElement y : childRange) {
+				Tuple<RangeElement> yTuple = Tuple.getInstance(y);
+				for (RangeElement z : childRange) {
+					Tuple<RangeElement> zTuple = Tuple.getInstance(z);
+					if (apply(parfactor.operator(), y, z).equals(x)) {
+						sum = sum.add(factor.getValue(yTuple).multiply(factor.getValue(zTuple)));
+					}
+				}
+			}
+			return sum;
+		}
+		
+		private BigDecimal getTripleComposition(Factor factor, RangeElement x) {
+			BigDecimal sum = BigDecimal.ZERO;
+			List<RangeElement> childRange = parfactor.child().range();
+			for (RangeElement y : childRange) {
+				Tuple<RangeElement> yTuple = Tuple.getInstance(y);
+				for (RangeElement z : childRange) {
+					Tuple<RangeElement> zTuple = Tuple.getInstance(z);
+					for (RangeElement w : childRange) {
+						Tuple<RangeElement> wTuple = Tuple.getInstance(w);
+						if (apply(parfactor.operator(), w, y, z).equals(x)) {
+							BigDecimal fw = parfactor.factor().getValue(wTuple);
+							BigDecimal fy = factor.getValue(yTuple);
+							BigDecimal fz = factor.getValue(zTuple);
+							sum = sum.add(fw.multiply(fy).multiply(fz));
+						}
+					}
+				}
+			}
+			return sum;
+		}
+		
+		private Factor getBase() {
+			List<Prv> prvs = new ArrayList<Prv>(1);
+			prvs.add(parfactor.child());
+			Factor tempBase = Factor.getInstance(prvs);
+			/*
+			 * Actually i dont need all this right now. But this code is more
+			 * generic, which will be useful when dealing with generalized
+			 * aggregation parfactors.
+			 */
+			int size = parfactor.child().range().size();
+			List<BigDecimal> vals = new ArrayList<BigDecimal>(size);
+			for (Tuple<RangeElement> tuple : tempBase) {
+				RangeElement childValue = tuple.get(0);
+				if (parfactor.parent().range().contains(childValue)) {
+					vals.add(parfactor.factor().getValue(tuple));
+				} else {
+					vals.add(BigDecimal.ZERO);
+				}
+			}
+			return Factor.getInstance("", prvs, vals);
+		}
+		
+		/**
+		 * Returns <code>true</code> if the child PRV has exactly one extra
+		 * parameter that is not present in parameters from parent PRV.
+		 * 
+		 * @return <code>true</code> if |param(c) \ param(p)| = 1, 
+		 * <code>false</code> otherwise.
+		 */
+		private boolean childHasParameterNotInParent() {
+			List<LogicalVariable> parentParam = parfactor.parent().parameters();
+			List<LogicalVariable> childParam = parfactor.child().parameters();
+			List<LogicalVariable> difference = Lists.difference(childParam, 
+					parentParam);
+			return (difference.size() == 1);
+		}
+		
+		/**
+		 * Returns the logical variable in the child PRV that is not present in
+		 * the parent PRV.
+		 * 
+		 * @return The logical variable in the child PRV that is not present in
+		 * the parent PRV.
+		 */
+		private LogicalVariable getExtraParameterFromChild() {
+			List<LogicalVariable> difference = Lists.difference(
+					parfactor.child().parameters(),
+					parfactor.parent().parameters());
+			return difference.get(0);
+		}
+	}
+	
+	
 	/* ************************************************************************
 	 *    Constructors
 	 * ************************************************************************/
@@ -822,7 +964,12 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 		
 		// Example
 		// RangeElement r = apply(operator, parent.range().get(0));
-		return null;
+		
+		// TODO check if prv is parent
+		
+		Eliminator eliminator = new Eliminator(this);
+		Parfactor result = eliminator.eliminate();
+		return result;
 	}
 	
 	/*
@@ -830,15 +977,18 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 	 * http://www.angelikalanger.com/GenericsFAQ/FAQSections/ProgrammingIdioms.html#FAQ207
 	 */
 	
-	// helper method
-	private <T extends RangeElement> T apply(Operator<T> op, RangeElement e1) {
-		return op.apply(op.getTypeArgument().cast(e1), 2);
-	}
-	
-	private <T extends RangeElement> T apply(Operator<T> op, RangeElement e1, RangeElement e2) {
+	public <T extends RangeElement> T apply(Operator<T> op, RangeElement e1, RangeElement e2) {
 		T t1 = op.getTypeArgument().cast(e1);
 		T t2 = op.getTypeArgument().cast(e2);
 		return op.applyOn(t1, t2);
+	}
+	
+	
+	public <T extends RangeElement> T apply(Operator<T> op, RangeElement e1, RangeElement e2, RangeElement e3) {
+		T t1 = op.getTypeArgument().cast(e1);
+		T t2 = op.getTypeArgument().cast(e2);
+		T t3 = op.getTypeArgument().cast(e3);
+		return op.applyOn(t1, t2, t3);
 	}
 	
 

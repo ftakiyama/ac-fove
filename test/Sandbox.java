@@ -20,18 +20,22 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import br.usp.poli.takiyama.acfove.operator.And;
+import br.usp.poli.takiyama.common.InequalityConstraint;
 import br.usp.poli.takiyama.common.Parfactors;
 import br.usp.poli.takiyama.common.Pool;
 import br.usp.poli.takiyama.common.ParfactorI;
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.Bool;
+import br.usp.poli.takiyama.prv.Constant;
+import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.OldCountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariableNameGenerator;
 import br.usp.poli.takiyama.prv.Operator;
 import br.usp.poli.takiyama.prv.Or;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 import br.usp.poli.takiyama.prv.RangeElement;
+import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
 import br.usp.poli.takiyama.utils.Lists;
@@ -124,6 +128,23 @@ public class Sandbox {
 			list2.add(BigDecimal.valueOf(1.0));
 			
 			assertTrue(Lists.areEqual(list1, list2));
+		}
+		
+		@Test
+		public void testSubstitution() {
+			LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 10);
+			LogicalVariable b = StdLogicalVariable.getInstance("B", "x", 10);
+			
+			Constant x1 = Constant.getInstance("x1");
+			Substitution s = Substitution.getInstance(Binding.getInstance(b, x1));
+			
+			Constraint c = InequalityConstraint.getInstance(a, b);
+			List<Constraint> list = Lists.listOf(c);
+			
+			Constraint ans = InequalityConstraint.getInstance(a, x1);
+			List<Constraint> expected = Lists.listOf(ans);
+			
+			assertEquals(expected, Lists.apply(s, list));
 		}
 	}
 	

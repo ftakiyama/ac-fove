@@ -1,6 +1,7 @@
 package br.usp.poli.takiyama.common;
 
 import br.usp.poli.takiyama.prv.Binding;
+import br.usp.poli.takiyama.prv.Replaceable;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
 
@@ -16,7 +17,7 @@ import br.usp.poli.takiyama.prv.Term;
  * @author Felipe Takiyama
  *
  */
-public interface Constraint {
+public interface Constraint extends Replaceable<Constraint> {
 	
 	/**
 	 * Returns the left-hand side of this constraint.

@@ -12,6 +12,7 @@ import static org.junit.Assume.assumeThat;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -39,6 +40,8 @@ import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.StdPrv;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
+import br.usp.poli.takiyama.utils.Lists;
+import br.usp.poli.takiyama.utils.Sets;
 
 
 @RunWith(Enclosed.class)
@@ -54,10 +57,19 @@ public class AggParfactorTest {
 		private static Prv c = StdPrv.getBooleanInstance("c", b);
 		private static Prv cPrime = c.rename("c'");
 		
+		private static Prv v = StdPrv.getBooleanInstance("v", a);
+		private static Prv u = StdPrv.getBooleanInstance("u", b);
+		
 		@DataPoints
 		public static Parfactor[] data() {
+			Constant x2 = Constant.getInstance("x2");
+			Constraint a_x2 = InequalityConstraint.getInstance(a, x2);
+			Constraint b_x2 = InequalityConstraint.getInstance(b, x2);
 			return new Parfactor[] {
-				new AggParfactorBuilder(p, c, Or.OR).build()
+				new AggParfactorBuilder(p, c, Or.OR).build(),
+				new AggParfactorBuilder(p, c, Or.OR).constraints(a_x2, b_x2).build(),
+				new AggParfactorBuilder(p, c, Or.OR).context(v, u).build(),
+				new AggParfactorBuilder(p, c, Or.OR).context(v, u).constraints(a_x2, b_x2).build()
 			};
 		}
 		
@@ -96,22 +108,81 @@ public class AggParfactorTest {
 			
 			assumeThat(parfactor, instanceOf(AggregationParfactor.class));
 			
-			Term extraVar = ((AggregationParfactor) parfactor).extraVariable();
+			AggregationParfactor ag = (AggregationParfactor) parfactor;
+			Term extraVar = ag.extraVariable();
 			
 			assumeThat(s.has(extraVar), is(true));
 			
 			Prv newP = p.apply(s);
+			Set<Constraint> constraints = Sets.apply(s, parfactor.constraints());
+			List<Prv> prvs = Lists.listOf(ag.context());	
+			prvs.add(0, newP);
+			prvs.add(cPrime);
+			prvs.add(c);
 			
 			// not quite right to put in a Theory
-			double [] vals = {1, 0, 0, 1, 0, 1, 0, 1};
-			Parfactor result = new StdParfactorBuilder().variables(newP, cPrime, c).values(vals).build();
+			double [] vals = new double[getSize(prvs)];
+			if (ag.context().isEmpty()) {
+				vals[0] = 1.0;
+				vals[1] = 0.0;
+				vals[2] = 0.0;
+				vals[3] = 1.0;
+				vals[4] = 0.0;
+				vals[5] = 1.0;
+				vals[6] = 0.0;
+				vals[7] = 1.0;
+			} else {
+				vals[0] = 1.0;
+				vals[1] = 0.0;
+				vals[2] = 0.0;
+				vals[3] = 1.0;
+				vals[4] = 1.0;
+				vals[5] = 0.0;
+				vals[6] = 0.0;
+				vals[7] = 1.0;
+				vals[8] = 1.0;
+				vals[9] = 0.0;
+				vals[10] = 0.0;
+				vals[11] = 1.0;
+				vals[12] = 1.0;
+				vals[13] = 0.0;
+				vals[14] = 0.0;
+				vals[15] = 1.0;
+				vals[16] = 0.0;
+				vals[17] = 1.0;
+				vals[18] = 0.0;
+				vals[19] = 1.0;
+				vals[20] = 0.0;
+				vals[21] = 1.0;
+				vals[22] = 0.0;
+				vals[23] = 1.0;
+				vals[24] = 0.0;
+				vals[25] = 1.0;
+				vals[26] = 0.0;
+				vals[27] = 1.0;
+				vals[28] = 0.0;
+				vals[29] = 1.0;
+				vals[30] = 0.0;
+				vals[31] = 1.0;
+			}
+			
+			Parfactor result = new StdParfactorBuilder().constraints(constraints)
+					.variables(prvs).values(vals).build();
 			
 			Constraint c = s.first().toInequalityConstraint();
-			Parfactor residue = new AggParfactorBuilder((AggregationParfactor) parfactor).constraint(c).child(cPrime).build();
+			Parfactor residue = new AggParfactorBuilder(ag).constraint(c).child(cPrime).build();
 			
 			SplitResult splitResult = AggSplitResult.getInstance(result, residue, cPrime);
 			
 			assertThat(parfactor.splitOn(s), equalTo(splitResult));
+		}
+		
+		private int getSize(List<Prv> prvs) {
+			int size = 1;
+			for (Prv var : prvs) {
+				size = size * var.range().size();
+			}
+			return size;
 		}
 	}
 

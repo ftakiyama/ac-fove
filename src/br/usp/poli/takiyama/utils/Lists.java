@@ -7,6 +7,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import br.usp.poli.takiyama.prv.Replaceable;
+import br.usp.poli.takiyama.prv.Substitution;
+
 /**
  * This class provides set operations for lists.
  *   
@@ -223,5 +226,32 @@ public final class Lists {
 			result = 31 * result + (element == null ? 0 : element.setScale(50).hashCode()); // set 15, but this is an arbitrary number
 		}
 		return result;
+	}
+	
+	
+	/**
+	 * Returns the result of applying the specified substitution to the
+	 * elements of the specified list.
+	 * <p>
+	 * When the result of applying of the substitution to a given element from
+	 * the list is invalid, it is not added to the returned list.
+	 * </p>
+	 * 
+	 * @param <T> A {@link Replaceable} type
+	 * @param s The substitution to be made
+	 * @param list The list containing the elements to be substituted
+	 * @return The result of applying the specified substitution to the
+	 * elements of the specified list.
+	 */
+	public static final <T extends Replaceable<T>> List<T> apply(Substitution s, List<T> list) {
+		List<T> replaced = new ArrayList<T>(list.size());
+		for (Replaceable<T> element : list) {
+			try {
+				replaced.add(element.apply(s));
+			} catch (IllegalArgumentException e) {
+				// invalid replaceable is not added to the list
+			}
+		}
+		return replaced;
 	}
 }

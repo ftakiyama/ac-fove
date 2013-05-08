@@ -2,6 +2,9 @@ package br.usp.poli.takiyama.acfove;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -29,6 +32,7 @@ import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.Operator;
 import br.usp.poli.takiyama.prv.Prv;
 import br.usp.poli.takiyama.prv.RangeElement;
+import br.usp.poli.takiyama.prv.Replaceable;
 import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.StdPrv;
 import br.usp.poli.takiyama.prv.Substitution;
@@ -241,6 +245,16 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 			return this;
 		}
 		
+		/**
+		 * Sets the list of context PRVs.
+		 * @param contextVars A list of context PRVs
+		 * @return This builder with the list of context PRVs.
+		 */
+		public AggParfactorBuilder context(Prv ... contextVars) {
+			ctxt = Lists.listOf(Arrays.asList(contextVars));
+			return this;
+		}
+		
 		@Override
 		public AggParfactor build() {
 			return new AggParfactor(this);
@@ -288,9 +302,6 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 		
 		private Split(LogicalVariable replaced, Term replacement) {
 			// I think there should a better way to do this
-			
-			
-			
 			if (replaced.equals(extraVar)) {
 				if (replacement.isConstant()) {
 					Constant c = (Constant) replacement;
@@ -544,7 +555,7 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 			}
 			
 			private Parfactor result() {
-				Set<Constraint> constraints = applyToConstraints(substitution);
+				Set<Constraint> constraints = Sets.apply(substitution, parfactorToSplit.constraints());
 				List<Prv> prvs = setPrvs();
 				List<BigDecimal> values = setValues(prvs);
 				return new StdParfactorBuilder().constraints(constraints)
@@ -552,9 +563,12 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 			}
 			
 			private List<Prv> setPrvs() {
-				Prv p = parfactorToSplit.parent().apply(substitution);
-				Prv c = parfactorToSplit.child();
-				return Lists.listOf(p, auxChild, c);
+				List<Prv> vars = Lists.listOf(parfactorToSplit.context());
+				vars.add(0, parfactorToSplit.parent().apply(substitution));
+				vars.add(auxChild);
+				vars.add(parfactorToSplit.child());
+				
+				return vars;
 			}
 			
 			private List<BigDecimal> setValues(List<Prv> prvs) {
@@ -562,8 +576,8 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 				Factor newStructure = Factor.getInstance(prvs);
 				for (Tuple<? extends RangeElement> tuple : newStructure) {
 					RangeElement p = tuple.get(0);
-					RangeElement cAux = tuple.get(1);
-					RangeElement c = tuple.get(2);
+					RangeElement cAux = tuple.get(tuple.size() - 2);
+					RangeElement c = tuple.get(tuple.size() - 1);
 					if (apply(operator, p, cAux).equals(c)) {
 						values.add(correctedValue(p));
 					} else {
@@ -986,39 +1000,21 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 
 	@Override
 	public Parfactor apply(Substitution s) {
-		Set<Constraint> substitutedConstraints = applyToConstraints(s);
+		Set<Constraint> substitutedConstraints = Sets.apply(s, constraints());//applyToConstraints(s);
 		Factor substitutedFactor = factor.apply(s);
 		Prv substitutedParent = parent.apply(s);
 		Prv substututedChild = child.apply(s);
+		List<Prv> substitutedContext = Lists.apply(s, context);
 		
 		return new AggParfactorBuilder(substitutedParent, substututedChild, 
 				operator).constraints(substitutedConstraints)
-				.factor(substitutedFactor).build();
+				.context(substitutedContext).factor(substitutedFactor).build();
 	}
+		
 	
-	
-	/**
-	 * Returns the result of applying the specified substitution to the set
-	 * of constraints from this parfactor.
-	 * 
-	 * @param s The substitution to apply to the constraints of this
-	 * parfactor
-	 * @return The result of applying the specified substitution to the set
-	 * of constraints from this parfactor.
-	 */
-	private Set<Constraint> applyToConstraints(Substitution s) {
-		Set<Constraint> substitutedConstraints = new HashSet<Constraint>(constraints().size());
-		for (Constraint c : constraints()) {
-			Constraint substituted = c.apply(s);
-			substitutedConstraints.add(substituted);
-		}
-		return substitutedConstraints;
-	}
-	
-
 	@Override
 	public boolean contains(Prv prv) {
-		return (prv.equals(parent) || prv.equals(child));
+		return (prv.equals(parent) || prv.equals(child) || context.contains(prv));
 	}
 	
 

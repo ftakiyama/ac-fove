@@ -13,7 +13,7 @@ import br.usp.poli.takiyama.common.Constraint;
  * @author Felipe Takiyama
  *
  */
-public interface Prv {
+public interface Prv extends Replaceable<Prv> {
 
 	/**
 	 * Returns the set of constraints associated with this PRV. If there are

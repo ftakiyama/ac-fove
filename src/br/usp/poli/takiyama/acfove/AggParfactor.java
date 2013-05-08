@@ -18,11 +18,13 @@ import br.usp.poli.takiyama.common.MultiplicationChecker;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.ParfactorVisitor;
 import br.usp.poli.takiyama.common.SplitResult;
+import br.usp.poli.takiyama.common.StdDistribution;
 import br.usp.poli.takiyama.common.StdSplitResult;
 import br.usp.poli.takiyama.common.Tuple;
 import br.usp.poli.takiyama.common.VisitableParfactor;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.Constant;
+import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.Operator;
 import br.usp.poli.takiyama.prv.Prv;
@@ -559,7 +561,17 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 	
 	
 	/**
-	 * This class encapsulates sum out algorithm
+	 * This class encapsulates sum out algorithm.
+	 * <p>
+	 * The conversion can be made only if the set of all constraints in
+	 * this aggregation parfactor is in the normal form. 
+	 * </p>
+	 * <p>
+	 * The conversion results in two parfactors, one of them involving a 
+	 * counting formula. This method returns a list of the resulting parfactors
+	 * in the following order: the first does involves counting formulas and
+	 * the second does not.
+	 * </p>
 	 */
 	private class Eliminator {
 		
@@ -696,6 +708,75 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 					parfactor.child().parameters(),
 					parfactor.parent().parameters());
 			return difference.get(0);
+		}
+	}
+	
+	
+	/**
+	 * This class encapsulates the algorithm to convert aggregation parfactors
+	 * into standard parfactors.
+	 */
+	private class Converter {
+		
+		private final AggregationParfactor ap;
+		
+		/**
+		 * Creates an instance of converter.
+		 * @param ap The aggregation parfactor to convert to standard 
+		 * parfactors.
+		 */
+		private Converter(AggregationParfactor ap) { 
+			this.ap = ap;
+		}
+		
+		/**
+		 * Returns a list of the standard parfactors whose product is 
+		 * equivalent to this aggregation parfactor.
+		 */
+		private Distribution convert() {
+			Parfactor parent = getParfactorOnParent();
+			Parfactor child = getParfactorOnChild();
+			Distribution dist = StdDistribution.of(parent, child);
+			return dist;
+		}
+		
+		/**
+		 * Returns the parfactor involving the parent PRV.
+		 */
+		private Parfactor getParfactorOnParent() {
+			Parfactor parent = new StdParfactorBuilder()
+					.constraints(ap.constraints()).variables(ap.parent())
+					.factor(ap.factor()).build();
+			return parent;
+		}
+		
+		/**
+		 * Returns the parfactor involving a counting formula on the parent
+		 * and the extra logical variable.
+		 */
+		private Parfactor getParfactorOnChild() {
+			Prv counted = CountingFormula.getInstance(ap.extraVariable(), 
+					ap.parent(), ap.constraintsOnExtra());
+
+			List<BigDecimal> vals = new ArrayList<BigDecimal>(
+					ap.parent().range().size() * ap.child().range().size());
+			
+			for (RangeElement histogram : counted.range()) {
+				RangeElement h = histogram.apply(ap.operator());
+				for (RangeElement childValue : ap.child().range()) {
+					if (h.equals(childValue)) {
+						vals.add(BigDecimal.ONE);
+					} else {
+						vals.add(BigDecimal.ZERO);
+					}
+				}
+			}
+			
+			Parfactor child = new StdParfactorBuilder()
+					.constraints(ap.constraintsNotOnExtra())
+					.variables(counted, ap.child()).values(vals).build();
+			
+			return child;
 		}
 	}
 	
@@ -960,11 +1041,6 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 
 	@Override
 	public Parfactor sumOut(Prv prv) {
-		// TODO Auto-generated method stub
-		
-		// Example
-		// RangeElement r = apply(operator, parent.range().get(0));
-		
 		// TODO check if prv is parent
 		
 		Eliminator eliminator = new Eliminator(this);
@@ -972,30 +1048,12 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 		return result;
 	}
 	
-	/*
-	 * Life savior:
-	 * http://www.angelikalanger.com/GenericsFAQ/FAQSections/ProgrammingIdioms.html#FAQ207
-	 */
-	
-	public <T extends RangeElement> T apply(Operator<T> op, RangeElement e1, RangeElement e2) {
-		T t1 = op.getTypeArgument().cast(e1);
-		T t2 = op.getTypeArgument().cast(e2);
-		return op.applyOn(t1, t2);
-	}
-	
-	
-	public <T extends RangeElement> T apply(Operator<T> op, RangeElement e1, RangeElement e2, RangeElement e3) {
-		T t1 = op.getTypeArgument().cast(e1);
-		T t2 = op.getTypeArgument().cast(e2);
-		T t3 = op.getTypeArgument().cast(e3);
-		return op.applyOn(t1, t2, t3);
-	}
-	
 
 	@Override
 	public Distribution toStdParfactors() {
-		// TODO Auto-generated method stub
-		return null;
+		Converter converter = new Converter(this);
+		Distribution result = converter.convert();
+		return result;
 	}
 
 	
@@ -1027,6 +1085,25 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 		 * AggregationParfactor, thus types for visit() are defined.
 		 */
 		visitor.visit(this, p);
+	}
+	
+	/*
+	 * Life savior:
+	 * http://www.angelikalanger.com/GenericsFAQ/FAQSections/ProgrammingIdioms.html#FAQ207
+	 */
+	
+	public <T extends RangeElement> T apply(Operator<T> op, RangeElement e1, RangeElement e2) {
+		T t1 = op.getTypeArgument().cast(e1);
+		T t2 = op.getTypeArgument().cast(e2);
+		return op.applyOn(t1, t2);
+	}
+	
+	
+	public <T extends RangeElement> T apply(Operator<T> op, RangeElement e1, RangeElement e2, RangeElement e3) {
+		T t1 = op.getTypeArgument().cast(e1);
+		T t2 = op.getTypeArgument().cast(e2);
+		T t3 = op.getTypeArgument().cast(e3);
+		return op.applyOn(t1, t2, t3);
 	}
 	
 

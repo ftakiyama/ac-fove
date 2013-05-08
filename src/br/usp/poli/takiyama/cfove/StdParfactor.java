@@ -116,6 +116,14 @@ public final class StdParfactor implements Parfactor {
 			return this;
 		}
 		
+		public StdParfactorBuilder factor() throws IllegalStateException {
+			if (prvs.isEmpty()) {
+				throw new IllegalStateException();
+			}
+			factor = Factor.getInstance(prvs);
+			return this;
+		}
+		
 		@Override
 		public StdParfactor build() {
 			return new StdParfactor(this);
@@ -135,7 +143,7 @@ public final class StdParfactor implements Parfactor {
 	 *
 	 */
 	private class Counter extends StdParfactorBuilder {
-		
+		// TODO use aggregation instead of inheritance
 		// PRV that contains the logical variable being counted
 		private Prv counted;
 		
@@ -259,10 +267,6 @@ public final class StdParfactor implements Parfactor {
 					Tuple<RangeElement> old = tuple.set(countedIndex, e);
 					CountingFormula cf = (CountingFormula) countingFormula;
 					int count = cf.getCount(tuple.get(countedIndex), e);
-					
-					/*
-					 * TODO Something wrong here. Values getting .00 ?
-					 */
 					value = value.multiply(super.factor.getValue(old).pow(count));
 				}
 				super.values.add(value);

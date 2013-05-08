@@ -20,6 +20,7 @@ import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
+import br.usp.poli.takiyama.prv.Operator;
 import br.usp.poli.takiyama.prv.Prv;
 import br.usp.poli.takiyama.prv.RangeElement;
 import br.usp.poli.takiyama.prv.StdLogicalVariable;
@@ -216,6 +217,14 @@ public class StdParfactorTest {
 		 * Throws {@link UnsupportedOperationException}.
 		 */
 		public RangeElement combine(RangeElement e) {
+			throw new UnsupportedOperationException("Not implemented");
+		}
+
+		/**
+		 * Throws {@link UnsupportedOperationException}.
+		 */
+		@Override
+		public RangeElement apply(Operator<? extends RangeElement> op) {
 			throw new UnsupportedOperationException("Not implemented");
 		}
 	}
@@ -485,7 +494,7 @@ public class StdParfactorTest {
 		Parfactor result = input.count(a);
 		
 		Parfactor answer = new StdParfactorBuilder().variables(cf)
-				.values(8, 12, 18, 27).setScale(3).build();
+				.values(8, 12, 18, 27).build();
 
 		assertTrue(result.equals(answer));
 	}
@@ -503,7 +512,7 @@ public class StdParfactorTest {
 		Prv f = StdPrv.getBooleanInstance("f", a);
 		
 		Parfactor input = new StdParfactorBuilder().variables(f)
-				.values(2, 3).setScale(2).build();
+				.values(2, 3).build();
 		
 		input.count(b);
 	}
@@ -552,7 +561,7 @@ public class StdParfactorTest {
 		Parfactor result = input.count(a);
 		
 		Parfactor answer = new StdParfactorBuilder().variables(cf)
-				.values(4, 6, 9).setScale(2).build();
+				.values(4, 6, 9).build();
 
 		assertTrue(result.equals(answer));
 	}
@@ -606,7 +615,7 @@ public class StdParfactorTest {
 		Parfactor result = input.count(a);
 		
 		Parfactor answer = new StdParfactorBuilder().variables(cf, h)
-				.values(8, 27, 20, 63, 50, 147, 125, 343).setScale(3).build();
+				.values(8, 27, 20, 63, 50, 147, 125, 343).build();
 		
 		assertTrue(result.equals(answer));
 	}
@@ -662,7 +671,7 @@ public class StdParfactorTest {
 				
 		double [] vals = {4.0, 9.0, 10.0, 21.0, 25.0, 49.0};
 		Parfactor answer = new StdParfactorBuilder().variables(cf, h)
-				.values(vals).setScale(2).build();
+				.values(vals).build();
 		
 		assertTrue(result.equals(answer));
 	}

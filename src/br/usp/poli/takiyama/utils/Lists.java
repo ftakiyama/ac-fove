@@ -118,6 +118,24 @@ public final class Lists {
 		list.add(e3);
 		return list;
 	}
+
+	
+	/**
+	 * Returns a lists with size <code>n</code> filled with the specified
+	 * element.
+	 * @param <T> The type of element contained in the list
+	 * @param e The element to fill the list
+	 * @param n The size of the list
+	 * @return a lists with size <code>n</code> filled with the specified
+	 * element.
+	 */
+	public static final <T> List<T> listOf(T e, int n) {
+		List<T> list = new ArrayList<T>(n);
+		for (int i = 0; i < n; i++) {
+			list.add(e);
+		}
+		return list;
+	}
 	
 	
 	/**
@@ -169,5 +187,24 @@ public final class Lists {
 			areEqual = false;
 		}
 		return areEqual;
+	}
+	
+	
+	/**
+	 * Returns the hash code for the specified list of {@link BigDecimal}.
+	 * <p>
+	 * This method should be used in association with 
+	 * {@link #areEqual(List, List)} to maintain consistency between
+	 * hashCode() and equals().
+	 * </p>
+	 * @param list A list of {@link BigDecimal}
+	 * @return The hash code for the specified list
+	 */
+	public static final int hashCode(List<BigDecimal> list) {
+		int result = 1;
+		for (BigDecimal element : list) {
+			result = 31 * result + (element == null ? 0 : element.setScale(50).hashCode()); // set 15, but this is an arbitrary number
+		}
+		return result;
 	}
 }

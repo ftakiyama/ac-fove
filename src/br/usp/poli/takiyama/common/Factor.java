@@ -533,7 +533,7 @@ public class Factor implements Iterable<Tuple<RangeElement>> {
 	public int hashCode() { 
 		int result = 17;
 		result = 31 + result + Arrays.hashCode(variables.toArray(new Prv[variables.size()]));
-		result = 31 + result + Arrays.hashCode(values.toArray(new BigDecimal[values.size()]));
+		result = 31 + result + Lists.hashCode(values);
 		return result;
 	}
 	

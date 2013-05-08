@@ -1,9 +1,13 @@
 package br.usp.poli.takiyama.prv;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 
+import br.usp.poli.takiyama.utils.Lists;
 import br.usp.poli.takiyama.utils.MathUtils.Multinomial;
 
 /**
@@ -156,6 +160,48 @@ public class Histogram<T extends RangeElement> implements RangeElement {
 			throw new IllegalArgumentException();
 		}
 		return result;
+	}
+	
+	
+	/**
+	 * Returns the result of applying the specified operator to the elements of
+	 * the expanded histogram corresponding to this object.
+	 * <p>
+	 * The expanded histogram is a list obtained by adding to it each range 
+	 * element
+	 * in this histogram the number of times specified by its bucket. For
+	 * instance, suppose that h = (#.false = 2, #.true = 3) is a histogram.
+	 * Then the expanded histogram list is {false, false, true, true, true}.
+	 * </p>
+	 */
+	@Override
+	public RangeElement apply(Operator<? extends RangeElement> op) {
+		List<T> expandedHistogram = new ArrayList<T>();
+		for (T key : distribution.keySet()) {
+			int count = getCount(key);
+			expandedHistogram.addAll(Lists.listOf(key, count));
+		}
+		return apply(op, expandedHistogram);
+	}
+	
+	
+	/**
+	 * Returns the result of applying the specified operator to the specified
+	 * set of elements. This is a helper method.
+	 * 
+	 * @param <E> The type of element to which the operator applies
+	 * @param op The operator to apply
+	 * @param elements The set of elements where the operator will be applied
+	 * @return The result of applying the specified operator to the specified
+	 * set of elements
+	 */
+	private <E extends RangeElement> E apply(Operator<E> op, 
+			Collection<T> elements) {
+		Set<E> elems = new HashSet<E>((int) (elements.size() / 0.75));
+		for (RangeElement e : elements) {
+			elems.add(op.getTypeArgument().cast(e));
+		}
+		return op.applyOn(elems);
 	}
 	
 	

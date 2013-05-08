@@ -3,6 +3,7 @@ package br.usp.poli.takiyama.acfove;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -22,12 +23,15 @@ import br.usp.poli.takiyama.acfove.AggParfactor.AggParfactorBuilder;
 import br.usp.poli.takiyama.cfove.StdParfactor.StdParfactorBuilder;
 import br.usp.poli.takiyama.common.AggregationParfactor;
 import br.usp.poli.takiyama.common.Constraint;
+import br.usp.poli.takiyama.common.Distribution;
 import br.usp.poli.takiyama.common.InequalityConstraint;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.SplitResult;
+import br.usp.poli.takiyama.common.StdDistribution;
 import br.usp.poli.takiyama.common.StdSplitResult;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.Constant;
+import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.Or;
 import br.usp.poli.takiyama.prv.Prv;
@@ -220,7 +224,11 @@ public class AggParfactorTest {
 			assertEquals(result, expected);
 		}
 		
-		// TODO avoid repetition, maybe using a parameterized test
+		
+		/**
+		 * Performs g1 * g2 and g2 * g1 and check if the results are the same.
+		 * To pass the test we must have g1 * g2 = g2 * g1
+		 */
 		@Test
 		public void testMultiplicationCommutativity() {
 			Parfactor direct = g2.multiply(g1);
@@ -229,6 +237,7 @@ public class AggParfactorTest {
 			assertEquals(direct, inverse);
 		}
 		
+		// TODO I can use Theory here
 		@Test
 		public void testMultiplicationCheck() {
 			assertTrue(g1.isMultipliable(g1) && g1.isMultipliable(g2)
@@ -277,5 +286,54 @@ public class AggParfactorTest {
 			
 			assertEquals(expected, result);
 		}
+	}
+	
+	
+	@RunWith(Theories.class)
+	public static class ConversionTest {
+		
+		// Using Integer because JUnit seems to have a bug when using int[]
+		@DataPoints
+		public static final Integer[] populationSize() {
+			Integer[] sizes = new Integer[20];
+			for (int i = 0; i < sizes.length; i++) {
+				sizes[i] = i;
+			}
+			return sizes;
+		}
+		
+		@Theory
+		public void testSimpleConversion(Integer popSize) {
+			
+			// Ugly, but I could not use int directly
+			int populationSize = popSize.intValue();
+			
+			assumeThat(populationSize, not(0));
+			
+			LogicalVariable person = StdLogicalVariable.getInstance("Person", "p", populationSize);
+			Prv matched6 = StdPrv.getBooleanInstance("matched_6", person);
+			Prv jackpotWon = StdPrv.getBooleanInstance("jackpot_won");
+			Prv matched6counted = CountingFormula.getInstance(person, matched6);
+			AggregationParfactor input = new AggParfactorBuilder(matched6, jackpotWon, Or.OR).factor().build();
+			
+			double [] f = new double[2 * (populationSize + 1)];
+			f[0] = 1.0;
+			f[1] = 0.0;
+			for (int i = 2; i < f.length; i++) {
+				f[i] = (double)(i % 2);
+			}
+			
+			Parfactor answer1 = new StdParfactorBuilder().variables(matched6counted, jackpotWon).values(f).build();
+			Parfactor answer2 = new StdParfactorBuilder().variables(matched6).factor().build();
+			
+			Distribution answer = StdDistribution.of(answer1, answer2);
+			
+			Distribution result = input.toStdParfactors();
+			
+			answer.equals(result);
+			assertThat(result, equalTo(answer));
+			
+		}
+		
 	}
 }

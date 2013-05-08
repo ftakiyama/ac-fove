@@ -68,6 +68,15 @@ public final class Bool implements RangeElement {
 		throw new UnsupportedOperationException("Not implemented");
 	}
 	
+
+	/**
+	 * Returns this object.
+	 */
+	@Override
+	public RangeElement apply(Operator<? extends RangeElement> op) {
+		return this;
+	}
+	
 	
 	/* ************************************************************************
 	 *    hashCode, equals and toString

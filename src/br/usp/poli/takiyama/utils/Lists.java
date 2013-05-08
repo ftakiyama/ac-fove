@@ -2,6 +2,7 @@ package br.usp.poli.takiyama.utils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -112,7 +113,7 @@ public final class Lists {
 	 * @return a list containing the specified elements.
 	 */
 	public static final <T> List<T> listOf(T e1, T e2, T e3) {
-		List<T> list = new ArrayList<T>(2);
+		List<T> list = new ArrayList<T>(3);
 		list.add(e1);
 		list.add(e2);
 		list.add(e3);
@@ -134,6 +135,22 @@ public final class Lists {
 		for (int i = 0; i < n; i++) {
 			list.add(e);
 		}
+		return list;
+	}
+	
+	
+	/**
+	 * Returns a list containing the elements of the specified 
+	 * {@link Collection}. The order of the elements is determined
+	 * by the collections iterator.
+	 * 
+	 * @param <T> The type of element contained in the list
+	 * @param c The collection to from where the elements will be gathered
+	 * @return a list containing the elements of the specified collection
+	 */
+	public static final <T> List<T> listOf(Collection<? extends T> c) {
+		List<T> list = new ArrayList<T>(c.size());
+		list.addAll(c);
 		return list;
 	}
 	

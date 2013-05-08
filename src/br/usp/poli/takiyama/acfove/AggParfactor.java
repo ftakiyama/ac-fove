@@ -47,6 +47,14 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 	private final Set<Constraint> constraintsOnExtra;
 	private final LogicalVariable extraVar;
 	
+	/*
+	 * List of context parameterized random variables.
+	 * Context variables describe dependency in aggregation between
+	 * parent and child.
+	 * On standard aggregation parfactors, this list is empty. 
+	 */
+	private final List<Prv> context;
+	
 	
 	/* ************************************************************************
 	 *    Builders
@@ -58,8 +66,8 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 	 * There are two ways of specifying the factor associated with this
 	 * aggregation parfactor: either pass a factor that was previously built
 	 * using {@link #factor(Factor)} or pass the values that constitute the
-	 * factor using {@link #values()}. If both are used, the former method
-	 * has precedence over the latter.
+	 * factor using {@link #values()}. These operations overwrite changes
+	 * made by previous calls. 
 	 * </p>
 	 */
 	public static class AggParfactorBuilder implements Builder<AggParfactor> {
@@ -71,21 +79,32 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 		private final LogicalVariable lv;
 		
 		// optional parameters
-		private Factor f;
 		private List<BigDecimal> values;
 		private Set<Constraint> constraintsOnExtra;
 		private Set<Constraint> constraintsNotOnExtra;
+		private List<Prv> ctxt;
 		
 		public AggParfactorBuilder(Prv p, Prv c, Operator<? extends RangeElement> op) 
 					throws IllegalArgumentException {
 			this.p = p;
 			this.c = c;
 			this.op = op;
-			this.f = Factor.getInstance(); // empty factor
-			this.values = new ArrayList<BigDecimal>(p.range().size());
-			this.constraintsNotOnExtra = new HashSet<Constraint>();
-			this.constraintsOnExtra = new HashSet<Constraint>();
+			this.values = new ArrayList<BigDecimal>();
+			this.constraintsNotOnExtra = new HashSet<Constraint>(0);
+			this.constraintsOnExtra = new HashSet<Constraint>(0);
 			this.lv = setExtra();
+			this.ctxt = new ArrayList<Prv>(0);
+		}
+		
+		public AggParfactorBuilder(AggregationParfactor ap) {
+			this.p = ap.parent();
+			this.c = ap.child();
+			this.op = ap.operator();
+			this.values = ap.factor().values();
+			this.constraintsNotOnExtra = ap.constraintsNotOnExtra();
+			this.constraintsOnExtra = ap.constraintsOnExtra();
+			this.lv = StdLogicalVariable.getInstance(ap.extraVariable());
+			this.ctxt = ap.context();
 		}
 				
 		/**
@@ -107,17 +126,11 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 			}
 		}
 		
-		public AggParfactorBuilder(AggregationParfactor ap) {
-			this.p = ap.parent();
-			this.c = ap.child();
-			this.op = ap.operator();
-			this.f = ap.factor();
-			this.values = f.values();
-			this.constraintsNotOnExtra = ap.constraintsNotOnExtra();
-			this.constraintsOnExtra = ap.constraintsOnExtra();
-			this.lv = StdLogicalVariable.getInstance(ap.extraVariable());
-		}
-		
+		/**
+		 * Adds the specified constraint to this builder.
+		 * @param c The constraint to add
+		 * @return This builder with the constraint added
+		 */
 		public AggParfactorBuilder constraint(Constraint c) {
 			if (c.contains(lv)) {
 				constraintsOnExtra.add(c);
@@ -127,6 +140,11 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 			return this;
 		}
 		
+		/**
+		 * Adds the specified constraints to this builder.
+		 * @param c The constraints to add
+		 * @return This builder with the constraints added
+		 */
 		public AggParfactorBuilder constraints(Constraint ... c) {
 			for (Constraint cons : c) {
 				constraint(cons);
@@ -134,6 +152,11 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 			return this;
 		}
 		
+		/**
+		 * Adds the specified constraints to this builder.
+		 * @param c The constraints to add
+		 * @return This builder with the constraints added
+		 */
 		public AggParfactorBuilder constraints(Set<Constraint> c) {
 			for (Constraint cons : c) {
 				constraint(cons);
@@ -141,9 +164,18 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 			return this;
 		}
 		
+		/**
+		 * Sets the factor for this builder.
+		 * 
+		 * @param f The factor 
+		 * @return This builder with the factor updated.
+		 * @throws IllegalArgumentException If the specified factor is not 
+		 * consistent with this builder.
+		 * @see #isConsistent(Factor)
+		 */
 		public AggParfactorBuilder factor(Factor f) throws IllegalArgumentException {
-			if (f.variables().size() == 1 && f.variables().get(0).equals(p)) {
-				this.f = Factor.getInstance(f);
+			if (isConsistent(f)) {
+				values = f.values();
 				return this;
 			} else {
 				throw new IllegalArgumentException();
@@ -151,14 +183,24 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 		}
 		
 		/**
-		 * Sets the factor to a constant factor with the parent PRV.
-		 * @return
+		 * Returns <code>true</code> if the specified factor is consistent 
+		 * with this builder, that is, prvs from the factor are the parent +
+		 * context PRVs, and the parent is the first element of the list.
+		 * 
+		 * @param f The factor to evaluate
 		 */
-		public AggParfactorBuilder factor() {
-			f = Factor.getInstance(p);
-			return this;
+		private boolean isConsistent(Factor f) {
+			List<Prv> varsFromBuilder = Lists.listOf(p);
+			varsFromBuilder.addAll(ctxt);
+			return varsFromBuilder.equals(f.variables());
 		}
 		
+		/**
+		 * Sets factor values for this builder.
+		 * 
+		 * @param v A list of doubles
+		 * @return This builder updated with the specified values
+		 */
 		public AggParfactorBuilder values(double ... v) {
 			values.clear();
 			for (double d : v) {
@@ -167,14 +209,35 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 			return this;
 		}
 		
+		/**
+		 * Sets factor values for this builder
+		 * 
+		 * @param v A list of {@link BigDecimal}
+		 * @return This builder updated with the specified values
+		 */
 		public AggParfactorBuilder values(List<BigDecimal> v) {
-			values.clear();
-			values.addAll(v);
+			values = Lists.listOf(v);
 			return this;
 		}
 		
+		/**
+		 * Sets the child PRV. Used only internally.
+		 * 
+		 * @param c The child PRV
+		 * @return This builder with the new child PRV
+		 */
 		AggParfactorBuilder child(Prv c) {
 			this.c = c;
+			return this;
+		}
+		
+		/**
+		 * Sets the list of context PRVs.
+		 * @param contextVars A list of context PRVs
+		 * @return This builder with the list of context PRVs.
+		 */
+		public AggParfactorBuilder context(List<Prv> contextVars) {
+			ctxt = Lists.listOf(contextVars);
 			return this;
 		}
 		
@@ -183,6 +246,31 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 			return new AggParfactor(this);
 		}
 		
+		/**
+		 * Returns the factor defined by PRVs and values in this builder.
+		 * <p>
+		 * If no values were set, returns a constant factor on parent + context
+		 * PRVs, otherwise tries to build the factor on parent + context PRVs
+		 * using the values given by {@link #values()}.
+		 * </p>
+		 * @return The factor defined by PRVs and values in this builder.
+		 * @throws IllegalStateException 
+		 */
+		private Factor getFactor() throws IllegalStateException {
+			Factor factor;
+			List<Prv> variables = Lists.listOf(p);
+			variables.addAll(ctxt);
+			if (values.isEmpty()) {
+				factor = Factor.getInstance(variables);
+			} else {
+				try {
+					factor = Factor.getInstance("", variables, values);
+				} catch (IllegalArgumentException e) {
+					throw new IllegalStateException();
+				}
+			}
+			return factor;
+		}
 	}
 	
 	
@@ -545,17 +633,19 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 	/**
 	 * This class encapsulates multiplication algorithm.
 	 */
-	private class Multiplier extends AggParfactorBuilder {
+	private class Multiplier {
 		private final Parfactor operand;
+		private final AggregationParfactor multiplicand;
 		
 		private Multiplier(AggregationParfactor thiz, Parfactor other) {
-			super(thiz);
+			multiplicand = thiz;
 			operand = other;
 		}
 		
-		private Multiplier multiply() {
-			super.f = super.f.multiply(operand.factor());
-			return this;
+		private Parfactor multiply() {
+			Factor f = multiplicand.factor().multiply(operand.factor());
+			Parfactor product = new AggParfactorBuilder(multiplicand).factor(f).build();
+			return product;
 		}
 	}
 	
@@ -791,15 +881,10 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 	 * @param builder A {@link AggParfactorBuilder}
 	 */
 	private AggParfactor(AggParfactorBuilder builder) {
-		Factor f;
-		if (builder.f.isEmpty()) {
-			f = Factor.getInstance("", builder.p, builder.values);
-		} else {
-			f = builder.f;
-		}
 		this.parent = builder.p;
 		this.child = builder.c;
-		this.factor = Factor.getInstance(f);
+		this.context = builder.ctxt;
+		this.factor = builder.getFactor();
 		this.operator = builder.op;
 		this.constraintsNotOnExtra = builder.constraintsNotOnExtra;
 		this.constraintsOnExtra = builder.constraintsOnExtra;
@@ -871,7 +956,7 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 	 */
 	@Override
 	public List<Prv> context() {
-		return new ArrayList<Prv>(0);
+		return Lists.listOf(context);
 	}
 	
 
@@ -1019,7 +1104,7 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 	public Parfactor multiply(Parfactor other) {
 		// TODO check if multiplication is valid
 		Multiplier result = new Multiplier(this, other);
-		return result.multiply().build();
+		return result.multiply();
 	}
 
 		

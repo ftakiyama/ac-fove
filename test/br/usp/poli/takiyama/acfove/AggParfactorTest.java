@@ -57,7 +57,7 @@ public class AggParfactorTest {
 		@DataPoints
 		public static Parfactor[] data() {
 			return new Parfactor[] {
-				new AggParfactorBuilder(p, c, Or.OR).factor().build()
+				new AggParfactorBuilder(p, c, Or.OR).build()
 			};
 		}
 		
@@ -212,7 +212,7 @@ public class AggParfactorTest {
 					.variables(played, matched6).values(fMatched).build();
 			
 			Parfactor g3 = new AggParfactorBuilder(matched6, jackpotWon, Or.OR)
-					.factor().build();
+					.build();
 			
 			Parfactor result = g1.multiply(g2).sumOut(played).multiply(g3);
 			
@@ -314,7 +314,7 @@ public class AggParfactorTest {
 			Prv matched6 = StdPrv.getBooleanInstance("matched_6", person);
 			Prv jackpotWon = StdPrv.getBooleanInstance("jackpot_won");
 			Prv matched6counted = CountingFormula.getInstance(person, matched6);
-			AggregationParfactor input = new AggParfactorBuilder(matched6, jackpotWon, Or.OR).factor().build();
+			AggregationParfactor input = new AggParfactorBuilder(matched6, jackpotWon, Or.OR).build();
 			
 			double [] f = new double[2 * (populationSize + 1)];
 			f[0] = 1.0;

@@ -11,6 +11,8 @@ import static org.junit.Assume.assumeThat;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -191,9 +193,17 @@ public class AggParfactorTest {
 		
 		private static LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 100);
 		private static LogicalVariable b = StdLogicalVariable.getInstance("B", "x", 100);
-         
+		private static LogicalVariable person = StdLogicalVariable.getInstance("Person", "p", 100); 
+		
+		private static Prv played = StdPrv.getBooleanInstance("played", person);
+		private static Prv matched6 = StdPrv.getBooleanInstance("matched_6", person);
+		private static Prv jackpotWon = StdPrv.getBooleanInstance("jackpot_won");
+		private static Prv bigJackpot = StdPrv.getBooleanInstance("big_jackpot");
+		 
 		private static Prv p = StdPrv.getBooleanInstance("p", a, b);
 		private static Prv c = StdPrv.getBooleanInstance("c", b);
+		private static Prv v = StdPrv.getBooleanInstance("v", a);
+		private static Prv u = StdPrv.getBooleanInstance("u", b);
 		 
 		private static Constant x1 = Constant.getInstance("x1");
 		private static Constant x2 = Constant.getInstance("x2");
@@ -202,6 +212,7 @@ public class AggParfactorTest {
 		private static Constraint a_x1 = InequalityConstraint.getInstance(a, x1);
 		private static Constraint a_x2 = InequalityConstraint.getInstance(a, x2);
 		private static Constraint a_b = InequalityConstraint.getInstance(a, b);
+		private static Constraint b_x1 = InequalityConstraint.getInstance(b, x1);
 		private static Constraint b_x3 = InequalityConstraint.getInstance(b, x3);
 		 
 		private static double [] f1 = {0.1234, 0.9876};
@@ -262,15 +273,8 @@ public class AggParfactorTest {
 		 * F = 1 &odot; &sum;<sub>played(Person)</sub>(Fplayed &odot; Fmatched_6).
 		 * </p>
 		 */
-		@Ignore("Enable this test when summing out is working")
 		@Test
 		public void testTrivialMultiplication() {
-			
-			LogicalVariable person = StdLogicalVariable.getInstance("Person", "p", 100);
-			
-			Prv played = StdPrv.getBooleanInstance("played", person);
-			Prv matched6 = StdPrv.getBooleanInstance("matched_6", person);
-			Prv jackpotWon = StdPrv.getBooleanInstance("jackpot_won");
 			
 			double [] fPlayed = {0.95, 0.05};
 			
@@ -314,6 +318,43 @@ public class AggParfactorTest {
 			assertTrue(g1.isMultipliable(g1) && g1.isMultipliable(g2)
 					&& g2.isMultipliable(g1) && !g2.isMultipliable(g2));
 		}
+		
+		@Test
+		public void testGeneralizedMultiplication() {
+			
+			Parfactor g4 = new AggParfactorBuilder(matched6, jackpotWon, Or.OR).context(bigJackpot).build();
+			
+			double [] fMatched6 = {
+					0.9999999965,
+					0.999999989,
+					0.0000000035,
+					0.000000011
+			};
+			Parfactor g5 = new StdParfactorBuilder().variables(matched6, bigJackpot).values(fMatched6).build();
+			Parfactor product = g4.multiply(g5);
+			
+			Parfactor expected = new AggParfactorBuilder(matched6, jackpotWon, Or.OR).context(bigJackpot).values(fMatched6).build();
+			
+			assertEquals(expected, product);
+		}
+		
+		@Test
+		public void testAnotherGeneralizedMultiplication() {
+			// using BigDecimal due to precision problems with double
+			int size = 8;
+			List<BigDecimal> fpv = new ArrayList<BigDecimal>(size);
+			List<BigDecimal> fr = new ArrayList<BigDecimal>(size);
+			for (int i = 0; i < size; i++) {
+				fpv.add(BigDecimal.valueOf(i / 10.0));
+				fr.add(fpv.get(i).multiply(fpv.get(i)));
+			}
+			Parfactor g1 = new StdParfactorBuilder().constraints(a_x2, b_x1).variables(p, v, u).values(fpv).build();
+			Parfactor ga = new AggParfactorBuilder(p, c, Or.OR).constraints(a_x2, b_x1).context(v, u).values(fpv).build();
+			Parfactor product = g1.multiply(ga);
+			Parfactor expected = new AggParfactorBuilder(p, c, Or.OR).constraints(a_x2, b_x1).context(v, u).values(fr).build();
+			
+			assertEquals(expected, product);
+		}
 	}
 	
 
@@ -322,7 +363,8 @@ public class AggParfactorTest {
 		private final static LogicalVariable person = StdLogicalVariable.getInstance("Person", "p", 5);
 		private final static Prv matched6 = StdPrv.getBooleanInstance("matched_6", person);
 		private final static Prv jackpotWon = StdPrv.getBooleanInstance("jackpot_won");
-
+		private final static Prv bigJackpot = StdPrv.getBooleanInstance("big_jackpot");
+		
 		private final static double [] fSum = {0.9999999965, 0.0000000035};
 		
 		private final static Parfactor g1 = new AggParfactorBuilder(matched6, jackpotWon, Or.OR).values(fSum).build();
@@ -355,6 +397,29 @@ public class AggParfactorTest {
 			
 			Parfactor result = g1.sumOut(matched6);
 			
+			assertEquals(expected, result);
+		}
+		
+		@Test
+		public void testGeneralizedSumOut() {
+			double [] fMatched6 = {
+					0.9999999965,
+					0.999999989,
+					0.0000000035,
+					0.000000011
+			};
+			Parfactor g6 = new AggParfactorBuilder(matched6, jackpotWon, Or.OR).context(bigJackpot).values(fMatched6).build();
+			
+			Parfactor result = g6.sumOut(matched6);
+			
+			double [] fJackpotWon = {
+					0.9999999825,
+					0.9999999450,
+					0.0000000175,
+					0.0000000550
+			};
+			Parfactor expected = new StdParfactorBuilder().variables(jackpotWon, bigJackpot).values(fJackpotWon).build();
+
 			assertEquals(expected, result);
 		}
 	}
@@ -401,9 +466,57 @@ public class AggParfactorTest {
 			
 			Distribution result = input.toStdParfactors();
 			
-			answer.equals(result);
 			assertThat(result, equalTo(answer));
 			
+		}
+		
+		@Theory
+		public void testSimpleGeneralizedConversion(Integer popSize) {
+			
+			int populationSize = popSize.intValue();
+			
+			assumeThat(populationSize, not(0));
+			assumeThat(populationSize, not(1));
+			
+			LogicalVariable lva = StdLogicalVariable.getInstance("A", "x", populationSize);
+			LogicalVariable lvb = StdLogicalVariable.getInstance("B", "x", populationSize);
+			LogicalVariable lvc = StdLogicalVariable.getInstance("C", "x", populationSize);
+			LogicalVariable lvd = StdLogicalVariable.getInstance("D", "x", populationSize);
+			LogicalVariable lve = StdLogicalVariable.getInstance("E", "x", populationSize);
+			
+			Constant x1 = Constant.getInstance("x1");
+			Constant x2 = Constant.getInstance("x2");
+			
+			Constraint a_x2 = InequalityConstraint.getInstance(lva, x2);
+			Constraint b_x1 = InequalityConstraint.getInstance(lvb, x2);
+			
+			Prv p = StdPrv.getBooleanInstance("p", lva, lvb);
+			Prv c = StdPrv.getBooleanInstance("c", lvb);
+			Prv v = StdPrv.getBooleanInstance("v", lvc);
+			Prv u = StdPrv.getBooleanInstance("u", lvd, lve);
+			Prv cf = CountingFormula.getInstance(lva, p, a_x2);
+			
+			List<BigDecimal> fpv = new ArrayList<BigDecimal>(8);
+			for (int i = 0; i < 8; i++) {
+				fpv.add(BigDecimal.valueOf(i / 10.0));
+			}
+			
+			List<BigDecimal> fr = new ArrayList<BigDecimal>(8 * populationSize);
+			Lists.fill(fr, BigDecimal.ONE, 4);
+			Lists.fill(fr, BigDecimal.ZERO, 4);
+			for (int i = 1; i < populationSize; i++) {
+				Lists.fill(fr, BigDecimal.ZERO, 4);
+				Lists.fill(fr, BigDecimal.ONE, 4);
+			}
+			
+			AggregationParfactor input = new AggParfactorBuilder(p, c, Or.OR).constraints(b_x1, a_x2).context(v, u).values(fpv).build();
+			Parfactor ans1 = new StdParfactorBuilder().constraints(a_x2, b_x1).variables(p, v, u).values(fpv).build();
+			Parfactor ans2 = new StdParfactorBuilder().constraints(b_x1).variables(cf, c, v, u).values(fr).build();
+			
+			Distribution answer = StdDistribution.of(ans1, ans2);
+			Distribution result = input.toStdParfactors();
+			
+			assertThat(result, equalTo(answer));
 		}
 		
 	}

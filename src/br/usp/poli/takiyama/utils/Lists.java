@@ -161,7 +161,6 @@ public final class Lists {
 	/**
 	 * TODO Make it more generic
 	 * Puts the specified element the specified number of times in the list.
-	 * The list is cleared before filling it.
 	 * 
 	 * @param <T> The type of element to put in the list 
 	 * @param list The container where the  elements will be put
@@ -169,16 +168,53 @@ public final class Lists {
 	 * @param num The number of elements to put in the list
 	 * @throws IllegalArgumentException If <code>num</code> < 0.
 	 */
-	public static final <T> void fill(List<T> list, T element, int num)
+	public static final <T> void fill(List<? super T> list, T element, int num)
 			throws IllegalArgumentException {
 		if (num < 0) {
 			throw new IllegalArgumentException();
 		}
-		list.clear();
 		for (int i = 0; i < num; i++) {
 			list.add(element);
 		}
 	}
+		
+
+//	/**
+//     * Assigns the specified Object reference to each element of the specified
+//     * range of the specified list  The range to be filled
+//     * extends from index <tt>fromIndex</tt>, inclusive, to index
+//     * <tt>toIndex</tt>, exclusive.  (If <tt>fromIndex==toIndex</tt>, the
+//     * range to be filled is empty.)
+//     *
+//     * @param <T> The type of element to put in the list 
+//     * @param list the list to be filled
+//     * @param fromIndex the index of the first element (inclusive) to be
+//     *        filled with the specified value
+//     * @param toIndex the index of the last element (exclusive) to be
+//     *        filled with the specified value
+//     * @param val the value to be stored in all elements of the array
+//     * @throws IllegalArgumentException if <tt>fromIndex &gt; toIndex</tt>
+//     * @throws ArrayIndexOutOfBoundsException if <tt>fromIndex &lt; 0</tt>
+//     */
+//	public static final <T> void fill(List<? super T> list, int fromIndex, int toIndex, T val) {
+//		rangeCheck(fromIndex, toIndex);
+//		for (int i = fromIndex; i < toIndex; i++) {
+//			list.set(i, val);
+//		}
+//	}
+//	
+//	
+//	/**
+//     * Check that fromIndex and toIndex are in range, and throw an
+//     * appropriate exception if they aren't.
+//     */
+//	private static void rangeCheck(int fromIndex, int toIndex) {
+//		if (fromIndex > toIndex)
+//			throw new IllegalArgumentException("fromIndex(" + fromIndex +
+//					") > toIndex(" + toIndex+")");
+//		if (fromIndex < 0)
+//			throw new ArrayIndexOutOfBoundsException(fromIndex);
+//	}
 	
 	
 	/**

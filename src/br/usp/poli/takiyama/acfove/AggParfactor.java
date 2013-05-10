@@ -834,7 +834,7 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 		}
 		
 		/**
-		 * Returns a list of the standard parfactors whose product is 
+		 * Returns a list of standard parfactors whose product is 
 		 * equivalent to this aggregation parfactor.
 		 */
 		private Distribution convert() {
@@ -848,8 +848,10 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 		 * Returns the parfactor involving the parent PRV.
 		 */
 		private Parfactor getParfactorOnParent() {
+			List<Prv> vars = ap.context();
+			vars.add(0, ap.parent());
 			Parfactor parent = new StdParfactorBuilder()
-					.constraints(ap.constraints()).variables(ap.parent())
+					.constraints(ap.constraints()).variables(vars)
 					.factor(ap.factor()).build();
 			return parent;
 		}
@@ -859,29 +861,51 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 		 * and the extra logical variable.
 		 */
 		private Parfactor getParfactorOnChild() {
-			Prv counted = CountingFormula.getInstance(ap.extraVariable(), 
-					ap.parent(), ap.constraintsOnExtra());
-
-			List<BigDecimal> vals = new ArrayList<BigDecimal>(
-					ap.parent().range().size() * ap.child().range().size());
 			
-			for (RangeElement histogram : counted.range()) {
-				RangeElement h = histogram.apply(ap.operator());
-				for (RangeElement childValue : ap.child().range()) {
-					if (h.equals(childValue)) {
-						vals.add(BigDecimal.ONE);
-					} else {
-						vals.add(BigDecimal.ZERO);
-					}
+			List<Prv> vars = getPrvsForParfactorOnChild();
+			
+			Factor structure = Factor.getInstance(vars);
+			List<BigDecimal> vals = new ArrayList<BigDecimal>();
+			
+			for (Tuple<RangeElement> tuple : structure) {
+				RangeElement histogram = tuple.get(0);
+				RangeElement condensedHistogram = histogram.apply(ap.operator());
+				RangeElement childValue = tuple.get(1);
+				if (condensedHistogram.equals(childValue)) {
+					vals.add(BigDecimal.ONE);
+				} else {
+					vals.add(BigDecimal.ZERO);
 				}
 			}
 			
 			Parfactor child = new StdParfactorBuilder()
 					.constraints(ap.constraintsNotOnExtra())
-					.variables(counted, ap.child()).values(vals).build();
+					.variables(vars).values(vals).build();
 			
 			return child;
 		}
+		
+		/**
+		 * Counts the extra variable from parent's PRV
+		 */
+		private Prv countParent() {
+			return CountingFormula.getInstance(ap.extraVariable(), 
+					ap.parent(), ap.constraintsOnExtra());
+		}
+		
+		/**
+		 * Builds the list of PRVs for the parfactor on child PRV. The order
+		 * is counted, child, context variables.
+		 */
+		private List<Prv> getPrvsForParfactorOnChild() {
+			Prv counted = countParent();
+			List<Prv> vars = new ArrayList<Prv>(ap.context().size() + 2);
+			vars.add(counted);
+			vars.add(ap.child());
+			vars.addAll(ap.context());
+			return vars;
+		}
+		
 	}
 	
 	

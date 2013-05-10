@@ -107,15 +107,14 @@ public class StdPrv implements Prv {
 	 * Creates a copy of the specified Prv.
 	 * 
 	 * @param prv The StdPrv to copy.
+	 * @throws IllegalArgumentException if the specified PRV is not a 
+	 * {@link StdPrv}
 	 */
 	private StdPrv(Prv prv) throws IllegalArgumentException {
+		this(prv.name(), prv.range(), prv.terms());
 		if (!(prv instanceof StdPrv)) {
 			throw new IllegalArgumentException();
 		}
-		StdPrv std = (StdPrv) prv;
-		parameters = new ArrayList<Term>(std.parameters);
-		functor = std.functor;
-		range = new ArrayList<RangeElement>(std.range);
 	}
 	
 	

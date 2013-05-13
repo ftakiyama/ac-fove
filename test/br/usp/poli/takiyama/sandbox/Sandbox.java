@@ -1,3 +1,4 @@
+package br.usp.poli.takiyama.sandbox;
 
 
 import java.math.BigDecimal;
@@ -145,6 +146,15 @@ public class Sandbox {
 			List<Constraint> expected = Lists.listOf(ans);
 			
 			assertEquals(expected, Lists.apply(s, list));
+		}
+	}
+	
+	public static class NumberTest {
+		@Test
+		public void testBigDecimalScale() {
+			BigDecimal n = BigDecimal.valueOf(0.2345);
+			BigDecimal m = n.setScale(2, BigDecimal.ROUND_HALF_EVEN);
+			int x;
 		}
 	}
 	

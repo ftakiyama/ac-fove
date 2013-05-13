@@ -709,10 +709,9 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 					.numberOfIndividualsSatisfying(parfactor.constraintsOnExtra());
 			String binSize = Integer.toBinaryString(domainSize);
 			
-			List<RangeElement> childRange = parfactor.child().range();
 			for (int k = 1; k < binSize.length(); k++) {
 				Factor previous = Factor.getInstance(current);
-				for (RangeElement x : childRange) { // for GAP, must be for (Tuple<RangeElement> tuple : previous)
+				for (Tuple<RangeElement> x : previous) {
 					BigDecimal sum;
 					if (binSize.charAt(k) == '0') {
 						sum = getDoubleComposition(previous, x);
@@ -727,14 +726,16 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 			return current;
 		}
 		
-		private BigDecimal getDoubleComposition(Factor factor, RangeElement x) {
+		private BigDecimal getDoubleComposition(Factor factor, Tuple<RangeElement> x) {
+			int childIndex = 0;
+			RangeElement childValue = x.get(childIndex);
 			BigDecimal sum = BigDecimal.ZERO;
 			List<RangeElement> childRange = parfactor.child().range();
 			for (RangeElement y : childRange) {
-				Tuple<RangeElement> yTuple = Tuple.getInstance(y);
+				Tuple<RangeElement> yTuple = x.set(childIndex, y);
 				for (RangeElement z : childRange) {
-					Tuple<RangeElement> zTuple = Tuple.getInstance(z);
-					if (apply(parfactor.operator(), y, z).equals(x)) {
+					Tuple<RangeElement> zTuple = x.set(childIndex, z);
+					if (apply(parfactor.operator(), y, z).equals(childValue)) {
 						sum = sum.add(factor.getValue(yTuple).multiply(factor.getValue(zTuple)));
 					}
 				}
@@ -742,16 +743,18 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 			return sum;
 		}
 		
-		private BigDecimal getTripleComposition(Factor factor, RangeElement x) {
+		private BigDecimal getTripleComposition(Factor factor, Tuple<RangeElement> x) {
+			int childIndex = 0;
+			RangeElement childValue = x.get(childIndex);
 			BigDecimal sum = BigDecimal.ZERO;
 			List<RangeElement> childRange = parfactor.child().range();
 			for (RangeElement y : childRange) {
-				Tuple<RangeElement> yTuple = Tuple.getInstance(y);
+				Tuple<RangeElement> yTuple = x.set(childIndex, y);
 				for (RangeElement z : childRange) {
-					Tuple<RangeElement> zTuple = Tuple.getInstance(z);
+					Tuple<RangeElement> zTuple = x.set(childIndex, z);
 					for (RangeElement w : childRange) {
-						Tuple<RangeElement> wTuple = Tuple.getInstance(w);
-						if (apply(parfactor.operator(), w, y, z).equals(x)) {
+						Tuple<RangeElement> wTuple = x.set(childIndex, w);
+						if (apply(parfactor.operator(), w, y, z).equals(childValue)) {
 							BigDecimal fw = parfactor.factor().getValue(wTuple);
 							BigDecimal fy = factor.getValue(yTuple);
 							BigDecimal fz = factor.getValue(zTuple);
@@ -763,15 +766,16 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 			return sum;
 		}
 		
+		/**
+		 * Builds the base factor F0
+		 */
 		private Factor getBase() {
-			List<Prv> prvs = new ArrayList<Prv>(1);
+			List<Prv> prvs = new ArrayList<Prv>();
 			prvs.add(parfactor.child());
+			prvs.addAll(parfactor.context());
+			
 			Factor tempBase = Factor.getInstance(prvs);
-			/*
-			 * Actually i dont need all this right now. But this code is more
-			 * generic, which will be useful when dealing with generalized
-			 * aggregation parfactors.
-			 */
+			
 			int size = parfactor.child().range().size();
 			List<BigDecimal> vals = new ArrayList<BigDecimal>(size);
 			for (Tuple<RangeElement> tuple : tempBase) {

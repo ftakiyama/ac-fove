@@ -23,10 +23,12 @@ import org.junit.experimental.theories.*;
 import org.junit.runner.RunWith;
 
 import br.usp.poli.takiyama.acfove.AggParfactor.AggParfactorBuilder;
+import br.usp.poli.takiyama.cfove.StdParfactor;
 import br.usp.poli.takiyama.cfove.StdParfactor.StdParfactorBuilder;
 import br.usp.poli.takiyama.common.AggregationParfactor;
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.Distribution;
+import br.usp.poli.takiyama.common.Factor;
 import br.usp.poli.takiyama.common.InequalityConstraint;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.SplitResult;
@@ -410,8 +412,9 @@ public class AggParfactorTest {
 			};
 			Parfactor g6 = new AggParfactorBuilder(matched6, jackpotWon, Or.OR).context(bigJackpot).values(fMatched6).build();
 			
-			Parfactor result = g6.sumOut(matched6);
+			Parfactor result = round(g6.sumOut(matched6), 10);
 			
+			// Im here!!!!! this list is not accurate
 			double [] fJackpotWon = {
 					0.9999999825,
 					0.9999999450,
@@ -421,6 +424,20 @@ public class AggParfactorTest {
 			Parfactor expected = new StdParfactorBuilder().variables(jackpotWon, bigJackpot).values(fJackpotWon).build();
 
 			assertEquals(expected, result);
+		}
+		
+		/**
+		 * Returns the specified parfactor with values rounded to the specified
+		 * scale. 
+		 */
+		private Parfactor round(Parfactor parfactor, int scale) {
+			List<BigDecimal> rounded = new ArrayList<BigDecimal>(parfactor.factor().values());
+			for (BigDecimal number : rounded) {
+				int index = rounded.indexOf(number);
+				rounded.set(index, number.setScale(scale, BigDecimal.ROUND_HALF_EVEN));
+			}
+			Factor roundedFactor = Factor.getInstance("", parfactor.prvs(), rounded);
+			return new StdParfactorBuilder(parfactor).factor(roundedFactor).build();
 		}
 	}
 	
@@ -488,7 +505,7 @@ public class AggParfactorTest {
 			Constant x2 = Constant.getInstance("x2");
 			
 			Constraint a_x2 = InequalityConstraint.getInstance(lva, x2);
-			Constraint b_x1 = InequalityConstraint.getInstance(lvb, x2);
+			Constraint b_x1 = InequalityConstraint.getInstance(lvb, x1);
 			
 			Prv p = StdPrv.getBooleanInstance("p", lva, lvb);
 			Prv c = StdPrv.getBooleanInstance("c", lvb);

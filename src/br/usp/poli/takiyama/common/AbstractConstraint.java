@@ -85,6 +85,13 @@ abstract class AbstractConstraint implements Constraint {
 	}
 	
 	
+	@Override
+	public boolean isUnary() {
+		return ((firstTerm.isVariable() && secondTerm.isConstant()) 
+				|| (firstTerm.isConstant() && secondTerm.isVariable())); 
+	}
+	
+	
 
 //	/**
 //	 * Creates a inequality constraint based on substitution. For instance,

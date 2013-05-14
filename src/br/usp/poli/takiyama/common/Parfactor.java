@@ -220,7 +220,8 @@ public interface Parfactor extends VisitableParfactor, Replaceable<Parfactor> { 
 //	
 //	public Parfactor restoreLogicalVariables();
 //	
-//	public Parfactor simplifyLogicalVariables();
+	
+	public Parfactor simplifyLogicalVariables();
 		
 	@Override
 	public boolean equals(Object o);

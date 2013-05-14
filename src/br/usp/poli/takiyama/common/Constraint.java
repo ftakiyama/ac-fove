@@ -135,6 +135,16 @@ public interface Constraint extends Replaceable<Constraint> {
 	public Binding toInverseBinding();
 
 	
+	/**
+	 * Returns <code>true</code> if this constraint is unary, that is, if
+	 * it is composed by a logical variable and a constant.
+	 * 
+	 * @return <code>true</code> if this constraint is unary, <code>false</code>
+	 * otherwise.
+	 */
+	public boolean isUnary();
+	
+	
 	@Override
 	public boolean equals(Object o);
 	

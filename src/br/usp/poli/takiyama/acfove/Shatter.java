@@ -2,16 +2,23 @@ package br.usp.poli.takiyama.acfove;
 
 import java.util.EmptyStackException;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.Stack;
 
+import br.usp.poli.takiyama.cfove.StdParfactor;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.Parfactors;
 import br.usp.poli.takiyama.common.RandomVariableSet;
 import br.usp.poli.takiyama.common.SplitResult;
 import br.usp.poli.takiyama.common.StdDistribution;
 import br.usp.poli.takiyama.common.StdSplitResult;
+import br.usp.poli.takiyama.prv.Binding;
+import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.Prv;
+import br.usp.poli.takiyama.prv.Prvs;
+import br.usp.poli.takiyama.prv.Substitution;
+import br.usp.poli.takiyama.utils.Lists;
 
 public final class Shatter extends AbstractMacroOperation {
 	
@@ -94,6 +101,46 @@ public final class Shatter extends AbstractMacroOperation {
 	
 	// unifica os parfactors p1 e p2 nas vari‡veis prv1 e prv2
 	private SplitResult unify(Parfactor p1, Prv prv1, Parfactor p2, Prv prv2) {
+		p1 = simplify(p1).renameLogicalVariables();
+		p2 = simplify(p2).renameLogicalVariables();
+		Substitution mgu = Prvs.mgu(prv1, prv2);
+		
+		SplitResult result = StdSplitResult.getInstance();
+		if (areNotDisjoint(prv1, prv2)) {
+			SplitResult firstSplit = split(p1, mgu);
+			SplitResult secondSplit = split(p2, mgu);
+			firstSplit = split(firstSplit.result(). secondSplit.result().constraints());
+			secondSplit = split(secondSplit.result(), firstSplit.result().constraints());
+			
+			result = StdSplitResult.getInstance(firstSplit, secondSplit);
+		}
+		
 		return null;
+	}
+	
+	// nope, need to know the type of parfactor.
+	private Parfactor simplify(Parfactor parfactor) {
+		LinkedList<LogicalVariable> queue = getVariablesInConstraints(parfactor);
+		Set<Constraint> unaryConstraints;
+		Set<Constraint> binaryConstraints;
+		while (!queue.isEmpty()) {
+			LogicalVariable lv = queue.poll();
+			int populationSize = lv.numberOfIndividualsSatisfying(unaryConstraints);
+			switch (populationSize) {
+			case 0:
+				simplified = StdParfactor.getInstance();
+				break;
+			case 1:
+				Constant c = lv.individualsSatisfying(unaryConstraints);
+				split.removeUnariesInvolving(lv);
+				queue.addAll(split.variablesInConstraintsInvolving(lv));
+				split.apply(Substitution.getInstance(Binding.getInstance(lv, c)));
+				variables = Lists.apply(s, variables);
+				break;
+			default:
+				break;
+			}
+		}
+		
 	}
 }

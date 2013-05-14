@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -27,6 +28,7 @@ import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.StdPrv;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
+import br.usp.poli.takiyama.utils.Lists;
 import br.usp.poli.takiyama.utils.Sets;
 
 public final class StdParfactor implements Parfactor {
@@ -138,9 +140,6 @@ public final class StdParfactor implements Parfactor {
 	 * Counting a free logical variable eliminates it from the parfactor using
 	 * a counting formula.
 	 * </p>
-	 * 
-	 * @author Felipe Takiyama
-	 *
 	 */
 	private class Counter extends StdParfactorBuilder {
 		// TODO use aggregation instead of inheritance
@@ -274,6 +273,120 @@ public final class StdParfactor implements Parfactor {
 			// Erase factor so it does not overwrites constructor
 			super.factor = null;
 		}
+	}
+	
+	
+	/**
+	 * Encapsulates simplification algorithm
+	 * <p>
+	 * Simplifying a parfactor is the process of replacing all logical variables
+	 * constrained to a single individual with this individual.
+	 * </p>
+	 */
+	private class Simplifier {
+		
+		private final Parfactor parfactor;
+		private Set<Constraint> unaryConstraints;
+		private Set<Constraint> constraints;
+		private List<Prv> variables;
+		
+		private Simplifier(StdParfactor parfactor) {
+			this.parfactor = parfactor;
+			this.constraints = new HashSet<Constraint>(parfactor.constraints());
+			this.variables = new ArrayList<Prv>(parfactor.prvs());
+			this.unaryConstraints = getUnaryConstraints();
+		}
+		
+		/**
+		 * Returns the subset of unary constraints from the set of constraints
+		 */
+		private Set<Constraint> getUnaryConstraints() {
+			Set<Constraint> unary = new HashSet<Constraint>();
+			for (Constraint constraint : constraints) {
+				if (constraint.isUnary()) {
+					unary.add(constraint);
+				}
+			}
+			return unary;
+		}
+		
+		/**
+		 * Replaces all logical variable constrained to a single individual
+		 * with this individual
+		 */
+		private Parfactor simplify() {
+			LinkedList<LogicalVariable> queue  = getVariablesInConstraints();
+			while (!queue.isEmpty()) {
+				LogicalVariable logicalVariable = queue.poll();
+				int populationSize = logicalVariable
+						.numberOfIndividualsSatisfying(unaryConstraints);
+				switch (populationSize) {
+				case 0:
+					return StdParfactor.getInstance();
+				case 1:
+					Substitution sub = getSubstitution(logicalVariable);
+					//removeUnaryConstraintsInvolving(logicalVariable);
+					queue.addAll(variablesInBinaryConstraintsInvolving(logicalVariable));
+					constraints = Sets.apply(sub, constraints);
+					unaryConstraints = getUnaryConstraints(); //Sets.apply(sub, unaryConstraints); /// << this is not enough, must sync constraints !!!!!
+					variables = Lists.apply(sub, variables);
+					break;
+				default:
+					break;
+				}
+			}
+			Parfactor result = new StdParfactorBuilder().constraints(constraints)
+					.variables(variables).values(parfactor.factor().values()).build();
+			return result;
+		}
+		
+		/**
+		 * Add logical variables from constraints from parfactor to a queue
+		 * >> ugly implementation =(
+		 */
+		private LinkedList<LogicalVariable> getVariablesInConstraints() {
+			Set<LogicalVariable> buffer = new HashSet<LogicalVariable>();
+			for (Constraint c : parfactor.constraints()) {
+				if (c.firstTerm().isVariable()) {
+					buffer.add((LogicalVariable) c.firstTerm());
+				}
+				if (c.secondTerm().isVariable()) {
+					buffer.add((LogicalVariable) c.secondTerm());
+				}
+			}
+			return new LinkedList<LogicalVariable>(buffer);
+		}
+		
+		/**
+		 * When a logical variable is constrained to a single individual, 
+		 * builds the substitution that replaces the logical variable by this
+		 * individual.
+		 */
+		private Substitution getSubstitution(LogicalVariable lv) {
+			Term loneGuy = lv.individualsSatisfying(unaryConstraints).iterator().next();
+			Binding bind = Binding.getInstance(lv, loneGuy);
+			return Substitution.getInstance(bind);
+		}
+		
+		/**
+		 * Returns the set of logical variables belonging to binary constraints
+		 * that involve the specified logical variable.
+		 */
+		private Set<LogicalVariable> variablesInBinaryConstraintsInvolving(LogicalVariable lv) {
+			Set<Constraint> binaryConstraints = new HashSet<Constraint>(constraints);
+			binaryConstraints.removeAll(unaryConstraints);
+			
+			Set<LogicalVariable> otherVariables = new HashSet<LogicalVariable>();
+			for (Constraint binary : binaryConstraints) {
+				if (binary.contains(lv) && binary.firstTerm().equals(lv)) {
+					otherVariables.add((LogicalVariable) binary.secondTerm());
+				} else if (binary.contains(lv) && binary.secondTerm().equals(lv)) {
+					otherVariables.add((LogicalVariable) binary.firstTerm());
+				}
+			}
+			return otherVariables;
+		}
+		
 	}
 	
 	
@@ -850,6 +963,13 @@ public final class StdParfactor implements Parfactor {
 				.factor(corrected).build();
 		
 		return summedOut;
+	}
+	
+	
+	@Override
+	public Parfactor simplifyLogicalVariables() {
+		Simplifier parfactor = new Simplifier(this);
+		return parfactor.simplify();
 	}
 	
 

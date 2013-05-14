@@ -1164,6 +1164,12 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 		Distribution result = converter.convert();
 		return result;
 	}
+	
+	
+	@Override
+	public Parfactor simplifyLogicalVariables() {
+		//return null;
+	}
 
 	
 	@Override

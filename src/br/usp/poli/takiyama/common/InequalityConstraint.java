@@ -128,8 +128,8 @@ public final class InequalityConstraint extends AbstractConstraint {
 	private boolean isApplicable(Binding b) {
 		return contains(b.firstTerm());
 	}
-		
 	
+		
 	/* ************************************************************************
 	 *    hashCode, equals and toString
 	 * ************************************************************************/
@@ -150,19 +150,19 @@ public final class InequalityConstraint extends AbstractConstraint {
 		
 		// tests A!=B == A!=B
 		boolean direct = 
-				(firstTerm == null) ? (other.firstTerm == null) 
-									: (firstTerm.equals(other.firstTerm))
+				(((firstTerm == null) ? (other.firstTerm == null) 
+									: (firstTerm.equals(other.firstTerm)))
 				&& 
-				(secondTerm == null) ? (other.secondTerm == null) 
-									 : (secondTerm.equals(other.secondTerm));
+				((secondTerm == null) ? (other.secondTerm == null) 
+									 : (secondTerm.equals(other.secondTerm))));
 		
 		// tests A!=B == B!=A
 		boolean inverse = 
-				(firstTerm == null) ? (other.secondTerm == null) 
-								  	: (firstTerm.equals(other.secondTerm))
+				(((firstTerm == null) ? (other.secondTerm == null) 
+								  	: (firstTerm.equals(other.secondTerm)))
 				&& 
-				(secondTerm == null) ? (other.firstTerm == null) 
-									 : (secondTerm.equals(other.firstTerm)); 
+				((secondTerm == null) ? (other.firstTerm == null) 
+									 : (secondTerm.equals(other.firstTerm)))); 
 		
 		return direct || inverse;
 	}

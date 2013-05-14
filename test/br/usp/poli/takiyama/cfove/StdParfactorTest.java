@@ -1,6 +1,7 @@
 package br.usp.poli.takiyama.cfove;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -676,4 +677,47 @@ public class StdParfactorTest {
 		assertTrue(result.equals(answer));
 	}
 	
+	
+	/**
+	 * Simplifies g = &langle; C, V, F &rangle;, where C = {A&ne;x1, A&ne;x2,
+	 * A&ne;x3, A&ne;B, A&ne;C, B&ne;x1, B&ne;x3, B&ne;C}, V = {f(A,B)} and
+	 * D(A) = D(B) = D(C) = {x1, x2, x3, x4}.
+	 * <p>
+	 * Result is g' = &langle; C', V', F &rangle;, where C' = {C&ne;x2, C&ne;x4}
+	 * and V' = {f(x4,x2)}.  
+	 * </p>
+	 */
+	@Test
+	public void testLogicalVariableSimplification() {
+		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 4);
+		LogicalVariable b = StdLogicalVariable.getInstance("B", "x", 4);
+		LogicalVariable c = StdLogicalVariable.getInstance("C", "x", 4);
+		
+		Constant x1 = Constant.getInstance("x1");
+		Constant x2 = Constant.getInstance("x2");
+		Constant x3 = Constant.getInstance("x3");
+		Constant x4 = Constant.getInstance("x4");
+		
+		Prv f = StdPrv.getBooleanInstance("f", a, b);
+		Prv f_x4_x2= StdPrv.getBooleanInstance("f", x4, x2);
+		
+		Constraint a_x1 = InequalityConstraint.getInstance(a, x1);
+		Constraint a_x2 = InequalityConstraint.getInstance(a, x2);
+		Constraint a_x3 = InequalityConstraint.getInstance(a, x3);
+		Constraint a_b = InequalityConstraint.getInstance(a, b);
+		Constraint a_c = InequalityConstraint.getInstance(a, c);
+		Constraint b_x1 = InequalityConstraint.getInstance(b, x1);
+		Constraint b_x3 = InequalityConstraint.getInstance(b, x3);
+		Constraint b_c = InequalityConstraint.getInstance(b, c);
+		Constraint c_x2 = InequalityConstraint.getInstance(c, x2);
+		Constraint c_x4 = InequalityConstraint.getInstance(c, x4);
+		
+		Parfactor input = new StdParfactorBuilder()
+				.constraints(a_x1, a_x2, a_x3, a_b, a_c, b_x1, b_x3, b_c)
+				.variables(f).values(0.2, 0.3).build();
+		Parfactor result = input.simplifyLogicalVariables();
+		Parfactor expected = new StdParfactorBuilder().constraints(c_x2, c_x4).variables(f_x4_x2).values(0.2, 0.3).build();
+		
+		assertEquals(expected, result);
+	}
 }

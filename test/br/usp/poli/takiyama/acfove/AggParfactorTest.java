@@ -12,6 +12,7 @@ import static org.junit.Assume.assumeThat;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -21,6 +22,8 @@ import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.experimental.theories.*;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 import br.usp.poli.takiyama.acfove.AggParfactor.AggParfactorBuilder;
 import br.usp.poli.takiyama.cfove.StdParfactor;
@@ -30,6 +33,7 @@ import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.Distribution;
 import br.usp.poli.takiyama.common.Factor;
 import br.usp.poli.takiyama.common.InequalityConstraint;
+import br.usp.poli.takiyama.common.InputOutput;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.SplitResult;
 import br.usp.poli.takiyama.common.StdDistribution;
@@ -45,6 +49,7 @@ import br.usp.poli.takiyama.prv.StdPrv;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
 import br.usp.poli.takiyama.utils.Lists;
+import br.usp.poli.takiyama.utils.MathUtils;
 import br.usp.poli.takiyama.utils.Sets;
 
 
@@ -536,5 +541,111 @@ public class AggParfactorTest {
 			assertThat(result, equalTo(answer));
 		}
 		
+	}
+
+
+	@RunWith(Parameterized.class)
+	public static class SimplificationTest {
+		
+		private static int populationSize = 3;
+		
+		private static LogicalVariable a = StdLogicalVariable.getInstance("A", "x", populationSize);
+		private static LogicalVariable b = StdLogicalVariable.getInstance("B", "x", populationSize);
+		private static LogicalVariable e = StdLogicalVariable.getInstance("E", "x", populationSize);
+		
+		private static Constant x1 = Constant.getInstance("x1");
+		private static Constant x2 = Constant.getInstance("x2");
+		private static Constant x3 = Constant.getInstance("x3");
+		
+		private static Prv p = StdPrv.getBooleanInstance("p", a, b);
+		private static Prv p_a_x3 = StdPrv.getBooleanInstance("p", a, x3);
+		private static Prv p_x2_x3 = StdPrv.getBooleanInstance("p", x2, x3);
+		private static Prv c = StdPrv.getBooleanInstance("c", b);
+		private static Prv c_x3 = StdPrv.getBooleanInstance("c", x3);
+		private static Prv c_b_e = StdPrv.getBooleanInstance("c", b, e);
+		private static Prv c_x3_e = StdPrv.getBooleanInstance("c", x3, e);
+		private static Prv h = StdPrv.getBooleanInstance("h", b);
+		private static Prv h_x3 = StdPrv.getBooleanInstance("h", x3);
+		
+		private static Constraint a_x1 = InequalityConstraint.getInstance(a, x1);
+		private static Constraint a_b = InequalityConstraint.getInstance(a, b);
+		private static Constraint b_x1 = InequalityConstraint.getInstance(b, x1);
+		private static Constraint b_x2 = InequalityConstraint.getInstance(b, x2);
+		private static Constraint e_x1 = InequalityConstraint.getInstance(e, x1);
+		
+		private static List<BigDecimal> vals = new ArrayList<BigDecimal>();
+		
+		@Parameters
+		public static Collection<Object[]> data() {
+			
+			InputOutput<Parfactor, Parfactor> inOut = InputOutput.getInstance();
+			
+			// test 1
+			
+			Parfactor in = new AggParfactorBuilder(p, c, Or.OR).constraints(b_x1, b_x2).build();
+			Parfactor out = new AggParfactorBuilder(p_a_x3, c_x3, Or.OR).build();
+			
+			inOut.add(in, out);
+			
+			// test 2
+			
+			vals = Lists.listOf(
+					BigDecimal.valueOf(0.2), 
+					BigDecimal.valueOf(0.3));
+			in = new AggParfactorBuilder(p, c, Or.OR).constraints(b_x1, b_x2, a_b, a_x1).values(vals).build();
+			
+			vals = Lists.listOf(
+					BigDecimal.valueOf(0.2), 
+					BigDecimal.ZERO, 
+					BigDecimal.ZERO, 
+					BigDecimal.valueOf(0.3));
+			out = new StdParfactorBuilder().variables(p_x2_x3, c_x3).values(vals).build();
+			
+			inOut.add(in, out);
+			
+			// test 3
+			
+			vals = Lists.listOf(
+					BigDecimal.valueOf(0.2), 
+					BigDecimal.valueOf(0.3));
+			in = new AggParfactorBuilder(p, c_b_e, Or.OR).constraints(b_x1, b_x2, a_b, a_x1, e_x1).values(vals).build();
+			
+			vals = Lists.listOf(
+					MathUtils.pow(BigDecimal.valueOf(0.2), 1, 2), 
+					BigDecimal.ZERO, 
+					BigDecimal.ZERO, 
+					MathUtils.pow(BigDecimal.valueOf(0.3), 1, 2));
+			out = new StdParfactorBuilder().constraints(e_x1).variables(p_x2_x3, c_x3_e).values(vals).build();
+
+			inOut.add(in, out);
+			
+			// test 4
+			
+			vals = Lists.listOf(
+					BigDecimal.valueOf(0.2), 
+					BigDecimal.valueOf(0.3), 
+					BigDecimal.valueOf(0.5), 
+					BigDecimal.valueOf(0.7));
+			in = new AggParfactorBuilder(p, c, Or.OR).constraints(b_x1, b_x2).context(h).values(vals).build();
+
+			out = new AggParfactorBuilder(p_a_x3, c_x3, Or.OR).context(h_x3).values(vals).build();
+			
+			inOut.add(in, out);
+			
+			return inOut.toCollection();
+		}
+		
+		private Parfactor input;
+		private Parfactor expected;
+		
+		public SimplificationTest(Parfactor input, Parfactor expected) {
+			this.input = input;
+			this.expected = expected;
+		}
+		
+		@Test
+		public void testSimplicationOfLogicalVariables() {
+			assertEquals(expected, input.simplifyLogicalVariables());
+		}
 	}
 }

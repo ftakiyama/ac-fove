@@ -3,9 +3,8 @@ package br.usp.poli.takiyama.acfove;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -32,7 +31,6 @@ import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.Operator;
 import br.usp.poli.takiyama.prv.Prv;
 import br.usp.poli.takiyama.prv.RangeElement;
-import br.usp.poli.takiyama.prv.Replaceable;
 import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.StdPrv;
 import br.usp.poli.takiyama.prv.Substitution;
@@ -912,6 +910,145 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 		
 	}
 	
+	// TODO if you like spaghetti. here it is
+	private class Simplifier {
+		
+		private Parfactor simplified;
+		private Set<Constraint> unaryConstraints;
+		private LogicalVariable extraVariable;
+		
+		private Simplifier(AggregationParfactor parfactor) {
+			this.unaryConstraints = new HashSet<Constraint>();
+			setSimplified(parfactor);
+			this.extraVariable = parfactor.extraVariable();
+		}
+		
+		/**
+		 * Sets the simplified parfactor with the specified parfactor, updating
+		 * the set of unary constraints.
+		 */
+		private void setSimplified(Parfactor parfactor) throws IllegalArgumentException {
+			if (parfactor == null) {
+				throw new IllegalArgumentException();
+			}
+			simplified = parfactor;
+			unaryConstraints.clear();
+			for (Constraint constraint : simplified.constraints()) {
+				if (constraint.isUnary()) {
+					unaryConstraints.add(constraint);
+				}
+			}
+		}
+		
+		/**
+		 * Replaces all logical variable constrained to a single individual
+		 * with this individual
+		 */
+		private Parfactor simplify() {
+			LinkedList<LogicalVariable> queue  = getVariablesInConstraints();
+			while (!queue.isEmpty()) {
+				LogicalVariable logicalVariable = queue.poll();
+				int populationSize = logicalVariable
+						.numberOfIndividualsSatisfying(unaryConstraints);
+				switch (populationSize) {
+				case 0:
+					return StdParfactor.getInstance();
+				case 1:
+					Substitution sub = getSubstitution(logicalVariable);
+					if (logicalVariable.equals(extraVariable)) {
+						return simplifyAggregation(sub).simplifyLogicalVariables();
+					} else {
+						queue.addAll(variablesInBinaryConstraintsInvolving(logicalVariable));
+						setSimplified(simplified.apply(sub));
+					}
+					break;
+				default:
+					break;
+				}
+			}
+			
+			return simplified;
+		}
+		
+		/**
+		 * Add logical variables from constraints from parfactor to a queue
+		 */
+		private LinkedList<LogicalVariable> getVariablesInConstraints() {
+			Set<LogicalVariable> buffer = new HashSet<LogicalVariable>();
+			for (Constraint c : simplified.constraints()) {
+				buffer.addAll(c.logicalVariables());
+			}
+			return new LinkedList<LogicalVariable>(buffer);
+		}
+		
+		/**
+		 * When a logical variable is constrained to a single individual, 
+		 * builds the substitution that replaces the logical variable by this
+		 * individual.
+		 */
+		private Substitution getSubstitution(LogicalVariable lv) {
+			Term loneGuy = lv.individualsSatisfying(unaryConstraints).iterator().next();
+			Binding bind = Binding.getInstance(lv, loneGuy);
+			return Substitution.getInstance(bind);
+		}
+		
+		/**
+		 * Returns the set of logical variables belonging to binary constraints
+		 * that involve the specified logical variable.
+		 */
+		private Set<LogicalVariable> variablesInBinaryConstraintsInvolving(LogicalVariable lv) {
+			Set<Constraint> binaryConstraints = new HashSet<Constraint>(simplified.constraints());
+			binaryConstraints.removeAll(unaryConstraints);
+			
+			Set<LogicalVariable> otherVariables = new HashSet<LogicalVariable>();
+			for (Constraint binary : binaryConstraints) {
+				if (binary.contains(lv) && binary.firstTerm().equals(lv)) {
+					otherVariables.add((LogicalVariable) binary.secondTerm());
+				} else if (binary.contains(lv) && binary.secondTerm().equals(lv)) {
+					otherVariables.add((LogicalVariable) binary.firstTerm());
+				}
+			}
+			return otherVariables;
+		}
+		
+		
+		/// buiuuuuuuuu
+		private Parfactor simplifyAggregation(Substitution sub) {
+			
+			// casting aggregation parfactor
+			AggregationParfactor ap = (AggregationParfactor) simplified;
+			
+			// list with parent, child and context variables
+			List<Prv> parentChildContext = Lists.union(ap.prvs(), ap.context());
+			parentChildContext = Lists.apply(sub, parentChildContext);
+			
+			// new factor structure after simplification
+			Factor newStructure = Factor.getInstance(parentChildContext);
+			
+			// lets fill the array of factor values
+			List<BigDecimal> values = new ArrayList<BigDecimal>();
+			for (Tuple<RangeElement> tuple : newStructure) {
+				if (tuple.get(0).equals(tuple.get(1))) {
+					// correction factors
+					Prv parent = parentChildContext.get(0);
+					int rp = parent.groundSetSize(ap.constraintsNotOnExtra());
+					Prv child = parentChildContext.get(1);
+					int rc = child.groundSetSize(ap.constraintsNotOnExtra());
+					// gets the value from old factor by removing the child
+					BigDecimal value = ap.factor().getValue(tuple.remove(1));
+					BigDecimal correctedValue = MathUtils.pow(value, rp, rc);
+					values.add(correctedValue);
+				} else {
+					values.add(BigDecimal.ZERO);
+				}
+			}
+			Parfactor result = new StdParfactorBuilder()
+					.constraints(ap.constraintsNotOnExtra())
+					.variables(parentChildContext).values(values).build();
+			return result;
+		}
+	}
+	
 	
 	/* ************************************************************************
 	 *    Constructors
@@ -1168,7 +1305,8 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 	
 	@Override
 	public Parfactor simplifyLogicalVariables() {
-		//return null;
+		Simplifier parfactor = new Simplifier(this);
+		return parfactor.simplify();
 	}
 
 	
@@ -1314,6 +1452,7 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 	public String toString() {
 		return "p = " + parent 
 				+ ", c = " + child
+				+ ", V = " + context
 				+ ", C_A = " + constraintsOnExtra
 				+ ", C = " + constraintsNotOnExtra 
 				+ "\n" + factor;	

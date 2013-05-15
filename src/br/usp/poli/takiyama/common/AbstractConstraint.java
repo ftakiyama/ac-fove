@@ -1,5 +1,8 @@
 package br.usp.poli.takiyama.common;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.Term;
@@ -76,7 +79,7 @@ abstract class AbstractConstraint implements Constraint {
 	 * @throws IllegalStateException If t1 is not a {@link LogicalVariable}
 	 */
 	private Binding getBinding(Term t1, Term t2) throws IllegalStateException {
-		if (t1 instanceof LogicalVariable) {
+		if (t1.isVariable()) {
 			LogicalVariable lv = (LogicalVariable) t1;
 			return Binding.getInstance(lv, t2);
 		} else {
@@ -92,83 +95,15 @@ abstract class AbstractConstraint implements Constraint {
 	}
 	
 	
-
-//	/**
-//	 * Creates a inequality constraint based on substitution. For instance,
-//	 * if substitution is X/t, then the corresponding constraint is
-//	 * X &ne; t.
-//	 * @param substitution
-//	 * @return
-//	 */
-//	public static Constraint getInequalityConstraintFromBinding(Binding substitution) {
-//		if (substitution.secondTerm() instanceof Constant) { // ugly
-//			return new Constraint(substitution.firstTerm(), (Constant) substitution.secondTerm());
-//		} else if (substitution.secondTerm() instanceof StdLogicalVariable) { // argh
-//			return new Constraint(substitution.firstTerm(), (StdLogicalVariable) substitution.secondTerm());
-//		} else {
-//			return null; // it should never get here
-//		}
-//	}
-	
-//	/**
-//	 * Returns true if the second term is Constant, false otherwise.
-//	 * @return True if the second term is Constant, false otherwise.
-//	 */
-//	public boolean secondTermIsConstant() {
-//		return (this.secondTerm instanceof Constant);
-//	}
-//	
-//	/**
-//	 * Returns true if the second term is a LogicalVariable, false otherwise.
-//	 * @return True if the second term is a LogicalVariable, false otherwise.
-//	 */
-//	public boolean secondTermIsLogicalVariable() {
-//		return (this.secondTerm instanceof StdLogicalVariable);
-//	}
-	
-	
-//	@Override
-//	public boolean equals(Object other) {
-//		// Tests if both refer to the same object
-//		if (this == other)
-//	    	return true;
-//		// Tests if the Object is an instance of this class
-//	    if (!(other instanceof Constraint))
-//	    	return false;
-//	    // Tests if both have the same attributes
-//	    Constraint targetObject = (Constraint) other;
-//	    if (this.secondTerm instanceof StdLogicalVariable 
-//	    		&& targetObject.secondTerm instanceof StdLogicalVariable)  { // tests the case (A!=B).equals(B!=A) 
-//	    	StdLogicalVariable thisSt = (StdLogicalVariable) this.secondTerm;
-//	    	StdLogicalVariable otherSt = (StdLogicalVariable) targetObject.secondTerm;
-//	    	
-//	    	// direct
-//	    	boolean directCompare = 
-//	    		((this.firstTerm == null) 
-//	    				? (targetObject.firstTerm == null) 
-//	    				: (this.firstTerm.equals(targetObject.firstTerm))) 
-//	    		&&
-//	    		((this.secondTerm == null) 
-//	    				? (targetObject.secondTerm == null) 
-//	    				: (this.secondTerm.equals(targetObject.secondTerm)));
-//	    	
-//	    	// inverse
-//	    	boolean inverseCompare = 
-//	    		((this.firstTerm == null) 
-//	    				? (otherSt == null) 
-//	    				: (this.firstTerm.equals(otherSt))) 
-//	    		&&
-//	    		((thisSt == null) 
-//	    				? (targetObject.firstTerm == null) 
-//	    				: (thisSt.equals(targetObject.firstTerm)));
-//	    	
-//	    	return (directCompare || inverseCompare);
-//	    }
-//	    return ((this.firstTerm == null) ? 
-//	    		 targetObject.firstTerm == null : 
-//		    		 this.firstTerm.equals(targetObject.firstTerm)) &&
-//    		   ((this.secondTerm == null) ? 
-//    		     targetObject.secondTerm == null : 
-//    		     this.secondTerm.equals(targetObject.secondTerm));	    		
-//	}
+	@Override
+	public Set<LogicalVariable> logicalVariables() {
+		Set<LogicalVariable> logicalVariables = new HashSet<LogicalVariable>(2);
+		if (firstTerm.isVariable()) {
+			logicalVariables.add((LogicalVariable) firstTerm);
+		}
+		if (secondTerm.isVariable()) {
+			logicalVariables.add((LogicalVariable) secondTerm);
+		}
+		return logicalVariables;
+	}
 }

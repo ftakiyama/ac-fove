@@ -1,6 +1,9 @@
 package br.usp.poli.takiyama.common;
 
+import java.util.Set;
+
 import br.usp.poli.takiyama.prv.Binding;
+import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.Replaceable;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
@@ -143,6 +146,15 @@ public interface Constraint extends Replaceable<Constraint> {
 	 * otherwise.
 	 */
 	public boolean isUnary();
+	
+	
+	/**
+	 * Returns a set containing all logical variables in this constraint. Note
+	 * that this set has a maximum size of 2.
+	 * 
+	 * @return A set containing all logical variables in this constraint
+	 */
+	public Set<LogicalVariable> logicalVariables();
 	
 	
 	@Override

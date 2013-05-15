@@ -2,6 +2,7 @@ package br.usp.poli.takiyama.utils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -121,6 +122,11 @@ public final class Lists {
 		list.add(e2);
 		list.add(e3);
 		return list;
+	}
+	
+	
+	public static final <T> List<T> listOf(T ... elements) {
+		return Arrays.asList(elements);
 	}
 
 	

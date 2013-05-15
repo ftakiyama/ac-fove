@@ -325,10 +325,9 @@ public final class StdParfactor implements Parfactor {
 					return StdParfactor.getInstance();
 				case 1:
 					Substitution sub = getSubstitution(logicalVariable);
-					//removeUnaryConstraintsInvolving(logicalVariable);
 					queue.addAll(variablesInBinaryConstraintsInvolving(logicalVariable));
 					constraints = Sets.apply(sub, constraints);
-					unaryConstraints = getUnaryConstraints(); //Sets.apply(sub, unaryConstraints); /// << this is not enough, must sync constraints !!!!!
+					unaryConstraints = getUnaryConstraints(); 
 					variables = Lists.apply(sub, variables);
 					break;
 				default:
@@ -347,12 +346,7 @@ public final class StdParfactor implements Parfactor {
 		private LinkedList<LogicalVariable> getVariablesInConstraints() {
 			Set<LogicalVariable> buffer = new HashSet<LogicalVariable>();
 			for (Constraint c : parfactor.constraints()) {
-				if (c.firstTerm().isVariable()) {
-					buffer.add((LogicalVariable) c.firstTerm());
-				}
-				if (c.secondTerm().isVariable()) {
-					buffer.add((LogicalVariable) c.secondTerm());
-				}
+				buffer.addAll(c.logicalVariables());
 			}
 			return new LinkedList<LogicalVariable>(buffer);
 		}

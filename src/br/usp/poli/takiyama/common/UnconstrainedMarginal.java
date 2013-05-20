@@ -7,10 +7,12 @@ import java.util.Set;
 
 import br.usp.poli.takiyama.prv.Prv;
 import br.usp.poli.takiyama.prv.StdPrv;
+import br.usp.poli.takiyama.prv.Substitution;
+import br.usp.poli.takiyama.utils.Sets;
 
 public class UnconstrainedMarginal implements Marginal<Prv> {
 
-	private final Set<? extends Prv> eliminables;
+	private final Set<Prv> eliminables;
 	private final Distribution distribution;
 	
 	/* ************************************************************************
@@ -21,7 +23,7 @@ public class UnconstrainedMarginal implements Marginal<Prv> {
 	 * Creates an empty {@link UnconstrainedMarginal}.
 	 */
 	private UnconstrainedMarginal() {
-		eliminables = new HashSet<StdPrv>(0);
+		eliminables = new HashSet<Prv>(0);
 		distribution = StdDistribution.of();
 	}
 	
@@ -31,8 +33,8 @@ public class UnconstrainedMarginal implements Marginal<Prv> {
 	 * variables.
 	 * @param distribution A distribution
 	 */
-	private UnconstrainedMarginal(Collection<StdPrv> eliminables, Distribution distribution) {
-		this.eliminables = new HashSet<StdPrv>(eliminables);
+	private UnconstrainedMarginal(Collection<? extends Prv> eliminables, Distribution distribution) {
+		this.eliminables = new HashSet<Prv>(eliminables);
 		this.distribution = StdDistribution.of(distribution);
 	}
 	
@@ -69,7 +71,7 @@ public class UnconstrainedMarginal implements Marginal<Prv> {
 	 * @param distribution A distribution
 	 * @return an {@link UnconstrainedMarginal} with the specified parameters.
 	 */
-	public static UnconstrainedMarginal getInstance(Collection<StdPrv> eliminables, 
+	public static UnconstrainedMarginal getInstance(Collection<? extends Prv> eliminables, 
 			Distribution distribution) {
 		return new UnconstrainedMarginal(eliminables, distribution);
 	}
@@ -77,6 +79,26 @@ public class UnconstrainedMarginal implements Marginal<Prv> {
 	
 	public static UnconstrainedMarginal getInstance(Prv eliminable, Parfactor p) {
 		return new UnconstrainedMarginal(eliminable, p);
+	}
+	
+	/**
+	 * Returns the union of the specified {@link SplitResult}.
+	 * 
+	 * @param split A split result
+	 * @param anotherSplit Another split result
+	 * @return the union of the specified {@link SplitResult}.
+	 */
+	public static UnconstrainedMarginal getInstance(SplitResult split, SplitResult anotherSplit) {
+		
+		Distribution dist = split.residue();
+		dist = dist.add(split.result());
+		dist = dist.addAll(anotherSplit.residue());
+		dist = dist.add(anotherSplit.result());
+		
+		Set<Prv> elim = split.eliminables();
+		elim.addAll(anotherSplit.eliminables());
+		
+		return new UnconstrainedMarginal(elim, dist);
 	}
 	
 	/* ************************************************************************
@@ -96,6 +118,31 @@ public class UnconstrainedMarginal implements Marginal<Prv> {
 	@Override
 	public boolean isEmpty() {
 		return distribution.isEmpty();
+	}
+	
+	/* ************************************************************************
+	 *    Setters
+	 * ************************************************************************/
+
+	@Override
+	public Marginal<Prv> add(Parfactor p) {
+		Distribution dist = StdDistribution.of(distribution);
+		dist = dist.add(p);
+		return UnconstrainedMarginal.getInstance(eliminables, dist);
+	}
+	
+	@Override
+	public Marginal<Prv> addAll(Distribution d) {
+		Distribution dist = StdDistribution.of(distribution);
+		dist = dist.addAll(d);
+		return UnconstrainedMarginal.getInstance(eliminables, dist);
+	}
+	
+	public Marginal<Prv> apply(Substitution s) {
+		Distribution substitutedDistribution = distribution.apply(s);
+		Set<Prv> substitutedEliminables = Sets.apply(s, eliminables);
+		return UnconstrainedMarginal.getInstance(substitutedEliminables, 
+				substitutedDistribution);
 	}
 	
 	/* ************************************************************************

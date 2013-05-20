@@ -558,7 +558,7 @@ public class Factor implements Iterable<Tuple<RangeElement>> {
 	
 	@Override
 	public String toString() {
-		String result = this.name + "\n";
+		String result = ((name == null || name.length() == 0) ? "" : this.name + "\n");
 		
 		if (this.variables.isEmpty()) {
 			return this.name + " is empty.";

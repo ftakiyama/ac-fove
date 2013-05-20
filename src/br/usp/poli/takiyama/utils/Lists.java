@@ -292,6 +292,8 @@ public final class Lists {
 				replaced.add(element.apply(s));
 			} catch (IllegalArgumentException e) {
 				// invalid replaceable is not added to the list
+			} catch (IllegalStateException e) {
+				// invalid replaceable is not added to the set
 			}
 		}
 		return replaced;

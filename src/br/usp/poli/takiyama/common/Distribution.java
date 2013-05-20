@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
+import br.usp.poli.takiyama.prv.Substitution;
+
 /**
  * A set of parfactors that represents a joint probability distribution.
  * <p>
@@ -90,6 +92,16 @@ public interface Distribution {
 	 * @return A set containing all elements of this distribution.
 	 */
 	public Set<Parfactor> toSet();
+	
+	/**
+	 * Returns the result of applying the specified substitution to all 
+	 * parfactors in this distribution.
+	 * 
+	 * @param s The substitution to apply
+	 * @return The result of applying the specified substitution to all 
+	 * parfactors in this distribution.
+	 */
+	public Distribution apply(Substitution s);
 	
 	@Override
 	public boolean equals(Object o);

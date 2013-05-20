@@ -11,13 +11,10 @@ import static org.junit.Assume.assumeThat;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.experimental.theories.*;
@@ -26,7 +23,6 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import br.usp.poli.takiyama.acfove.AggParfactor.AggParfactorBuilder;
-import br.usp.poli.takiyama.cfove.StdParfactor;
 import br.usp.poli.takiyama.cfove.StdParfactor.StdParfactorBuilder;
 import br.usp.poli.takiyama.common.AggregationParfactor;
 import br.usp.poli.takiyama.common.Constraint;

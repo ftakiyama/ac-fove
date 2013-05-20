@@ -157,5 +157,15 @@ public class Sandbox {
 			int x;
 		}
 	}
-	
+
+	public static class SetTest {
+		@Test
+		public void testEmptySet() {
+			Set<String> setWithInitialCapacity = new HashSet<String>(0);
+			Set<String> setWithoutInitialCapacity = new HashSet<String>();
+			
+			assertFalse(setWithInitialCapacity.contains(null));
+			assertFalse(setWithoutInitialCapacity.contains(null));
+		}
+	}
 }

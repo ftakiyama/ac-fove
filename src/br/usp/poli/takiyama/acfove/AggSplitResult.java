@@ -49,6 +49,11 @@ public final class AggSplitResult implements SplitResult {
 		this.marginal = UnconstrainedMarginal.getInstance(eliminable, residue);
 	}
 	
+	private AggSplitResult(Parfactor result, Marginal<? extends Prv> marginal) {
+		this.result = result;
+		this.marginal = marginal;
+	}
+	
 
 	/* ************************************************************************
 	 *    Static factories
@@ -58,6 +63,10 @@ public final class AggSplitResult implements SplitResult {
 		return new AggSplitResult(result, residue, eliminable);
 	}
 	
+	public static AggSplitResult getInstance(Parfactor result, Marginal<? extends Prv> marginal) {
+		return new AggSplitResult(result, marginal);
+	}
+		
 	/* ************************************************************************
 	 *    Getters
 	 * ************************************************************************/

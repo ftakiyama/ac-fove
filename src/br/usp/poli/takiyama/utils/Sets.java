@@ -27,6 +27,38 @@ public final class Sets {
 	}
 	
 	
+	public static final <T> Set<T> union(Set<T> set1, Set<T> set2, Set<T> set3, Set<T> set4) {
+		Set<T> union = new HashSet<T>();
+		union.addAll(set1);
+		union.addAll(set2);
+		union.addAll(set3);
+		union.addAll(set4);
+		return union;
+	}
+	
+	
+	public static final <T> Set<T> setOf(T e1) {
+		Set<T> set = new HashSet<T>();
+		set.add(e1);
+		return set;
+	}
+	
+	public static final <T> Set<T> setOf(T e1, T e2) {
+		Set<T> set = new HashSet<T>();
+		set.add(e1);
+		set.add(e2);
+		return set;
+	}
+	
+	public static final <T> Set<T> setOf(T e1, T e2, T e3) {
+		Set<T> set = new HashSet<T>();
+		set.add(e1);
+		set.add(e2);
+		set.add(e3);
+		return set;
+	}
+	
+	
 	/**
 	 * Returns the result of applying the specified substitution to the
 	 * elements of the specified set.
@@ -47,6 +79,8 @@ public final class Sets {
 			try {
 				replaced.add(element.apply(s));
 			} catch (IllegalArgumentException e) {
+				// invalid replaceable is not added to the set
+			} catch (IllegalStateException e) {
 				// invalid replaceable is not added to the set
 			}
 		}

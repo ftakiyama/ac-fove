@@ -52,10 +52,17 @@ public final class StdSplitResult implements SplitResult {
 		this.residue = StdDistribution.of(residue);
 	}
 	
-//	private StdSplitResult(Parfactor result, Distribution residue) {
-//		this.result = result; // use defensive copy!
-//		this.residue = residue;
-//	}
+	
+	/**
+	 * Creates a split result with two or more parfactors
+	 * 
+	 * @param result The result of the split
+	 * @param residue The residue of the split
+	 */
+	private StdSplitResult(Parfactor result, Distribution residue) {
+		this.result = result; // use defensive copy?
+		this.residue = residue;
+	}
 	
 	
 	/* ************************************************************************
@@ -79,6 +86,18 @@ public final class StdSplitResult implements SplitResult {
 	 * @return A split result with two parfactors.
 	 */
 	public static SplitResult getInstance(Parfactor result, Parfactor residue) {
+		return new StdSplitResult(result, residue);
+	}
+	
+	
+	/**
+	 * Returns a split result with two or more parfactors
+	 * 
+	 * @param result The result of the split
+	 * @param residue The residue of the split
+	 * @return A split result with two or more parfactors 
+	 */
+	public static SplitResult getInstance(Parfactor result, Distribution residue) {
 		return new StdSplitResult(result, residue);
 	}
 	

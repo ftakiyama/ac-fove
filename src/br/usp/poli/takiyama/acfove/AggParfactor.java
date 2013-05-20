@@ -28,6 +28,8 @@ import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
+import br.usp.poli.takiyama.prv.LogicalVariableNameGenerator;
+import br.usp.poli.takiyama.prv.NameGenerator;
 import br.usp.poli.takiyama.prv.Operator;
 import br.usp.poli.takiyama.prv.Prv;
 import br.usp.poli.takiyama.prv.RangeElement;
@@ -1308,7 +1310,7 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 		Simplifier parfactor = new Simplifier(this);
 		return parfactor.simplify();
 	}
-
+	
 	
 	@Override
 	public void accept(ParfactorVisitor visitor, Parfactor p) {

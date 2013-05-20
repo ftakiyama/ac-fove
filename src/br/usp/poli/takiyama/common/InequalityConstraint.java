@@ -1,5 +1,6 @@
 package br.usp.poli.takiyama.common;
 
+import java.util.IllegalFormatException;
 import java.util.Iterator;
 
 import br.usp.poli.takiyama.prv.Binding;
@@ -32,10 +33,11 @@ public final class InequalityConstraint extends AbstractConstraint {
 	 * @param firstTerm The left-hand side of the constraint 
 	 * @param secondTerm The right-hand side of the constraint
 	 * @return An inequality constraint
-	 * @throws IllegalArgumentException if both terms are {@link Constant}s or 
-	 * if both terms are equal
+	 * @throws IllegalArgumentException if both terms are equal
+	 * @throws IllegalStateException if both terms are {@link Constant}s
 	 */
-	private InequalityConstraint(Term t1, Term t2) throws IllegalArgumentException {
+	private InequalityConstraint(Term t1, Term t2) 
+			throws IllegalArgumentException, IllegalStateException {
 		if (t1.equals(t2)) {
 			// trying to create a constraint with equal terms
 			throw new IllegalArgumentException();
@@ -45,7 +47,7 @@ public final class InequalityConstraint extends AbstractConstraint {
 			secondTerm = t2;
 		} else {
 			// trying to create a constraint with two constants
-			throw new IllegalArgumentException();
+			throw new IllegalStateException();
 		}
 	}
 	
@@ -72,7 +74,8 @@ public final class InequalityConstraint extends AbstractConstraint {
 	 * ************************************************************************/
 	
 	@Override
-	public Constraint apply(Substitution s) throws IllegalArgumentException {
+	public Constraint apply(Substitution s) throws IllegalArgumentException,
+			IllegalStateException {
 		Term t1 = this.firstTerm;
 		Term t2 = this.secondTerm;
 		for (Iterator<LogicalVariable> it = s.getSubstitutedIterator(); it.hasNext(); ) {

@@ -5,10 +5,12 @@ import java.util.Set;
 import br.usp.poli.takiyama.common.Distribution;
 import br.usp.poli.takiyama.common.RandomVariableSet;
 import br.usp.poli.takiyama.common.StdDistribution;
+import br.usp.poli.takiyama.prv.Prv;
 
 public abstract class AbstractMacroOperation implements MacroOperation {
 	
-	private Distribution dist;
+	Distribution dist;
+	Set<? extends Prv> varsToEliminate;
 	
 	@Override
 	public Distribution distribution() {

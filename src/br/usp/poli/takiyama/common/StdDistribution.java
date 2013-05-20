@@ -5,6 +5,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import br.usp.poli.takiyama.prv.Substitution;
+import br.usp.poli.takiyama.utils.Sets;
+
 /**
  * Standard implementation of {@link Distribution}. This implementation is a
  * immutable set of {@link Parfactor}s.
@@ -81,6 +84,25 @@ public final class StdDistribution implements Distribution {
 	}
 	
 	/**
+	 * Returns a distribution with the specified parfactors. 
+	 * 
+	 * @param parfactors An array of parfactors.
+	 * @throws NullPointerException If any of the specified parfators is 
+	 * <code>null</code>.
+	 */
+	public static Distribution of(Parfactor ... parfactors) throws NullPointerException {
+		Set<Parfactor> set = new HashSet<Parfactor>((int) (parfactors.length / 0.75));
+		for (Parfactor p : parfactors) {
+			if (p == null) {
+				throw new NullPointerException();
+			} else {
+				set.add(p);
+			}
+		}
+		return new StdDistribution(set);
+	}
+	
+	/**
 	 * Creates a distribution with the specified collection of parfactors
 	 * @param c A collection of parfactors
 	 * @throws NullPointerException If the specified Collection contains a 
@@ -136,14 +158,11 @@ public final class StdDistribution implements Distribution {
 	
 	@Override
 	public Distribution addAll(Distribution d) {
-		return new StdDistribution(d.toSet());
+		return new StdDistribution(Sets.union(d.toSet(), pSet));
 	}
 	
 	@Override
 	public boolean contains(Object o) throws NullPointerException {
-		if (o == null) {
-			throw new NullPointerException();
-		}
 		return pSet.contains(o);
 	}
 
@@ -170,6 +189,11 @@ public final class StdDistribution implements Distribution {
 	@Override
 	public Set<Parfactor> toSet() {
 		return new HashSet<Parfactor>(pSet);
+	}
+	
+	@Override
+	public Distribution apply(Substitution s) {
+		return new StdDistribution(Sets.apply(s, pSet));
 	}
 
 	/* ************************************************************************

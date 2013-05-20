@@ -9,9 +9,12 @@ import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-public class Substitution {
+import br.usp.poli.takiyama.common.Constraint;
+import br.usp.poli.takiyama.utils.Lists;
+
+public final class Substitution {
 	
-	private Map<LogicalVariable, Term> bindings;
+	private final Map<LogicalVariable, Term> bindings;
 	
 	
 	/* ************************************************************************
@@ -80,10 +83,32 @@ public class Substitution {
 	 * @return A new substitution built from the binding given.
 	 */
 	public static Substitution getInstance(Binding b1, Binding b2) {
-		List<Binding> args = new ArrayList<Binding>(2);
-		args.add(b1);
-		args.add(b2);
+		List<Binding> args = Lists.listOf(b1, b2);
 		return new Substitution(args);
+	}
+	
+	
+	/**
+	 * Returns a substitution based on three bindings.
+	 * 
+	 * @param b1 A {@link Binding}.
+	 * @param b2 A {@link Binding}.
+	 * @param b3 A {@link Binding}.
+	 * @return A new substitution built from the binding given.
+	 */
+	public static Substitution getInstance(Binding b1, Binding b2, Binding b3) {
+		List<Binding> args = Lists.listOf(b1, b2, b3);
+		return new Substitution(args);
+	}
+	
+	
+	/**
+	 * Returns an empty substitution.
+	 * 
+	 * @return an empty substitution.
+	 */
+	public static Substitution getInstance() {
+		return new Substitution();
 	}
 	
 	
@@ -101,7 +126,7 @@ public class Substitution {
 		bindings.put(b.firstTerm(), b.secondTerm());
 	}
 	
-	
+		
 	/* ************************************************************************
 	 *    Getters
 	 * ************************************************************************/
@@ -284,6 +309,36 @@ public class Substitution {
 		} else {
 			return asList().get(0);
 		}
+	}
+	
+	
+	/**
+	 * Returns <code>true</code> if this substitution is consistent with the
+	 * specified set of constraints.
+	 * <p>
+	 * A substitution is consistent with a set of constraints when applying
+	 * the former to the latter do generates only valid expressions.
+	 * </p>
+	 * 
+	 * @param constraints The set of constraints to test this substitution
+	 * against
+	 * @return <code>true</code> if this substitution is consistent with the
+	 * specified set of constraints, <code>false</code> otherwise.
+	 */
+	public boolean isConsistentWith(Set<Constraint> constraints) {
+		int size = 0;
+		for (Constraint constraint : constraints) {
+			try {
+				constraint.apply(this);
+				size++;
+			} catch (IllegalStateException e) {
+				// takes into account valid Constant-only constraints 
+				size++;
+			} catch (IllegalArgumentException e) {
+				// ignore invalid constraints
+			} 
+		}
+		return (constraints.size() == size);
 	}
 	
 	

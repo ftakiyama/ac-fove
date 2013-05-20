@@ -53,10 +53,13 @@ public interface Constraint extends Replaceable<Constraint> {
 	 * @return The constraint that results from the application of the
 	 * specified substitution to this constraint, following the rules 
 	 * specified above.
-	 * @throws IllegalStateException If the resulting constraint is always
-	 * false
+	 * @throws IllegalArgumentException if the resulting constraint is 
+	 * always false
+	 * @throws IllegalStateException If the resulting constraint involves only
+	 * constants
 	 */
-	public Constraint apply(Substitution s) throws IllegalArgumentException;
+	public Constraint apply(Substitution s) throws IllegalArgumentException,
+			IllegalStateException;
 	
 		
 	/**

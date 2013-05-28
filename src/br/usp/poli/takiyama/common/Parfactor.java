@@ -10,7 +10,7 @@ import br.usp.poli.takiyama.prv.Replaceable;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
 
-public interface Parfactor extends VisitableParfactor, Replaceable<Parfactor> { // or it is the other way around?
+public interface Parfactor extends VisitableParfactor, Replaceable<Parfactor> { // or it is the other way around? 
 	
 	// Getters
 	

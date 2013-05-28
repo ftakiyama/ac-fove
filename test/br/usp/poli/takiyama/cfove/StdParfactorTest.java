@@ -16,7 +16,6 @@ import br.usp.poli.takiyama.common.FactorTest;
 import br.usp.poli.takiyama.common.InequalityConstraint;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.SplitResult;
-import br.usp.poli.takiyama.common.StdSplitResult;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.CountingFormula;
@@ -92,9 +91,9 @@ public class StdParfactorTest {
 		Parfactor residue = new StdParfactorBuilder().constraints(ab, b0)
 				.variables(f, h).values(vals).build();
 		
-		SplitResult answer = StdSplitResult.getInstance(result, residue);
+		SplitResult answer = SplitResult.getInstance(result, residue);
 		
-		assertTrue(output.equals(answer));
+		assertEquals(output, answer);
 	}
 	
 	

@@ -21,7 +21,6 @@ import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.ParfactorVisitor;
 import br.usp.poli.takiyama.common.SplitResult;
 import br.usp.poli.takiyama.common.StdDistribution;
-import br.usp.poli.takiyama.common.StdSplitResult;
 import br.usp.poli.takiyama.common.Tuple;
 import br.usp.poli.takiyama.common.VisitableParfactor;
 import br.usp.poli.takiyama.prv.Binding;
@@ -465,7 +464,7 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 			@Override
 			public boolean isValid() {
 				return child.parameters().contains(x) 
-						&& child.parameters().contains(y);
+						&& child.parameters().contains(y);  
 			}
 
 			@Override
@@ -545,7 +544,7 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 			
 			@Override
 			public SplitResult split() {
-				return AggSplitResult.getInstance(result(), residue(), auxChild);
+				return SplitResult.getInstance(result(), residue(), auxChild);
 			}
 
 			private AggregationParfactor residue() {
@@ -617,7 +616,7 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 			
 			@Override
 			public SplitResult split() {
-				return StdSplitResult.getInstance(result(), residue());
+				return SplitResult.getInstance(result(), residue());
 			}
 			
 			private AggregationParfactor residue() {
@@ -689,11 +688,10 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 		
 		private Parfactor eliminate() {
 			Set<Constraint> constraints = parfactor.constraints();
-			Prv child = parfactor.child();
 			Factor factor = setFactor();
 			
 			Parfactor result = builder.constraints(constraints)
-					.variables(child).factor(factor).build();
+					.factor(factor).build();
 			
 			if (childHasParameterNotInParent()) {
 				LogicalVariable extraParameter = getExtraParameterFromChild();
@@ -855,7 +853,7 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 			List<Prv> vars = ap.context();
 			vars.add(0, ap.parent());
 			Parfactor parent = new StdParfactorBuilder()
-					.constraints(ap.constraints()).variables(vars)
+					.constraints(ap.constraints())//.variables(vars)
 					.factor(ap.factor()).build();
 			return parent;
 		}

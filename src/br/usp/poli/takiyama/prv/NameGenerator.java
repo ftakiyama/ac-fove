@@ -1,6 +1,7 @@
 package br.usp.poli.takiyama.prv;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 
@@ -11,11 +12,8 @@ import java.util.List;
 public final class NameGenerator {
 	
 	private static int count = 0;
-	//private static final HashMap<String, String> map = new HashMap<String, String>();
 	
-	/**
-	 * Substitutions are in the form renamed/old
-	 */
+	// Substitutions are in the form renamed/old
 	private static Substitution map = Substitution.getInstance();
 	
 	private NameGenerator() {
@@ -56,6 +54,35 @@ public final class NameGenerator {
 		return newVariable; 
 	}
 	
+	/**
+	 * Returns a substitution that replaces the specified collection of 
+	 * logical variables with new names.
+	 * 
+	 * @param oldVariables The logical variables to replace
+	 * @return a substitution that replaces the specified collection of 
+	 * logical variables with new names.
+	 */
+	public static Substitution rename(Collection<LogicalVariable> oldVariables) {
+		List<Binding> toRename = new ArrayList<Binding>(oldVariables.size());
+		List<Binding> toRestore = map.asList();
+		for (LogicalVariable old : oldVariables) {
+			String newName = getNewName();
+			LogicalVariable newVariable = old.rename(newName);
+			toRename.add(Binding.getInstance(old, newVariable));
+			toRestore.add(Binding.getInstance(newVariable, old));
+		}
+		map = Substitution.getInstance(toRestore);
+		return Substitution.getInstance(toRename);
+	}
+	
+	/**
+	 * Returns a new logical variable name.
+	 */
+	private static String getNewName() {
+		count++;
+		return "X" + count;
+	}
+	
 	
 	/**
 	 * Resets the count and clears the mapping of logical variables.
@@ -65,25 +92,10 @@ public final class NameGenerator {
 		map = Substitution.getInstance();
 	}
 	
-	
-//	/**
-//	 * Restore the old name of the specified logical variable.
-//	 * If the specified logical variable does not exist in the mapping, then
-//	 * returns the specified logical variable, unchanged.
-//	 * 
-//	 * @param lv The logical variable to restore.
-//	 * @return A new instance of the specified logical variable with its name
-//	 * changed to the old one, according to the internal mapping, or the 
-//	 * specified logical variable if there is no mapping that matches it.
-//	 */
-//	public static LogicalVariable restore(LogicalVariable lv) {
-//		if (map.containsKey(lv.value())) {
-//			return lv.rename(map.get(lv.value()));
-//		} else {
-//			return lv;
-//		}
-//	}
-	
+	/**
+	 * Returns the substitution that restores logical variable old names.
+	 * @return the substitution that restores logical variable old names.
+	 */
 	public static Substitution getOldNames() {
 		return map;
 	}

@@ -41,6 +41,7 @@ import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
 import br.usp.poli.takiyama.utils.Lists;
 import br.usp.poli.takiyama.utils.MathUtils;
+import br.usp.poli.takiyama.utils.Sets;
 
 
 @RunWith(Enclosed.class)
@@ -166,6 +167,64 @@ public class Sandbox {
 			
 			assertFalse(setWithInitialCapacity.contains(null));
 			assertFalse(setWithoutInitialCapacity.contains(null));
+		}
+		
+		private static class Person {
+			private String name;
+			private Person(String name) {
+				this.name = name;
+			}
+			private void setName(String name) {
+				this.name = name;
+			}
+			public String toString() {
+				return name;
+			}
+		}
+		
+		@Test
+		public void testSetReference() {
+			Person person = new Person("John");
+			Set<Person> s1 = Sets.setOf(person);
+			Set<Person> s2 = new HashSet<Person>(s1);
+			System.out.println("Before");
+			System.out.println(s1);
+			System.out.println(s2);
+			person.setName("James");
+			System.out.println("After");
+			System.out.println(s1);
+			System.out.println(s2);
+		}
+	}
+
+	public static class AssertTest {
+		@Test
+		public void testDirect() {
+			assertEquals(1, 2);
+			assertEquals(1, 1);
+		}
+		
+		@Test
+		public void testInverse() {
+			assertEquals(1, 1);
+			assertEquals(1, 2);
+		}
+	}
+
+	public static class MutabilityTest {
+		@Test
+		public void accessAndModifyValueInHashMap() {
+			// Creating a map whose value is a mutable object
+			HashMap<String, Set<String>> map = new HashMap<String, Set<String>>();
+			// Creating the value
+			Set<String> value = new HashSet<String>();
+			value.add("a");
+			value.add("b");
+			// Putting the value into the map
+			map.put("key", value);
+			// Retrieving the value and modifying it
+			map.get("key").add("c");
+			System.out.println(map);
 		}
 	}
 }

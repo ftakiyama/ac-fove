@@ -1,6 +1,11 @@
 package br.usp.poli.takiyama.utils;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import br.usp.poli.takiyama.prv.Replaceable;
@@ -33,6 +38,15 @@ public final class Sets {
 		union.addAll(set2);
 		union.addAll(set3);
 		union.addAll(set4);
+		return union;
+	}
+	
+	
+	public static final <T> Set<T> union(Collection<Set<T>> collectionOfSets) {
+		Set<T> union = new HashSet<T>();
+		for (Set<T> s : collectionOfSets) {
+			union.addAll(s);
+		}
 		return union;
 	}
 	
@@ -85,5 +99,20 @@ public final class Sets {
 			}
 		}
 		return replaced;
-	} 
+	}
+	
+	/**
+	 * Returns the result of ordering the specified set using the specified
+	 * comparator. The result is given in a list.
+	 * 
+	 * @param <T> The type of element being ordered
+	 * @param set The set to be ordered
+	 * @param comparator The comparator to use to sort the set.
+	 * @return The specified set sorted.
+	 */
+	public static final <T> List<T> sort(Set<T> set, Comparator<T> comparator) {
+		List<T> ordered = new ArrayList<T>(set);
+		Collections.sort(ordered, comparator);
+		return ordered;
+	}
 }

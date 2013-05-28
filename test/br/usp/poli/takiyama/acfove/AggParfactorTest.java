@@ -33,7 +33,6 @@ import br.usp.poli.takiyama.common.InputOutput;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.SplitResult;
 import br.usp.poli.takiyama.common.StdDistribution;
-import br.usp.poli.takiyama.common.StdSplitResult;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.CountingFormula;
@@ -103,7 +102,7 @@ public class AggParfactorTest {
 			Constraint c = s.first().toInequalityConstraint();
 			Parfactor residue = new AggParfactorBuilder((AggregationParfactor) parfactor).constraint(c).build();
 			
-			SplitResult splitResult = StdSplitResult.getInstance(result, residue);
+			SplitResult splitResult = SplitResult.getInstance(result, residue);
 			
 			assertThat(parfactor.splitOn(s), equalTo(splitResult));
 		}
@@ -177,7 +176,7 @@ public class AggParfactorTest {
 			Constraint c = s.first().toInequalityConstraint();
 			Parfactor residue = new AggParfactorBuilder(ag).constraint(c).child(cPrime).build();
 			
-			SplitResult splitResult = AggSplitResult.getInstance(result, residue, cPrime);
+			SplitResult splitResult = SplitResult.getInstance(result, residue, cPrime);
 			
 			assertThat(parfactor.splitOn(s), equalTo(splitResult));
 		}
@@ -438,7 +437,7 @@ public class AggParfactorTest {
 				rounded.set(index, number.setScale(scale, BigDecimal.ROUND_HALF_EVEN));
 			}
 			Factor roundedFactor = Factor.getInstance("", parfactor.prvs(), rounded);
-			return new StdParfactorBuilder(parfactor).factor(roundedFactor).build();
+			return new StdParfactorBuilder().constraints(parfactor.constraints()).factor(roundedFactor).build();
 		}
 	}
 	
@@ -478,7 +477,7 @@ public class AggParfactorTest {
 			}
 			
 			Parfactor answer1 = new StdParfactorBuilder().variables(matched6counted, jackpotWon).values(f).build();
-			Parfactor answer2 = new StdParfactorBuilder().variables(matched6).factor().build();
+			Parfactor answer2 = new StdParfactorBuilder().variables(matched6).build();
 			
 			Distribution answer = StdDistribution.of(answer1, answer2);
 			

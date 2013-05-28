@@ -1,25 +1,14 @@
 package br.usp.poli.takiyama.acfove;
 
-import java.util.Set;
-
-import br.usp.poli.takiyama.common.Distribution;
-import br.usp.poli.takiyama.common.RandomVariableSet;
-import br.usp.poli.takiyama.common.StdDistribution;
+import br.usp.poli.takiyama.common.Marginal;
 import br.usp.poli.takiyama.prv.Prv;
 
 public abstract class AbstractMacroOperation implements MacroOperation {
 	
-	Distribution dist;
-	Set<? extends Prv> varsToEliminate;
+	Marginal<Prv> marginal;
 	
 	@Override
-	public Distribution distribution() {
-		return StdDistribution.of(dist);
+	public Marginal<Prv> marginal() {
+		return marginal;
 	}
-	
-	@Override
-	public Set<RandomVariableSet> getVariablesToEliminate() {
-		throw new UnsupportedOperationException("Not implemented!");
-	}
-
 }

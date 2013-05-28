@@ -17,7 +17,6 @@ import br.usp.poli.takiyama.common.MultiplicationChecker;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.ParfactorVisitor;
 import br.usp.poli.takiyama.common.SplitResult;
-import br.usp.poli.takiyama.common.StdSplitResult;
 import br.usp.poli.takiyama.common.Tuple;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.CountingFormula;
@@ -46,13 +45,11 @@ public final class StdParfactor implements Parfactor {
 		private Set<Constraint> restrictions;
 		private List<Prv> prvs;
 		private List<BigDecimal> values;
-		private Factor factor;
 		
 		public StdParfactorBuilder() {
 			restrictions = new HashSet<Constraint>();
 			prvs = new ArrayList<Prv>();
 			values = new ArrayList<BigDecimal>();
-			factor = null;
 		}
 		
 		public StdParfactorBuilder(Parfactor p) {
@@ -113,17 +110,40 @@ public final class StdParfactor implements Parfactor {
 			return this;
 		}
 		
+		/**
+		 * Sets the factor for this builder. Values and PRVs from the 
+		 * specified factor are added to this builder.
+		 * 
+		 * @param f The factor 
+		 * @return This builder with the factor updated.
+		 */
 		public StdParfactorBuilder factor(Factor f) {
-			factor = f;
+			variables(f.variables());
+			values(f.values());
 			return this;
 		}
 		
-		public StdParfactorBuilder factor() throws IllegalStateException {
-			if (prvs.isEmpty()) {
-				throw new IllegalStateException();
+		/**
+		 * Returns the factor defined by PRVs and values in this builder.
+		 * <p>
+		 * If no values were set, returns a constant factor.
+		 * </p>
+		 * @return The factor defined by PRVs and values in this builder.
+		 * @throws IllegalStateException 
+		 */
+		private Factor getFactor() throws IllegalStateException {
+			Factor factor;
+			List<Prv> variables = new ArrayList<Prv>(this.prvs);
+			if (this.values.isEmpty()) {
+				factor = Factor.getInstance(variables);
+			} else {
+				try {
+					factor = Factor.getInstance("", variables, values);
+				} catch (IllegalArgumentException e) {
+					throw new IllegalStateException(variables + "\n" + values);
+				}
 			}
-			factor = Factor.getInstance(prvs);
-			return this;
+			return factor;
 		}
 		
 		@Override
@@ -141,8 +161,12 @@ public final class StdParfactor implements Parfactor {
 	 * a counting formula.
 	 * </p>
 	 */
-	private class Counter extends StdParfactorBuilder {
+	private class Counter {
 		// TODO use aggregation instead of inheritance
+		
+		// The parfactor being modified
+		private Parfactor parfactor;
+		
 		// PRV that contains the logical variable being counted
 		private Prv counted;
 		
@@ -158,6 +182,16 @@ public final class StdParfactor implements Parfactor {
 		// Index of 'counted' in the list of PRVs
 		private int countedIndex;
 		
+		
+		// Values from the result
+		private List<BigDecimal> values;
+		
+		// Variables in the result
+		private List<Prv> variables;
+		
+		// Constraints in the result
+		private Set<Constraint> constraints;
+		
 		/*
 		 * I use super.factor to navigate through the old factor, and
 		 * super.prvs/super.values to set the values for the new factor
@@ -170,12 +204,15 @@ public final class StdParfactor implements Parfactor {
 		 * @param p The parfactor on which counting will take place.
 		 */
 		private Counter(Parfactor p) {
-			super(p);
+			parfactor = p;
 			counted = StdPrv.getInstance();
 			bound = StdLogicalVariable.getInstance();
-			constraintsOnBound = new HashSet<Constraint>(super.restrictions.size());
+			constraintsOnBound = new HashSet<Constraint>(parfactor.constraints().size());
 			countingFormula = StdPrv.getInstance();
 			countedIndex = 0;
+			values = parfactor.factor().values();
+			variables = parfactor.prvs();
+			constraints = parfactor.constraints();
 		}
 		
 		/**
@@ -184,14 +221,14 @@ public final class StdParfactor implements Parfactor {
 		 * @param lv The logical variable to count
 		 * @return A {@link StdParfactorBuilder} with the result of counting.
 		 */
-		private Counter count(LogicalVariable lv) {
+		private Parfactor count(LogicalVariable lv) {
 			setBound(lv);
 			partitionOnBound();
 			setPrvOnOnBound();
 			setCountingFormulaOnBound();
 			replaceCountedWithCountingFormula();
 			setValues();
-			return this;
+			return new StdParfactorBuilder().constraints(constraints).variables(variables).values(values).build();
 		}
 		
 		/**
@@ -207,12 +244,12 @@ public final class StdParfactor implements Parfactor {
 		 * involves the bound logical variable and another that does not.
 		 */
 		private void partitionOnBound() {
-			for (Constraint c : super.restrictions) {
+			for (Constraint c : parfactor.constraints()) {
 				if (c.contains(bound)) {
 					constraintsOnBound.add(c);
 				}
 			}
-			super.restrictions.removeAll(constraintsOnBound);
+			constraints.removeAll(constraintsOnBound);
 		}
 		
 		/**
@@ -223,8 +260,8 @@ public final class StdParfactor implements Parfactor {
 		 * @see StdParfactor#isCountable(LogicalVariable)
 		 */
 		private void setPrvOnOnBound() {
-			counted = super.factor.getVariableHaving(bound);
-			countedIndex = super.prvs.indexOf(counted);
+			counted = parfactor.factor().getVariableHaving(bound);
+			countedIndex = variables.indexOf(counted);
 		}
 		
 		/**
@@ -240,7 +277,7 @@ public final class StdParfactor implements Parfactor {
 		 * formula.
 		 */
 		private void replaceCountedWithCountingFormula() {
-			super.prvs.set(countedIndex, countingFormula);
+			variables.set(countedIndex, countingFormula);
 		}
 		
 		/**
@@ -257,8 +294,8 @@ public final class StdParfactor implements Parfactor {
 			 *     add value to v[]
 			 */
 			
-			super.values = new ArrayList<BigDecimal>();
-			Factor newStructure = Factor.getInstance(super.prvs);
+			values = new ArrayList<BigDecimal>();
+			Factor newStructure = Factor.getInstance(variables);
 			
 			for (Tuple<RangeElement> tuple : newStructure) {
 				BigDecimal value = BigDecimal.ONE;
@@ -266,12 +303,12 @@ public final class StdParfactor implements Parfactor {
 					Tuple<RangeElement> old = tuple.set(countedIndex, e);
 					CountingFormula cf = (CountingFormula) countingFormula;
 					int count = cf.getCount(tuple.get(countedIndex), e);
-					value = value.multiply(super.factor.getValue(old).pow(count));
+					value = value.multiply(parfactor.factor().getValue(old).pow(count));
 				}
-				super.values.add(value);
+				values.add(value);
 			}
 			// Erase factor so it does not overwrites constructor
-			super.factor = null;
+			//super.factor = null;
 		}
 	}
 	
@@ -407,14 +444,8 @@ public final class StdParfactor implements Parfactor {
 	 * @param builder A Standard Parfactor Builder
 	 */
 	private StdParfactor(StdParfactorBuilder builder) {
-		Factor factor;
-		if (builder.factor == null) {
-			factor = Factor.getInstance("", builder.prvs, builder.values);
-		} else {
-			factor = builder.factor;
-		}
+		this.factor = builder.getFactor();
 		this.constraints = new HashSet<Constraint>(builder.restrictions);
-		this.factor = Factor.getInstance(factor);
 	}
 	
 	
@@ -533,7 +564,7 @@ public final class StdParfactor implements Parfactor {
 	
 	@Override
 	public Parfactor apply(Substitution s) {
-		Set<Constraint> substitutedConstraints = applyToConstraints(s);
+		Set<Constraint> substitutedConstraints = Sets.apply(s, constraints);
 		Factor substitutedFactor = factor.apply(s);
 		return StdParfactor.getInstance(substitutedConstraints, substitutedFactor);
 	}
@@ -768,7 +799,7 @@ public final class StdParfactor implements Parfactor {
 		if (!isCountable(lv)) {
 			throw new IllegalArgumentException();
 		}
-		return new Counter(this).count(lv).build();
+		return new Counter(this).count(lv);
 	}
 	
 	// TODO encapsulate expand, split, sum out and multiplication
@@ -883,7 +914,7 @@ public final class StdParfactor implements Parfactor {
 		Set<Constraint> union = Sets.union(other.constraints(), constraints);
 		Factor fixfj = other.factor().multiply(factor);
 		Parfactor g = new StdParfactorBuilder().constraints(union)
-				.factor(fixfj).build();
+				.variables(fixfj.variables()).values(fixfj.values()).build();
 		
 		// Correction exponents
 		int giSize = other.size(); 
@@ -897,7 +928,8 @@ public final class StdParfactor implements Parfactor {
 		
 		// Creates the product parfactor g' = <Ci U Cj, Vi U Vj, Fi^ri x Fj^rj>
 		Parfactor product = new StdParfactorBuilder().constraints(union)
-				.factor(fixfjCorrected).build();
+				.variables(fixfjCorrected.variables())
+				.values(fixfjCorrected.values()).build();
 		
 		return product;
 	}
@@ -919,7 +951,7 @@ public final class StdParfactor implements Parfactor {
 		Binding b = s.first();
 		Constraint c = InequalityConstraint.getInstance(b.firstTerm(), b.secondTerm());
 		Parfactor residue = add(c);
-		SplitResult split = StdSplitResult.getInstance(result, residue);
+		SplitResult split = SplitResult.getInstance(result, residue);
 		return split;
 	}
 	

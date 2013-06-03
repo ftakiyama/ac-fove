@@ -27,8 +27,6 @@ import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
-import br.usp.poli.takiyama.prv.LogicalVariableNameGenerator;
-import br.usp.poli.takiyama.prv.NameGenerator;
 import br.usp.poli.takiyama.prv.Operator;
 import br.usp.poli.takiyama.prv.Prv;
 import br.usp.poli.takiyama.prv.RangeElement;
@@ -544,7 +542,7 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 			
 			@Override
 			public SplitResult split() {
-				return SplitResult.getInstance(result(), residue(), auxChild);
+				return SplitResult.getInstance(result(), residue());
 			}
 
 			private AggregationParfactor residue() {

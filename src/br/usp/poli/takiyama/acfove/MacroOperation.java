@@ -1,11 +1,8 @@
 package br.usp.poli.takiyama.acfove;
 
-import java.util.Set;
+import org.omg.SendingContext.RunTime;
 
-import br.usp.poli.takiyama.common.Distribution;
 import br.usp.poli.takiyama.common.Marginal;
-import br.usp.poli.takiyama.common.RandomVariableSet;
-import br.usp.poli.takiyama.prv.Prv;
 
 /**
  * Represents a macro operation in (A)C-FOVE.
@@ -14,30 +11,34 @@ import br.usp.poli.takiyama.prv.Prv;
  */
 public interface MacroOperation {
 	
-//	@Deprecated
-//	/**
-//	 * Returns the distribution associated with this macro-operation.
-//	 * @return The distribution associated with this macro-operation.
-//	 */
-//	public Distribution distribution();
-//	
-//	@Deprecated
-//	/**
-//	 * Returns the set of variables to eliminate after performing the
-//	 * macro operation.
-//	 * @return The set of variables to eliminate
-//	 */
-//	public Set<RandomVariableSet> getVariablesToEliminate();
-	
 	/**
 	 * Returns the marginal.
 	 */
-	public Marginal<Prv> marginal();
+	public Marginal marginal();
 	
 	/**
-	 * Executes the macro-operation.
+	 * Executes the macro-operation. Should be called once per concrete instance.
 	 */
 	public void run();
+	
+	/**
+	 * Returns this operation cost.
+	 * <p>
+	 * The cost of an operation is the size of parfactors it creates.
+	 * </p>
+	 * 
+	 * @return This operation cost.
+	 */
+	public int cost();
+	
+	/**
+	 * Returns the number of random variables that are eliminated if this
+	 * operation is executed using {@link run}.
+	 * 
+	 * @return the number of random variables that are eliminated if this
+	 * operation is executed
+	 */
+	public int numberOfRandomVariablesEliminated();
 	
 	@Override
 	public String toString();

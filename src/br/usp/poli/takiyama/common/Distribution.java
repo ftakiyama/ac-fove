@@ -16,7 +16,7 @@ import br.usp.poli.takiyama.prv.Substitution;
  * @author Felipe Takiyama
  *
  */
-public interface Distribution {
+public interface Distribution extends Iterable<Parfactor> {
 	
 	/**
 	 * Returns a distribution with the specified parfactor added. The order of

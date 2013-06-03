@@ -11,7 +11,7 @@ import org.junit.Test;
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.ParfactorI;
 import br.usp.poli.takiyama.common.Pool;
-import br.usp.poli.takiyama.common.RandomVariableSet;
+import br.usp.poli.takiyama.common.RandomVariableSetOld;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
@@ -43,7 +43,7 @@ public class CFOVETest {
 		Set<ParfactorI> input = new HashSet<ParfactorI>(4);
 		input = objects.getSimpleParfactorSet("g1","g4","g5","g6","g7","g8");
 		
-		RandomVariableSet q = objects.getRandomVariableSet("wg:lot");
+		RandomVariableSetOld q = objects.getRandomVariableSet("wg:lot");
 		
 		CFOVE cfove = new CFOVE(input, q);
 		cfove.runStep(input);
@@ -74,7 +74,7 @@ public class CFOVETest {
 		Set<ParfactorI> input = new HashSet<ParfactorI>(5);
 		input = objects.getSimpleParfactorSet("g1","g4","g5","g7","g9");
 		
-		RandomVariableSet q = objects.getRandomVariableSet("wg:lot");
+		RandomVariableSetOld q = objects.getRandomVariableSet("wg:lot");
 		
 		CFOVE cfove = new CFOVE(input, q);
 		cfove.runStep(input);
@@ -115,7 +115,7 @@ public class CFOVETest {
 		Set<ParfactorI> input = new HashSet<ParfactorI>(4);
 		input = objects.getSimpleParfactorSet("g1","g4","g9","g10");
 		
-		RandomVariableSet q = objects.getRandomVariableSet("wg:lot");
+		RandomVariableSetOld q = objects.getRandomVariableSet("wg:lot");
 		
 		CFOVE cfove = new CFOVE(input, q);
 		cfove.runStep(input);
@@ -156,7 +156,7 @@ public class CFOVETest {
 		Set<ParfactorI> input = new HashSet<ParfactorI>(3);
 		input = objects.getSimpleParfactorSet("g1","g9","g11");
 		
-		RandomVariableSet q = objects.getRandomVariableSet("wg:lot");
+		RandomVariableSetOld q = objects.getRandomVariableSet("wg:lot");
 		
 		CFOVE cfove = new CFOVE(input, q);
 		cfove.runStep(input);
@@ -185,7 +185,7 @@ public class CFOVETest {
 		Set<ParfactorI> input = new HashSet<ParfactorI>(3);
 		input = objects.getSimpleParfactorSet("g1","g11","g12");
 		
-		RandomVariableSet q = objects.getRandomVariableSet("wg:lot");
+		RandomVariableSetOld q = objects.getRandomVariableSet("wg:lot");
 		
 		CFOVE cfove = new CFOVE(input, q);
 		cfove.runStep(input);
@@ -237,7 +237,7 @@ public class CFOVETest {
 		Set<ParfactorI> result = new HashSet<ParfactorI>(5);
 		Set<Constraint> c = new HashSet<Constraint>();
 		c.add(objects.getConstraint("Lot != 1"));
-		RandomVariableSet q = RandomVariableSet.getInstance (
+		RandomVariableSetOld q = RandomVariableSetOld.getInstance (
 				objects.getParameterizedRandomVariable("wet_grass"), c);
 		CFOVE cfove = new CFOVE(input, q);
 		result = cfove.executeStep(input); //must put all state variables here
@@ -262,7 +262,7 @@ public class CFOVETest {
 		Set<ParfactorI> result = new HashSet<ParfactorI>(4);
 		Set<Constraint> c = new HashSet<Constraint>();
 		c.add(objects.getConstraint("Lot != 1"));
-		RandomVariableSet q = RandomVariableSet.getInstance (
+		RandomVariableSetOld q = RandomVariableSetOld.getInstance (
 				objects.getParameterizedRandomVariable("wet_grass"), c);
 		CFOVE cfove = new CFOVE(input, q);
 		result = cfove.executeStep(input); //must put all state variables here
@@ -287,7 +287,7 @@ public class CFOVETest {
 		Set<ParfactorI> result = new HashSet<ParfactorI>(3);
 		Set<Constraint> c = new HashSet<Constraint>();
 		c.add(objects.getConstraint("Lot != 1"));
-		RandomVariableSet q = RandomVariableSet.getInstance (
+		RandomVariableSetOld q = RandomVariableSetOld.getInstance (
 				objects.getParameterizedRandomVariable("wet_grass"), c);
 		CFOVE cfove = new CFOVE(input, q);
 		result = cfove.executeStep(input); //must put all state variables here
@@ -312,7 +312,7 @@ public class CFOVETest {
 		Set<ParfactorI> result = new HashSet<ParfactorI>(3);
 		Set<Constraint> c = new HashSet<Constraint>();
 		c.add(objects.getConstraint("Lot != 1"));
-		RandomVariableSet q = RandomVariableSet.getInstance (
+		RandomVariableSetOld q = RandomVariableSetOld.getInstance (
 				objects.getParameterizedRandomVariable("wet_grass"), c);
 		CFOVE cfove = new CFOVE(input, q);
 		result = cfove.executeStep(input); //must put all state variables here
@@ -337,7 +337,7 @@ public class CFOVETest {
 		Set<ParfactorI> result = new HashSet<ParfactorI>(1);
 		Set<Constraint> c = new HashSet<Constraint>();
 		c.add(objects.getConstraint("Lot != 1"));
-		RandomVariableSet q = RandomVariableSet.getInstance (
+		RandomVariableSetOld q = RandomVariableSetOld.getInstance (
 				objects.getParameterizedRandomVariable("wet_grass"), c);
 		CFOVE cfove = new CFOVE(input, q);
 		result = cfove.executeStep(input); //must put all state variables here
@@ -363,7 +363,7 @@ public class CFOVETest {
 		
 		Set<Constraint> c = new HashSet<Constraint>();
 		c.add(objects.getConstraint("Lot != 1"));
-		RandomVariableSet q = RandomVariableSet.getInstance (
+		RandomVariableSetOld q = RandomVariableSetOld.getInstance (
 				objects.getParameterizedRandomVariable("wet_grass"), c);
 		CFOVE cfove = new CFOVE(input, q);
 		ParfactorI result = cfove.run(); 

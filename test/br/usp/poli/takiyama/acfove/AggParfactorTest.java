@@ -176,7 +176,7 @@ public class AggParfactorTest {
 			Constraint c = s.first().toInequalityConstraint();
 			Parfactor residue = new AggParfactorBuilder(ag).constraint(c).child(cPrime).build();
 			
-			SplitResult splitResult = SplitResult.getInstance(result, residue, cPrime);
+			SplitResult splitResult = SplitResult.getInstance(result, residue);
 			
 			assertThat(parfactor.splitOn(s), equalTo(splitResult));
 		}

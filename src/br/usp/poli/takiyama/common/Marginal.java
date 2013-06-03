@@ -1,10 +1,9 @@
 package br.usp.poli.takiyama.common;
 
-import java.util.Map;
 import java.util.Set;
 
 import br.usp.poli.takiyama.prv.Prv;
-import br.usp.poli.takiyama.prv.Substitution;
+import br.usp.poli.takiyama.prv.RandomVariableSet;
 
 /**
  * Represents the marginal &Sum;<sub>&Gamma;</sub> J(&Phi;), where &Gamma; is
@@ -16,8 +15,7 @@ import br.usp.poli.takiyama.prv.Substitution;
  * 
  * @see Prv
  */
-public interface Marginal<T extends Prv> extends Elimination<T>, 
-		Iterable<Parfactor> {
+public interface Marginal extends Iterable<Parfactor> {
 	
 	/**
 	 * Returns the distribution of this marginal (before summing out the
@@ -26,45 +24,36 @@ public interface Marginal<T extends Prv> extends Elimination<T>,
 	 * @return The distribution of this marginal
 	 */
 	public Distribution distribution();
-	
+
 	/**
-	 * Adds the specified parfactor to this marginal and returns the
-	 * result.
+	 * Returns the set of variables to eliminate.
 	 * 
-	 * @param p The parfactor to add to this marginal
-	 * @return The result of adding the specified parfactor to this
-	 * marginal
+	 * @return The set of variables to eliminate.
 	 */
-//	public Marginal<Prv> add(Parfactor p);
+	public Set<RandomVariableSet> eliminables();
+	
 	
 	/**
-	 * Adds the specified distribution to this marginal and returns the
-	 * result.
+	 * Returns the set of variables to preserve. The set returned by this method
+	 * is the complement of the set returned by {@link #eliminables()}.
 	 * 
-	 * @param d The distribution to add to this marginal
-	 * @return The result of adding the specified distribution to this
-	 * marginal
+	 * @return The set of variables to preserve.
 	 */
-//	public Marginal<Prv> addAll(Distribution d);
+	public RandomVariableSet preservable();
 	
 	/**
-	 * Returns the result of applying the specified substitution to this
-	 * marginal. The substitution is made on marginal's distribution and on
-	 * PRVs to be eliminated.
+	 * Returns <code>true</code> if this elimination is empty
+	 * @return <code>true</code> if this elimination is empty, 
+	 * <code>false</code> otherwise.
+	 */
+	public boolean isEmpty();
+	
+	/**
+	 * Returns the number of parfactors in the marginal.
 	 * 
-	 * @param s The substitution to be applied to this marginal
-	 * @return The result of applying the specified substitution to this
-	 * marginal.
+	 * @return the number of parfactors in the marginal.
 	 */
-//	public Marginal<Prv> apply(Substitution s);
-	
-	/**
-	 * Returns this marginal as a map. The map associates each parfactor in
-	 * distribution with its corresponding PRVs being eliminated.
-	 *  
-	 * @return this marginal as a map.
-	 */
-	public Map<Parfactor, Set<T>> toMap();
+	public int size();
 	
 	@Override
 	public int hashCode();
@@ -73,5 +62,5 @@ public interface Marginal<T extends Prv> extends Elimination<T>,
 	public boolean equals(Object o);
 
 	@Override
-	public String toString();
+	public String toString();	
 }

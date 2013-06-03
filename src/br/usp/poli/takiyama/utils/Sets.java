@@ -22,18 +22,25 @@ public final class Sets {
 		// avoids instantiation
 	}
 	
+	/**
+	 * Returns an empty set with size adapted to load factor of 0.75.
+	 */
+	public static final <T> Set<T> getInstance(int size) {
+		return new HashSet<T>((int) Math.ceil(size / 0.75));
+	}
+	
+	
 	public static final <T> Set<T> union(Set<T> set1, Set<T> set2) {
-		Set<T> set = new HashSet<T>();
-		
+		Set<T> set = Sets.getInstance(set1.size() + set2.size());
 		set.addAll(set1);
 		set.addAll(set2);
-		
 		return set;
 	}
 	
 	
 	public static final <T> Set<T> union(Set<T> set1, Set<T> set2, Set<T> set3, Set<T> set4) {
-		Set<T> union = new HashSet<T>();
+		Set<T> union = Sets.getInstance(set1.size() + set2.size() + set3.size() 
+				+ set4.size());
 		union.addAll(set1);
 		union.addAll(set2);
 		union.addAll(set3);
@@ -52,20 +59,20 @@ public final class Sets {
 	
 	
 	public static final <T> Set<T> setOf(T e1) {
-		Set<T> set = new HashSet<T>();
+		Set<T> set = Sets.getInstance(1);
 		set.add(e1);
 		return set;
 	}
 	
 	public static final <T> Set<T> setOf(T e1, T e2) {
-		Set<T> set = new HashSet<T>();
+		Set<T> set = Sets.getInstance(2);
 		set.add(e1);
 		set.add(e2);
 		return set;
 	}
 	
 	public static final <T> Set<T> setOf(T e1, T e2, T e3) {
-		Set<T> set = new HashSet<T>();
+		Set<T> set = Sets.getInstance(3);
 		set.add(e1);
 		set.add(e2);
 		set.add(e3);
@@ -88,7 +95,7 @@ public final class Sets {
 	 * elements of the specified set.
 	 */
 	public static final <T extends Replaceable<T>> Set<T> apply(Substitution s, Set<T> set) {
-		Set<T> replaced = new HashSet<T>((int) (set.size() / 0.75));
+		Set<T> replaced = Sets.getInstance(set.size());
 		for (Replaceable<T> element : set) {
 			try {
 				replaced.add(element.apply(s));
@@ -100,6 +107,7 @@ public final class Sets {
 		}
 		return replaced;
 	}
+	
 	
 	/**
 	 * Returns the result of ordering the specified set using the specified

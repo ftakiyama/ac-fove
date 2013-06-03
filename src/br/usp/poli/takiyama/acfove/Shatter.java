@@ -14,14 +14,15 @@ import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.NameGenerator;
 import br.usp.poli.takiyama.prv.Prv;
 import br.usp.poli.takiyama.prv.Prvs;
+import br.usp.poli.takiyama.prv.RandomVariableSet;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
 import br.usp.poli.takiyama.utils.Sets;
 
 public final class Shatter extends AbstractMacroOperation {
 	
-	public Shatter(Marginal<Prv> marginal) {
-		super.marginal = new StdMarginalBuilder(marginal).build();
+	public Shatter(Marginal marginal) {
+		super.marginal = new StdMarginalBuilder().add(marginal).build();
 	}
 	
 	/**
@@ -53,8 +54,13 @@ public final class Shatter extends AbstractMacroOperation {
 		Stack<Parfactor> parfactorsToProcess = new Stack<Parfactor>();
 		parfactorsToProcess.addAll(marginal.distribution().toSet());
 		
-		// in case we unify aggregation parfactors
-		Set<Prv> eliminables = marginal.eliminables();
+		// in case we unify aggregation parfactors 
+		/*
+		 * update: marginals are now defined by preservable, the complement of
+		 * eliminables. Preservalbe, unlike eliminables, never change during
+		 * the life of the algorithm.
+		 */
+		//Set<RandomVariableSet> eliminables = marginal.eliminables();
 		
 		// A set of shattered parfactors
 		Set<Parfactor> shatteredSet = new HashSet<Parfactor>();
@@ -66,12 +72,12 @@ public final class Shatter extends AbstractMacroOperation {
 			while (!parfactorsToProcess.isEmpty()) {
 				if (!parfactorsToProcess.isEmpty()) {
 					Parfactor p2 = parfactorsToProcess.pop();
-					Marginal<Prv> unifiedSet = unify(p1, p2);
+					Marginal unifiedSet = unify(p1, p2);
 					if (unifiedSet.isEmpty()) {
 						shatteredPool.add(p2);
 					} else {
 						parfactorsToProcess.addAll(unifiedSet.distribution().toSet());
-						eliminables.addAll(unifiedSet.eliminables());
+						//eliminables.addAll(unifiedSet.eliminables());
 						parfactorsToProcess.addAll(shatteredPool);
 						parfactorsToProcess.addAll(shatteredSet);
 						shatteredPool.clear();
@@ -86,9 +92,9 @@ public final class Shatter extends AbstractMacroOperation {
 		}
 		
 		shatteredSet = Sets.apply(NameGenerator.getOldNames(), shatteredSet);
-		eliminables = Sets.apply(NameGenerator.getOldNames(), eliminables);
+		//eliminables = Sets.apply(NameGenerator.getOldNames(), eliminables);
 		marginal = new StdMarginalBuilder().parfactors(shatteredSet)
-				.eliminables(eliminables).build();
+				.preservable(marginal.preservable()).build();
 	}
 	
 	/**
@@ -96,11 +102,12 @@ public final class Shatter extends AbstractMacroOperation {
 	 * constant in all parfactors in the distribution.
 	 */
 	private void simplifyLogicalVariables() {
-		StdMarginalBuilder m = new StdMarginalBuilder(this.marginal);
+		StdMarginalBuilder m = new StdMarginalBuilder(marginal.size());
 		for (Parfactor p : this.marginal) {
-			m.set(p, p.simplifyLogicalVariables());
+			m.add(p.simplifyLogicalVariables());
 		}
-		this.marginal = m.build();
+		RandomVariableSet query = marginal.preservable();
+		this.marginal = m.preservable(query).build();
 	}
 	
 	
@@ -109,11 +116,12 @@ public final class Shatter extends AbstractMacroOperation {
 	 * of logical variable names from different parfactors.
 	 */
 	private void renameAllLogicalVariables() {
-		StdMarginalBuilder m = new StdMarginalBuilder(this.marginal);
+		StdMarginalBuilder m = new StdMarginalBuilder(marginal.size());
 		for (Parfactor p : this.marginal) {
-			m.set(p, renameLogicalVariables(p));
+			m.add(renameLogicalVariables(p));
 		}
-		this.marginal = m.build();
+		RandomVariableSet query = marginal.preservable();
+		this.marginal = m.preservable(query).build();
 	}
 	
 	/**
@@ -131,10 +139,10 @@ public final class Shatter extends AbstractMacroOperation {
 	 * several times.
 	 * Returns an empty Marginal if p1 and p2 do not have unifiable PRVs.
 	 */
-	private Marginal<Prv> unify(Parfactor p1, Parfactor p2) {
+	private Marginal unify(Parfactor p1, Parfactor p2) {
 		for (Prv prv1 : p1.prvs()) {
 			for (Prv prv2 : p2.prvs()) {
-				Marginal<Prv> result = unify(p1, prv1, p2, prv2);
+				Marginal result = unify(p1, prv1, p2, prv2);
 				if (!result.isEmpty()) {
 					return result;
 				}
@@ -150,7 +158,7 @@ public final class Shatter extends AbstractMacroOperation {
 	 * you try to do that =) 
 	 * Returns an empty Marginal if prv1 and prv2 do not unify.
 	 */
-	private Marginal<Prv> unify(Parfactor p1, Prv prv1, Parfactor p2, Prv prv2) {
+	private Marginal unify(Parfactor p1, Prv prv1, Parfactor p2, Prv prv2) {
 		
 		// Stores the reference for prv1 and prv2 (they change if they unify)
 		int indexOfPrv1 = p1.prvs().indexOf(prv1);
@@ -182,12 +190,16 @@ public final class Shatter extends AbstractMacroOperation {
 				SplitResult secondSplitOnConstraints = split(secondSplit, allConstraints);
 				
 				// Put everything together
-				result.union(firstSplitOnConstraints, secondSplitOnConstraints);
+				Set<Parfactor> union = Sets.union(
+						firstSplitOnConstraints.distribution().toSet(), 
+						secondSplitOnConstraints.distribution().toSet());
+				result.parfactors(union);
+				result.preservable(marginal.preservable());
 			} else {
-				// PRVs are not unifiable
+				// PRVs do not unify
 			}
 		} catch (IllegalArgumentException e) {
-			// PRVs are represent disjoint sets of random variables
+			// PRVs represent disjoint sets of random variables
 		}
 		
 		return result.build();
@@ -226,8 +238,7 @@ public final class Shatter extends AbstractMacroOperation {
 				if (result.isSplittable(bindAsSub)) {
 					SplitResult split = result.splitOn(bindAsSub);
 					result = split.result();
-					residues.parfactors(split.residue())
-							.eliminables(split.eliminables());
+					residues.parfactors(split.residue());
 				} else {
 					result = result.apply(bindAsSub);
 				}
@@ -249,7 +260,6 @@ public final class Shatter extends AbstractMacroOperation {
 		Parfactor residue = splitResult.result();
 		StdMarginalBuilder byProduct = new StdMarginalBuilder();
 		byProduct.parfactors(splitResult.residue());
-		byProduct.eliminables(splitResult.eliminables());
 		for (Constraint constraint : constraints) {
 			
 			// Need to check both terms from constraint
@@ -265,8 +275,7 @@ public final class Shatter extends AbstractMacroOperation {
 			if (residue.isSplittable(constraintAsSub)) {
 				SplitResult split = residue.splitOn(constraintAsSub);
 				residue = split.residue().iterator().next();
-				byProduct.parfactors(split.result())
-				.eliminables(split.eliminables());
+				byProduct.parfactors(split.result());
 				
 			} 
 		}
@@ -286,5 +295,15 @@ public final class Shatter extends AbstractMacroOperation {
 			}
 		}
 		return parfactor;
+	}
+
+	@Override
+	public int cost() {
+		return (int) Double.POSITIVE_INFINITY;
+	}
+
+	@Override
+	public int numberOfRandomVariablesEliminated() {
+		return 0;
 	}
 }

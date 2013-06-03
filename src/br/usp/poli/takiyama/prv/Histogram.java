@@ -21,7 +21,7 @@ import br.usp.poli.takiyama.utils.MathUtils.Multinomial;
  * @param <T> The type of element in the range of the counted 
  * parameterized random variable. For now, it is String.
  */
-public class Histogram<T extends RangeElement> implements RangeElement {
+public final class Histogram<T extends RangeElement> implements RangeElement {
 	
 	private LinkedHashMap<T, Integer> distribution;
 	

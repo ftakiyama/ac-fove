@@ -7,7 +7,7 @@ import java.util.Stack;
 
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.ParfactorI;
-import br.usp.poli.takiyama.common.RandomVariableSet;
+import br.usp.poli.takiyama.common.RandomVariableSetOld;
 import br.usp.poli.takiyama.prv.OldCountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.StdLogicalVariable;
@@ -102,13 +102,13 @@ public final class MacroOperations {
 	 * 
 	 * @param parfactors The set of parfactors to shatter.
 	 * @param query A set of random variables to shatter against. It must be 
-	 * given in the form of a {@link RandomVariableSet}
+	 * given in the form of a {@link RandomVariableSetOld}
 	 * @return The specified set of parfactors shattered, or an empty set if
 	 * the specified set is also empty.
 	 */
 	public static Set<ParfactorI> shatter (
 			Set<ParfactorI> parfactors, 
-			RandomVariableSet query) {
+			RandomVariableSetOld query) {
 		
 		HashSet<ParfactorI> shatteredSet = new HashSet<ParfactorI>(parfactors);
 		for (ParfactorI p : parfactors) {

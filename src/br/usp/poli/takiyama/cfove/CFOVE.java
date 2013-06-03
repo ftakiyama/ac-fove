@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.ParfactorI;
-import br.usp.poli.takiyama.common.RandomVariableSet;
+import br.usp.poli.takiyama.common.RandomVariableSetOld;
 import br.usp.poli.takiyama.log.ConsoleLogger;
 import br.usp.poli.takiyama.prv.OldCountingFormula;
 import br.usp.poli.takiyama.prv.StdLogicalVariable;
@@ -18,14 +18,14 @@ import static br.usp.poli.takiyama.cfove.MacroOperations.*;
 public final class CFOVE {
 	
 	// Input
-	private RandomVariableSet query;
+	private RandomVariableSetOld query;
 	private HashSet<ParfactorI> parfactors;
 	
 	// Output
 	private ParfactorI marginalDistribution;
 	
 	// State variables
-	private HashSet<RandomVariableSet> variablesToEliminate;
+	private HashSet<RandomVariableSetOld> variablesToEliminate;
 	//private HashSet<RandomVariableSet> allVariables;
 	private int lowestCost;
 	private int maxNumEliminatedVariables; // the maximum number of random variables eliminated
@@ -68,7 +68,7 @@ public final class CFOVE {
 		 * variables to eliminate and from the set of all variables.
 		 */
 		private void updateVariableSets() {
-			RandomVariableSet s = RandomVariableSet.getInstance (
+			RandomVariableSetOld s = RandomVariableSetOld.getInstance (
 					variableToEliminate, 
 					constraints);
 			variablesToEliminate.remove(s);
@@ -192,10 +192,10 @@ public final class CFOVE {
 	 * Constructor.
 	 * 
 	 */
-	public CFOVE(Set<ParfactorI> parfactors, RandomVariableSet query) {
+	public CFOVE(Set<ParfactorI> parfactors, RandomVariableSetOld query) {
 		this.parfactors = new HashSet<ParfactorI>(parfactors);
 		this.query = query;
-		this.variablesToEliminate = new HashSet<RandomVariableSet>();
+		this.variablesToEliminate = new HashSet<RandomVariableSetOld>();
 		this.lowestCost = INFINITE;
 		this.maxNumEliminatedVariables = 0;
 		ConsoleLogger.setup();
@@ -233,7 +233,7 @@ public final class CFOVE {
 		this.variablesToEliminate.clear();
 		for (ParfactorI p : this.parfactors) {
 			for (ParameterizedRandomVariable prv : p.getParameterizedRandomVariables()) {
-				RandomVariableSet s = RandomVariableSet.getInstance(prv, p.getConstraints());
+				RandomVariableSetOld s = RandomVariableSetOld.getInstance(prv, p.getConstraints());
 				if (prv instanceof OldCountingFormula
 						&& this.query.isEquivalent((OldCountingFormula) prv)) {
 					continue;
@@ -289,7 +289,7 @@ public final class CFOVE {
 			for (ParameterizedRandomVariable f : p.getParameterizedRandomVariables()) { 
 				if (f instanceof OldCountingFormula) {
 					evaluateFullExpand(p, (OldCountingFormula) f);
-				} else if (!RandomVariableSet.getInstance(f, p.getConstraints()).equals(query)) {
+				} else if (!RandomVariableSetOld.getInstance(f, p.getConstraints()).equals(query)) {
 					evaluateGlobalSumOut(f, p.getConstraints());
 				}
 			}
@@ -529,7 +529,7 @@ public final class CFOVE {
 			for (ParameterizedRandomVariable f : p.getParameterizedRandomVariables()) { 
 				if (f instanceof OldCountingFormula) {
 					evaluateFullExpand(p, (OldCountingFormula) f);
-				} else if (!RandomVariableSet.getInstance(f, p.getConstraints()).equals(query)) {
+				} else if (!RandomVariableSetOld.getInstance(f, p.getConstraints()).equals(query)) {
 					evaluateGlobalSumOut(f, p.getConstraints());
 				}
 			}

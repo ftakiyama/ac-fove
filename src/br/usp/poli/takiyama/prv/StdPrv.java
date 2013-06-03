@@ -21,7 +21,7 @@ import br.usp.poli.takiyama.common.Constraint;
  * @author Felipe Takiyama
  *
  */
-public class StdPrv implements Prv {
+public final class StdPrv implements Prv {
 
 	/*
 	 * Parameters are put in a list because they need to be ordered in a 
@@ -244,6 +244,22 @@ public class StdPrv implements Prv {
 	@Override
 	public BigDecimal getSumOutCorrection(RangeElement e) {
 		return BigDecimal.ONE;
+	}
+	
+	
+	@Override
+	public boolean isEquivalentTo(RandomVariableSet s) {
+		/*
+		 * Not quite right. Should build each random variable set 
+		 */
+		return s.prv().equals(this) && s.constraints().isEmpty();
+	}
+	
+	
+	@Override
+	public Prv getCanonicalForm() {
+		// Not quite right. Should return a PRV with logical variables only
+		return this;
 	}
 	
 	

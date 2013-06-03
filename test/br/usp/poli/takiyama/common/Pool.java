@@ -40,7 +40,7 @@ public class Pool {
 	private HashMap<String, ParameterizedRandomVariable> prvPool;
 	private HashMap<String, SimpleParfactor> simpleParfactorPool;
 	private HashMap<String, Substitution> substitutionPool;
-	private HashMap<String, RandomVariableSet> randomVariableSetPool;
+	private HashMap<String, RandomVariableSetOld> randomVariableSetPool;
 	private HashMap<String, AggregationParfactor> aggParfactorPool;
 	private HashMap<String, Binding> bindingPool;
 	private HashMap<String, List<ParfactorI>> parfactorListPool;
@@ -57,7 +57,7 @@ public class Pool {
 		this.prvPool = new HashMap<String, ParameterizedRandomVariable>();
 		this.simpleParfactorPool = new HashMap<String, SimpleParfactor>();
 		this.substitutionPool = new HashMap<String, Substitution>();
-		this.randomVariableSetPool = new HashMap<String, RandomVariableSet>();
+		this.randomVariableSetPool = new HashMap<String, RandomVariableSetOld>();
 		this.aggParfactorPool = new HashMap<String, AggregationParfactor>();
 		this.bindingPool = new HashMap<String, Binding>();
 		this.parfactorListPool = new HashMap<String, List<ParfactorI>>();
@@ -364,7 +364,7 @@ public class Pool {
 		
 		randomVariableSetPool.put(
 				name, 
-				RandomVariableSet.getInstance(
+				RandomVariableSetOld.getInstance(
 						prvPool.get(prv), 
 						c));
 	}
@@ -2413,7 +2413,7 @@ public class Pool {
 	 * @throws IllegalArgumentException If the set with the given name
 	 * does not exist in the pool.
 	 */
-	public RandomVariableSet getRandomVariableSet(String name) throws IllegalArgumentException {
+	public RandomVariableSetOld getRandomVariableSet(String name) throws IllegalArgumentException {
 		if (randomVariableSetPool.containsKey(name)) {
 			return randomVariableSetPool.get(name);
 		} else {

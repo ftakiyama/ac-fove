@@ -132,7 +132,21 @@ public interface Prv extends Replaceable<Prv> {
 	 */
 	public BigDecimal getSumOutCorrection(RangeElement e);
 	
-		
+	
+	/**
+	 * Returns <code>true</code> if this PRV represents the same set of random
+	 * variables as the specified set.
+	 * 
+	 * @param s A set of random variables.
+	 * @return <code>true</code> if this PRV represents the same set of random
+	 * variables as the specified set, <code>false</code> otherwise.
+	 */
+	public boolean isEquivalentTo(RandomVariableSet s);
+	
+	
+	public Prv getCanonicalForm();
+	
+	
 	@Override
 	public boolean equals(Object o);
 	

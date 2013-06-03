@@ -1,11 +1,5 @@
 package br.usp.poli.takiyama.common;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-
-import br.usp.poli.takiyama.prv.Prv;
 import br.usp.poli.takiyama.common.StdMarginal.StdMarginalBuilder;
 
 /**
@@ -26,18 +20,19 @@ import br.usp.poli.takiyama.common.StdMarginal.StdMarginalBuilder;
  */
 public final class SplitResult {
 	
-	
-	private final Marginal<? extends Prv> marginal;
+	// This marginal is the residue, even  though the result also belongs to the result
+	private final Marginal marginal;
 	
 	// Stores references to parfactors in marginal
 	private final Parfactor result;
 	private final Distribution residue;
 	
+	
 	/* ************************************************************************
 	 *    Constructors
 	 * ************************************************************************/
 
-	private SplitResult(Parfactor result, Marginal<? extends Prv> marginal) {
+	private SplitResult(Parfactor result, Marginal marginal) {
 		this.result = result;
 		this.marginal = marginal;
 		this.residue = marginal.distribution();
@@ -48,23 +43,15 @@ public final class SplitResult {
 	 *    Static factories
 	 * ************************************************************************/
 
-	public static SplitResult getInstance(Parfactor result, 
-			Marginal<? extends Prv> marginal) {
-		return new SplitResult(result, marginal);
-	}
-	
-	public static SplitResult getInstance(Parfactor result, Parfactor residue,
-			Prv eliminable) {
-		Marginal<Prv> marginal = new StdMarginalBuilder()
-				.parfactors(residue).eliminables(eliminable).build();
-		return new SplitResult(result, marginal);
+	public static SplitResult getInstance(Parfactor result,	Marginal residue) {
+		return new SplitResult(result, residue);
 	}
 	
 	public static SplitResult getInstance(Parfactor result, Parfactor residue) {
-		Marginal<Prv> marginal = new StdMarginalBuilder()
-				.parfactors(residue).build();
+		Marginal marginal = new StdMarginalBuilder().parfactors(residue).build();
 		return new SplitResult(result, marginal);
 	}
+	
 	
 	/* ************************************************************************
 	 *    Getters
@@ -79,6 +66,7 @@ public final class SplitResult {
 		return result;
 	}
 	
+	
 	/**
 	 * Returns the residual parfactors.
 	 * 
@@ -88,6 +76,7 @@ public final class SplitResult {
 		return residue;
 	}
 	
+	
 	/**
 	 * Returns a distribution composed by the result and residual parfactors.
 	 * @return a distribution composed by the result and residual parfactors.
@@ -96,20 +85,7 @@ public final class SplitResult {
 		return residue.add(result);
 	}
 	
-	public Set<Prv> eliminables() {
-		return eliminablesHelper(marginal.eliminables());
-	}
 	
-	private <T extends Prv> Set<Prv> eliminablesHelper(Set<T> set) {
-		return new HashSet<Prv>(set);
-	}
-	
-		
-	@Deprecated
-	public boolean isEmpty() {
-		return (result.isConstant() && marginal.isEmpty());
-	}
-
 	/* ************************************************************************
 	 *    hashCode, equals and toString
 	 * ************************************************************************/

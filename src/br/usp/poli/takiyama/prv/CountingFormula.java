@@ -32,7 +32,7 @@ import br.usp.poli.takiyama.utils.MathUtils;
  * @author Felipe Takiyama
  *
  */
-public class CountingFormula implements Prv {
+public final class CountingFormula implements Prv {
 
 	private final LogicalVariable bound;
 	private final Set<Constraint> constraints;
@@ -322,6 +322,17 @@ public class CountingFormula implements Prv {
 		return new BigDecimal(MathUtils.multinomial(h.toMultinomial()));
 	}
 	
+	
+	@Override
+	public boolean isEquivalentTo(RandomVariableSet s) {
+		return s.prv().equals(prv) && s.constraints().equals(constraints);
+	}
+	
+	
+	@Override
+	public Prv getCanonicalForm() {
+		return prv.getCanonicalForm();
+	}
 	
 	/* ************************************************************************
 	 *    Setters

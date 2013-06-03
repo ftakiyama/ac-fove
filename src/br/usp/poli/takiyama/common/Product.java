@@ -15,17 +15,17 @@ import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 public class Product {
 
 	private final Set<ParfactorI> parfactors;
-	private final RandomVariableSet rvSet;
+	private final RandomVariableSetOld rvSet;
 	
-	private Product(RandomVariableSet rvSet, Set<ParfactorI> parfactors) {
-		this.rvSet = RandomVariableSet.getInstance(rvSet);
+	private Product(RandomVariableSetOld rvSet, Set<ParfactorI> parfactors) {
+		this.rvSet = RandomVariableSetOld.getInstance(rvSet);
 		this.parfactors = new HashSet<ParfactorI>(parfactors);
 	}
 	
 	private Product(Set<ParfactorI> parfactors) {
 		ParameterizedRandomVariable prv = ParameterizedRandomVariable.getEmptyInstance();
 		Set<Constraint> constraints = new HashSet<Constraint>(0);
-		this.rvSet = RandomVariableSet.getInstance(prv, constraints);
+		this.rvSet = RandomVariableSetOld.getInstance(prv, constraints);
 		this.parfactors = new HashSet<ParfactorI>(parfactors);
 	}
 	

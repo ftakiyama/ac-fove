@@ -19,6 +19,23 @@ import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
 import br.usp.poli.takiyama.utils.Sets;
 
+/**
+ * This operation makes all the necessary splits and expansions to 
+ * guarantee that the sets of random variables represented by parameterized
+ * random variables in each parfactor of the given set are equal or 
+ * disjoint.
+ * <p>
+ * In other words, for any parameterized random variables p and q from
+ * parfactors in the marginal, p and q represent identical or
+ * disjoint sets of random variables.
+ * </p>
+ * <p>
+ * This operation is used before multiplication and elimination 
+ * on parfactors.
+ * </p>
+ * 
+ * @author Felipe Takiyama
+ */
 public final class Shatter implements MacroOperation {
 	
 	private Marginal marginal;
@@ -27,24 +44,7 @@ public final class Shatter implements MacroOperation {
 		this.marginal = new StdMarginalBuilder().add(marginal).build();
 	}
 	
-	/**
-	 * Makes all the necessary splits and expansions to 
-	 * guarantee that the sets of random variables represented by parameterized
-	 * random variables in each parfactor of the current distribution are equal 
-	 * or disjoint.
-	 * <p>
-	 * In other words, for any parameterized random variables p and q from
-	 * parfactors of the current distribution, p and q represent identical or
-	 * disjoint sets of random variables.
-	 * </p>
-	 * <p>
-	 * This operation is used before multiplication and elimination 
-	 * on parfactors.
-	 * </p>
-	 * <p>
-	 * If the current distribution is empty, nothing is done.
-	 * </p>
-	 */
+	@Override
 	public Marginal run() {
 		if (marginal.distribution().isEmpty()) {
 			return marginal;
@@ -94,7 +94,6 @@ public final class Shatter implements MacroOperation {
 		}
 		
 		shatteredSet = Sets.apply(NameGenerator.getOldNames(), shatteredSet);
-		//eliminables = Sets.apply(NameGenerator.getOldNames(), eliminables);
 		return new StdMarginalBuilder().parfactors(shatteredSet)
 				.preservable(marginal.preservable()).build();
 	}

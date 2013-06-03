@@ -10,12 +10,8 @@ import br.usp.poli.takiyama.common.Marginal;
 public interface MacroOperation {
 	
 	/**
-	 * Returns the marginal.
-	 */
-	//public Marginal marginal();
-	
-	/**
-	 * Executes the macro-operation. Should be called once per concrete instance.
+	 * Executes the macro-operation.
+	 * 
 	 * @return The resulting marginal after applying the macro-operation.
 	 */
 	public Marginal run();

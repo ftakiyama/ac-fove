@@ -13,6 +13,22 @@ import br.usp.poli.takiyama.prv.RandomVariableSet;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
 
+/**
+ * This operation makes all the necessary splits to 
+ * guarantee that the sets of random variables represented by parameterized
+ * random variables in each parfactor of the given set are equal or 
+ * disjoint to the specified query set.
+ * <p>
+ * In other words, for any parameterized random variable v from
+ * parfactors in the marginal, v and the query represent identical 
+ * or disjoint sets of random variables.
+ * </p>
+ * <p>
+ * This operation is used once at the beginning of the A-FOVE algorithm.
+ * </p>
+ * 
+ * @author Felipe Takiyama
+ */
 public final class ShatterOnQuery implements MacroOperation {
 
 	private Marginal marginal;
@@ -80,14 +96,19 @@ public final class ShatterOnQuery implements MacroOperation {
 		return parfactor;
 	}
 	
+	/**
+	 * Returns infinity.
+	 */
 	@Override
 	public int cost() {
 		return (int) Double.POSITIVE_INFINITY;
 	}
 
+	/**
+	 * Returns zero.
+	 */
 	@Override
 	public int numberOfRandomVariablesEliminated() {
 		return 0;
 	}
-
 }

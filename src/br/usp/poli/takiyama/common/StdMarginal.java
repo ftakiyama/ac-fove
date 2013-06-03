@@ -94,7 +94,8 @@ public final class StdMarginal implements Marginal {
 		/**
 		 * Adds parfactors from the specified marginal to this builder.
 		 * <p>
-		 * The random variable set to be preserved is set to empty.
+		 * The random variable set to be preserved is set to be the same as the
+		 * specified marginal.
 		 * </p>
 		 * 
 		 * @param marginal
@@ -103,6 +104,7 @@ public final class StdMarginal implements Marginal {
 		 */
 		public StdMarginalBuilder add(Marginal marginal) {
 			parfactors.addAll(marginal.distribution().toSet());
+			preservable = marginal.preservable();
 			return this;
 		}
 		

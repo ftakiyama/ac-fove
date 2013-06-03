@@ -26,8 +26,10 @@ import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.Or;
 import br.usp.poli.takiyama.prv.Prv;
+import br.usp.poli.takiyama.prv.RandomVariableSet;
 import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.StdPrv;
+import br.usp.poli.takiyama.utils.Sets;
 
 @RunWith(Enclosed.class)
 public class MacroOperationTest {
@@ -189,8 +191,8 @@ public class MacroOperationTest {
 		@Test
 		public void testUnification() {
 			MacroOperation shatter = new Shatter(input);
-			shatter.run();
-			org.junit.Assert.assertThat(shatter.marginal(), isIn(expected));
+			Marginal result = shatter.run();
+			org.junit.Assert.assertThat(result, isIn(expected));
 		}
 		
 	}
@@ -231,10 +233,50 @@ public class MacroOperationTest {
 			Marginal marginal = new StdMarginalBuilder().parfactors(g1, g2, g3, g4).build();
 			
 			MacroOperation shatter = new Shatter(marginal);
-			shatter.run();
 			
-			Marginal result = shatter.marginal();
+			Marginal result = shatter.run();
 			Marginal expected = new StdMarginalBuilder().parfactors(g1, g4, g5, g6, g7, g8).build();
+			
+			assertEquals(expected, result);
+		}
+	}
+	
+	/**
+	 * Tests shatter on query. This macro operation is called only once
+	 * in the algorithm, just before {@link Shatter}.
+	 */
+	public static class ShatterOnQueryTest {
+		
+		@Test
+		public void testShatterOnQuery() {
+			LogicalVariable lot = StdLogicalVariable.getInstance("Lot", "lot", 15);
+			Constant lot1 = Constant.getInstance("lot1");
+			
+			Prv rain = StdPrv.getBooleanInstance("rain");
+			Prv sprinkler = StdPrv.getBooleanInstance("sprinkler", lot);
+			Prv wet_grass = StdPrv.getBooleanInstance("wet_grass", lot);
+			Prv wet_grass_lot1 = StdPrv.getBooleanInstance("wet_grass", lot1);
+			Prv sprinkler_lot1 = StdPrv.getBooleanInstance("sprinkler", lot1);
+			
+			Constraint lot_lot1 = InequalityConstraint.getInstance(lot, lot1);
+			
+			double [] f1 = {0.8, 0.2};
+			double [] f2 = {0.6, 0.4};
+			double [] f3 = {1.0, 0.0, 0.2, 0.8, 0.1, 0.9, 0.01, 0.99};
+			
+			Parfactor g1 = new StdParfactorBuilder().variables(rain).values(f1).build();
+			Parfactor g2 = new StdParfactorBuilder().variables(sprinkler).values(f2).build();
+			Parfactor g3 = new StdParfactorBuilder().variables(rain, sprinkler, wet_grass).values(f3).build();
+			Parfactor g4 = new StdParfactorBuilder().variables(rain, sprinkler_lot1, wet_grass_lot1).values(f3).build();
+			Parfactor g5 = new StdParfactorBuilder().variables(rain, sprinkler, wet_grass).constraints(lot_lot1).values(f3).build();
+			
+			RandomVariableSet query = RandomVariableSet.getInstance(wet_grass, Sets.setOf(lot_lot1));
+			Marginal marginal = new StdMarginalBuilder().parfactors(g1, g2, g3).preservable(query).build();
+			
+			MacroOperation shatter = new ShatterOnQuery(marginal);
+			
+			Marginal result = shatter.run();
+			Marginal expected = new StdMarginalBuilder().parfactors(g1, g2, g4, g5).preservable(query).build();
 			
 			assertEquals(expected, result);
 		}

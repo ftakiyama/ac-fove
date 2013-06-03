@@ -1,7 +1,5 @@
 package br.usp.poli.takiyama.acfove;
 
-import org.omg.SendingContext.RunTime;
-
 import br.usp.poli.takiyama.common.Marginal;
 
 /**
@@ -14,12 +12,13 @@ public interface MacroOperation {
 	/**
 	 * Returns the marginal.
 	 */
-	public Marginal marginal();
+	//public Marginal marginal();
 	
 	/**
 	 * Executes the macro-operation. Should be called once per concrete instance.
+	 * @return The resulting marginal after applying the macro-operation.
 	 */
-	public void run();
+	public Marginal run();
 	
 	/**
 	 * Returns this operation cost.

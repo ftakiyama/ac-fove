@@ -19,10 +19,12 @@ import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
 import br.usp.poli.takiyama.utils.Sets;
 
-public final class Shatter extends AbstractMacroOperation {
+public final class Shatter implements MacroOperation {
+	
+	private Marginal marginal;
 	
 	public Shatter(Marginal marginal) {
-		super.marginal = new StdMarginalBuilder().add(marginal).build();
+		this.marginal = new StdMarginalBuilder().add(marginal).build();
 	}
 	
 	/**
@@ -43,9 +45,9 @@ public final class Shatter extends AbstractMacroOperation {
 	 * If the current distribution is empty, nothing is done.
 	 * </p>
 	 */
-	public void run() {
+	public Marginal run() {
 		if (marginal.distribution().isEmpty()) {
-			return;
+			return marginal;
 		}
 		
 		simplifyLogicalVariables();
@@ -93,7 +95,7 @@ public final class Shatter extends AbstractMacroOperation {
 		
 		shatteredSet = Sets.apply(NameGenerator.getOldNames(), shatteredSet);
 		//eliminables = Sets.apply(NameGenerator.getOldNames(), eliminables);
-		marginal = new StdMarginalBuilder().parfactors(shatteredSet)
+		return new StdMarginalBuilder().parfactors(shatteredSet)
 				.preservable(marginal.preservable()).build();
 	}
 	

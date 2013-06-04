@@ -134,6 +134,26 @@ public final class StdMarginal implements Marginal {
 		}
 		
 		/**
+		 * Replaces the specified old parfactor with the specified new parfactor
+		 * and returns the modified builder.
+		 * <p>
+		 * If the specified old parfactor does not exist, returns this builder
+		 * unmodified.
+		 * </p>
+		 * 
+		 * @param oldOne The parfactor to be replaced
+		 * @param newOne The parfactor that replaces the old one
+		 * @return This builder with the old parfactor replaced with the new
+		 * one.
+		 */
+		public StdMarginalBuilder replace(Parfactor oldOne, Parfactor newOne) {
+			if (parfactors.remove(oldOne)) {
+				parfactors.add(newOne);
+			}
+			return this;
+		}
+		
+		/**
 		 * @return The set of parfactors from this builder as a distribution.
 		 */
 		Distribution distribution() {

@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
@@ -23,6 +24,7 @@ import br.usp.poli.takiyama.common.Marginal;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.StdMarginal.StdMarginalBuilder;
 import br.usp.poli.takiyama.prv.Constant;
+import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.Or;
 import br.usp.poli.takiyama.prv.Prv;
@@ -83,6 +85,7 @@ public class MacroOperationTest {
 			Constraint a_x4 = InequalityConstraint.getInstance(a, x4);
 			Constraint b_x1 = InequalityConstraint.getInstance(b, x1);
 			Constraint b_x2 = InequalityConstraint.getInstance(b, x2);
+			Constraint b_x3 = InequalityConstraint.getInstance(b, x3);
 			Constraint e_x1 = InequalityConstraint.getInstance(e, x1);
 			Constraint e_x2 = InequalityConstraint.getInstance(e, x2);
 			Constraint e_x3 = InequalityConstraint.getInstance(e, x3);
@@ -99,20 +102,34 @@ public class MacroOperationTest {
 			
 			Parfactor g_2_in_1 = new AggParfactorBuilder(p_a_b, c_b, Or.OR).build();
 			Parfactor g_2_in_2 = new StdParfactorBuilder().variables(p_x1_e).build();
-			Parfactor g_2_out_1 = new AggParfactorBuilder(p_a_b, cPrime, Or.OR).constraint(a_x1).build();
+			Parfactor g_2_out_1 = new AggParfactorBuilder(p_a_e, cPrime_e, Or.OR).constraint(a_x1).build();
 			Parfactor g_2_out_2 = new StdParfactorBuilder().variables(p_x1_e, cPrime_e, c_e).values(new double[] {1, 0, 0, 1, 0, 1, 0, 1}).build();
 			Parfactor g_2_out_3 = new StdParfactorBuilder().variables(p_x1_e).build();
-			Parfactor g_2_out_4 = new StdParfactorBuilder().variables(p_x1_b, cPrime, c_b).values(new double[] {1, 0, 0, 1, 0, 1, 0, 1}).build();
-			Parfactor g_2_out_5 = new StdParfactorBuilder().variables(p_x1_b).build();
+			Parfactor g_2_out_4 = new AggParfactorBuilder(p_a_b, cPrime, Or.OR).constraint(a_x1).build();
+			Parfactor g_2_out_5 = new StdParfactorBuilder().variables(p_x1_b, cPrime, c_b).values(new double[] {1, 0, 0, 1, 0, 1, 0, 1}).build();
+			Parfactor g_2_out_6 = new StdParfactorBuilder().variables(p_x1_b).build();
 			
 			Marginal in2 = new StdMarginalBuilder().parfactors(g_2_in_1, g_2_in_2).build();
 			Marginal out2_1 = new StdMarginalBuilder().parfactors(g_2_out_1, g_2_out_2, g_2_out_3).build();
-			Marginal out2_2 = new StdMarginalBuilder().parfactors(g_2_out_1, g_2_out_4, g_2_out_5).build();
+			Marginal out2_2 = new StdMarginalBuilder().parfactors(g_2_out_4, g_2_out_5, g_2_out_6).build();
 						
 			Parfactor g_3_in_1 = new AggParfactorBuilder(p_a_b, c_b, Or.OR).constraints(b_x2, a_x4).build();
 			Parfactor g_3_in_2 = new StdParfactorBuilder().variables(p_x1_e).constraints(e_x3).build();
 			
+			Marginal in3 = new StdMarginalBuilder().parfactors(g_3_in_1, g_3_in_2).build();
+			
 			Set<Parfactor> out = new HashSet<Parfactor>();
+			
+			out.add(new AggParfactorBuilder(p_a_b, cPrime, Or.OR).constraints(b_x2, b_x3, a_x1, a_x4).build());
+			out.add(new AggParfactorBuilder(p_a_x3, cPrime_x3, Or.OR).constraints(a_x1, a_x4).build());
+			out.add(new StdParfactorBuilder().variables(p_x1_x3, cPrime_x3, c_x3).values(new double[] {1, 0, 0, 1, 0, 1, 0, 1}).build());
+			out.add(new StdParfactorBuilder().variables(p_x1_b, cPrime, c_b).constraints(b_x2, b_x3).values(new double[] {1, 0, 0, 1, 0, 1, 0, 1}).build());
+			out.add(new StdParfactorBuilder().variables(p_x1_x2).build());
+			out.add(new StdParfactorBuilder().variables(p_x1_b).constraints(b_x3, b_x2).build());
+			
+			Marginal out3_1 = new StdMarginalBuilder().parfactors(out).build();
+			
+			out.clear();
 			out.add(new AggParfactorBuilder(p_a_e, cPrime_e, Or.OR).constraints(e_x2, e_x3, a_x1, a_x4).build());
 			out.add(new AggParfactorBuilder(p_a_x3, cPrime_x3, Or.OR).constraints(a_x1, a_x4).build());
 			out.add(new StdParfactorBuilder().variables(p_x1_x3, cPrime_x3, c_x3).values(new double[] {1, 0, 0, 1, 0, 1, 0, 1}).build());
@@ -120,7 +137,6 @@ public class MacroOperationTest {
 			out.add(new StdParfactorBuilder().variables(p_x1_x2).build());
 			out.add(new StdParfactorBuilder().variables(p_x1_e).constraints(e_x3, e_x2).build());
 									
-			Marginal in3 = new StdMarginalBuilder().parfactors(g_3_in_1, g_3_in_2).build();
 			Marginal out3_2 = new StdMarginalBuilder().parfactors(out).build();
 			
 			Parfactor g_4_in_1 = new AggParfactorBuilder(p_a_b, c_b, Or.OR).build();
@@ -172,7 +188,7 @@ public class MacroOperationTest {
 			return Arrays.asList(new Object[][] {
 					{in1, new Object[] {out1}},
 					{in2, new Object[] {out2_1, out2_2}},
-					{in3, new Object[] {out3_2}},
+					{in3, new Object[] {out3_1, out3_2}},
 					{in4, new Object[] {out4_1, out4_2}},
 					{in5, new Object[] {out5_1, out5_2}},
 					{in6, new Object[] {out6}},
@@ -278,6 +294,45 @@ public class MacroOperationTest {
 			Marginal result = shatter.run();
 			Marginal expected = new StdMarginalBuilder().parfactors(g1, g2, g4, g5).preservable(query).build();
 			
+			assertEquals(expected, result);
+		}
+	}
+	
+	public static class FullExpandTest {
+		
+		@Test
+		public void testFullExpand() {
+			LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 3);
+			LogicalVariable b = StdLogicalVariable.getInstance("B", "x", 3);
+			
+			Constant x1 = Constant.getInstance("x1");
+			Constant x2 = Constant.getInstance("x2");
+			Constant x3 = Constant.getInstance("x3");
+			
+			Constraint a_x1 = InequalityConstraint.getInstance(a, x1);
+			Constraint a_x2 = InequalityConstraint.getInstance(a, x2);
+			Constraint a_x3 = InequalityConstraint.getInstance(a, x3);
+			
+			Prv f_a = StdPrv.getBooleanInstance("f", a);
+			Prv f_x2 = StdPrv.getBooleanInstance("f", x2);
+			Prv f_x3 = StdPrv.getBooleanInstance("f", x3);
+			Prv h_b = StdPrv.getBooleanInstance("h", b);
+			Prv cf = CountingFormula.getInstance(a, f_a, a_x1);
+			
+			Parfactor g1 = new StdParfactorBuilder().variables(f_a).values(0.4, 0.6).build();
+			Parfactor g2 = new StdParfactorBuilder().variables(cf, h_b).values(1, 2, 3, 4, 5, 6).build();
+			Parfactor g3 = new StdParfactorBuilder().variables(f_a).constraints(a_x2, a_x3).values(0.4, 0.6).build();
+			Parfactor g4 = new StdParfactorBuilder().variables(f_x2).values(0.4, 0.6).build();
+			Parfactor g5 = new StdParfactorBuilder().variables(f_x3).values(0.4, 0.6).build();
+			Parfactor g6 = new StdParfactorBuilder().variables(f_x3, f_x2, h_b).values(1, 2, 3, 4, 3, 4, 5, 6).build();
+			
+			Marginal marginal = new StdMarginalBuilder(2).parfactors(g1, g2).build();
+			
+			MacroOperation fullExpand = new FullExpand(marginal, g2, cf);
+			
+			Marginal result = fullExpand.run();
+			Marginal expected = new StdMarginalBuilder().parfactors(g3, g4, g5, g6).build();
+
 			assertEquals(expected, result);
 		}
 	}

@@ -56,14 +56,6 @@ public final class Shatter implements MacroOperation {
 		Stack<Parfactor> parfactorsToProcess = new Stack<Parfactor>();
 		parfactorsToProcess.addAll(marginal.distribution().toSet());
 		
-		// in case we unify aggregation parfactors 
-		/*
-		 * update: marginals are now defined by preservable, the complement of
-		 * eliminables. Preservalbe, unlike eliminables, never change during
-		 * the life of the algorithm.
-		 */
-		//Set<RandomVariableSet> eliminables = marginal.eliminables();
-		
 		// A set of shattered parfactors
 		Set<Parfactor> shatteredSet = new HashSet<Parfactor>();
 		// A temporary set of shattered parfactors
@@ -79,7 +71,6 @@ public final class Shatter implements MacroOperation {
 						shatteredPool.add(p2);
 					} else {
 						parfactorsToProcess.addAll(unifiedSet.distribution().toSet());
-						//eliminables.addAll(unifiedSet.eliminables());
 						parfactorsToProcess.addAll(shatteredPool);
 						parfactorsToProcess.addAll(shatteredSet);
 						shatteredPool.clear();
@@ -94,6 +85,10 @@ public final class Shatter implements MacroOperation {
 		}
 		
 		shatteredSet = Sets.apply(NameGenerator.getOldNames(), shatteredSet);
+		
+		// clears buffered names
+		NameGenerator.reset();
+		
 		return new StdMarginalBuilder().parfactors(shatteredSet)
 				.preservable(marginal.preservable()).build();
 	}

@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static br.usp.poli.takiyama.acfove.VariablesToEliminate.buffer;
@@ -17,6 +18,7 @@ import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
  * @author ftakiyama
  *
  */
+@Ignore("old version")
 public class ParfactorsTest {
 	
 	private Pool objects;

@@ -154,6 +154,19 @@ public final class StdMarginal implements Marginal {
 		}
 		
 		/**
+		 * Removes the specified parfactor from the set of parfactors in this 
+		 * builder. If the parfactor does not exist, returns this builder
+		 * unmodified.
+		 * 
+		 * @param removable The parfactor to remove
+		 * @return This builder with the specified parfactor removed
+		 */
+		public StdMarginalBuilder remove(Parfactor removable) {
+			parfactors.remove(removable);
+			return this;
+		}
+		
+		/**
 		 * @return The set of parfactors from this builder as a distribution.
 		 */
 		Distribution distribution() {

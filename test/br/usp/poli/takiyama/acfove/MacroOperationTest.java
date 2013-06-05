@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
@@ -255,6 +254,73 @@ public class MacroOperationTest {
 			
 			assertEquals(expected, result);
 		}
+		
+		@Test
+		public void testShatterThatResultsInPropositionalization() {
+			LogicalVariable lot = StdLogicalVariable.getInstance("Lot", "lot", 3);
+			Constant lot1 = Constant.getInstance("lot1");
+			Constant lot2 = Constant.getInstance("lot2");
+			Constant lot3 = Constant.getInstance("lot3");
+			
+			Prv rain = StdPrv.getBooleanInstance("rain");
+			Prv sprinkler = StdPrv.getBooleanInstance("sprinkler", lot);
+			Prv wet_grass = StdPrv.getBooleanInstance("wet_grass", lot);
+			Prv wet_grass_lot1 = StdPrv.getBooleanInstance("wet_grass", lot1);
+			Prv wet_grass_lot2 = StdPrv.getBooleanInstance("wet_grass", lot2);
+			Prv wet_grass_lot3 = StdPrv.getBooleanInstance("wet_grass", lot3);
+			Prv sprinkler_lot1 = StdPrv.getBooleanInstance("sprinkler", lot1);
+			Prv sprinkler_lot2 = StdPrv.getBooleanInstance("sprinkler", lot2);
+			Prv sprinkler_lot3 = StdPrv.getBooleanInstance("sprinkler", lot3);
+			
+			double [] f1 = {0.8, 0.2};
+			double [] f2 = {0.6, 0.4};
+			double [] f3 = {1.0, 0.0, 0.2, 0.8, 0.1, 0.9, 0.01, 0.99};
+			double [] f4 = {0.0, 1.0};
+			
+			Parfactor g1 = new StdParfactorBuilder().variables(rain).values(f1).build();
+			Parfactor g2 = new StdParfactorBuilder().variables(sprinkler).values(f2).build();
+			Parfactor g3 = new StdParfactorBuilder().variables(rain, sprinkler, wet_grass).values(f3).build();
+			Parfactor g4 = new StdParfactorBuilder().variables(wet_grass_lot1).values(f4).build();
+			
+			Parfactor g2_1 = new StdParfactorBuilder().variables(sprinkler_lot1).values(f2).build();
+			Parfactor g2_2 = new StdParfactorBuilder().variables(sprinkler_lot2).values(f2).build();
+			Parfactor g2_3 = new StdParfactorBuilder().variables(sprinkler_lot3).values(f2).build();
+			
+			Parfactor g3_1 = new StdParfactorBuilder().variables(rain, sprinkler_lot1, wet_grass_lot1).values(f3).build();
+			Parfactor g3_2 = new StdParfactorBuilder().variables(rain, sprinkler_lot2, wet_grass_lot2).values(f3).build();
+			Parfactor g3_3 = new StdParfactorBuilder().variables(rain, sprinkler_lot3, wet_grass_lot3).values(f3).build();
+			
+			Marginal marginal = new StdMarginalBuilder().parfactors(g1, g2, g3_1, g3_2, g3_3, g4).build();
+			MacroOperation shatter = new Shatter(marginal);
+			
+			Marginal result = shatter.run();
+			Marginal expected = new StdMarginalBuilder().parfactors(g1, g4, g2_1, g2_2, g2_3, g3_1, g3_2, g3_3).build();
+			
+			assertEquals(expected, result);
+		}
+		
+		@Test
+		public void testSimpleTrickyShatter() {
+			
+			LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 2);
+			Constant x1 = Constant.getInstance("x1");
+			Constant x2 = Constant.getInstance("x2");
+			
+			Prv f = StdPrv.getBooleanInstance("f", a);
+			Prv f_x1 = StdPrv.getBooleanInstance("f", x1);
+			Prv f_x2 = StdPrv.getBooleanInstance("f", x2);
+			
+			double [] val = {0, 1};
+			Parfactor g1 = new StdParfactorBuilder().variables(f).values(val).build();
+			Parfactor g2 = new StdParfactorBuilder().variables(f_x1).values(val).build();
+			Parfactor g3 = new StdParfactorBuilder().variables(f_x2).values(val).build();
+			
+			Marginal input = new StdMarginalBuilder(2).parfactors(g1, g2).build();
+			MacroOperation shatter = new Shatter(input);
+			Marginal result = shatter.run();
+			Marginal expected = new StdMarginalBuilder().parfactors(g2, g2, g3).build();
+			assertEquals(expected, result);
+		}
 	}
 	
 	/**
@@ -334,6 +400,56 @@ public class MacroOperationTest {
 			Marginal expected = new StdMarginalBuilder().parfactors(g3, g4, g5, g6).build();
 
 			assertEquals(expected, result);
+		}
+	}
+
+	public static class PropositionalizationTest {
+		@Test
+		public void testPropositionalize() {
+			LogicalVariable lot = StdLogicalVariable.getInstance("Lot", "lot", 3);
+			Constant lot1 = Constant.getInstance("lot1");
+			Constant lot2 = Constant.getInstance("lot2");
+			Constant lot3 = Constant.getInstance("lot3");
+			
+			Prv rain = StdPrv.getBooleanInstance("rain");
+			Prv sprinkler = StdPrv.getBooleanInstance("sprinkler", lot);
+			Prv wet_grass = StdPrv.getBooleanInstance("wet_grass", lot);
+			Prv wet_grass_lot1 = StdPrv.getBooleanInstance("wet_grass", lot1);
+			Prv wet_grass_lot2 = StdPrv.getBooleanInstance("wet_grass", lot2);
+			Prv wet_grass_lot3 = StdPrv.getBooleanInstance("wet_grass", lot3);
+			Prv sprinkler_lot1 = StdPrv.getBooleanInstance("sprinkler", lot1);
+			Prv sprinkler_lot2 = StdPrv.getBooleanInstance("sprinkler", lot2);
+			Prv sprinkler_lot3 = StdPrv.getBooleanInstance("sprinkler", lot3);
+			
+			double [] f1 = {0.8, 0.2};
+			double [] f2 = {0.6, 0.4};
+			double [] f3 = {1.0, 0.0, 0.2, 0.8, 0.1, 0.9, 0.01, 0.99};
+			double [] f4 = {0.0, 1.0};
+			
+			Parfactor g1 = new StdParfactorBuilder().variables(rain).values(f1).build();
+			Parfactor g2 = new StdParfactorBuilder().variables(sprinkler).values(f2).build();
+			Parfactor g3 = new StdParfactorBuilder().variables(rain, sprinkler, wet_grass).values(f3).build();
+			Parfactor g4 = new StdParfactorBuilder().variables(wet_grass_lot1).values(f4).build();
+			
+			Parfactor g2_1 = new StdParfactorBuilder().variables(sprinkler_lot1).values(f2).build();
+			Parfactor g2_2 = new StdParfactorBuilder().variables(sprinkler_lot2).values(f2).build();
+			Parfactor g2_3 = new StdParfactorBuilder().variables(sprinkler_lot3).values(f2).build();
+			
+			Parfactor g3_1 = new StdParfactorBuilder().variables(rain, sprinkler_lot1, wet_grass_lot1).values(f3).build();
+			Parfactor g3_2 = new StdParfactorBuilder().variables(rain, sprinkler_lot2, wet_grass_lot2).values(f3).build();
+			Parfactor g3_3 = new StdParfactorBuilder().variables(rain, sprinkler_lot3, wet_grass_lot3).values(f3).build();
+			
+			Marginal marginal = new StdMarginalBuilder().parfactors(g1, g2, g3, g4).build();
+			MacroOperation propositionalize = new Propositionalize(marginal, g3, lot);
+			
+			Marginal result = propositionalize.run();
+			Marginal expected = new StdMarginalBuilder().parfactors(g1, g4, g2_1, g2_2, g2_3, g3_1, g3_2, g3_3).build();
+			
+			assertEquals(expected, result);
+			Constraint lot_lot2 = InequalityConstraint.getInstance(lot, lot2);
+			Constraint lot_lot3 = InequalityConstraint.getInstance(lot, lot3);
+			Parfactor g = new StdParfactorBuilder().variables(sprinkler).values(f2).constraints(lot_lot2, lot_lot3).build();
+			//assertEquals(g2_1, g);
 		}
 	}
 }

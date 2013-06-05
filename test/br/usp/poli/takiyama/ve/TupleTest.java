@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.util.ArrayList;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import br.usp.poli.takiyama.common.IntTuple;
@@ -14,6 +15,7 @@ import br.usp.poli.takiyama.common.IntTuple;
  * @author ftakiyama
  *
  */
+@Ignore("Old code")
 public class TupleTest {
 
 	private IntTuple tuple;

@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.util.ArrayList;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import br.usp.poli.takiyama.common.Pool;
@@ -20,6 +21,7 @@ import br.usp.poli.takiyama.prv.Term;
 import com.google.common.collect.ImmutableSet;
 
 
+@Ignore("old version")
 public class ParameterizedRandomVariableTest {
 
 	private Pool objects;

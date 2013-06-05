@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import br.usp.poli.takiyama.cfove.MacroOperations;
@@ -19,6 +20,7 @@ import br.usp.poli.takiyama.common.Pool;
  * @author ftakiyama
  *
  */
+@Ignore("old version")
 public class MacroOperationsTest {
 	
 	private Pool objects;

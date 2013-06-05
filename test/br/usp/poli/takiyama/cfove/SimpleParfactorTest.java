@@ -8,6 +8,7 @@ import java.util.Set;
 import static org.junit.Assert.*;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import br.usp.poli.takiyama.common.Parfactors;
@@ -25,6 +26,7 @@ import br.usp.poli.takiyama.prv.Term;
  * @author ftakiyama
  *
  */
+@Ignore("old version")
 public class SimpleParfactorTest {
 	
 	private Pool objects;

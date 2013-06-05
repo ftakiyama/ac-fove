@@ -12,7 +12,6 @@ import br.usp.poli.takiyama.common.AggregationParfactor;
 import br.usp.poli.takiyama.common.Builder;
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.Factor;
-import br.usp.poli.takiyama.common.InequalityConstraint;
 import br.usp.poli.takiyama.common.MultiplicationChecker;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.ParfactorVisitor;
@@ -148,11 +147,70 @@ public final class StdParfactor implements Parfactor {
 		
 		@Override
 		public StdParfactor build() {
-			return new StdParfactor(this);
+//			StdParfactor simplified = new StdParfactor(this);
+//			Simplifier simplifier = simplified.new Simplifier(simplified);
+//		
+//			return ((StdParfactor) simplifier.simplify());
+			StdParfactor current = new StdParfactor(this);
+			return ((StdParfactor) current.simplifyLogicalVariables());
 		}
 		
+		private StdParfactor buildRaw() {
+			return new StdParfactor(this);
+		}
 	}
 	
+	/**
+	 * Encapsulates splitting algorithm.
+	 * <p>
+	 * Splitting a parfactor "breaks" a parfactor in two.
+	 * </p>
+	 */
+	private final class Splitter {
+		
+		private Parfactor splittable;
+		
+		private Substitution substitution;
+		
+		private Splitter(Parfactor splittable, Substitution substitution) {
+			this.splittable = splittable;
+			this.substitution = substitution;
+		}
+		
+		/**
+		 * Splits this parfactor on the specified substitution. The result of
+		 * splitting StdParfactor g on substitution {X/t} will
+		 * have two parfactors:
+		 * <li> g[X/t], the parfactor g after applying substitution {X/t};
+		 * <li> g' = &langle; C U {X &ne; t}, V, F &rangle;, the residual 
+		 * parfactor.
+		 */
+		private SplitResult split() {
+			if (!isSplittable(substitution)) {
+				throw new IllegalArgumentException(splittable 
+						+ " is not splittable on " + substitution);
+			}
+			Parfactor result = splittable.apply(substitution);
+			Parfactor residue = getResidue();
+			SplitResult split = SplitResult.getInstance(result, residue);
+			return split;
+		}
+		
+		/**
+		 * Returns a Parfactor equal to this one with the specified constraint
+		 * added.
+		 */
+		private Parfactor getResidue() {
+			Binding b = substitution.first();
+			Constraint c = b.toInequalityConstraint();
+			Set<Constraint> constraints = splittable.constraints();
+			constraints.add(c);
+			return new StdParfactorBuilder().constraints(constraints)
+					.variables(splittable.prvs())
+					.values(splittable.factor().values())
+					.build();
+		}
+	}
 	
 	/**
 	 * Encapsulates counting algorithm.
@@ -334,6 +392,19 @@ public final class StdParfactor implements Parfactor {
 			this.unaryConstraints = getUnaryConstraints();
 		}
 		
+//		/*
+//		 * This is a quick, temporary, dirt fix ;P
+//		 * I need to simplify all parfactors just after creating them, so I
+//		 * will call this simplifier in builder's build() method.
+//		 */
+//		private Simplifier(Set<Constraint> constraints, List<Prv> variables, List<BigDecimal> values) {
+//			this.parfactor = new StdParfactorBuilder().constraints(constraints)
+//					.variables(variables).values(values).build();
+//			this.constraints = this.parfactor.constraints();
+//			this.variables = this.parfactor.prvs();
+//			this.unaryConstraints = getUnaryConstraints();
+//		}
+		
 		/**
 		 * Returns the subset of unary constraints from the set of constraints
 		 */
@@ -372,12 +443,12 @@ public final class StdParfactor implements Parfactor {
 				}
 			}
 			Parfactor result = new StdParfactorBuilder().constraints(constraints)
-					.variables(variables).values(parfactor.factor().values()).build();
+					.variables(variables).values(parfactor.factor().values()).buildRaw();
 			return result;
 		}
 		
 		/**
-		 * Add logical variables from constraints from parfactor to a queue
+		 * Add logical variables from parfactor's constraints to a queue
 		 * >> ugly implementation =(
 		 */
 		private LinkedList<LogicalVariable> getVariablesInConstraints() {
@@ -426,6 +497,7 @@ public final class StdParfactor implements Parfactor {
 	 * ************************************************************************/
 	
 	/**
+	 * @deprecated
 	 * Constructor.
 	 * @param constraints A set of {@link Constraint}s on logical variables
 	 * @param factor A {@link Factor} from the Cartesian product of ranges of 
@@ -454,6 +526,7 @@ public final class StdParfactor implements Parfactor {
 	 * ************************************************************************/
 
 	/**
+	 * @deprecated
 	 * Returns a constant parfactor, the neutral factor for multiplications. 
 	 * Any parfactor multiplied by the constant parfactor does not change.
 	 * <p>
@@ -470,6 +543,7 @@ public final class StdParfactor implements Parfactor {
 	}
 	
 	/**
+	 * @deprecated
 	 * Returns a new instance StdParfactor that has the same constraints and
 	 * the same factor of the specified Parfactor.
 	 * 
@@ -481,6 +555,7 @@ public final class StdParfactor implements Parfactor {
 	
 
 	/**
+	 * @deprecated
 	 * Returns an instance of StdParfactor that has the specified constraints
 	 * and the specified factor.
 	 * 
@@ -567,24 +642,6 @@ public final class StdParfactor implements Parfactor {
 		Set<Constraint> substitutedConstraints = Sets.apply(s, constraints);
 		Factor substitutedFactor = factor.apply(s);
 		return StdParfactor.getInstance(substitutedConstraints, substitutedFactor);
-	}
-	
-	
-	/**
-	 * Returns the result of applying the specified substitution to the set
-	 * of constraints from this parfactor.
-	 * @param s The substitution to apply to the constraints of this
-	 * parfactor
-	 * @return The result of applying the specified substitution to the set
-	 * of constraints from this parfactor.
-	 */
-	private Set<Constraint> applyToConstraints(Substitution s) {
-		Set<Constraint> substitutedConstraints = new HashSet<Constraint>(constraints.size());
-		for (Constraint c : constraints) {
-			Constraint substituted = c.apply(s);
-			substitutedConstraints.add(substituted);
-		}
-		return substitutedConstraints;
 	}
 	
 	
@@ -802,7 +859,7 @@ public final class StdParfactor implements Parfactor {
 		return new Counter(this).count(lv);
 	}
 	
-	// TODO encapsulate expand, split, sum out and multiplication
+	// TODO encapsulate expand,  sum out and multiplication
 	
 	@Override
 	public Parfactor expand(Prv cf, Term t) {
@@ -944,30 +1001,7 @@ public final class StdParfactor implements Parfactor {
 	 */
 	@Override
 	public SplitResult splitOn(Substitution s) throws IllegalArgumentException {
-		if (!isSplittable(s)) {
-			throw new IllegalArgumentException(this + " is not splittable.");
-		}
-		Parfactor result = apply(s);
-		Binding b = s.first();
-		Constraint c = InequalityConstraint.getInstance(b.firstTerm(), b.secondTerm());
-		Parfactor residue = add(c);
-		SplitResult split = SplitResult.getInstance(result, residue);
-		return split;
-	}
-	
-	
-	/**
-	 * Returns a Parfactor equal to this one with the specified constraint
-	 * added.
-	 * 
-	 * @param c The constraint to add to this parfactor
-	 * @return a Parfactor equal to this one with the specified constraint
-	 * added
-	 */
-	public Parfactor add(Constraint c) {
-		Set<Constraint> constraints = new HashSet<Constraint>(this.constraints);
-		constraints.add(c);
-		return StdParfactor.getInstance(constraints, this.factor);
+		return  new Splitter(this, s).split();
 	}
 
 	

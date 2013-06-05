@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import br.usp.poli.takiyama.common.Constraint;
@@ -21,6 +22,7 @@ import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
  * @author ftakiyama
  *
  */
+@Ignore("old version")
 public class CFOVETest {
 
 	private Pool objects;

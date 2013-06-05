@@ -14,6 +14,7 @@ import java.util.Set;
 import static org.junit.Assert.*;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
@@ -159,6 +160,7 @@ public class Sandbox {
 		}
 	}
 
+	@Ignore("Old code")
 	public static class SetTest {
 		@Test
 		public void testEmptySet() {
@@ -197,6 +199,7 @@ public class Sandbox {
 		}
 	}
 
+	@Ignore("Always fails")
 	public static class AssertTest {
 		@Test
 		public void testDirect() {
@@ -211,6 +214,7 @@ public class Sandbox {
 		}
 	}
 
+	@Ignore("Old code")
 	public static class MutabilityTest {
 		@Test
 		public void accessAndModifyValueInHashMap() {

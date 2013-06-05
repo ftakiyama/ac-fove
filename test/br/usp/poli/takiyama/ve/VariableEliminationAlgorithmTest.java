@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import br.usp.poli.takiyama.common.RandomVariable;
@@ -17,6 +18,7 @@ import br.usp.poli.takiyama.ve.VariableEliminationAlgorithm;
  * @author ftakiyama
  *
  */
+@Ignore("Old code")
 public class VariableEliminationAlgorithmTest {
 	
 	/**

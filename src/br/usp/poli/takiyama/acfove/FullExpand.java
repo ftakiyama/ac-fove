@@ -19,7 +19,7 @@ import br.usp.poli.takiyama.prv.Prv;
  * counting formula from some parfactor.
  * </p>
  * <p>
- * After all the splits, the {@link Shatter} macro operation is invoked to 
+ * After all the expansions, the {@link Shatter} macro operation is invoked to 
  * guarantee that all parameterized random variables represent equal or
  * disjoint sets of random variables.
  * </p>

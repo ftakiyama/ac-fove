@@ -254,6 +254,8 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 		
 		@Override
 		public AggParfactor build() {
+			// Cannot simplify logical variables here because in aggregation
+			// parfactors this operation may result in StdParfactor
 			return new AggParfactor(this);
 		}
 		
@@ -545,10 +547,11 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 				return SplitResult.getInstance(result(), residue());
 			}
 
-			private AggregationParfactor residue() {
+			private Parfactor residue() {
 				Constraint c = substitution.first().toInequalityConstraint();
 				return new AggParfactorBuilder(parfactorToSplit).constraint(c)
-						.child(auxChild).build();
+						.child(auxChild).build()
+						.simplifyLogicalVariables();
 			}
 			
 			private Parfactor result() {
@@ -556,7 +559,8 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 				List<Prv> prvs = setPrvs();
 				List<BigDecimal> values = setValues(prvs);
 				return new StdParfactorBuilder().constraints(constraints)
-						.variables(prvs).values(values).build();
+						.variables(prvs).values(values).build()
+						.simplifyLogicalVariables();
 			}
 			
 			private List<Prv> setPrvs() {
@@ -617,13 +621,15 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 				return SplitResult.getInstance(result(), residue());
 			}
 			
-			private AggregationParfactor residue() {
+			private Parfactor residue() {
 				Constraint c = substitution.first().toInequalityConstraint();
-				return new AggParfactorBuilder(parfactorToSplit).constraint(c).build();
+				return new AggParfactorBuilder(parfactorToSplit).constraint(c).build()
+						.simplifyLogicalVariables();
 			}
 			
 			private Parfactor result() {
-				return parfactorToSplit.apply(substitution);
+				return parfactorToSplit.apply(substitution)
+						.simplifyLogicalVariables();
 			}
 			
 		}

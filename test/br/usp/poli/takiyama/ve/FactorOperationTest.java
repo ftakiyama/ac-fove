@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import br.usp.poli.takiyama.common.RandomVariable;
@@ -19,6 +20,7 @@ import br.usp.poli.takiyama.ve.FactorOperation;
  * @author ftakiyama
  *
  */
+@Ignore("Old code")
 public class FactorOperationTest {
 	
 	private HashMap<String,RandomVariable> randomVariables;

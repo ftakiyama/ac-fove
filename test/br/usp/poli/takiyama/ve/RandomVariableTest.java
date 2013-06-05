@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import br.usp.poli.takiyama.common.RandomVariable;
@@ -14,6 +15,7 @@ import br.usp.poli.takiyama.common.RandomVariable;
  * A set of tests to check the methods of {@link RandomVariable}.
  * @author ftakiyama
  */
+@Ignore("Old code")
 public class RandomVariableTest {
 	
 	private RandomVariable randomVariable;

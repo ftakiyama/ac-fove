@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import br.usp.poli.takiyama.common.ParfactorI;
@@ -18,6 +19,7 @@ import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
  * @author ftakiyama
  *
  */
+@Ignore("old version")
 public class GeneralizedAggregationParfactorTest {
 
 	private Pool objects;

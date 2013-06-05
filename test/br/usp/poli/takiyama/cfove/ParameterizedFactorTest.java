@@ -6,12 +6,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import br.usp.poli.takiyama.common.IntTuple;
 import br.usp.poli.takiyama.prv.Prvs;
 import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 
+@Ignore("old version")
 public class ParameterizedFactorTest {
 	
 	private HashMap<String, ParameterizedRandomVariable> variables;

@@ -3,6 +3,7 @@ package br.usp.poli.takiyama.acfove;
 import static org.hamcrest.collection.IsIn.isIn;
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -21,6 +22,7 @@ import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.InequalityConstraint;
 import br.usp.poli.takiyama.common.Marginal;
 import br.usp.poli.takiyama.common.Parfactor;
+import br.usp.poli.takiyama.common.StdMarginal;
 import br.usp.poli.takiyama.common.StdMarginal.StdMarginalBuilder;
 import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.CountingFormula;
@@ -264,7 +266,6 @@ public class MacroOperationTest {
 			
 			Prv rain = StdPrv.getBooleanInstance("rain");
 			Prv sprinkler = StdPrv.getBooleanInstance("sprinkler", lot);
-			Prv wet_grass = StdPrv.getBooleanInstance("wet_grass", lot);
 			Prv wet_grass_lot1 = StdPrv.getBooleanInstance("wet_grass", lot1);
 			Prv wet_grass_lot2 = StdPrv.getBooleanInstance("wet_grass", lot2);
 			Prv wet_grass_lot3 = StdPrv.getBooleanInstance("wet_grass", lot3);
@@ -279,7 +280,6 @@ public class MacroOperationTest {
 			
 			Parfactor g1 = new StdParfactorBuilder().variables(rain).values(f1).build();
 			Parfactor g2 = new StdParfactorBuilder().variables(sprinkler).values(f2).build();
-			Parfactor g3 = new StdParfactorBuilder().variables(rain, sprinkler, wet_grass).values(f3).build();
 			Parfactor g4 = new StdParfactorBuilder().variables(wet_grass_lot1).values(f4).build();
 			
 			Parfactor g2_1 = new StdParfactorBuilder().variables(sprinkler_lot1).values(f2).build();
@@ -446,10 +446,62 @@ public class MacroOperationTest {
 			Marginal expected = new StdMarginalBuilder().parfactors(g1, g4, g2_1, g2_2, g2_3, g3_1, g3_2, g3_3).build();
 			
 			assertEquals(expected, result);
-			Constraint lot_lot2 = InequalityConstraint.getInstance(lot, lot2);
-			Constraint lot_lot3 = InequalityConstraint.getInstance(lot, lot3);
-			Parfactor g = new StdParfactorBuilder().variables(sprinkler).values(f2).constraints(lot_lot2, lot_lot3).build();
-			//assertEquals(g2_1, g);
+		}
+	}
+
+	/**
+	 * Tests counting convert.
+	 */
+	public static class CountingConvertTest {
+		
+		/**
+		 * Creates example in section 2.5.2.7 of Kisynski (2010).
+		 * Only sets &Phi;<sub>4</sub> and &Phi;<sub>5</sub> are used.
+		 * <p>
+		 * Parfactors [09] and [12] have been changed to use integer numbers, 
+		 * otherwise comparison between doubles would complicate the test.
+		 * Precision is not the objective of this test.
+		 * </p>
+		 * <p>
+		 * The population of logical variable Lot is set to 16 individuals. 
+		 * Factor F7 will have 32 rows.
+		 * </p>
+		 */
+		@Test
+		public void testSimpleCountingConvert() {
+			
+			LogicalVariable lot = StdLogicalVariable.getInstance("Lot", "lot", 16);
+			Constant lot1 = Constant.getInstance("lot1");
+
+			Constraint lot_lot1 = InequalityConstraint.getInstance(lot, lot1);
+			
+			Prv rain = StdPrv.getBooleanInstance("rain");
+			Prv wet_grass = StdPrv.getBooleanInstance("wet_grass", lot);
+			Prv formula = CountingFormula.getInstance(lot, wet_grass, lot_lot1);
+			
+			double [] f1 = {0.8, 0.2};
+			double [] f5 = {2, 3, 5, 7};
+			double [] f6 = {0.32, 0.936};
+			double [] f7 = {32768, 49152, 73728, 110592, 165888, 248832, 373248,
+					559872, 839808, 1259712, 1889568, 2834352, 4251528, 6377292, 
+					9565938, 14348907, 30517578125.0, 42724609375.0, 59814453125.0, 
+					83740234375.0, 117236328125.0, 164130859375.0, 229783203125.0,
+					321696484375.0, 450375078125.0, 630525109375.0, 882735153125.0,
+					1235829214375.0, 1730160900125.0, 2422225260175.0, 
+					3391115364245.0, 4747561509943.0};
+			
+			Parfactor g1 = new StdParfactorBuilder().variables(rain).values(f1).build();
+			Parfactor g9 = new StdParfactorBuilder().variables(rain, wet_grass).constraints(lot_lot1).values(f5).build();
+			Parfactor g11 = new StdParfactorBuilder().variables(rain).values(f6).build();
+			Parfactor g12 = new StdParfactorBuilder().variables(rain, formula).values(f7).build();
+			
+			Marginal input = new StdMarginalBuilder().parfactors(g1, g9, g11).build();
+			MacroOperation countingConvert = new CountingConvert(input, g9, lot);
+			
+			Marginal result = countingConvert.run();
+			Marginal expected = new StdMarginalBuilder().parfactors(g1, g11, g12).build();
+			
+			assertEquals(expected, result);
 		}
 	}
 }

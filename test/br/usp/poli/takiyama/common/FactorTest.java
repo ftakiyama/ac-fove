@@ -14,6 +14,7 @@ import br.usp.poli.takiyama.prv.Prv;
 import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.StdPrv;
 import br.usp.poli.takiyama.prv.Term;
+import br.usp.poli.takiyama.utils.Lists;
 
 
 public class FactorTest {
@@ -462,5 +463,28 @@ public class FactorTest {
 		Factor answer = Factor.getInstance("F", ansVars, ansVals);
 		
 		assertTrue(result.equals(answer));
+	}
+	
+	/**
+	 * Multiplies a factor by 1. Expected result is the factor itself.
+	 */
+	@Test
+	public void testMultiplicationBy1() {
+		Factor constant = Factor.getInstance();
+		
+		Prv f = StdPrv.getBooleanInstance("f");
+		Prv h = StdPrv.getBooleanInstance("h");
+		List<Prv> vars = Lists.listOf(f, h);
+		
+		List<BigDecimal> vals = Lists.listOf(
+				BigDecimal.valueOf(1.0),
+				BigDecimal.valueOf(2.0),
+				BigDecimal.valueOf(3.0),
+				BigDecimal.valueOf(4.0));
+		Factor factor = Factor.getInstance("f", vars, vals);
+		
+		Factor result = factor.multiply(constant);
+		Factor expected = factor;
+		assertEquals(expected, result);
 	}
 }

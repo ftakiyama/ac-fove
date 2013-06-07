@@ -367,6 +367,7 @@ public final class CFOVE {
 	private boolean hasAllLogicalVariables (
 			Set<ParameterizedRandomVariable> allVariables, 
 			ParameterizedRandomVariable prv) {
+		// TODO this is wrong. Should do what the documentation says.
 		for (ParameterizedRandomVariable variable : allVariables) {
 			if (!prv.getParameters().containsAll(variable.getParameters())) 
 				return false;

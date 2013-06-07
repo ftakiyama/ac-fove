@@ -79,6 +79,10 @@ public final class Sets {
 		return set;
 	}
 	
+	public static final <T> Set<T> setOf(Collection<? extends T> c) {
+		return new HashSet<T>(c);
+	}
+	
 	
 	/**
 	 * Returns the result of applying the specified substitution to the

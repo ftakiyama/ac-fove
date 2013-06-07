@@ -759,6 +759,15 @@ public class Factor implements Iterable<Tuple<RangeElement>> {
 	 */
 	public Factor multiply(Factor factor) {
 		
+		// Special case: multiplication by 1. Needed because of the way constant
+		// factors are modeled
+		if (this.isConstant()) {
+			return factor;
+		}
+		if (factor.isConstant()) {
+			return this;
+		}
+		
 		String newName = name() + "*" + factor.name();
 		List<Prv> union = Lists.union(variables(), factor.variables());
 		List<BigDecimal> mult = new ArrayList<BigDecimal>(getSize(union));
@@ -816,7 +825,7 @@ public class Factor implements Iterable<Tuple<RangeElement>> {
 		for (Prv prv1 : f1.variables()) {
 			if (f2.variables().contains(prv1)) {
 				mapping[0][size] = f1.variables().indexOf(prv1);
-				mapping[1][size] = f1.variables().indexOf(prv1);
+				mapping[1][size] = f2.variables().indexOf(prv1);
 				size++;
 			}
 		}

@@ -3,7 +3,6 @@ package br.usp.poli.takiyama.acfove;
 import static org.hamcrest.collection.IsIn.isIn;
 import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -22,7 +21,6 @@ import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.InequalityConstraint;
 import br.usp.poli.takiyama.common.Marginal;
 import br.usp.poli.takiyama.common.Parfactor;
-import br.usp.poli.takiyama.common.StdMarginal;
 import br.usp.poli.takiyama.common.StdMarginal.StdMarginalBuilder;
 import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.CountingFormula;
@@ -500,6 +498,104 @@ public class MacroOperationTest {
 			
 			Marginal result = countingConvert.run();
 			Marginal expected = new StdMarginalBuilder().parfactors(g1, g11, g12).build();
+			
+			assertEquals(expected, result);
+		}
+	}
+
+	/**
+	 * Tests global sum out.
+	 */
+	public static class GlobalSumOutTest {
+		
+		private final LogicalVariable lot = StdLogicalVariable.getInstance("Lot", "lot", 10);
+		private final Constant lot1 = Constant.getInstance("lot1");
+
+		private final Constraint lot_lot1 = InequalityConstraint.getInstance(lot, lot1);
+		
+		private final Prv rain = StdPrv.getBooleanInstance("rain");
+		private final Prv another_rain = StdPrv.getBooleanInstance("another_rain");
+		private final Prv sprinkler = StdPrv.getBooleanInstance("sprinkler", lot);
+		private final Prv sprinkler_lot1 = StdPrv.getBooleanInstance("sprinkler", lot1);
+		private final Prv wet_grass = StdPrv.getBooleanInstance("wet_grass", lot);
+		private final Prv wet_grass_lot1 = StdPrv.getBooleanInstance("wet_grass", lot1);
+		
+		private final double [] f1 = {1, 2};
+		private final double [] f2 = {2, 3};
+		private final double [] f3 = {1, 2, 3, 4, 5, 6, 7, 8};
+		private final double [] f6 = {3, 5};
+		private final double [] f7 = {2, 3, 5, 7};
+		private final double [] f8 = {56, 79};
+		private final double [] f9 = {11, 16, 31, 36};
+		
+		private final Parfactor g1 = new StdParfactorBuilder().variables(rain).values(f1).build();
+		private final Parfactor g4 = new StdParfactorBuilder().variables(wet_grass_lot1).values(f1).build();
+		private final Parfactor g5 = new StdParfactorBuilder().variables(rain, sprinkler_lot1, wet_grass_lot1).values(f3).build();
+		private final Parfactor g6 = new StdParfactorBuilder().variables(rain, sprinkler, wet_grass).values(f3).constraints(lot_lot1).build();
+		private final Parfactor g7 = new StdParfactorBuilder().variables(sprinkler_lot1).values(f2).build();
+		private final Parfactor g8 = new StdParfactorBuilder().variables(sprinkler).values(f2).constraints(lot_lot1).build();
+		private final Parfactor g9 = new StdParfactorBuilder().variables(rain, wet_grass).values(f9).constraints(lot_lot1).build();
+		private final Parfactor g10 = new StdParfactorBuilder().variables(rain, wet_grass_lot1).values(f9).build();
+		private final Parfactor g11 = new StdParfactorBuilder().variables(rain).values(f6).build();
+		private final Parfactor g12 = new StdParfactorBuilder().variables(rain, another_rain).values(f7).build();
+		private final Parfactor g13 = new StdParfactorBuilder().variables(another_rain).values(f8).build();
+		
+		
+		@Test
+		public void testGlobalSumOutWithConstraintSimplified() {
+			Marginal input = new StdMarginalBuilder(2).parfactors(g6, g8).build();
+			
+			Set<Constraint> constraints = Sets.setOf(lot_lot1);
+			RandomVariableSet eliminables = RandomVariableSet.getInstance(sprinkler, constraints);
+			MacroOperation globalSumOut = new GlobalSumOut(input, eliminables);
+			Marginal result = globalSumOut.run();
+			
+			Marginal expected = new StdMarginalBuilder(5).parfactors(g9).build();
+			
+			assertEquals(expected, result);
+		}
+		
+		@Test
+		public void testGlobalSumOutWithConstraint() {
+			
+			Marginal input = new StdMarginalBuilder(6).parfactors(g1, g4, g5, g6, g7, g8).build();
+			
+			Set<Constraint> constraints = Sets.setOf(lot_lot1);
+			RandomVariableSet eliminables = RandomVariableSet.getInstance(sprinkler, constraints);
+			MacroOperation globalSumOut = new GlobalSumOut(input, eliminables);
+			Marginal result = globalSumOut.run();
+			
+			Marginal expected = new StdMarginalBuilder(5).parfactors(g1, g4, g5, g7, g9).build();
+			
+			assertEquals(expected, result);
+		}
+		
+		@Test
+		public void testGlobalSumOutNoConstraints() {
+			
+			Marginal input = new StdMarginalBuilder(5).parfactors(g1, g4, g5, g7, g9).build();
+			
+			Set<Constraint> constraints = Sets.getInstance(0);
+			RandomVariableSet eliminables = RandomVariableSet.getInstance(sprinkler_lot1, constraints);
+			MacroOperation globalSumOut = new GlobalSumOut(input, eliminables);
+			Marginal result = globalSumOut.run();
+			
+			Marginal expected = new StdMarginalBuilder(4).parfactors(g1, g4, g9, g10).build();
+			
+			assertEquals(expected, result);
+		}
+		
+		@Test
+		public void testGlobalSumWithThreeStdParfactors() {
+			
+			Marginal input = new StdMarginalBuilder(3).parfactors(g1, g11, g12).build();
+			
+			Set<Constraint> constraints = Sets.getInstance(0);
+			RandomVariableSet eliminables = RandomVariableSet.getInstance(rain, constraints);
+			MacroOperation globalSumOut = new GlobalSumOut(input, eliminables);
+			Marginal result = globalSumOut.run();
+			
+			Marginal expected = new StdMarginalBuilder(1).parfactors(g13).build();
 			
 			assertEquals(expected, result);
 		}

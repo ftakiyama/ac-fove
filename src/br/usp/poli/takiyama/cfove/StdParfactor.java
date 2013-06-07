@@ -95,20 +95,7 @@ public final class StdParfactor implements Parfactor {
 			}
 			return this;
 		}
-		
-		/**
-		 * @deprecated
-		 * Used to control scale of big decimal in junit tests
-		 */
-		public StdParfactorBuilder setScale(int scale) {
-			List<BigDecimal> vals = new ArrayList<BigDecimal>(values.size());
-			for (BigDecimal bg : values) {
-				vals.add(bg.setScale(scale));
-			}
-			values = vals;
-			return this;
-		}
-		
+				
 		/**
 		 * Sets the factor for this builder. Values and PRVs from the 
 		 * specified factor are added to this builder.
@@ -126,6 +113,9 @@ public final class StdParfactor implements Parfactor {
 		 * Returns the factor defined by PRVs and values in this builder.
 		 * <p>
 		 * If no values were set, returns a constant factor.
+		 * </p>
+		 * <p>
+		 * If no variables were set, returns an empty factor.
 		 * </p>
 		 * @return The factor defined by PRVs and values in this builder.
 		 * @throws IllegalStateException 

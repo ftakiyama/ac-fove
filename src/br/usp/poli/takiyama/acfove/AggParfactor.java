@@ -1245,7 +1245,63 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 		}
 		return isSplittable;
 	}
+	
+	
+	@Override
+	public boolean isEliminable(Prv prv) {
+		
+		/*
+		 * There is one condition not checked here: no other parfactor from the
+		 * set has PRVs representing random variables from ground(p).
+		 */
+		
+		// param(p(...A...)) \ {A}
+		Set<LogicalVariable> parentParameters = new HashSet<LogicalVariable>(parent.parameters());
+		parentParameters.remove(extraVar);
+		
+		// param(c(...E...)) \ {E}
+		Set<LogicalVariable> childParameters = new HashSet<LogicalVariable>(child.parameters());
+		List<LogicalVariable> extraVariablesInChild = child.parameters();
+		extraVariablesInChild.removeAll(parent.parameters());
+		
+		if (extraVariablesInChild.size() == 1) {
+			LogicalVariable e = extraVariablesInChild.get(0);
+			childParameters.remove(e);
+		}
+		
+		boolean oneExtraForEach = childParameters.equals(parentParameters);
+		
+		return isInNormalForm() && oneExtraForEach;
+	}
 
+
+	/**
+	 * Returns <code>true</code> if this parfactor is in normal form.
+	 * <p>
+	 * A parfactor is in normal form if, for each inequality constraint 
+	 * (X &ne; Y) &in; C we have &epsilon;<sub>X</sub><sup>C</sup>\{Y} = 
+	 *  &epsilon;<sub>Y</sub><sup>C</sup>\{X}. X and Y are logical variables.
+	 * </p>
+	 * @return <code>true</code> if this parfactor is in normal form, 
+	 * <code>false</code> otherwise
+	 */
+	private boolean isInNormalForm() {
+		for (Constraint c : constraints()) {
+			if (c.firstTerm().isVariable() && c.secondTerm().isVariable()) {
+				LogicalVariable x = (LogicalVariable) c.firstTerm();
+				LogicalVariable y = (LogicalVariable) c.secondTerm();
+				Set<Term> ex = x.excludedSet(constraints());
+				Set<Term> ey = y.excludedSet(constraints());
+				ex.remove(y);
+				ey.remove(x);
+				if (!ex.equals(ey)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	
 	
 	/**
 	 * Throws {@link UnsupportedOperationException}.

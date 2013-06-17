@@ -1,15 +1,20 @@
 package br.usp.poli.takiyama.acfove;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.Stack;
 
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.Marginal;
 import br.usp.poli.takiyama.common.Parfactor;
+import br.usp.poli.takiyama.common.Scanner;
 import br.usp.poli.takiyama.common.SplitResult;
 import br.usp.poli.takiyama.common.StdMarginal.StdMarginalBuilder;
+import br.usp.poli.takiyama.common.Tuple;
+import br.usp.poli.takiyama.log.ConsoleLogger;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.NameGenerator;
 import br.usp.poli.takiyama.prv.Prv;
@@ -17,6 +22,7 @@ import br.usp.poli.takiyama.prv.Prvs;
 import br.usp.poli.takiyama.prv.RandomVariableSet;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
+import br.usp.poli.takiyama.utils.Lists;
 import br.usp.poli.takiyama.utils.Sets;
 
 /**
@@ -40,57 +46,193 @@ public final class Shatter implements MacroOperation {
 	
 	private Marginal marginal;
 	
+	public static class MutableQueue<T> implements Iterable<Tuple<T>> {
+
+		// The queue
+		private final List<T> queue;
+		
+		// Iterator that returns pairs of parfactor from the queue
+		private MutableQueueIterator iterator;
+		
+		public MutableQueue(Collection<? extends T> c) throws  IllegalArgumentException{
+			if (c.size() < 2) { 
+				throw new IllegalArgumentException();
+			}
+			queue = new ArrayList<T>(c);
+			iterator = new MutableQueueIterator();
+		}
+		
+		public void add(Collection<? extends T> c) {
+			queue.addAll(c);
+			iterator.reset();
+		}
+		
+		/**
+		 * Tries to remove the elements in the specified tuple from the queue.
+		 * Elements that are not in the queue are not removed.
+		 * @param t
+		 */
+		public void remove(Tuple<T> t) {
+			boolean removedItem = false;
+			for (int i = 0; i < t.size(); i++) {
+				if (queue.remove(t.get(i))) {
+					removedItem = true;
+				}
+			}
+			if (removedItem) {
+				/*
+				 * Resets iteration only if queue structure was modified.
+				 * Otherwise we would have an infinite loop.
+				 */
+				iterator.reset();
+			}
+		}
+		
+		private class MutableQueueIterator implements Iterator<Tuple<T>> {
+
+			private int i, j;
+						
+			private MutableQueueIterator() {
+				reset();
+			}
+			
+			private void reset() {
+				i = -1;
+				j = 0;
+			}
+			
+			@Override
+			public boolean hasNext() {
+				return ((i < (queue.size() - 2)) || (j < (queue.size() - 1)));
+			}
+
+			@Override
+			public Tuple<T> next() {
+				
+				// calculates next tuple
+				if ((i == -1) && (j == 0)) {
+					i++;
+					j++;
+				} else {
+					j++;
+					if (j == queue.size()) {
+						i++;
+						if (i != (queue.size() - 1)) {
+							j = i + 1;
+						}
+					}
+				}
+				
+				Tuple<T> t = Tuple.getInstance(Lists.listOf(queue.get(i), queue.get(j)));
+				
+				return t;
+			}
+
+			/**
+			 * Throws {@link UnsupportedOperationException}.
+			 */
+			@Override
+			public void remove() {
+				throw new UnsupportedOperationException();
+			}
+			
+		}
+		
+		@Override
+		public Iterator<Tuple<T>> iterator() {
+			return iterator;
+		}
+		
+		public Set<T> toSet() {
+			return new HashSet<T>(queue);
+		}
+		
+	}
+	
 	public Shatter(Marginal marginal) {
 		this.marginal = new StdMarginalBuilder().add(marginal).build();
+		ConsoleLogger.setup();
 	}
+	
+//	@Override
+//	public Marginal run() {
+//		if (marginal.distribution().isEmpty()) {
+//			return marginal;
+//		}
+//		
+//		simplifyLogicalVariables();
+//		renameAllLogicalVariables();
+//				
+//		Stack<Parfactor> parfactorsToProcess = new Stack<Parfactor>();
+//		parfactorsToProcess.addAll(marginal.distribution().toSet());
+//		
+//		// A set of shattered parfactors
+//		Set<Parfactor> shatteredSet = new HashSet<Parfactor>();
+//		// A temporary set of shattered parfactors
+//		Set<Parfactor> shatteredPool = new HashSet<Parfactor>();
+//		
+//		while (!parfactorsToProcess.isEmpty()) {
+//			Parfactor p1 = parfactorsToProcess.pop();
+//			while (!parfactorsToProcess.isEmpty()) {
+//				Parfactor p2 = parfactorsToProcess.pop();
+//				logger.info("\n Evaluating\n" + p1 + "\nwith \n" + p2);
+//				Marginal unifiedSet = unify(p1, p2);
+//				if (unifiedSet.isEmpty()) {
+//					logger.info("Unification result: they do not unify");
+//					shatteredPool.add(p2);
+//				} else {
+//					logger.info("Unification result:\n" + unifiedSet);
+//					parfactorsToProcess.addAll(unifiedSet.distribution().toSet());
+//					parfactorsToProcess.addAll(shatteredPool);
+//					parfactorsToProcess.addAll(shatteredSet);
+//					shatteredPool.clear();
+//					shatteredSet.clear();
+//					break; //p1 = parfactorsToProcess.pop();
+//				}
+//			}
+//			shatteredSet.add(p1);
+//			parfactorsToProcess.addAll(shatteredPool);
+//			shatteredPool.clear();
+//		}
+//		
+//		shatteredSet = Sets.apply(NameGenerator.getOldNames(), shatteredSet);
+//		
+//		// clears buffered names
+//		NameGenerator.reset();
+//		
+//		return new StdMarginalBuilder().parfactors(shatteredSet)
+//				.preservable(marginal.preservable()).build();
+//	}
 	
 	@Override
 	public Marginal run() {
-		if (marginal.distribution().isEmpty()) {
+		int marginalSize = marginal.distribution().size();
+		if (marginalSize < 2) {
 			return marginal;
 		}
-		
 		simplifyLogicalVariables();
 		renameAllLogicalVariables();
-				
-		Stack<Parfactor> parfactorsToProcess = new Stack<Parfactor>();
-		parfactorsToProcess.addAll(marginal.distribution().toSet());
 		
-		// A set of shattered parfactors
-		Set<Parfactor> shatteredSet = new HashSet<Parfactor>();
-		// A temporary set of shattered parfactors
-		Set<Parfactor> shatteredPool = new HashSet<Parfactor>();
-		
-		while (!parfactorsToProcess.isEmpty()) {
-			Parfactor p1 = parfactorsToProcess.pop();
-			while (!parfactorsToProcess.isEmpty()) {
-				if (!parfactorsToProcess.isEmpty()) {
-					Parfactor p2 = parfactorsToProcess.pop();
-					Marginal unifiedSet = unify(p1, p2);
-					if (unifiedSet.isEmpty()) {
-						shatteredPool.add(p2);
-					} else {
-						parfactorsToProcess.addAll(unifiedSet.distribution().toSet());
-						parfactorsToProcess.addAll(shatteredPool);
-						parfactorsToProcess.addAll(shatteredSet);
-						shatteredPool.clear();
-						shatteredSet.clear();
-						p1 = parfactorsToProcess.pop();
-					}
-				}
+		MutableQueue<Parfactor> queue = new MutableQueue<Parfactor>(marginal.distribution().toSet());
+		for (Tuple<Parfactor> pair : queue) {
+			Marginal unifiedSet = unify(pair.get(0), pair.get(1));
+			if (!unifiedSet.isEmpty()) {
+				queue.remove(pair);
+				queue.add(unifiedSet.distribution().toSet());
 			}
-			shatteredSet.add(p1);
-			parfactorsToProcess.addAll(shatteredPool);
-			shatteredPool.clear();
 		}
 		
-		shatteredSet = Sets.apply(NameGenerator.getOldNames(), shatteredSet);
+		// Renames back logical variables
+		Set<Parfactor> shattered = Sets.apply(NameGenerator.getOldNames(), queue.toSet());
 		
-		// clears buffered names
+		// Clears buffered names
 		NameGenerator.reset();
 		
-		return new StdMarginalBuilder().parfactors(shatteredSet)
+		// Builds the resulting marginal
+		Marginal result = new StdMarginalBuilder().parfactors(shattered)
 				.preservable(marginal.preservable()).build();
+		
+		return result;
 	}
 	
 	/**
@@ -125,10 +267,11 @@ public final class Shatter implements MacroOperation {
 	 * generated by a {@link NameGenerator}.
 	 */
 	private Parfactor renameLogicalVariables(Parfactor p) {
-		return p.apply(NameGenerator.rename(p.logicalVariables()));
+		Parfactor scanned = new Scanner(p);
+		return p.apply(NameGenerator.rename(scanned.logicalVariables()));
 	}
 	
-	/*
+	/**
 	 * Tries to unify two parfactors. This function returns on the first 
 	 * oportunity where a pair of PRVs unify.
 	 * To unify two parfactors it may be necessary to call this function 
@@ -225,7 +368,8 @@ public final class Shatter implements MacroOperation {
 		Parfactor result = parfactor;
 		StdMarginalBuilder residues = new StdMarginalBuilder();
 		for (Binding bind : mgu.asList()) {
-			if (result.logicalVariables().contains(bind.firstTerm())) {
+			Parfactor scanner = new Scanner(result);
+			if (scanner.logicalVariables().contains(bind.firstTerm())) {
 				
 				// expands all counting formulas - not sure if it is the right thing to do
 				result = expand(result, bind.secondTerm());

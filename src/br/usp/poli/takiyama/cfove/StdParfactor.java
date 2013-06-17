@@ -15,11 +15,14 @@ import br.usp.poli.takiyama.common.Factor;
 import br.usp.poli.takiyama.common.MultiplicationChecker;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.ParfactorVisitor;
+import br.usp.poli.takiyama.common.Scanner;
 import br.usp.poli.takiyama.common.SplitResult;
 import br.usp.poli.takiyama.common.Tuple;
 import br.usp.poli.takiyama.prv.Binding;
+import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
+import br.usp.poli.takiyama.prv.Population;
 import br.usp.poli.takiyama.prv.Prv;
 import br.usp.poli.takiyama.prv.RangeElement;
 import br.usp.poli.takiyama.prv.StdLogicalVariable;
@@ -413,6 +416,9 @@ public final class StdParfactor implements Parfactor {
 		 * with this individual
 		 */
 		private Parfactor simplify() {
+			
+			simplifyVariablesWithPopulationOne();
+			
 			LinkedList<LogicalVariable> queue  = getVariablesInConstraints();
 			while (!queue.isEmpty()) {
 				LogicalVariable logicalVariable = queue.poll();
@@ -477,6 +483,20 @@ public final class StdParfactor implements Parfactor {
 				}
 			}
 			return otherVariables;
+		}
+		
+		private void simplifyVariablesWithPopulationOne() {
+			Parfactor p = new Scanner(parfactor);
+			List<Binding> bindList = new ArrayList<Binding>(p.logicalVariables().size());
+			for (LogicalVariable v : p.logicalVariables()) {
+				if (v.population().size() == 1) {
+					Constant c = v.population().individualAt(0);
+					Binding bind = Binding.getInstance(v, c);
+					bindList.add(bind);
+				}
+			}
+			Substitution substitution = Substitution.getInstance(bindList);
+			variables = Lists.apply(substitution, variables);
 		}
 		
 	}
@@ -692,8 +712,14 @@ public final class StdParfactor implements Parfactor {
 		// formula, is there a constraint Y != t in this parfactor?
 		boolean isOrthogonal = isOrthogonal(cf, t);
 		
+		boolean isLocalLogicalVariable = logicalVariables().contains(t);
+		
+		boolean isConstantFromBound = (t.isConstant() ? 
+				cf.boundVariable().population().contains((Constant) t) : false);
+		
 		return isCountingFormula && belongsHere && isInNormalForm 
-				&& isCountable && isOrthogonal;
+				&& isCountable && isOrthogonal
+				&& (isLocalLogicalVariable || isConstantFromBound);
 	}
 	
 
@@ -842,6 +868,16 @@ public final class StdParfactor implements Parfactor {
 	
 	
 	@Override
+	public boolean isEliminable(Prv prv) {
+		Set<LogicalVariable> lvs = Sets.getInstance(0);
+		for (Prv v : factor.variables()) {
+			lvs.addAll(v.parameters());
+		}
+		return prv.parameters().equals(lvs);
+	}
+	
+	
+	@Override
 	public Parfactor count(LogicalVariable lv) throws IllegalArgumentException {
 		if (!isCountable(lv)) {
 			throw new IllegalArgumentException();
@@ -854,6 +890,22 @@ public final class StdParfactor implements Parfactor {
 	@Override
 	public Parfactor expand(Prv cf, Term t) {
 		
+		/*
+		 * First checks whether the set of constraints in the counting formula 
+		 * is big enough to limit bound variable population size to 1.
+		 * When that happens, expansion converts counting formula 
+		 * #.A:C[f(...A...)] to f(...t...), where t = D(A):C.
+		 */
+		int cfIndex = factor.variables().indexOf(cf);
+		Population pop = cf.boundVariable().individualsSatisfying(cf.constraints());
+		if (pop.size() == 1) {
+			Prv expandedPrv = ((CountingFormula) cf).toStdPrv();
+			List<Prv> prvs = Lists.replace(prvs(), cf, expandedPrv);
+			Parfactor expanded = new StdParfactorBuilder().constraints(constraints())
+					.variables(prvs).values(factor.values()).build();
+			return expanded;
+		}
+		
 		// Creates the new set of PRVs
 		List<Prv> vars = getExpandedVariables(cf, t);
 		
@@ -861,7 +913,6 @@ public final class StdParfactor implements Parfactor {
 		Factor newStructure = Factor.getInstance(vars);
 		
 		// Creates an array to store the values of the new parfactor
-		int cfIndex = factor.variables().indexOf(cf);
 		Prv takenOut = vars.get(cfIndex + 1);
 		int newSize = factor.size() * takenOut.range().size();
 		List<BigDecimal> vals = new ArrayList<BigDecimal>(newSize);

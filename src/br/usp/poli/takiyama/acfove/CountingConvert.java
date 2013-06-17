@@ -87,4 +87,12 @@ public final class CountingConvert implements MacroOperation {
 		return 0;
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("COUNTING-CONVERT").append("\n")
+				.append(countableParfactor).append("\n")
+				.append(freeVariable);
+		return builder.toString();
+	}
 }

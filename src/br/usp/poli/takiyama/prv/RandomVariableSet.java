@@ -50,10 +50,17 @@ public final class RandomVariableSet implements Prv {
 	 * @param constraints A set of {@link Constraint}
 	 */
 	private RandomVariableSet(Prv prv, Set<Constraint> constraints) {
-		this.prv = prv.getCanonicalForm();
+		this.prv = prv;
 		this.constraints = Sets.getInstance(constraints.size() + prv.constraints().size());
 		for (Constraint c : constraints) {
 			if (c.isUnary() && prv.contains(c.logicalVariables().iterator().next())) {
+				this.constraints.add(c);
+			}
+		}
+		// Enters this block only when PRV is a counting formula.
+		// I am removing binary constraints: is it a problem? Not sure...
+		for (Constraint c : prv.constraints()) {
+			if (c.isUnary()) {
 				this.constraints.add(c);
 			}
 		}
@@ -345,7 +352,9 @@ public final class RandomVariableSet implements Prv {
 
 	@Override
 	public Prv getCanonicalForm() {
-		return prv;
+		Prv canonicalPrv = prv.getCanonicalForm();
+		Set<Constraint> allConstraints = Sets.union(constraints, prv.constraints());
+		return RandomVariableSet.getInstance(canonicalPrv, allConstraints);
 	}
 	
 	/* ************************************************************************

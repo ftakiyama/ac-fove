@@ -10,6 +10,7 @@ import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.Population;
 import br.usp.poli.takiyama.prv.Prv;
+import br.usp.poli.takiyama.prv.Term;
 
 /**
  * This operation represents the expansion of a counting formula 
@@ -112,23 +113,37 @@ public final class FullExpand implements MacroOperation {
 	 */
 	@Override
 	public int cost() {
-		// Factor's size
-		int factor = expandableParfactor.factor().size();
-		
-		// Counting formula range size
-		int countingFormula = expandableVariable.range().size();
-		
-		// Counting formula associated PRV range size
-		int prv = ((CountingFormula) expandableVariable).prvRangeSize();
-		
-		// Number of individuals from the bounded logical variable satisfying
-		// counting formula's constraints
-		int domain = getBoundedIndividuals().size();
-		
-		// Finally, the result
-		int resultSize = factor / countingFormula * ((int) Math.pow(prv, domain));
-		
-		return resultSize;
+		int cost = ((int) Double.POSITIVE_INFINITY);
+		if (isPossible()) {
+			// Factor's size
+			int factor = expandableParfactor.factor().size();
+			
+			// Counting formula range size
+			int countingFormula = expandableVariable.range().size();
+			
+			// Counting formula associated PRV range size
+			int prv = ((CountingFormula) expandableVariable).prvRangeSize();
+			
+			// Number of individuals from the bounded logical variable satisfying
+			// counting formula's constraints
+			int domain = getBoundedIndividuals().size();
+			
+			// Finally, the result
+			int resultSize = factor / countingFormula * ((int) Math.pow(prv, domain));
+			
+			cost = resultSize;
+		}
+		return cost;
+	}
+	
+	private boolean isPossible() {
+		boolean isPossible = false;
+		Population population = getBoundedIndividuals();
+		if (population.size() != 0) {
+			Term someone = population.individualAt(0);
+			isPossible = expandableParfactor.isExpandable(expandableVariable, someone);
+		}
+		return isPossible;
 	}
 
 	/**
@@ -139,4 +154,12 @@ public final class FullExpand implements MacroOperation {
 		return 0;
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("FULL-EXPAND").append("\n")
+				.append(expandableParfactor).append("\non ")
+				.append(expandableVariable);
+		return builder.toString();
+	}
 }

@@ -11,6 +11,7 @@ public interface MacroOperation {
 	
 	/**
 	 * Executes the macro-operation.
+	 * TODO: throw exception when the operation is not possible
 	 * 
 	 * @return The resulting marginal after applying the macro-operation.
 	 */

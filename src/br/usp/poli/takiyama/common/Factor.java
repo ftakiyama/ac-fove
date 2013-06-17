@@ -28,8 +28,20 @@ import br.usp.poli.takiyama.utils.MathUtils;
  */
 public class Factor implements Iterable<Tuple<RangeElement>> {
 	
+	/**
+	 * The name of this factor.
+	 */
 	private final String name;
+	
+	/**
+	 * A list with all parameterized random variables. Variables must be 
+	 * ordered because of internal implementation. 
+	 */
 	private final List<? extends Prv> variables;
+	
+	/**
+	 * The list of values mapped to tuples of PRVs. 
+	 */
 	private final List<BigDecimal> values;
 	
 	private final int size;

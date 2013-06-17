@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
@@ -35,6 +36,222 @@ import br.usp.poli.takiyama.utils.Sets;
 @RunWith(Enclosed.class)
 public class MacroOperationTest {
 
+	public static class UnificationBetweenStandardParfactors {
+		
+		@Ignore("Recalculate expected result")
+		@Test
+		public void test() {
+			LogicalVariable x = StdLogicalVariable.getInstance("X", "x", 5);
+			LogicalVariable y = StdLogicalVariable.getInstance("Y", "y", 6);
+			LogicalVariable z = StdLogicalVariable.getInstance("Z", "y", 6);
+
+			Constant x1 = Constant.getInstance("x1");
+			Constant x2 = Constant.getInstance("x2");
+			Constant y1 = Constant.getInstance("y1");
+			
+			Prv f_x_y = StdPrv.getBooleanInstance("f", x, y);
+			Prv f_x_z = StdPrv.getBooleanInstance("f", x, z);
+			Prv f_x1_y = StdPrv.getBooleanInstance("f", x1, y);
+			Prv f_x1_z = StdPrv.getBooleanInstance("f", x1, z);
+			Prv f_x1_y1 = StdPrv.getBooleanInstance("f", x1, y1);
+			Prv q_y = StdPrv.getBooleanInstance("q", y);
+			Prv q_y1 = StdPrv.getBooleanInstance("q", y1);
+			Prv q_z = StdPrv.getBooleanInstance("q", z);
+			Prv p_x = StdPrv.getBooleanInstance("p", x);
+			
+			Constraint x_x1 = InequalityConstraint.getInstance(x, x1);
+			Constraint x_x2 = InequalityConstraint.getInstance(x, x2);
+			Constraint y_y1 = InequalityConstraint.getInstance(y, y1);
+			Constraint z_y1 = InequalityConstraint.getInstance(z, y1);
+			
+			double [] vals = {0.2, 0.3, 0.5, 0.7};
+			
+			Parfactor g1 = new StdParfactorBuilder().variables(f_x_y, q_y).constraints(x_x2).values(vals).build();
+			Parfactor g2 = new StdParfactorBuilder().variables(p_x, f_x1_z).constraints(x_x1, z_y1).values(vals).build();
+			
+//			Parfactor g3 = new StdParfactorBuilder().variables(p_x, f_x1_z).constraints(x_x1, z_y1).values(vals).build();
+//			Parfactor g4 = new StdParfactorBuilder().variables(f_x_z, q_z).constraints(x_x1, x_x2).values(vals).build();
+//			Parfactor g5 = new StdParfactorBuilder().variables(f_x1_y1, q_y1).values(vals).build();
+//			Parfactor g6 = new StdParfactorBuilder().variables(f_x1_z, q_z).constraints(z_y1).values(vals).build();
+			
+			Parfactor g3 = new StdParfactorBuilder().variables(p_x, f_x1_y).constraints(x_x1, y_y1).values(vals).build();
+			Parfactor g4 = new StdParfactorBuilder().variables(f_x_y, q_y).constraints(x_x1, x_x2).values(vals).build();
+			Parfactor g5 = new StdParfactorBuilder().variables(f_x1_y1, q_y1).values(vals).build();
+			Parfactor g6 = new StdParfactorBuilder().variables(f_x1_y, q_y).constraints(y_y1).values(vals).build();
+			
+			Marginal input = new StdMarginalBuilder(2).parfactors(g1, g2).build();
+			MacroOperation shatter = new Shatter(input);
+			Marginal result = shatter.run();
+			Marginal expected = new StdMarginalBuilder(4).parfactors(g3, g4, g5, g6).build();
+			
+			assertEquals(expected, result);
+		}
+		
+		/**
+		 * Creates data structures to test unification between two counting
+		 * formulas.
+		 * <br>
+		 * The input is
+		 * <br>
+		 * &Phi;<sub>0</sub> = {<br>
+		 * < { }, { #<sub>A:{A &ne; x1}</sub>[f(A)], h(A) }, F1 >, [1] <br>
+		 * < { }, { #<sub>A:{A &ne; x2}</sub>[f(A)] }, F2 > } [2] <br>
+		 * <br>
+		 * Where D(A) = {x1,x2,x3}.
+		 * The result is
+		 * <br>
+		 * &Phi;<sub>1</sub> = {<br>
+		 * < { }, { f(x0), f(x1) }, F2' >, [3] <br>
+		 * < { A &ne; x2 }, { f(x0), f(x2), h(A) }, F1' > [4] <br>
+		 * < { }, { f(x0), f(x2), h(x2) }, F1' > } [5] <br>
+		 * 
+		 */
+		@Test
+		public void testUnificationWithTwoCountingFormulas() {
+			
+			LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 3);
+			
+			Constant x1 = Constant.getInstance("x1");
+			Constant x2 = Constant.getInstance("x2");
+			Constant x3 = Constant.getInstance("x3");
+			
+			Constraint a_x2 = InequalityConstraint.getInstance(a, x2);
+			Constraint a_x3 = InequalityConstraint.getInstance(a, x3);
+			
+			Prv f = StdPrv.getBooleanInstance("f", a);
+			Prv f_x1 = StdPrv.getBooleanInstance("f", x1);
+			Prv f_x2 = StdPrv.getBooleanInstance("f", x2);
+			Prv f_x3 = StdPrv.getBooleanInstance("f", x3);
+			Prv h = StdPrv.getBooleanInstance("h", a);
+			Prv h_x3 = StdPrv.getBooleanInstance("h", x3);
+			Prv cf1 = CountingFormula.getInstance(a, f, a_x2);
+			Prv cf2 = CountingFormula.getInstance(a, f, a_x3);
+			
+			double [] f1 = {2, 3, 5, 7, 11, 13};
+			double [] f3 = {2, 3, 5, 7, 5, 7, 11, 13};
+			
+			Parfactor g1 = new StdParfactorBuilder().variables(cf1, h).values(f1).build();
+			Parfactor g2 = new StdParfactorBuilder().variables(cf2).values(2, 3, 5).build();
+			Parfactor g3 = new StdParfactorBuilder().variables(f_x1, f_x2).values(2, 3, 3, 5).build();
+			Parfactor g4 = new StdParfactorBuilder().variables(f_x1, f_x3, h).values(f3).constraints(a_x3).build();
+			Parfactor g5 = new StdParfactorBuilder().variables(f_x1, f_x3, h_x3).values(f3).build();
+			
+			Marginal input = new StdMarginalBuilder(2).parfactors(g1, g2).build();
+			MacroOperation shatter = new Shatter(input);
+			Marginal result = shatter.run();
+			Marginal expected = new StdMarginalBuilder(3).parfactors(g3, g4, g5).build();
+			
+			assertEquals(expected, result);
+		}
+		
+		/**
+		 * Creates data structures to test unification between two counting
+		 * formulas in a bigger population.
+		 * <br>
+		 * The input is
+		 * <br>
+		 * &Phi;<sub>0</sub> = {<br>
+		 * < { }, { #<sub>A:{A &ne; x1}</sub>[f(A)], h(A) }, F1 >, [1] <br>
+		 * < { }, { #<sub>A:{A &ne; x2}</sub>[f(A)] }, F2 > } [2] <br>
+		 * <br>
+		 * Where D(A) = {x1,x2,x3,x4}.
+		 * The result is
+		 * <br>
+		 * &Phi;<sub>1</sub> = {<br>
+		 * < { }, { #<sub>A:{A &ne; x1, A &ne; x2}</sub>[f(A)], f(x1) }, F2' >, [3] <br>
+		 * < { A &ne; x2 }, { #<sub>A:{A &ne; x1, A &ne; x2}</sub>[f(A)], f(x2), h(A) }, F1' > [4] <br>
+		 * < { }, { #<sub>A:{A &ne; x1, A &ne; x2}</sub>[f(A)], f(x2), h(x2) }, F1' > } [5] <br>
+		 */
+		@Test
+		public void testUnificationWithTwoCountingFormulasAndBiggerPopulation() {
+			
+			LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 4);
+			
+			Constant x1 = Constant.getInstance("x1");
+			Constant x2 = Constant.getInstance("x2");
+			
+			Constraint a_x1 = InequalityConstraint.getInstance(a, x1);
+			Constraint a_x2 = InequalityConstraint.getInstance(a, x2);
+			
+			Set<Constraint> a_x1_a_x2 = Sets.setOf(a_x1, a_x2);
+			
+			Prv f = StdPrv.getBooleanInstance("f", a);
+			Prv f_x1 = StdPrv.getBooleanInstance("f", x1);
+			Prv f_x2 = StdPrv.getBooleanInstance("f", x2);
+			Prv h = StdPrv.getBooleanInstance("h", a);
+			Prv h_x2 = StdPrv.getBooleanInstance("h", x2);
+			Prv cf1 = CountingFormula.getInstance(a, f, a_x1);
+			Prv cf2 = CountingFormula.getInstance(a, f, a_x2);
+			Prv cf3 = CountingFormula.getInstance(a, f, a_x1_a_x2);
+			
+			double [] f1 = {2, 3, 5, 7, 11, 13, 17, 23};
+			double [] f2 = {2, 3, 5, 7};
+			double [] f3 = {2, 3, 3, 5, 5, 7};
+			double [] f4 = {2, 3, 5, 7, 5, 7, 11, 13, 11, 13, 17, 23};
+			
+			Parfactor g1 = new StdParfactorBuilder().variables(cf1, h).values(f1).build();
+			Parfactor g2 = new StdParfactorBuilder().variables(cf2).values(f2).build();
+			Parfactor g3 = new StdParfactorBuilder().variables(cf3, f_x1).values(f3).build();
+			Parfactor g4 = new StdParfactorBuilder().variables(cf3, f_x2, h).values(f4).constraints(a_x2).build();
+			Parfactor g5 = new StdParfactorBuilder().variables(cf3, f_x2, h_x2).values(f4).build();
+			
+			Marginal input = new StdMarginalBuilder(2).parfactors(g1, g2).build();
+			MacroOperation shatter = new Shatter(input);
+			Marginal result = shatter.run();
+			Marginal expected = new StdMarginalBuilder(3).parfactors(g3, g4, g5).build();
+			
+			assertEquals(expected, result);
+		}
+		
+		/**
+		 * Creates data structures to test unification between a counting formula
+		 * and a standard parameterized random variable.
+		 * <br>
+		 * The input is
+		 * <br>
+		 * &Phi;<sub>0</sub> = {<br>
+		 * < { }, { #<sub>A:{A &ne; x1}</sub>[f(A)], h(A) }, F1 >, [1] <br>
+		 * < { }, { f(A) }, F2 > } [2] <br>
+		 * <br>
+		 * The result is
+		 * <br>
+		 * &Phi;<sub>1</sub> = {<br>
+		 * < { }, { #<sub>X2:{X2 &ne; x1}</sub>[f(X2)], h(X2) }, F1 >, [3] <br>
+		 * < { }, { f(x1) }, F2 >, [4] <br>
+		 * < { X2 &ne; x1 }, { f(X2) }, F2 > } [5] <br>
+		 * 
+		 */
+		@Test
+		public void testUnificationTestWithCountingFormulaAndPrv() {
+			LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 3);
+			
+			Constant x1 = Constant.getInstance("x1");
+			
+			Constraint a_x1 = InequalityConstraint.getInstance(a, x1);
+			
+			Prv f = StdPrv.getBooleanInstance("f", a);
+			Prv f_x1 = StdPrv.getBooleanInstance("f", x1);
+			Prv h = StdPrv.getBooleanInstance("h", a);
+			Prv cf1 = CountingFormula.getInstance(a, f, a_x1);
+			
+			double [] f1 = {2, 3, 5, 7, 11, 13};
+			double [] f2 = {2, 3};
+			
+			Parfactor g1 = new StdParfactorBuilder().variables(cf1, h).values(f1).build();
+			Parfactor g2 = new StdParfactorBuilder().variables(f).values(f2).build();
+			Parfactor g3 = new StdParfactorBuilder().variables(cf1, h).values(f1).build();
+			Parfactor g4 = new StdParfactorBuilder().variables(f_x1).values(f2).build();
+			Parfactor g5 = new StdParfactorBuilder().variables(f).values(f2).constraints(a_x1).build();
+			
+			Marginal input = new StdMarginalBuilder(2).parfactors(g1, g2).build();
+			MacroOperation shatter = new Shatter(input);
+			Marginal result = shatter.run();
+			Marginal expected = new StdMarginalBuilder(3).parfactors(g3, g4, g5).build();
+			
+			assertEquals(expected, result);			
+		}
+	}
+	
 	/**
 	 * Tests unification/shattering between aggregation parfactors and
 	 * standard parfactors.
@@ -600,4 +817,6 @@ public class MacroOperationTest {
 			assertEquals(expected, result);
 		}
 	}
+
+	
 }

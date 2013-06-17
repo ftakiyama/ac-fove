@@ -50,6 +50,12 @@ public final class Tuple<E> {
 	}
 	
 	
+	public static <E> Tuple<E> getInstance(E ... values) {
+		List<E> vals = Lists.listOf(values);
+		return new Tuple<E>(vals);
+	}
+	
+	
 	/**
 	 * Returns a tuple with the elements of the specified tuple, in the same
 	 * order.

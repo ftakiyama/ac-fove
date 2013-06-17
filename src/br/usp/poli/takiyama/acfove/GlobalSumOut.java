@@ -1,6 +1,9 @@
 package br.usp.poli.takiyama.acfove;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import br.usp.poli.takiyama.cfove.StdParfactor.StdParfactorBuilder;
@@ -16,82 +19,190 @@ import br.usp.poli.takiyama.utils.Sets;
 
 final class GlobalSumOut implements MacroOperation {
 
+	// The marginal where elimination will take place
 	private final Marginal marginal;
 	
+	// The set of random variables to eliminate
 	private final RandomVariableSet eliminables;
+	
+	/*
+	 * These variables are redundant. If cost is INFINITY, then this operation
+	 * is automatically impossible.
+	 */
+	private int cost;
+	private boolean isPossible;
+	
+	private static int infinity = (int) Double.POSITIVE_INFINITY;
+
+	/**
+	 * This class has the same structure of a StdParfactor, except for the
+	 * values. 
+	 */
+	private final class ParfactorSkeleton {
 		
+		private final Set<Constraint> constraints;
+		private final Set<Prv> variables;
+		
+		private ParfactorSkeleton() {
+			constraints = new HashSet<Constraint>();
+			variables = new LinkedHashSet<Prv>();
+		}
+		
+		private boolean isMultipliable(Parfactor p) {
+			/*
+			 * Assuming this skeleton represents StdParfactors.
+			 * This assumption is not true if Aggregation parfactors are not
+			 * converted in the beginning of the AC-FOVE algorithm
+			 */
+			Parfactor parfactor = new StdParfactorBuilder()
+					.variables(new ArrayList<Prv>(variables))
+					.constraints(constraints).build();
+			return p.isMultipliable(parfactor);
+		}
+		
+		private ParfactorSkeleton multiply(Parfactor p) {
+			constraints.addAll(p.constraints());
+			variables.addAll(p.prvs());
+			return this;
+		}
+		
+		private boolean isEliminable() {
+			Set<LogicalVariable> lvs = Sets.getInstance(0);
+			for (Prv v : variables) {
+				lvs.addAll(v.parameters());
+			}
+			return eliminables.prv().parameters().containsAll(lvs);
+		}
+		
+		private Factor getFactor() {
+			return Factor.getInstance(new ArrayList<Prv>(variables));
+		}
+	}
+	
 	public GlobalSumOut(Marginal marginal, RandomVariableSet eliminables) {
 		this.marginal = marginal;
 		this.eliminables = eliminables;
+		calculateFeasibility();
+	}
+	
+
+	
+	/*
+	 * Calculates the feasibility of this operation. This operation is possible
+	 * if all parfactors involving the variables being eliminated can be 
+	 * multiplied and those variables can be summed out from the product.
+	 */
+	private void calculateFeasibility() {
+		setCost(infinity);
+		if (!marginal.preservable().equals(eliminables.getCanonicalForm())) {
+			
+			// assembles a dummy parfactor that represents the result of this operation
+			ParfactorSkeleton result = new ParfactorSkeleton();
+			for (Parfactor candidate : marginal) {
+				if (containsEliminable(candidate)) {
+					if (result.isMultipliable(candidate)) {
+						result.multiply(candidate);
+					} else {
+						// contains eliminables but cannot be multiplied: be sure
+						// to shatter before!
+						setCost(infinity);
+					}
+				}
+			}
+			
+			// if it got here, it means multiplication is possible
+			// now, can we sum out eliminables?
+			if (result.isEliminable()) {
+				int f = result.getFactor().size();
+				int v = eliminables.range().size();
+				setCost(f / v); 
+			}
+		}
+	}
+	
+	/*
+	 * Updates cost and isPossible. Helps to keep consistency.
+	 */
+	private void setCost(int c) {
+		if (c < infinity) {
+			this.cost = c;
+			this.isPossible = true;
+		} else {
+			this.cost = infinity;
+			this.isPossible = false;
+		}
+	}
+
+	/**
+	 * Returns true if the specified parfactor contains the set of variables
+	 * to eliminate.
+	 */
+	private boolean containsEliminable(Parfactor candidate) {
+		List<Prv> variables = candidate.factor().variables();
+		for (Prv prv : variables) {
+			boolean hasFunctor = prv.name().equals(eliminables.prv().name());
+			boolean hasConstraints = candidate.constraints().containsAll(eliminables.constraints());
+			if (hasFunctor && hasConstraints) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	@Override
 	public Marginal run() {
-		Parfactor result = new StdParfactorBuilder().build();
-		
-		StdMarginalBuilder marginalResult = new StdMarginalBuilder();
-		marginalResult.add(marginal);
-		
-		// Multiplies all parfactors that involve the eliminable PRV
-		for (Parfactor candidate : marginal) {
-			if (containsEliminable(candidate)) {
-				result = result.multiply(candidate);
-				marginalResult.remove(candidate);
+		if (isPossible) {
+			Parfactor result = new StdParfactorBuilder().build();
+			
+			StdMarginalBuilder marginalResult = new StdMarginalBuilder();
+			marginalResult.add(marginal);
+			
+			// Multiplies all parfactors that involve the eliminable PRV
+			for (Parfactor candidate : marginal) {
+				if (containsEliminable(candidate)) {
+					result = result.multiply(candidate);
+					marginalResult.remove(candidate);
+				}
 			}
-		}
-		
-		// Sums out the eliminable if possible
-		if (Sets.setOf(eliminables.prv().parameters()).equals(result.logicalVariables())) {
+			
+			// Sums out the eliminable if possible - actually it should be possible at this point
+			//if (Sets.setOf(eliminables.prv().parameters()).equals(result.logicalVariables())) {
 			result = result.sumOut(eliminables.prv());
+			//}
+			
+			// Adds the result to marginal result if not constant (constant 
+			// parfactors are irrelevant)
+			if (!result.isConstant()) {
+				marginalResult.add(result);
+			}
+			
+			return marginalResult.build();
+			
+		} else {
+			return marginal;
 		}
-		
-		// Adds the result to marginal result if not constant (constant 
-		// parfactors are irrelevant)
-		if (!result.isConstant()) {
-			marginalResult.add(result);
-		}
-		
-		return marginalResult.build();
-	}
-
-	private boolean containsEliminable(Parfactor candidate) {
-		return (candidate.contains(eliminables.prv()) 
-				&& candidate.constraints().containsAll(eliminables.constraints()));
 	}
 	
 	@Override
 	public int cost() {
-		Set<Prv> vars = Sets.getInstance(16);
-		Set<Constraint> constraints = Sets.getInstance(64);
-		
-		for (Parfactor candidate : marginal) {
-			if (containsEliminable(candidate)) {
-				vars.addAll(candidate.prvs()); 
-				constraints.addAll(candidate.constraints());
-			}
-		}
-		
-		int cost = (int) Double.POSITIVE_INFINITY;
-		if (eliminableHasAllLogicalVariablesFrom(vars)) {
-			int f = Factor.getInstance(new ArrayList<Prv>(vars)).size();
-			int v = eliminables.range().size();
-			cost = f / v; 
-		}
-		
 		return cost;
-	}
-
-	private boolean eliminableHasAllLogicalVariablesFrom(Set<Prv> prvs) {
-		Set<LogicalVariable> lvs = Sets.getInstance(0);
-		for (Prv v : prvs) {
-			lvs.addAll(v.parameters());
-		}
-		return eliminables.prv().parameters().containsAll(lvs);
 	}
 	
 	@Override
 	public int numberOfRandomVariablesEliminated() {
-		return eliminables.prv().groundSetSize(eliminables.constraints());
+		// cost = infinity means this operation is impossible, thus no vars 
+		// can be eliminated.
+		if (cost() == infinity) {
+			return 0;
+		} else {
+			return eliminables.prv().groundSetSize(eliminables.constraints());
+		}
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("GLOBAL-SUM-OUT").append(" ").append(eliminables);
+		return builder.toString();
+	}
 }

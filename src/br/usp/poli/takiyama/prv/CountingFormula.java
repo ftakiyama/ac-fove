@@ -58,10 +58,12 @@ public final class CountingFormula implements Prv {
 	 * @throws IllegalArgumentException If the set of constraints contains
 	 * a constraint not involving the bound logical variable <b>or</b> if the 
 	 * specified logical variable is not a parameter of the specified 
-	 * parameterized random variable.
+	 * parameterized random variable 
+	 * @throws IllegalStateException if the set of constraints is too 
+	 * restrictive to create a PRV.
 	 */
 	private CountingFormula(LogicalVariable bound, Set<Constraint> constraints, 
-			Prv prv) throws IllegalArgumentException {
+			Prv prv) throws IllegalArgumentException, IllegalStateException {
 		
 		this.prv = StdPrv.getInstance(prv);
 		this.bound = StdLogicalVariable.getInstance(bound);
@@ -70,6 +72,10 @@ public final class CountingFormula implements Prv {
 		
 		if (!prv.contains(bound)) {
 			throw new IllegalArgumentException();
+		}
+		
+		if (this.bound.individualsSatisfying(this.constraints).size() == 0) {
+			throw new IllegalStateException();
 		}
 		
 		for (Constraint c : constraints) {
@@ -228,9 +234,19 @@ public final class CountingFormula implements Prv {
 	
 	@Override
 	public List<Term> terms() {
-		List<Term> terms = new ArrayList<Term>(prv.terms());
-		terms.remove(bound);
-		return terms;
+//		List<Term> terms = new ArrayList<Term>(prv.terms());
+//		terms.remove(bound);
+//		return terms;
+		/*
+		 * This list includes the bound variable (let's call it A).
+		 * It is not correct to return A as a term or parameter. Why?
+		 * Because when you have a counting formula #.A:C [f(...A...)] you
+		 * are actually representing all PRVs f(...a...) where 'a' is a 
+		 * constant from the set D(A):C. Thus the correct term to return 
+		 * would be 'a', which is not a logical variable nor a constant. It
+		 * represents a constant without being one.  
+		 */
+		return prv.terms();
 	}
 
 	

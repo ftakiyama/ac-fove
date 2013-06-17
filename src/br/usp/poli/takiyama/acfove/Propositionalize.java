@@ -97,6 +97,13 @@ public final class Propositionalize implements MacroOperation {
 	 */
 	@Override
 	public int cost() {
+		
+		/*
+		 * This calculation is valid for standard parfactors.
+		 * For aggregation parfactors, propositionalization creates even
+		 * bigger factors.
+		 */
+		
 		int populationSize = getIndividuals().size();
 		int factorSize = propositionalizable.factor().size();
 		int result = populationSize * factorSize;
@@ -111,4 +118,12 @@ public final class Propositionalize implements MacroOperation {
 		return 0;
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("PROPOSITIONALIZE").append("\n")
+				.append(propositionalizable).append("\n")
+				.append(freeVariable);
+		return builder.toString();
+	}
 }

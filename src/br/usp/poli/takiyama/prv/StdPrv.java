@@ -216,6 +216,9 @@ public final class StdPrv implements Prv {
 	}
 
 	
+	/**
+	 * Returns an empty logical variable.
+	 */
 	@Override
 	public LogicalVariable boundVariable() {
 		return StdLogicalVariable.getInstance();

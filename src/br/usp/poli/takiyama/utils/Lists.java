@@ -1,6 +1,7 @@
 package br.usp.poli.takiyama.utils;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -265,7 +266,7 @@ public final class Lists {
 	public static final int hashCode(List<BigDecimal> list) {
 		int result = 1;
 		for (BigDecimal element : list) {
-			result = 31 * result + (element == null ? 0 : element.setScale(50).hashCode()); // set 15, but this is an arbitrary number
+			result = 31 * result + (element == null ? 0 : element.setScale(50, RoundingMode.HALF_EVEN).hashCode()); // set 15, but this is an arbitrary number
 		}
 		return result;
 	}
@@ -295,6 +296,25 @@ public final class Lists {
 			} catch (IllegalStateException e) {
 				// invalid replaceable is not added to the set
 			}
+		}
+		return replaced;
+	}
+	
+	
+	/**
+	 * Replaces the specified element with another element of same type in the
+	 * specified list.
+	 * @param <T>
+	 * @param list
+	 * @param toReplace
+	 * @param replacement
+	 * @return
+	 */
+	public static final <T> List<T> replace(List<T> list, T toReplace, T replacement) {
+		List<T> replaced = new ArrayList<T>(list);
+		int index = list.indexOf(toReplace);
+		if (index != -1) {
+			replaced.set(index, replacement);
 		}
 		return replaced;
 	}

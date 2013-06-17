@@ -32,7 +32,8 @@ public interface LogicalVariable extends Term {
 	 * (t must be a constant).
 	 * <p>
 	 * Note that, if t is a logical variable, then there is no way of finding
-	 * out which value to constrain in the population. 
+	 * out which value to constrain in the population. Binary constraints are
+	 * silently ignored during account. 
 	 * </p>
 	 * <p>
 	 * This method does not check whether the constraints are consistent, that

@@ -719,4 +719,21 @@ public class StdParfactorTest {
 		
 		assertEquals(expected, result);
 	}
+	
+	@Test
+	public void testLogicalVariableSimplificationWithoutConstraints() {
+		
+		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", 1);
+		
+		Constant x1 = Constant.getInstance("x1");
+		
+		Prv f = StdPrv.getBooleanInstance("f", a);
+		Prv f_x1 = StdPrv.getBooleanInstance("f", x1);
+		
+		Parfactor input = new StdParfactorBuilder().variables(f).values(0, 1).build();
+		Parfactor result = input.simplifyLogicalVariables();
+		Parfactor expected = new StdParfactorBuilder().variables(f_x1).values(0, 1).build();
+
+		assertEquals(expected, result);
+	}
 }

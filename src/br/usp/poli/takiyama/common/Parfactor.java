@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import br.usp.poli.takiyama.cfove.StdParfactor;
+import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.Prv;
 import br.usp.poli.takiyama.prv.Replaceable;
@@ -144,7 +145,23 @@ public interface Parfactor extends VisitableParfactor, Replaceable<Parfactor> { 
 	 * out) from this parfactor because this verification requires a full
 	 * scan of all parfactors in the distribution. In this special case,
 	 * the verification must be done by a higher level class.
+	 * 
+	 * BUT
+	 * If I assume that the marginal has been SHATTERED, then I only need
+	 * to check some parfactor-level conditions. So, here is an important
+	 * assumption: the marginal has been SHATTERED before calling this 
+	 * method. Use at your own risk ;P
 	 */
+	
+	/**
+	 * Returns <code>true</code> if the specified PRV can be eliminated from
+	 * this parfactor.
+	 * 
+	 * @param prv The PRV to eliminate
+	 * @return <code>true</code> if the specified PRV can be eliminated from
+	 * this parfactor, <code>false</code> otherwise.
+	 */
+	public boolean isEliminable(Prv prv);
 	
 	// Enabling operations
 	

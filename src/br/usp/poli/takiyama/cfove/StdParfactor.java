@@ -10,6 +10,7 @@ import java.util.Set;
 
 import br.usp.poli.takiyama.common.AggregationParfactor;
 import br.usp.poli.takiyama.common.Builder;
+import br.usp.poli.takiyama.common.ConstantFactor;
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.Factor;
 import br.usp.poli.takiyama.common.MultiplicationChecker;
@@ -17,6 +18,7 @@ import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.ParfactorVisitor;
 import br.usp.poli.takiyama.common.Scanner;
 import br.usp.poli.takiyama.common.SplitResult;
+import br.usp.poli.takiyama.common.StdFactor;
 import br.usp.poli.takiyama.common.Tuple;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.Constant;
@@ -127,10 +129,10 @@ public final class StdParfactor implements Parfactor {
 			Factor factor;
 			List<Prv> variables = new ArrayList<Prv>(this.prvs);
 			if (this.values.isEmpty()) {
-				factor = Factor.getInstance(variables);
+				factor = ConstantFactor.getInstance(variables);
 			} else {
 				try {
-					factor = Factor.getInstance("", variables, values);
+					factor = StdFactor.getInstance("", variables, values);
 				} catch (IllegalArgumentException e) {
 					throw new IllegalStateException(variables + "\n" + values);
 				}
@@ -144,8 +146,12 @@ public final class StdParfactor implements Parfactor {
 //			Simplifier simplifier = simplified.new Simplifier(simplified);
 //		
 //			return ((StdParfactor) simplifier.simplify());
-			StdParfactor current = new StdParfactor(this);
-			return ((StdParfactor) current.simplifyLogicalVariables());
+			
+			// this is causing some problems
+//			StdParfactor current = new StdParfactor(this);
+//			return ((StdParfactor) current.simplifyLogicalVariables());
+			
+			return new StdParfactor(this);
 		}
 		
 		private StdParfactor buildRaw() {
@@ -346,7 +352,7 @@ public final class StdParfactor implements Parfactor {
 			 */
 			
 			values = new ArrayList<BigDecimal>();
-			Factor newStructure = Factor.getInstance(variables);
+			Factor newStructure = ConstantFactor.getInstance(variables);
 			
 			for (Tuple<RangeElement> tuple : newStructure) {
 				BigDecimal value = BigDecimal.ONE;
@@ -515,7 +521,7 @@ public final class StdParfactor implements Parfactor {
 	 */
 	private StdParfactor(Set<Constraint> constraints, Factor factor) {
 		this.constraints = new HashSet<Constraint>(constraints);
-		this.factor = Factor.getInstance(factor);
+		this.factor = StdFactor.getInstance(factor);
 	}
 	
 
@@ -548,7 +554,7 @@ public final class StdParfactor implements Parfactor {
 	 */
 	public static Parfactor getInstance() {
 		Set<Constraint> constraints = new HashSet<Constraint>(0);
-		Factor factor = Factor.getInstance();
+		Factor factor = StdFactor.getInstance();
 		return new StdParfactor(constraints, factor);
 	}
 	
@@ -591,7 +597,7 @@ public final class StdParfactor implements Parfactor {
 	
 	@Override
 	public Factor factor() {
-		return Factor.getInstance(factor);
+		return factor;
 	}
 
 	
@@ -694,7 +700,15 @@ public final class StdParfactor implements Parfactor {
 	 * be expanded on the specified term, <code>false</code> otherwise
 	 */
 	@Override
-	public boolean isExpandable(Prv cf, Term t) {
+	public boolean isExpandable(Prv cf, Substitution s) {
+		
+		if (s.size() != 1) {
+			return false;
+		}
+		
+		Binding bind = s.asList().get(0);
+		LogicalVariable replaced = bind.firstTerm();
+		Term t = bind.secondTerm();
 		
 		// Is counting formula?
 		boolean isCountingFormula = !cf.boundVariable().isEmpty();
@@ -712,14 +726,23 @@ public final class StdParfactor implements Parfactor {
 		// formula, is there a constraint Y != t in this parfactor?
 		boolean isOrthogonal = isOrthogonal(cf, t);
 		
-		boolean isLocalLogicalVariable = logicalVariables().contains(t);
+		/*
+		 * In theory it is possible to expand a counting formula on a logical
+		 * variable. For now, I will not allow it to make shattering simpler.
+		 * Need to find an example where expanding on a logical variable is
+		 * the only and correct thing to do.
+		 */
+		// boolean isLocalLogicalVariable = logicalVariables().contains(t);
+		
+		boolean replacesBound = replaced.equals(cf.boundVariable());
 		
 		boolean isConstantFromBound = (t.isConstant() ? 
 				cf.boundVariable().population().contains((Constant) t) : false);
 		
 		return isCountingFormula && belongsHere && isInNormalForm 
 				&& isCountable && isOrthogonal
-				&& (isLocalLogicalVariable || isConstantFromBound);
+				&& replacesBound && isConstantFromBound;
+				//&& (isLocalLogicalVariable || isConstantFromBound); // disabled for the reason above
 	}
 	
 
@@ -910,7 +933,7 @@ public final class StdParfactor implements Parfactor {
 		List<Prv> vars = getExpandedVariables(cf, t);
 		
 		// Creates a constant factor with the new set of PRVs
-		Factor newStructure = Factor.getInstance(vars);
+		Factor newStructure = ConstantFactor.getInstance(vars);
 		
 		// Creates an array to store the values of the new parfactor
 		Prv takenOut = vars.get(cfIndex + 1);
@@ -1098,7 +1121,7 @@ public final class StdParfactor implements Parfactor {
 	
 	@Override
 	public String toString() {
-		String result = "C = " + constraints + ",\n" + factor;
+		String result = "\nC = " + constraints + ",\n" + factor;
 		return result;
 	
 	}

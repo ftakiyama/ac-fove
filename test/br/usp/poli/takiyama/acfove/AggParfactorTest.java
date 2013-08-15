@@ -1,10 +1,10 @@
 package br.usp.poli.takiyama.acfove;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.core.IsInstanceOf.instanceOf;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
+import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeThat;
@@ -17,7 +17,9 @@ import java.util.Set;
 
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
-import org.junit.experimental.theories.*;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
@@ -33,6 +35,7 @@ import br.usp.poli.takiyama.common.InputOutput;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.SplitResult;
 import br.usp.poli.takiyama.common.StdDistribution;
+import br.usp.poli.takiyama.common.StdFactor;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.CountingFormula;
@@ -436,7 +439,7 @@ public class AggParfactorTest {
 				int index = rounded.indexOf(number);
 				rounded.set(index, number.setScale(scale, BigDecimal.ROUND_HALF_EVEN));
 			}
-			Factor roundedFactor = Factor.getInstance("", parfactor.prvs(), rounded);
+			Factor roundedFactor = StdFactor.getInstance("", parfactor.prvs(), rounded);
 			return new StdParfactorBuilder().constraints(parfactor.constraints()).factor(roundedFactor).build();
 		}
 	}
@@ -640,7 +643,8 @@ public class AggParfactorTest {
 		
 		@Test
 		public void testSimplicationOfLogicalVariables() {
-			assertEquals(expected, input.simplifyLogicalVariables());
+			Parfactor result = input.simplifyLogicalVariables();
+			assertEquals(expected, result);
 		}
 	}
 }

@@ -1,11 +1,38 @@
 package br.usp.poli.takiyama.prv;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import org.junit.Before;
 import org.junit.Test;
+
+import br.usp.poli.takiyama.common.Constraint;
+import br.usp.poli.takiyama.common.InequalityConstraint;
+import br.usp.poli.takiyama.utils.Sets;
 
 
 public class PrvsTest {
+	
+	private LogicalVariable a;
+	private List<Prv> base;
+	private List<Prv> disjointWithBase;
+	private List<Prv> notDisjointWithBase;
+	
+	@Before
+	public void setup() {
+		base = new ArrayList<Prv>();
+		disjointWithBase = new ArrayList<Prv>();
+		notDisjointWithBase = new ArrayList<Prv>();
+		
+		a = StdLogicalVariable.getInstance("A", "a", 3);
+		base.add(StdPrv.getBooleanInstance("h", a));
+		//base.add(RandomVariableSet.getInstance(StdPrv.getBooleanInstance("f", a), new HashSet<Constraint>(0)));
+		disjointWithBase.add(CountingFormula.getInstance(a, StdPrv.getBooleanInstance("f", a)));
+	}
 	
 	/**
 	 * Example 2.20 from Kisynski (2010).
@@ -32,5 +59,44 @@ public class PrvsTest {
 		Substitution answer = Substitution.getInstance(x1_1, x2_x4);
 		
 		assertTrue(result.equals(answer));
+	}
+	
+	@Test
+	public void testSetIntersection() {
+		for (Prv prv : base) {
+			for (Prv disjoint : disjointWithBase) {
+				if(!Prvs.areDisjoint(prv, disjoint)) {
+					assertTrue(false);
+				}
+			}
+		}
+		assertTrue(true);
+	}
+	
+	/**
+	 * sprinkler(Lot):{Lot!=lot1} is disjoint with sprinkler(lot1)
+	 */
+	@Test
+	public void testSetIntersection1() {
+		LogicalVariable lot = StdLogicalVariable.getInstance("Lot", "lot", 10);
+		Prv sprinkler = StdPrv.getBooleanInstance("sprinkler", lot);
+		Term lot1 = lot.population().individualAt(0);
+		Set<Constraint> constraints = Sets.setOf(InequalityConstraint.getInstance(lot, lot1));
+		Prv randomVariableSet = RandomVariableSet.getInstance(sprinkler, constraints);
+		Prv sprinkler1 = StdPrv.getBooleanInstance("sprinkler", lot1);
+		assertTrue(Prvs.areDisjoint(randomVariableSet, sprinkler1));
+	}
+	
+	/**
+	 * sprinkler(Lot) is NOT disjoint with sprinkler(lot1)
+	 */
+	@Test
+	public void testSetIntersection2() {
+		LogicalVariable lot = StdLogicalVariable.getInstance("Lot", "lot", 10);
+		Prv sprinkler = StdPrv.getBooleanInstance("sprinkler", lot);
+		Term lot1 = lot.population().individualAt(0);
+		Prv randomVariableSet = RandomVariableSet.getInstance(sprinkler, Sets.<Constraint>getInstance(0));
+		Prv sprinkler1 = StdPrv.getBooleanInstance("sprinkler", lot1);
+		assertFalse(Prvs.areDisjoint(randomVariableSet, sprinkler1));
 	}
 }

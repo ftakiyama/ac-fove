@@ -210,7 +210,7 @@ public final class Shatter implements MacroOperation {
 		if (marginalSize < 2) {
 			return marginal;
 		}
-		simplifyLogicalVariables();
+		marginal = simplifyLogicalVariables(marginal);
 		renameAllLogicalVariables();
 		
 		MutableQueue<Parfactor> queue = new MutableQueue<Parfactor>(marginal.distribution().toSet());
@@ -232,6 +232,9 @@ public final class Shatter implements MacroOperation {
 		Marginal result = new StdMarginalBuilder().parfactors(shattered)
 				.preservable(marginal.preservable()).build();
 		
+		// Simplifies logical variables after shattering
+		result = simplifyLogicalVariables(result);
+		
 		return result;
 	}
 	
@@ -239,13 +242,13 @@ public final class Shatter implements MacroOperation {
 	 * Replaces logical variables constrained to a single constant with this
 	 * constant in all parfactors in the distribution.
 	 */
-	private void simplifyLogicalVariables() {
+	private Marginal simplifyLogicalVariables(Marginal marginal) {
 		StdMarginalBuilder m = new StdMarginalBuilder(marginal.size());
-		for (Parfactor p : this.marginal) {
+		for (Parfactor p : marginal) {
 			m.add(p.simplifyLogicalVariables());
 		}
 		RandomVariableSet query = marginal.preservable();
-		this.marginal = m.preservable(query).build();
+		return m.preservable(query).build();
 	}
 	
 	
@@ -372,7 +375,7 @@ public final class Shatter implements MacroOperation {
 			if (scanner.logicalVariables().contains(bind.firstTerm())) {
 				
 				// expands all counting formulas - not sure if it is the right thing to do
-				result = expand(result, bind.secondTerm());
+				result = expand(result, Substitution.getInstance(bind));
 				
 				Substitution bindAsSub = Substitution.getInstance(bind);
 				if (result.isSplittable(bindAsSub)) {
@@ -402,22 +405,13 @@ public final class Shatter implements MacroOperation {
 		byProduct.parfactors(splitResult.residue());
 		for (Constraint constraint : constraints) {
 			
-			// Need to check both terms from constraint
-			residue = expand(residue, constraint.firstTerm());
-			residue = expand(residue, constraint.secondTerm());
-			
-			Substitution constraintAsSub;
-			try {
-				constraintAsSub = Substitution.getInstance(constraint.toBinding());
-			} catch (IllegalStateException e) {
-				constraintAsSub = Substitution.getInstance(constraint.toInverseBinding());
-			}
+			Substitution constraintAsSub = convertToSubstitution(constraint);
+			residue = expand(residue, constraintAsSub);
 			if (residue.isSplittable(constraintAsSub)) {
 				SplitResult split = residue.splitOn(constraintAsSub);
 				residue = split.residue().iterator().next();
 				byProduct.parfactors(split.result());
-				
-			} 
+			}
 		}
 		return SplitResult.getInstance(residue, byProduct.build());
 	}
@@ -427,14 +421,25 @@ public final class Shatter implements MacroOperation {
 	 * specified parfactor on the specified term. Expansion is made only if
 	 * conditions for expansion are met.
 	 */
-	private Parfactor expand(Parfactor parfactor, Term term) {
+	private Parfactor expand(Parfactor parfactor, Substitution sub) {
 		List<Prv> variables = parfactor.prvs();
 		for (Prv prv : variables) {
-			if (parfactor.isExpandable(prv, term)) {
+			if (parfactor.isExpandable(prv, sub)) {
+				Term term = sub.getReplacement(prv.boundVariable());
 				parfactor = parfactor.expand(prv, term);
 			}
 		}
 		return parfactor;
+	}
+	
+	private Substitution convertToSubstitution(Constraint constraint) {
+		Substitution constraintAsSub;
+		try {
+			constraintAsSub = Substitution.getInstance(constraint.toBinding());
+		} catch (IllegalStateException e) {
+			constraintAsSub = Substitution.getInstance(constraint.toInverseBinding());
+		}
+		return constraintAsSub;
 	}
 
 	@Override
@@ -445,5 +450,10 @@ public final class Shatter implements MacroOperation {
 	@Override
 	public int numberOfRandomVariablesEliminated() {
 		return 0;
+	}
+	
+	@Override
+	public String toString() {
+		return "SHATTER";
 	}
 }

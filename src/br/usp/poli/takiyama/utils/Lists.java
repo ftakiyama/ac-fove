@@ -318,4 +318,19 @@ public final class Lists {
 		}
 		return replaced;
 	}
+	
+	
+	/**
+	 * Returns <code>true</code> if the specified lists have the same elements.
+	 * @param <T>
+	 * @param list1
+	 * @param list2
+	 * @return
+	 */
+	public static final <T> boolean sameElements(List<T> list1, List<T> list2) {
+		if (list1.size() != list2.size()) {
+			return false;
+		}
+		return (list1.containsAll(list2) && list2.containsAll(list1));
+	}
 }

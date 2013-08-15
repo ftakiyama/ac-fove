@@ -352,9 +352,11 @@ public final class RandomVariableSet implements Prv {
 
 	@Override
 	public Prv getCanonicalForm() {
-		Prv canonicalPrv = prv.getCanonicalForm();
-		Set<Constraint> allConstraints = Sets.union(constraints, prv.constraints());
-		return RandomVariableSet.getInstance(canonicalPrv, allConstraints);
+//		Prv canonicalPrv = prv.getCanonicalForm();
+//		Set<Constraint> allConstraints = Sets.union(constraints, prv.constraints());
+//		return RandomVariableSet.getInstance(canonicalPrv, allConstraints);
+		
+		return this.prv.getCanonicalForm();
 	}
 	
 	/* ************************************************************************

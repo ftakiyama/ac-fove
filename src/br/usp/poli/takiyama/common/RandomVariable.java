@@ -172,7 +172,7 @@ public final class RandomVariable {
 //		// Prints the bottom rule
 //		result += thickRule + "\n";
 		
-		return name + " # " + domain.toString();
+		return name;
 	}
 
 	@Override

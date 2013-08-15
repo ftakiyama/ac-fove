@@ -127,4 +127,42 @@ public final class Sets {
 		Collections.sort(ordered, comparator);
 		return ordered;
 	}
+	
+	
+	/**
+	 * Returns the difference between the specified set and the specified 
+	 * collection. That is, returns a set containing all elements in the set
+	 * that are not in the collection.
+	 * @param <T>
+	 * @param set
+	 * @param collection
+	 * @return
+	 */
+	public static final <T> Set<T> difference(Set<T> set, Collection<T> collection) {
+		Set<T> difference = getInstance(set.size());
+		for (T element : set) {
+			if (!collection.contains(element)) {
+				difference.add(element);
+			}
+		}
+		return difference;
+	}
+	
+	
+	/**
+	 * Returns the intersection of the specified sets.
+	 * @param <T>
+	 * @param set1
+	 * @param set2
+	 * @return
+	 */
+	public static final <T> Set<T> intersection(Set<T> set1, Set<T> set2) {
+		Set<T> intersection = getInstance(set1.size());
+		for (T element : set1) {
+			if (set2.contains(element)) {
+				intersection.add(element);
+			}
+		}
+		return intersection;
+	}
 }

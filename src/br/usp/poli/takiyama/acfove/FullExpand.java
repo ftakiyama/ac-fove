@@ -6,11 +6,13 @@ package br.usp.poli.takiyama.acfove;
 import br.usp.poli.takiyama.common.Marginal;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.StdMarginal.StdMarginalBuilder;
+import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.CountingFormula;
+import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.Population;
 import br.usp.poli.takiyama.prv.Prv;
-import br.usp.poli.takiyama.prv.Term;
+import br.usp.poli.takiyama.prv.Substitution;
 
 /**
  * This operation represents the expansion of a counting formula 
@@ -81,7 +83,10 @@ public final class FullExpand implements MacroOperation {
 		
 		for (Constant individual : population) {
 			expandable = toExpand.factor().variables().get(prvIndex);
-			if (toExpand.isExpandable(expandable, individual)) {
+			LogicalVariable bound = expandable.boundVariable();
+			Binding b = Binding.getInstance(bound, individual);
+			Substitution s = Substitution.getInstance(b);
+			if (toExpand.isExpandable(expandable, s)) {
 				toExpand = toExpand.expand(expandable, individual);
 			}
 		}
@@ -140,8 +145,11 @@ public final class FullExpand implements MacroOperation {
 		boolean isPossible = false;
 		Population population = getBoundedIndividuals();
 		if (population.size() != 0) {
-			Term someone = population.individualAt(0);
-			isPossible = expandableParfactor.isExpandable(expandableVariable, someone);
+			Constant someone = population.individualAt(0);
+			LogicalVariable bound = expandableVariable.boundVariable();
+			Binding b = Binding.getInstance(bound, someone);
+			Substitution s = Substitution.getInstance(b);
+			isPossible = expandableParfactor.isExpandable(expandableVariable, s);
 		}
 		return isPossible;
 	}

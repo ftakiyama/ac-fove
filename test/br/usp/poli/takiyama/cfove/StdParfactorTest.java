@@ -1,7 +1,8 @@
 package br.usp.poli.takiyama.cfove;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ import br.usp.poli.takiyama.prv.StdPrv;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
 import br.usp.poli.takiyama.utils.MathUtils;
+import br.usp.poli.takiyama.utils.TestUtils;
 
 
 /**
@@ -205,6 +207,69 @@ public class StdParfactorTest {
 		assertTrue(product.equals(answer));
 	}
 	
+	
+//	public void testMultiplicationWithCountingFormula() {
+//		int n = 5;
+//		
+//		// Logical variables A, B and C
+//		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", n);
+//		LogicalVariable b = StdLogicalVariable.getInstance("B", "x", n);
+//		
+//		Constant x1 = Constant.getInstance("x1");
+//		
+//		Constraint a_x1 = InequalityConstraint.getInstance(a, x1);
+//		
+//		// PRVs f(A,B) #.B [f(A,B)] 
+//		Prv f = StdPrv.getBooleanInstance("f", a, b);
+//		Prv cf = CountingFormula.getInstance(b, f);
+//		
+//		List<BigDecimal> f1 = TestUtils.toBigDecimalList(2, 4, 6, 8, 10, 12);
+//		List<BigDecimal> f2 = TestUtils.toBigDecimalList(3, 5);
+//		
+//		Parfactor g1 = new StdParfactorBuilder().constraints(a_x1)
+//				.variables(cf).values(f1).build();
+//		Parfactor g2 = new StdParfactorBuilder().constraints(a_x1)
+//				.variables(f).values(f2).build();
+//		
+//		Parfactor product = g1.multiply(g2);
+//		Parfactor expected = new StdParfactorBuilder().constraints(a_x1)
+//				.variables(cf).values(f3).build();
+//		
+//		assertEquals(expected, product);
+//	}
+	
+	// TODO improve this test
+	@Test
+	public void testMultiplicationConditions() {
+		
+		int n = 2;
+		
+		LogicalVariable a = StdLogicalVariable.getInstance("A", "x", n);
+		LogicalVariable b = StdLogicalVariable.getInstance("B", "x", n);
+		LogicalVariable c = StdLogicalVariable.getInstance("C", "x", n);
+		
+		Constant x1 = Constant.getInstance("x1");
+		
+		Prv f = StdPrv.getBooleanInstance("f", a, b);
+		Prv f_a_x1 = StdPrv.getBooleanInstance("f", a, x1);
+		Prv h = StdPrv.getBooleanInstance("h", c);
+		Prv cf1 = CountingFormula.getInstance(a, f);
+		Prv cf2 = CountingFormula.getInstance(a, f_a_x1);
+		
+		List<BigDecimal> f1 = TestUtils.toBigDecimalList(2, 4, 6);
+		List<BigDecimal> f2 = TestUtils.toBigDecimalList(3, 5);
+		List<BigDecimal> f3 = TestUtils.toBigDecimalList(3, 5, 7, 11);
+		
+		Parfactor g1 = new StdParfactorBuilder().variables(cf1).values(f1).build();
+		Parfactor g2 = new StdParfactorBuilder().variables(f).values(f2).build();
+		Parfactor g3 = new StdParfactorBuilder().variables(cf2).values(f1).build();
+		Parfactor g4 = new StdParfactorBuilder().variables(f_a_x1).values(f2).build();
+		Parfactor g5 = new StdParfactorBuilder().variables(f, h).values(f3).build();
+		Parfactor g6 = new StdParfactorBuilder().variables(f).values(f2).build();
+		
+		assertFalse(g1.isMultipliable(g2) || g3.isMultipliable(g4)
+				|| !g5.isMultipliable(g6) || g5.isMultipliable(g5));
+	}
 	
 	/**
 	 * Range for PRV e(C), specified above.

@@ -3,6 +3,7 @@ package br.usp.poli.takiyama.acfove;
 import static org.hamcrest.collection.IsIn.isIn;
 import static org.junit.Assert.assertEquals;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -23,6 +24,7 @@ import br.usp.poli.takiyama.common.InequalityConstraint;
 import br.usp.poli.takiyama.common.Marginal;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.StdMarginal.StdMarginalBuilder;
+import br.usp.poli.takiyama.prv.And;
 import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
@@ -32,6 +34,7 @@ import br.usp.poli.takiyama.prv.RandomVariableSet;
 import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.StdPrv;
 import br.usp.poli.takiyama.utils.Sets;
+import br.usp.poli.takiyama.utils.TestUtils;
 
 @RunWith(Enclosed.class)
 public class MacroOperationTest {
@@ -536,49 +539,94 @@ public class MacroOperationTest {
 			Marginal expected = new StdMarginalBuilder().parfactors(g2, g2, g3).build();
 			assertEquals(expected, result);
 		}
-	}
-	
-	/**
-	 * Tests shatter on query. This macro operation is called only once
-	 * in the algorithm, just before {@link Shatter}.
-	 */
-	public static class ShatterOnQueryTest {
 		
 		@Test
-		public void testShatterOnQuery() {
-			LogicalVariable lot = StdLogicalVariable.getInstance("Lot", "lot", 15);
-			Constant lot1 = Constant.getInstance("lot1");
+		public void testShatterWithCountingFormula() {
 			
-			Prv rain = StdPrv.getBooleanInstance("rain");
-			Prv sprinkler = StdPrv.getBooleanInstance("sprinkler", lot);
-			Prv wet_grass = StdPrv.getBooleanInstance("wet_grass", lot);
-			Prv wet_grass_lot1 = StdPrv.getBooleanInstance("wet_grass", lot1);
-			Prv sprinkler_lot1 = StdPrv.getBooleanInstance("sprinkler", lot1);
+			int n = 3;
+			LogicalVariable x = StdLogicalVariable.getInstance("X", "x", n);
+			LogicalVariable y = StdLogicalVariable.getInstance("Y", "x", n);
 			
-			Constraint lot_lot1 = InequalityConstraint.getInstance(lot, lot1);
+			Constant x1 = Constant.getInstance("x1");
 			
-			double [] f1 = {0.8, 0.2};
-			double [] f2 = {0.6, 0.4};
-			double [] f3 = {1.0, 0.0, 0.2, 0.8, 0.1, 0.9, 0.01, 0.99};
+			Constraint x_x1 = InequalityConstraint.getInstance(x, x1);
 			
-			Parfactor g1 = new StdParfactorBuilder().variables(rain).values(f1).build();
-			Parfactor g2 = new StdParfactorBuilder().variables(sprinkler).values(f2).build();
-			Parfactor g3 = new StdParfactorBuilder().variables(rain, sprinkler, wet_grass).values(f3).build();
-			Parfactor g4 = new StdParfactorBuilder().variables(rain, sprinkler_lot1, wet_grass_lot1).values(f3).build();
-			Parfactor g5 = new StdParfactorBuilder().variables(rain, sprinkler, wet_grass).constraints(lot_lot1).values(f3).build();
+			Prv b = StdPrv.getBooleanInstance("b", x);
+			Prv c = StdPrv.getBooleanInstance("c", x);
+			Prv e = StdPrv.getBooleanInstance("e", x);
+			Prv e_x1 = StdPrv.getBooleanInstance("e", x1);
+			Prv r = StdPrv.getBooleanInstance("r", x, y);
+			Prv r_x1_y = StdPrv.getBooleanInstance("r", x1, y);
+			Prv cf = CountingFormula.getInstance(y, r);
+			Prv cf_x1 = CountingFormula.getInstance(y, r_x1_y);
 			
-			RandomVariableSet query = RandomVariableSet.getInstance(wet_grass, Sets.setOf(lot_lot1));
-			Marginal marginal = new StdMarginalBuilder().parfactors(g1, g2, g3).preservable(query).build();
+			Parfactor g1 = new StdParfactorBuilder().variables(cf, e).build();
+			Parfactor g2 = new StdParfactorBuilder().variables(b, e, c).constraints(x_x1).build();
+			Parfactor g3 = new StdParfactorBuilder().variables(cf, e).constraints(x_x1).build();
+			Parfactor g4 = new StdParfactorBuilder().variables(cf_x1, e_x1).build();
 			
-			MacroOperation shatter = new ShatterOnQuery(marginal);
+			Marginal input = new StdMarginalBuilder().parfactors(g1, g2).build();
 			
+			MacroOperation shatter = new Shatter(input);
 			Marginal result = shatter.run();
-			Marginal expected = new StdMarginalBuilder().parfactors(g1, g2, g4, g5).preservable(query).build();
+
+			Marginal expected = new StdMarginalBuilder().parfactors(g2, g3, g4).build();
 			
 			assertEquals(expected, result);
 		}
+		
+		@Test
+		public void testShatterOnCralcExample() {
+			
+			int n = 3;
+			LogicalVariable x = StdLogicalVariable.getInstance("X", "x", n);
+			LogicalVariable y = StdLogicalVariable.getInstance("Y", "x", n);
+			
+			Constant x1 = Constant.getInstance("x1");
+			
+			Prv a = StdPrv.getBooleanInstance("a", x);
+			Prv b = StdPrv.getBooleanInstance("b", x);
+			Prv c = StdPrv.getBooleanInstance("c", x);
+			Prv d = StdPrv.getBooleanInstance("d", x);
+			Prv e = StdPrv.getBooleanInstance("e", x);
+			Prv f = StdPrv.getBooleanInstance("f", x);
+			Prv r = StdPrv.getBooleanInstance("r", x, y);
+			Prv r1 = StdPrv.getBooleanInstance("r1", x, y);
+			Prv r2 = StdPrv.getBooleanInstance("r2", x, y);
+			Prv c1 = StdPrv.getBooleanInstance("c", x1);
+			
+			List<BigDecimal> f1 = TestUtils.toBigDecimalList(0.1, 0.9);
+			List<BigDecimal> f2 = TestUtils.toBigDecimalList(1.0, 0.0, 0.55, 0.45);
+			List<BigDecimal> f3 = TestUtils.toBigDecimalList(1, 0, 0, 1, 0, 1, 0, 1);
+			List<BigDecimal> f5 = TestUtils.toBigDecimalList(1, 0, 0, 1);
+			List<BigDecimal> f7 = TestUtils.toBigDecimalList(1, 0, 0, 1, 0, 1, 0, 1);
+			List<BigDecimal> f8 = TestUtils.toBigDecimalList(0.7, 0.3);
+			List<BigDecimal> f9 = TestUtils.toBigDecimalList(1, 0, 1, 0, 1, 0, 0, 1);
+			
+			Parfactor g1 = new StdParfactorBuilder().variables(a).values(f1).build();
+			Parfactor g2 = new StdParfactorBuilder().variables(a, b).values(f2).build();
+			Parfactor g3 = new StdParfactorBuilder().variables(b, e, c).values(f3).build();
+			Parfactor g4 = new AggParfactorBuilder(r1, f, And.AND).build();
+			Parfactor g5 = new StdParfactorBuilder().variables(f, d).values(f5).build();
+			Parfactor g6 = new AggParfactorBuilder(r2, e, Or.OR).build();
+			Parfactor g7 = new StdParfactorBuilder().variables(a, r, r1).values(f7).build();
+			Parfactor g8 = new StdParfactorBuilder().variables(r).values(f8).build();
+			Parfactor g9 = new StdParfactorBuilder().variables(d, r, r2).values(f9).build();
+			Parfactor g10 = new StdParfactorBuilder().variables(c1).build();
+			
+			RandomVariableSet query = RandomVariableSet.getInstance(c1, new HashSet<Constraint>(0));
+			Marginal input = new StdMarginalBuilder().parfactors(g1, g2, g3, g4, g5, g6, g7, g8, g9, g10).preservable(query).build();
+			
+//			MacroOperation conversion = new ConvertToStdParfactors(input);
+//			input = conversion.run();
+			MacroOperation shatter = new Shatter(input);
+			Marginal result = shatter.run();
+			
+			System.out.print(result);
+		}
 	}
 	
+		
 	public static class FullExpandTest {
 		
 		@Test

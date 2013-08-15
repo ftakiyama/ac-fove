@@ -108,14 +108,14 @@ public interface Parfactor extends VisitableParfactor, Replaceable<Parfactor> { 
 	
 	/**
 	 * Returns <code>true</code> if the specified {@link Prv} can
-	 * be expanded on the specified term.
+	 * be expanded on the specified substitution.
 	 * 
 	 * @param cf The PRV to be expanded
-	 * @param t The term to expand the counting formula on
+	 * @param s The substitution to expand the counting formula on
 	 * @return <code>true</code> if the specified PRV can
 	 * be expanded on the specified term, <code>false</code> otherwise
 	 */
-	public boolean isExpandable(Prv cf, Term t);
+	public boolean isExpandable(Prv cf, Substitution s);
 	
 	
 	/**

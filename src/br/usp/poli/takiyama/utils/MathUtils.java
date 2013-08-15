@@ -298,8 +298,13 @@ public final class MathUtils {
 				throw new IllegalArgumentException("0^n, n < 0 is undefined!");
 			}
 		} else if (b.signum() < 0 || sign < 0) {
-			throw new IllegalArgumentException("Operation not defined for"
-					+ " negative numbers.");
+			if (p % q == 0) {
+				int exp = p / q;
+				result = b.pow(exp);
+			} else {
+				throw new IllegalArgumentException("Operation not defined for"
+						+ " negative numbers.");
+			}
 		} else {
 			// separates p/q in two parts: whole (i) and decimal (d)
 			int intPart = p / q;

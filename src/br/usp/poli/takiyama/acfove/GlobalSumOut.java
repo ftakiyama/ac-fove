@@ -6,7 +6,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import br.usp.poli.takiyama.cfove.StdParfactor;
 import br.usp.poli.takiyama.cfove.StdParfactor.StdParfactorBuilder;
+import br.usp.poli.takiyama.common.ConstantFactor;
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.Factor;
 import br.usp.poli.takiyama.common.Marginal;
@@ -14,6 +16,7 @@ import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.StdMarginal.StdMarginalBuilder;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.Prv;
+import br.usp.poli.takiyama.prv.Prvs;
 import br.usp.poli.takiyama.prv.RandomVariableSet;
 import br.usp.poli.takiyama.utils.Sets;
 
@@ -54,6 +57,9 @@ final class GlobalSumOut implements MacroOperation {
 			 * This assumption is not true if Aggregation parfactors are not
 			 * converted in the beginning of the AC-FOVE algorithm
 			 */
+			// it is a waist of memory to create a factor here. what now?
+			// better yet: it is a waist of memory to use constant factors
+			// need to take simplification out
 			Parfactor parfactor = new StdParfactorBuilder()
 					.variables(new ArrayList<Prv>(variables))
 					.constraints(constraints).build();
@@ -75,7 +81,7 @@ final class GlobalSumOut implements MacroOperation {
 		}
 		
 		private Factor getFactor() {
-			return Factor.getInstance(new ArrayList<Prv>(variables));
+			return ConstantFactor.getInstance(new ArrayList<Prv>(variables));
 		}
 	}
 	
@@ -94,7 +100,8 @@ final class GlobalSumOut implements MacroOperation {
 	 */
 	private void calculateFeasibility() {
 		setCost(infinity);
-		if (!marginal.preservable().equals(eliminables.getCanonicalForm())) {
+		
+		if (Prvs.areDisjoint(eliminables, marginal.preservable())) {
 			
 			// assembles a dummy parfactor that represents the result of this operation
 			ParfactorSkeleton result = new ParfactorSkeleton();
@@ -105,7 +112,7 @@ final class GlobalSumOut implements MacroOperation {
 					} else {
 						// contains eliminables but cannot be multiplied: be sure
 						// to shatter before!
-						setCost(infinity);
+						return;
 					}
 				}
 			}
@@ -138,15 +145,29 @@ final class GlobalSumOut implements MacroOperation {
 	 * to eliminate.
 	 */
 	private boolean containsEliminable(Parfactor candidate) {
-		List<Prv> variables = candidate.factor().variables();
+		/*
+		 * In theory, marginal is shattered, so candidate either contains
+		 * eliminables or not.
+		 */
+		
+		List<Prv> variables = candidate.prvs();
 		for (Prv prv : variables) {
-			boolean hasFunctor = prv.name().equals(eliminables.prv().name());
-			boolean hasConstraints = candidate.constraints().containsAll(eliminables.constraints());
-			if (hasFunctor && hasConstraints) {
+			RandomVariableSet rvs = RandomVariableSet.getInstance(prv, candidate.constraints());
+			if (rvs.equals(eliminables)) {
 				return true;
 			}
 		}
 		return false;
+		
+//		List<Prv> variables = candidate.prvs();
+//		for (Prv prv : variables) {
+//			boolean hasFunctor = prv.name().equals(eliminables.prv().name());
+//			boolean hasConstraints = candidate.constraints().containsAll(eliminables.constraints());
+//			if (hasFunctor && hasConstraints) {
+//				return true;
+//			}
+//		}
+//		return false;
 	}
 	
 	@Override
@@ -167,7 +188,11 @@ final class GlobalSumOut implements MacroOperation {
 			
 			// Sums out the eliminable if possible - actually it should be possible at this point
 			//if (Sets.setOf(eliminables.prv().parameters()).equals(result.logicalVariables())) {
-			result = result.sumOut(eliminables.prv());
+			try {
+				result = result.sumOut(eliminables.prv());
+			} catch (IllegalArgumentException e) {
+				result = new StdParfactor.StdParfactorBuilder().build();
+			}
 			//}
 			
 			// Adds the result to marginal result if not constant (constant 

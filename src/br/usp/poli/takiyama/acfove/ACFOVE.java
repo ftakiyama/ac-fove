@@ -3,21 +3,30 @@ package br.usp.poli.takiyama.acfove;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import br.usp.poli.takiyama.cfove.StdParfactor.StdParfactorBuilder;
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.Marginal;
 import br.usp.poli.takiyama.common.Parfactor;
-import br.usp.poli.takiyama.log.ConsoleLogger;
+import br.usp.poli.takiyama.common.StdMarginal;
+import br.usp.poli.takiyama.log.FileLogger;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.Prv;
 import br.usp.poli.takiyama.prv.RandomVariableSet;
 
-public final class ACFOVE {
+public class ACFOVE {
 	
 	private final Marginal input;
 	private Marginal result;
 	private MacroOperation currentOperation;
 	
 	private final static Logger logger = Logger.getLogger(ACFOVE.class.getName());
+	
+	// change later
+	private final long timeout;
+	private final long deadline;
+	long start, end;
+	double timeSeconds;
+	
 	
 	/*
 	 * I need to create a mechanism to avoid deadlocks between expanding and
@@ -33,17 +42,33 @@ public final class ACFOVE {
 	 */
 	public ACFOVE(Marginal parfactors) {
 		
-		ConsoleLogger.setup();
+		FileLogger.setup();
+		timeout = 100000;
+		deadline = System.currentTimeMillis() + timeout;
 		
 		logger.info("Starting AC-FOVE...");
 		this.input = parfactors;
 		
 		logger.info("Input: \n" + input);
-		this.result = performConversionToStdParfactors(input);
+		
+		result = input;
+//		start = System.currentTimeMillis();
+//		this.result = performConversionToStdParfactors(input);
+//		end = System.currentTimeMillis();
+//		
+//		timeSeconds = (end - start) / 1000.0;
+//		logger.severe("Time to convert aggregation parfactors: " + timeSeconds + "\n");
+		
+		
+		start = System.currentTimeMillis();
 		this.result = performInitialShattering(result);
-
+		end = System.currentTimeMillis();
+		
+		timeSeconds = (end - start) / 1000.0;
+		logger.severe("Time to initial shatter: " + timeSeconds + "\n");
+		
 		logger.info("Initial shattering and conversion: \n" + result);
-		this.currentOperation = ImpossibleOperation.instance;
+		this.currentOperation = new Shatter(result); //ImpossibleOperation.instance;
 	}
 	
 
@@ -56,8 +81,13 @@ public final class ACFOVE {
 	 * @param arg The marginal to shatter.
 	 * @return The specified marginal shattered
 	 */
-	private Marginal performInitialShattering(Marginal arg) {
-		Marginal result = new ShatterOnQuery(arg).run();
+	private Marginal performInitialShattering(Marginal arg) { 
+		Parfactor query = new StdParfactorBuilder()
+				.variables(arg.preservable().prv())
+				.constraints(arg.preservable().constraints())
+				.build();
+		//Marginal result = new ShatterOnQuery(arg).run();
+		Marginal result = new StdMarginal.StdMarginalBuilder().add(arg).add(query).build();
 		result = new Shatter(result).run();
 		return result;
 	}
@@ -70,9 +100,9 @@ public final class ACFOVE {
 	 * @return The specified marginal with all aggregation parfactors 
 	 * converted to standard parfactors.
 	 */
-	private Marginal performConversionToStdParfactors(Marginal arg) {
-		return new ConvertToStdParfactors(arg).run();
-	}
+//	private Marginal performConversionToStdParfactors(Marginal arg) {
+//		return new ConvertToStdParfactors(arg).run();
+//	}
 	
 	
 	/**
@@ -84,10 +114,19 @@ public final class ACFOVE {
 		while (thereAreVariablesToEliminate()) {
 			runStep();
 			resetCurrentOperation();
+//			if (System.currentTimeMillis() > deadline) {
+//				logger.warning("Timeout.");
+//				break;
+//			}
 		}
-		if (result.size() > 1) {
+		
+		evaluateFinalMultiplication();
+		try {
+			runStep();
+		} catch (UnsupportedOperationException e) {
 			throw new IllegalStateException();
 		}
+		
 		logger.info("\nResult:\n" + result);
 		return result.iterator().next();
 	}
@@ -99,6 +138,7 @@ public final class ACFOVE {
 	 * eliminated.
 	 */
 	private boolean thereAreVariablesToEliminate() {
+//		return (result.size() > 1); // no, because there may be eliminables in one parfactor
 		return !result.eliminables().isEmpty();
 	}
 	
@@ -109,8 +149,22 @@ public final class ACFOVE {
 	 * @return the result of running one step of the algorithm.
 	 */
 	Marginal runStep() {
+		
+		start = System.currentTimeMillis();
 		chooseMacroOperation();
+		end = System.currentTimeMillis();
+		
+		timeSeconds = (end - start) / 1000.0;
+		logger.severe("Time to choose operation: " + timeSeconds + "\n");
+		
+		start = System.currentTimeMillis();
 		executeMacroOperation();
+		end = System.currentTimeMillis();
+		
+		timeSeconds = (end - start) / 1000.0;
+		logger.severe("Time to run operation: " + timeSeconds + "\n");
+		logger.info("Operation result:\n" + result + "\n\n\n");
+		
 		return result;
 	}
 	
@@ -129,6 +183,7 @@ public final class ACFOVE {
 				evaluateCountingConvert(p, lv);
 				evaluatePropositionalize(p, lv);
 			}
+			evaluateConversionToStdParfactors(p);
 		}
 	}
 	
@@ -153,6 +208,16 @@ public final class ACFOVE {
 		compareAndUpdate(candidate);
 	}
 	
+	private void evaluateFinalMultiplication() {
+		MacroOperation candidate = new FinalMultiplication(result);
+		compareAndUpdate(candidate);
+	}
+	
+	private void evaluateConversionToStdParfactors(Parfactor p) {
+		MacroOperation candidate = new ConvertToStdParfactors(p);
+		compareAndUpdate(candidate);
+	}
+	
 	/**
 	 * Compares the candidate macro operation with current operation and
 	 * updates current if candidate's cost is smaller.
@@ -161,20 +226,22 @@ public final class ACFOVE {
 	 * In case of another draw, current operation is kept.
 	 */
 	private void compareAndUpdate(MacroOperation candidate) {
-		logger.info("\nEvaluating candidate " + candidate + " with " + currentOperation + "\n");
+		logger.fine("\nEvaluating candidate " + candidate + " with " + currentOperation + "\n");
 		int candidateCost = candidate.cost();
 		int currentCost = currentOperation.cost();
+		int candidateEliminables = candidate.numberOfRandomVariablesEliminated();
+		int currentEliminables = currentOperation.numberOfRandomVariablesEliminated();
 		
 		boolean costIsSmaller = (candidateCost < currentCost);
 		boolean costIsEqual = (candidateCost == currentCost);
-		boolean eliminatesMore = (candidate.numberOfRandomVariablesEliminated() 
-				> currentOperation.numberOfRandomVariablesEliminated());
+		boolean eliminatesMore = (candidateEliminables > currentEliminables);
+		boolean eliminatesTheSame = (candidateEliminables == currentEliminables);
 		
-		if (costIsSmaller || (costIsEqual && eliminatesMore)) {
-			logger.info("\nSetting " + candidate + " as current operation.\n");
+		if (eliminatesMore || (eliminatesTheSame && costIsSmaller)) {
+			logger.fine("\nSetting " + candidate + " as current operation.\n");
 			currentOperation = candidate;
 		} else {
-			logger.info("\nKeeping " + currentOperation + " as current operation.\n");
+			logger.fine("\nKeeping " + currentOperation + " as current operation.\n");
 		}
 	}
 	
@@ -194,4 +261,23 @@ public final class ACFOVE {
 	private void resetCurrentOperation() {
 		currentOperation = ImpossibleOperation.instance;
 	}
+	
+	Marginal result() {
+		return this.result;
+	}
+	
+	MacroOperation currentOperation() {
+		return this.currentOperation;
+	}
+	
+//	private Parfactor multiplyParfactors() {
+//		Parfactor product = new StdParfactorBuilder().build();
+//		
+//		// Multiplies all parfactors in the marginal
+//		for (Parfactor candidate : result) {
+//			product = product.multiply(candidate);
+//		}
+//		
+//		return product;
+//	}
 }

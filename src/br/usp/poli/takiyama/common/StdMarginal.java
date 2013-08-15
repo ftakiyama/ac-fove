@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import br.usp.poli.takiyama.prv.Prv;
+import br.usp.poli.takiyama.prv.Prvs;
 import br.usp.poli.takiyama.prv.RandomVariableSet;
 import br.usp.poli.takiyama.utils.Sets;
 
@@ -199,11 +200,16 @@ public final class StdMarginal implements Marginal {
 		Set<RandomVariableSet> eliminables = new HashSet<RandomVariableSet>();
 		for (Parfactor p : parfactors) {
 			for (Prv prv : p.prvs()) {
-				if (prv.isEquivalentTo(preservable)) {
+				if (!Prvs.areDisjoint(prv, preservable.prv())) {
+					/* 
+					 * If the PRV from the parfactor represents a set of random
+					 * variables that is not disjoint with the set of random
+					 * variables represented by 'preservable', then it cannot
+					 * be eliminated
+					 */
 					continue;
-				}
-				RandomVariableSet s = RandomVariableSet.getInstance(prv, p.constraints());
-				if (!s.equals(preservable)) {
+				} else {
+					RandomVariableSet s = RandomVariableSet.getInstance(prv, p.constraints());
 					eliminables.add(s);
 				}
 			}

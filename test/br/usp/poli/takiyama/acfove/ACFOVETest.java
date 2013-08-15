@@ -1,46 +1,48 @@
 package br.usp.poli.takiyama.acfove;
 
-import static org.hamcrest.collection.IsIn.isIn;
 import static org.junit.Assert.assertEquals;
 
-import java.io.ObjectInputStream.GetField;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
-import org.junit.experimental.theories.DataPoints;
-import org.junit.experimental.theories.Theories;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import br.usp.poli.takiyama.acfove.AggParfactor.AggParfactorBuilder;
-import br.usp.poli.takiyama.cfove.StdParfactor;
 import br.usp.poli.takiyama.cfove.StdParfactor.StdParfactorBuilder;
 import br.usp.poli.takiyama.common.Constraint;
+import br.usp.poli.takiyama.common.Factor;
 import br.usp.poli.takiyama.common.InequalityConstraint;
 import br.usp.poli.takiyama.common.InputOutput;
 import br.usp.poli.takiyama.common.Marginal;
 import br.usp.poli.takiyama.common.Parfactor;
-import br.usp.poli.takiyama.common.StdMarginal;
+import br.usp.poli.takiyama.common.StdFactor;
 import br.usp.poli.takiyama.common.StdMarginal.StdMarginalBuilder;
+import br.usp.poli.takiyama.common.Tuple;
+import br.usp.poli.takiyama.prv.Bool;
 import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.Or;
 import br.usp.poli.takiyama.prv.Prv;
 import br.usp.poli.takiyama.prv.RandomVariableSet;
+import br.usp.poli.takiyama.prv.RangeElement;
 import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.StdPrv;
+import br.usp.poli.takiyama.utils.Example;
 import br.usp.poli.takiyama.utils.Lists;
 import br.usp.poli.takiyama.utils.MathUtils;
 import br.usp.poli.takiyama.utils.Sets;
+import br.usp.poli.takiyama.utils.TestUtils;
 
 
 @RunWith(Enclosed.class)
@@ -251,7 +253,7 @@ public class ACFOVETest {
 		
 
 		// TODO: remove repeted code
-		
+		@Ignore(" while testing smaller features")
 		@Test
 		public void testExampleComputation() {
 			int populationSize = 10;
@@ -323,12 +325,13 @@ public class ACFOVETest {
 			
 			Marginal input = new StdMarginalBuilder(4).parfactors(g1, g2, g3, g4).preservable(query).build();
 			
-			ACFOVE acfove = new ACFOVE(input);
+			ACFOVE acfove = new LoggedACFOVE(input);
 			Parfactor result = acfove.run();
 			
 			Parfactor expected = g13;
 			
 			assertEquals(expected, result);
+			
 		}
 	}
 
@@ -416,45 +419,6 @@ public class ACFOVETest {
 			assertEquals(expected, result);
 		}
 	}
-	
-	// This test is the same as AggregationExampleWithConversion
-//	public static class ExampleComputationWithAggregation {
-//
-//		@Test
-//		public void testExampleComputationWithAggregation() {
-//			
-//			int populationSize = 5;
-//			
-//			LogicalVariable person = StdLogicalVariable.getInstance("Person", "x", populationSize);
-//			
-//			Prv big_jackpot = StdPrv.getBooleanInstance("big_jackpot");
-//			Prv played = StdPrv.getBooleanInstance("played", person);
-//			Prv matched_6 = StdPrv.getBooleanInstance("matched_6", person);
-//			Prv jackpot_won = StdPrv.getBooleanInstance("jackpot_won");
-//			
-//			List<BigDecimal> fBigJackpot = Utils.toBigDecimalList(0.8, 0.2);
-//			List<BigDecimal> fPlayed = Utils.toBigDecimalList(0.95, 0.05, 0.85, 0.15);
-//			List<BigDecimal> fMatched6 = Utils.toBigDecimalList(1.0, 0.0, 0.99999993, 0.00000007);
-//			List<BigDecimal> fJackpotWon = Utils.toBigDecimalList(0.999999975, 0.000000025);
-//			
-//			Parfactor g1 = new StdParfactorBuilder().variables(big_jackpot).values(fBigJackpot).build();
-//			Parfactor g2 = new StdParfactorBuilder().variables(big_jackpot, played).values(fPlayed).build();
-//			Parfactor g3 = new StdParfactorBuilder().variables(played, matched_6).values(fMatched6).build();
-//			Parfactor g4 = new AggParfactorBuilder(matched_6, jackpot_won, Or.OR).context(big_jackpot).build();
-//			Parfactor g8 = new StdParfactorBuilder().variables(jackpot_won).values(fJackpotWon).build();
-//			
-//			RandomVariableSet query = RandomVariableSet.getInstance(jackpot_won, Sets.<Constraint>getInstance(0));
-//			Marginal input = new StdMarginalBuilder(4).parfactors(g1, g2, g3, g4).preservable(query).build();
-//			
-//			ACFOVE acfove = new ACFOVE(input);
-//			Parfactor result = acfove.run();
-//			
-//			Parfactor expected = g8;
-//			
-//			assertEquals(expected, result);
-//		}
-//	}
-	
 	
 	/**
 	 * Tests for AC-FOVE algorithm using example 3.14 of Kisynski (2010).
@@ -551,4 +515,457 @@ public class ACFOVETest {
 			assertEquals(expected, result);
 		}
 	}
+
+	public static class CorrectnessTest {
+
+		@Ignore
+		@Test
+		public void testNodeWithCommonParent() {
+			
+			int domainSize = 3;
+			
+			LogicalVariable x = StdLogicalVariable.getInstance("X", "x", domainSize);
+			
+			Constant x1 = Constant.getInstance("x1");
+			
+			Prv b = StdPrv.getBooleanInstance("b");
+			Prv r = StdPrv.getBooleanInstance("r", x);
+			Prv r11 = StdPrv.getBooleanInstance("r", x1);
+			
+			List<BigDecimal> f1 = Utils.toBigDecimalList(0.2, 0.8);
+			List<BigDecimal> f2 = Utils.toBigDecimalList(1.0, 0.0, 0.1, 0.9);
+			
+			Parfactor g1 = new StdParfactorBuilder().variables(b).values(f1).build();
+			Parfactor g2 = new StdParfactorBuilder().variables(b, r).values(f2).build();
+			
+			RandomVariableSet query = RandomVariableSet.getInstance(b, Sets.<Constraint>getInstance(0));
+			Marginal input = new StdMarginalBuilder(2).parfactors(g1, g2).preservable(query).build();
+			
+			Marginal groundedInput = propositionalizeAll(input);
+			
+//			ACFOVE ve = new ACFOVE(groundedInput);
+//			Parfactor groundedResult = ve.run();
+//			System.out.println(groundedResult);
+			
+			ACFOVE acfove = new LoggedACFOVE(input);
+			Parfactor result = acfove.run();
+			System.out.println(result);
+			
+		}
+		
+		@Ignore("First need to know how to eliminate variable from parfactor of type (a(X), b(Y))")
+		@Test
+		public void testNodesWithCommonParent() {
+			
+			int domainSize = 3;
+			
+			LogicalVariable x = StdLogicalVariable.getInstance("X", "x", domainSize);
+			LogicalVariable y = StdLogicalVariable.getInstance("Y", "y", domainSize);
+			
+			Constant x1 = Constant.getInstance("x1");
+			Constant y1 = Constant.getInstance("y1");
+			
+			Prv b = StdPrv.getBooleanInstance("b", y);
+			Prv r = StdPrv.getBooleanInstance("r", x, y);
+			Prv r11 = StdPrv.getBooleanInstance("r", x1, y1);
+			
+			List<BigDecimal> f1 = Utils.toBigDecimalList(0.2, 0.8);
+			List<BigDecimal> f2 = Utils.toBigDecimalList(1.0, 0.0, 0.1, 0.9);
+			
+			Parfactor g1 = new StdParfactorBuilder().variables(b).values(f1).build();
+			Parfactor g2 = new StdParfactorBuilder().variables(b, r).values(f2).build();
+			
+			RandomVariableSet query = RandomVariableSet.getInstance(r11, Sets.<Constraint>getInstance(0));
+			Marginal input = new StdMarginalBuilder(2).parfactors(g1, g2).preservable(query).build();
+			
+			Marginal groundedInput = propositionalizeAll(input);
+			
+			System.out.println(g1.multiply(g2));
+			
+			ACFOVE ve = new ACFOVE(groundedInput);
+			Parfactor groundedResult = ve.run();
+			System.out.println(groundedResult);
+			
+			ACFOVE acfove = new LoggedACFOVE(input);
+			Parfactor result = acfove.run();
+			System.out.println(result);
+			
+		}
+		
+		private Marginal propositionalizeAll(Marginal m) {
+			Marginal result = m;
+			for (Parfactor p : m) {
+				for (LogicalVariable v : p.logicalVariables()) {
+					result = new Propositionalize(result, p, v).run();
+				}
+			}
+			return result;
+		}
+		
+		
+		@Ignore("Test with Kisynski example first")
+		@Test
+		public void testExistsNodeManually() {
+			
+			int domainSize = 2;
+			
+			LogicalVariable x = StdLogicalVariable.getInstance("X", "x", domainSize);
+			LogicalVariable y = StdLogicalVariable.getInstance("Y", "y", domainSize);
+			
+			Constant x1 = Constant.getInstance("x1");
+			Constant y1 = Constant.getInstance("y1");
+			
+			Prv b = StdPrv.getBooleanInstance("b", y);
+			Prv by = CountingFormula.getInstance(y, b);
+			Prv r = StdPrv.getBooleanInstance("r", x, y);
+			Prv a = StdPrv.getBooleanInstance("and", x, y);
+			Prv e = StdPrv.getBooleanInstance("exists", x);
+			Prv eaux = StdPrv.getBooleanInstance("exists_aux", x);
+			Prv ex = CountingFormula.getInstance(x, e);
+			
+			List<BigDecimal> fb = Utils.toBigDecimalList(0.1, 0.9);
+			List<BigDecimal> fr = Utils.toBigDecimalList(0.2, 0.8);
+			List<BigDecimal> fand = Utils.toBigDecimalList(1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0);
+			List<BigDecimal> f6 = Utils.toBigDecimalList(1.0, 1.0, 1.0, 0.0);
+			List<BigDecimal> f7 = Utils.toBigDecimalList(1.0, 0.0, -1.0, 1.0);
+			
+			Parfactor g1 = new StdParfactorBuilder().variables(b).values(fb).build();
+			Parfactor g2 = new StdParfactorBuilder().variables(r).values(fr).build();
+			Parfactor g3 = new StdParfactorBuilder().variables(r, b, a).values(fand).build();
+			Parfactor g4 = new AggParfactorBuilder(a, e, Or.OR).context(b).build();
+						
+			Parfactor g5 = g2.multiply(g3).sumOut(r);
+			Parfactor g6 = g5.multiply(g1);
+			Parfactor g7 = g6.multiply(g4).sumOut(a);
+			Parfactor g8 = g7.count(x);
+			Parfactor g9 = g8.sumOut(b);
+
+			// Trying to use special agg parfactor conversion
+//			Parfactor g5 = g2.multiply(g3).sumOut(r);
+//			Parfactor g6 = new StdParfactorBuilder().variables(a, eaux).values(f6).build();
+//			Parfactor g7 = new StdParfactorBuilder().variables(e, eaux).values(f7).build();
+//			Parfactor g8 = g5.multiply(g6).sumOut(a);
+//			Parfactor g9 = g1.multiply(g8).count(y);
+//			Parfactor g10 = g9.multiply(g7).sumOut(eaux);
+//			Parfactor g11 = g10.count(x).sumOut(by);
+			
+			
+			
+			System.out.println("Welcome to this incredible test!");
+			System.out.println(getCorrectResultOfExistsNodeManually(domainSize));
+			System.out.println(g9);
+			
+		}
+		
+		private Factor getCorrectResultOfExistsNodeManually(int n) {
+			
+			// List of constants
+			List<Constant> x = new ArrayList<Constant>(n);
+			List<Constant> y = new ArrayList<Constant>(n);
+			for (int i = 0; i < n; i++) {
+				x.add(Constant.getInstance("x" + i));
+				y.add(Constant.getInstance("y" + i));
+			}
+			
+			// Creates random variables
+			List<Prv> b = new ArrayList<Prv>(n);
+			List<Prv> r = new ArrayList<Prv>(n * n);
+			List<Prv> a = new ArrayList<Prv>(n * n);
+			List<Prv> e = new ArrayList<Prv>(n);
+			for (int i = 0; i < n; i++) {
+				b.add(StdPrv.getBooleanInstance("b", y.get(i)));
+				e.add(StdPrv.getBooleanInstance("exists", x.get(i)));
+				for (int j = 0; j < n; j++) {
+					r.add(StdPrv.getBooleanInstance("r", x.get(i), y.get(j)));
+					a.add(StdPrv.getBooleanInstance("and", x.get(i), y.get(j)));
+				}
+			}
+			
+			// Creates factors on b(Y)
+			List<BigDecimal> vb = Utils.toBigDecimalList(0.1, 0.9);
+			List<Factor> fb = new ArrayList<Factor>(n);
+			for (int i = 0; i < n; i++) {
+				int index = i;
+				List<Prv> rvs = Lists.listOf(b.get(index));
+				fb.add(StdFactor.getInstance("", rvs, vb));
+			}
+			
+			// Creates factors on r(X,Y)
+			List<BigDecimal> vr = Utils.toBigDecimalList(0.2, 0.8);
+			List<Factor> fr = new ArrayList<Factor>(n);
+			for (int i = 0; i < n; i++) {
+				for (int j = 0; j < n; j++) {
+					int index = i * n + j;
+					List<Prv> rvs = Lists.listOf(r.get(index));
+					fr.add(StdFactor.getInstance("", rvs, vr));
+				}
+			}
+			
+			// Creates factors on r(X,Y), b(Y), and(X,Y)
+			List<BigDecimal> vand = Utils.toBigDecimalList(1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0);
+			List<Factor> fa = new ArrayList<Factor>(n * n);
+			for (int i = 0; i < n; i++) {
+				for (int j = 0; j < n; j++) {
+					List<Prv> rvs = Lists.listOf(b.get(j), r.get(i * n + j),
+							a.get(i * n + j));
+					fa.add(StdFactor.getInstance("", rvs, vand));
+				}
+			}
+			
+			// Creates factors on and(X,y1), ..., and(X,yn), exists(X)
+			int vexistsSize = (int) Math.pow(2, n);
+			List<BigDecimal> vexists = new ArrayList<BigDecimal>(vexistsSize); 
+			for (int i = 0; i < vexistsSize; i++) {
+				vexists.add(BigDecimal.ZERO);
+				vexists.add(BigDecimal.ONE);
+			}
+			vexists.set(0, BigDecimal.ONE);
+			vexists.set(1, BigDecimal.ZERO);
+			List<Factor> fe = new ArrayList<Factor>(n);
+			for (int i = 0; i < n; i++) {
+				List<Prv> rvs = new ArrayList<Prv>(n + 1);
+				for (int j = 0; j < n; j++) {
+					rvs.add(a.get(i * n + j));
+				}
+				rvs.add(e.get(i));
+				fe.add(StdFactor.getInstance("", rvs, vexists));
+			}
+			
+			// The stupidest way to solve it
+//			Factor result = StdFactor.getInstance();
+//			for (Factor f : fb) {
+//				result = result.multiply(f);
+//			}
+//			for (Factor f : fr) {
+//				result = result.multiply(f);
+//			}
+//			for (Factor f : fa) {
+//				result = result.multiply(f);
+//			}
+//			for (Factor f : fe) {
+//				result = result.multiply(f);
+//			}
+//			for (Prv v : result.variables()) {
+//				if (!e.contains(v)) {
+//					result = result.sumOut(v);
+//				}
+//			}
+			
+			// Step by step
+			// Eliminate r(X,Y)
+			List<Factor> afterEliminating_r = new ArrayList<Factor>(n * n);
+			for (int i = 0; i < n * n; i++) {
+				afterEliminating_r.add(fr.get(i).multiply(fa.get(i)).sumOut(r.get(i)));
+			}
+			// Eliminate and(X,Y)
+			List<Factor> afterEliminating_and = new ArrayList<Factor>(n * n);
+			for (int i = 0; i < n; i++) {
+				Factor product = fe.get(i);
+				for (Prv v : fe.get(i).variables()) {
+					for (Factor f : afterEliminating_r) {
+						if (f.variables().contains(v)) {
+							product = product.multiply(f);
+						}
+					}
+				}
+				for (Prv and : a) {
+					if (product.variables().contains(and)) {
+						product = product.sumOut(and);
+					}
+				}
+				afterEliminating_and.add(product);
+			}
+			
+			// Eliminate b(Y) -- need to multiply all remaining factors ...
+			Factor product = StdFactor.getInstance();
+			for (Factor f : afterEliminating_and) {
+				product = product.multiply(f);
+			}
+			for (Factor f : fb) {
+				product = product.multiply(f);
+			}
+			// and eliminate each b(yi)
+			Factor result = product;
+			for (Prv by : b) {
+				result = result.sumOut(by);
+			}
+			result = result.sumOut(e.get(0));
+			
+			return result;
+		}
+		
+		@Ignore("Wrong: this is the case to use Aggregation parfactors")
+		@Test
+		public void testFullyConnectedNetwork() throws IOException {
+			
+			int domainSize = 3;
+			
+			LogicalVariable x = StdLogicalVariable.getInstance("X", "x", domainSize);
+			LogicalVariable y = StdLogicalVariable.getInstance("Y", "y", domainSize);
+			
+			Constant x1 = Constant.getInstance("x1");
+			Constant x2 = Constant.getInstance("x2");
+			Constant y1 = Constant.getInstance("y1");
+
+			Prv e = StdPrv.getBooleanInstance("e", x);
+			Prv b = StdPrv.getBooleanInstance("b", y);
+			Prv e1 = StdPrv.getBooleanInstance("e", x1);
+			
+			List<BigDecimal> f1 = Utils.toBigDecimalList(0.2, 0.8);
+			double r1n = Math.pow(0.1, domainSize);
+			List<BigDecimal> f2 = Utils.toBigDecimalList(1.0, 0.0, r1n, 1.0 - r1n);
+			
+			Parfactor g1 = new StdParfactorBuilder().variables(b).values(f1).build();
+			Parfactor g2 = new StdParfactorBuilder().variables(b, e).values(f2).build();
+			
+			RandomVariableSet query = RandomVariableSet.getInstance(e1, Sets.<Constraint>getInstance(0));
+			Marginal input = new StdMarginalBuilder(2).parfactors(g1, g2).preservable(query).build();
+			
+			Marginal groundedInput = propositionalizeAll(input);
+			
+			Parfactor product = new StdParfactorBuilder().build();
+			for (Parfactor p : groundedInput) {
+				product = product.multiply(p);
+			}
+						
+			ACFOVE ve = new LoggedACFOVE(groundedInput);
+			Parfactor groundedResult = ve.run();
+			System.out.println("Hi: " + groundedResult);
+		}
+		
+		@Ignore("Testing manually")
+		@Test
+		public void testInferenceOnExistsNodeSimplified() throws IOException {
+			int n = 1;
+			
+			LogicalVariable x = StdLogicalVariable.getInstance("X", "x", n);
+			LogicalVariable y = StdLogicalVariable.getInstance("Y", "y", n);
+			
+			Constant x1 = Constant.getInstance("x1");
+			
+			Prv b = StdPrv.getBooleanInstance("b", y);
+			Prv e = StdPrv.getBooleanInstance("e", x);
+			Prv r = StdPrv.getBooleanInstance("r", x, y);
+			Prv r1 = StdPrv.getBooleanInstance("and", x, y);
+			Prv e1 = StdPrv.getBooleanInstance("e", x1);
+			
+			List<BigDecimal> fb = TestUtils.toBigDecimalList(0.1, 0.9);
+			List<BigDecimal> fr = TestUtils.toBigDecimalList(0.2, 0.8);
+			List<BigDecimal> fr1 = TestUtils.toBigDecimalList(1, 0, 1, 0, 1, 0, 0, 1);
+			
+			Parfactor gb = new StdParfactorBuilder().variables(b).values(fb).build();
+			Parfactor gr = new StdParfactorBuilder().variables(r).values(fr).build();
+			Parfactor gr1 = new StdParfactorBuilder().variables(b, r, r1).values(fr1).build();
+			Parfactor ge = new AggParfactorBuilder(r1, e, Or.OR).build();
+			
+			RandomVariableSet query = RandomVariableSet.getInstance(e1, new HashSet<Constraint>(0));
+			Marginal input = new StdMarginalBuilder().parfactors(gb, gr, gr1, ge).preservable(query).build();
+			
+			input = propositionalizeAll(input);
+			
+			ACFOVE ve = new LoggedACFOVE(input);
+			Parfactor groundedResult = ve.run();
+			System.out.println("Hi again: " + groundedResult);
+		}
+		
+		
+		@Test
+		public void testBigJackpotInference() {
+			
+			int populationSize = 4;
+			
+			LogicalVariable person = StdLogicalVariable.getInstance("Person", "x", populationSize);
+			
+			Prv big_jackpot = StdPrv.getBooleanInstance("big_jackpot");
+			Prv played = StdPrv.getBooleanInstance("played", person);
+			Prv matched_6 = StdPrv.getBooleanInstance("matched_6", person);
+			Prv jackpot_won = StdPrv.getBooleanInstance("jackpot_won");
+			
+			List<BigDecimal> fBigJackpot = Utils.toBigDecimalList(0.8, 0.2);
+			List<BigDecimal> fPlayed = Utils.toBigDecimalList(0.95, 0.05, 0.85, 0.15);
+			List<BigDecimal> fMatched6 = Utils.toBigDecimalList(1.0, 0.0, 0.99999993, 0.00000007);
+			
+			Parfactor g1 = new StdParfactorBuilder().variables(big_jackpot).values(fBigJackpot).build();
+			Parfactor g2 = new StdParfactorBuilder().variables(big_jackpot, played).values(fPlayed).build();
+			Parfactor g3 = new StdParfactorBuilder().variables(played, matched_6).values(fMatched6).build();
+			Parfactor g4 = new AggParfactorBuilder(matched_6, jackpot_won, Or.OR).context(big_jackpot).build();
+			
+			Parfactor g2xg3 = g2.multiply(g3);
+			Parfactor afterEliminatingPlayed = g2xg3.sumOut(played);
+			Parfactor g4xg5 = g4.multiply(afterEliminatingPlayed);
+			Parfactor afterEliminatingMatched6 = g4xg5.sumOut(matched_6);
+			Parfactor g6xg1 = g1.multiply(afterEliminatingMatched6);
+			Parfactor afterEliminatingBigJackpot = g6xg1.sumOut(big_jackpot);
+
+			Factor r = getCorrectResultOfBigJackpotInference(populationSize);
+			Parfactor expected = new StdParfactorBuilder().factor(r).build();
+			
+			assertEquals(expected, afterEliminatingBigJackpot);
+			
+		}
+		
+		// propositionalizes the model above and  calculates P(jackpot_won)
+		private Factor getCorrectResultOfBigJackpotInference(int n) {
+			
+			List<Prv> matched_6 = new ArrayList<Prv>(n);
+			for (int i = 0; i < n; i++) {
+				Constant p = Constant.getInstance("x" + i);
+				matched_6.add(StdPrv.getBooleanInstance("matched_6", p));
+			}
+			
+			Prv jackpot_won = StdPrv.getBooleanInstance("jackpot_won");
+			
+			// Creates factor on matched_6(x0) ... matched_6(xn) jackpot_won()
+			List<Prv> vars = Lists.listOf(matched_6);
+			vars.add(jackpot_won);
+			List<BigDecimal> fagg = new ArrayList<BigDecimal>();
+			for (int i = 0; i < (int) Math.pow(2, n); i++) {
+				fagg.add(BigDecimal.ZERO);
+				fagg.add(BigDecimal.ONE);
+			}
+			fagg.set(0, BigDecimal.ONE);
+			fagg.set(1, BigDecimal.ZERO);
+			
+			Factor jw = StdFactor.getInstance("", vars, fagg);
+			
+			// Creates factor on big_jackpot() matched_6(X)
+			Prv big_jackpot = StdPrv.getBooleanInstance("big_jackpot");
+			List<BigDecimal> f5vals = TestUtils.toBigDecimalList(0.9999999965, 0.0000000035, 0.9999999895, 0.0000000105);
+			List<Factor> f5 = new ArrayList<Factor>(n);
+			for (Prv m6 : matched_6) {
+				List<Prv> rvs = new ArrayList<Prv>(2);
+				rvs.add(big_jackpot);
+				rvs.add(m6);
+				f5.add(StdFactor.getInstance("", rvs, f5vals));
+			}
+
+			// Creates factor big_jackpot()
+			List<BigDecimal> fbj = TestUtils.toBigDecimalList(0.8, 0.2);
+			Factor bj = StdFactor.getInstance("", big_jackpot, fbj);
+			
+			// multiplies all factors
+			Factor product = jw;
+			for (Factor f : f5) {
+				product = product.multiply(f);
+			}
+			
+			// eliminates matched_6(x)
+			Factor result = product;
+			for (Prv m6 : matched_6) {
+				result = result.sumOut(m6);
+			}
+			
+			// Multiplies by big_jackpot
+			result = result.multiply(bj);
+			
+			// eliminates big_jackpot
+			result = result.sumOut(big_jackpot);
+			
+			return result;
+		}
+		
+		
+	}
+
+
 }

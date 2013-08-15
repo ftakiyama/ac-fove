@@ -12,6 +12,7 @@ import br.usp.poli.takiyama.cfove.StdParfactor;
 import br.usp.poli.takiyama.cfove.StdParfactor.StdParfactorBuilder;
 import br.usp.poli.takiyama.common.AggregationParfactor;
 import br.usp.poli.takiyama.common.Builder;
+import br.usp.poli.takiyama.common.ConstantFactor;
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.Distribution;
 import br.usp.poli.takiyama.common.Factor;
@@ -21,6 +22,7 @@ import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.ParfactorVisitor;
 import br.usp.poli.takiyama.common.SplitResult;
 import br.usp.poli.takiyama.common.StdDistribution;
+import br.usp.poli.takiyama.common.StdFactor;
 import br.usp.poli.takiyama.common.Tuple;
 import br.usp.poli.takiyama.common.VisitableParfactor;
 import br.usp.poli.takiyama.prv.Binding;
@@ -178,6 +180,10 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 			if (isConsistent(f)) {
 				values = f.values();
 				return this;
+			} else if (needsReordering(f)) {
+				Factor reference = ConstantFactor.getInstance(Lists.union(Lists.listOf(p), ctxt));
+				values = f.reorder(reference).values();
+				return this;
 			} else {
 				throw new IllegalArgumentException();
 			}
@@ -191,9 +197,16 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 		 * @param f The factor to evaluate
 		 */
 		private boolean isConsistent(Factor f) {
-			List<Prv> varsFromBuilder = Lists.listOf(p);
-			varsFromBuilder.addAll(ctxt);
+			List<Prv> varsFromBuilder = Lists.union(Lists.listOf(p), ctxt);
 			return varsFromBuilder.equals(f.variables());
+		}
+		
+		private boolean needsReordering(Factor f) {
+			List<Prv> varsFromBuilder = Lists.union(Lists.listOf(p), ctxt);
+			List<Prv> varsFromFactor = f.variables();
+			boolean sameElements = Lists.sameElements(varsFromBuilder, varsFromFactor);
+			boolean differentOrder = !varsFromBuilder.equals(varsFromFactor);
+			return sameElements && differentOrder;
 		}
 		
 		/**
@@ -274,10 +287,10 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 			List<Prv> variables = Lists.listOf(p);
 			variables.addAll(ctxt);
 			if (values.isEmpty()) {
-				factor = Factor.getInstance(variables);
+				factor = ConstantFactor.getInstance(variables);
 			} else {
 				try {
-					factor = Factor.getInstance("", variables, values);
+					factor = StdFactor.getInstance("", variables, values);
 				} catch (IllegalArgumentException e) {
 					throw new IllegalStateException();
 				}
@@ -574,7 +587,7 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 			
 			private List<BigDecimal> setValues(List<Prv> prvs) {
 				List<BigDecimal> values = new ArrayList<BigDecimal>();
-				Factor newStructure = Factor.getInstance(prvs);
+				Factor newStructure = StdFactor.getInstance(prvs);
 				for (Tuple<? extends RangeElement> tuple : newStructure) {
 					RangeElement p = tuple.get(0);
 					RangeElement cAux = tuple.get(tuple.size() - 2);
@@ -712,7 +725,7 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 			String binSize = Integer.toBinaryString(domainSize);
 			
 			for (int k = 1; k < binSize.length(); k++) {
-				Factor previous = Factor.getInstance(current);
+				Factor previous = StdFactor.getInstance(current);
 				for (Tuple<RangeElement> x : previous) {
 					BigDecimal sum;
 					if (binSize.charAt(k) == '0') {
@@ -776,7 +789,7 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 			prvs.add(parfactor.child());
 			prvs.addAll(parfactor.context());
 			
-			Factor tempBase = Factor.getInstance(prvs);
+			Factor tempBase = ConstantFactor.getInstance(prvs);
 			
 			int size = parfactor.child().range().size();
 			List<BigDecimal> vals = new ArrayList<BigDecimal>(size);
@@ -788,7 +801,7 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 					vals.add(BigDecimal.ZERO);
 				}
 			}
-			return Factor.getInstance("", prvs, vals);
+			return StdFactor.getInstance("", prvs, vals);
 		}
 		
 		/**
@@ -870,7 +883,7 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 			
 			List<Prv> vars = getPrvsForParfactorOnChild();
 			
-			Factor structure = Factor.getInstance(vars);
+			Factor structure = ConstantFactor.getInstance(vars);
 			List<BigDecimal> vals = new ArrayList<BigDecimal>();
 			
 			for (Tuple<RangeElement> tuple : structure) {
@@ -949,7 +962,7 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 		 * with this individual
 		 */
 		private Parfactor simplify() {
-			LinkedList<LogicalVariable> queue  = getVariablesInConstraints();
+			LinkedList<LogicalVariable> queue = getVariablesInConstraints();
 			while (!queue.isEmpty()) {
 				LogicalVariable logicalVariable = queue.poll();
 				int populationSize = logicalVariable
@@ -963,6 +976,25 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 						return simplifyAggregation(sub).simplifyLogicalVariables();
 					} else {
 						queue.addAll(variablesInBinaryConstraintsInvolving(logicalVariable));
+						setSimplified(simplified.apply(sub));
+					}
+					break;
+				default:
+					break;
+				}
+			}
+			
+			// stupid
+			for (LogicalVariable lv : logicalVariables()) {
+				int populationSize = lv.numberOfIndividualsSatisfying(unaryConstraints);
+				switch (populationSize) {
+				case 0:
+					return StdParfactor.getInstance();
+				case 1:
+					Substitution sub = getSubstitution(lv);
+					if (lv.equals(extraVariable)) {
+						return simplifyAggregation(sub).simplifyLogicalVariables();
+					} else {
 						setSimplified(simplified.apply(sub));
 					}
 					break;
@@ -1019,37 +1051,58 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 		/// buiuuuuuuuu
 		private Parfactor simplifyAggregation(Substitution sub) {
 			
-			// casting aggregation parfactor
-			AggregationParfactor ap = (AggregationParfactor) simplified;
-			
-			// list with parent, child and context variables
-			List<Prv> parentChildContext = Lists.union(ap.prvs(), ap.context());
-			parentChildContext = Lists.apply(sub, parentChildContext);
-			
-			// new factor structure after simplification
-			Factor newStructure = Factor.getInstance(parentChildContext);
-			
-			// lets fill the array of factor values
+			/*
+			 * When the extra variable is constrained to a single individual
+			 * there is no aggregation needed.
+			 */
+			List<Prv> parentChild = Lists.listOf(parent(), child());
+			Factor newStructure = ConstantFactor.getInstance(parentChild);
 			List<BigDecimal> values = new ArrayList<BigDecimal>();
 			for (Tuple<RangeElement> tuple : newStructure) {
 				if (tuple.get(0).equals(tuple.get(1))) {
-					// correction factors
-					Prv parent = parentChildContext.get(0);
-					int rp = parent.groundSetSize(ap.constraintsNotOnExtra());
-					Prv child = parentChildContext.get(1);
-					int rc = child.groundSetSize(ap.constraintsNotOnExtra());
-					// gets the value from old factor by removing the child
-					BigDecimal value = ap.factor().getValue(tuple.remove(1));
-					BigDecimal correctedValue = MathUtils.pow(value, rp, rc);
-					values.add(correctedValue);
+					values.add(BigDecimal.ONE);
 				} else {
 					values.add(BigDecimal.ZERO);
 				}
 			}
+
+			AggregationParfactor ap = (AggregationParfactor) simplified;
 			Parfactor result = new StdParfactorBuilder()
 					.constraints(ap.constraintsNotOnExtra())
-					.variables(parentChildContext).values(values).build();
+					.variables(parentChild).values(values).build();
 			return result;
+			
+//			// casting aggregation parfactor
+//			AggregationParfactor ap = (AggregationParfactor) simplified;
+//			
+//			// list with parent, child and context variables
+//			List<Prv> parentChildContext = Lists.union(ap.prvs(), ap.context());
+//			parentChildContext = Lists.apply(sub, parentChildContext);
+//			
+//			// new factor structure after simplification
+//			Factor newStructure = ConstantFactor.getInstance(parentChildContext);
+//			
+//			// lets fill the array of factor values
+//			List<BigDecimal> values = new ArrayList<BigDecimal>();
+//			for (Tuple<RangeElement> tuple : newStructure) {
+//				if (tuple.get(0).equals(tuple.get(1))) {
+//					// correction factors
+//					Prv parent = parentChildContext.get(0);
+//					int rp = parent.groundSetSize(ap.constraintsNotOnExtra());
+//					Prv child = parentChildContext.get(1);
+//					int rc = child.groundSetSize(ap.constraintsNotOnExtra());
+//					// gets the value from old factor by removing the child
+//					BigDecimal value = ap.factor().getValue(tuple.remove(1));
+//					BigDecimal correctedValue = MathUtils.pow(value, rp, rc);
+//					values.add(correctedValue);
+//				} else {
+//					values.add(BigDecimal.ZERO);
+//				}
+//			}
+//			Parfactor result = new StdParfactorBuilder()
+//					.constraints(ap.constraintsNotOnExtra())
+//					.variables(parentChildContext).values(values).build();
+//			return result;
 		}
 	}
 	
@@ -1100,7 +1153,7 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 
 	@Override
 	public Factor factor() {
-		return Factor.getInstance(factor);
+		return factor;
 	}
 
 	
@@ -1113,12 +1166,17 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 
 	
 	/**
-	 * Returns a list containing the parent PRV and the child PRV, in this 
-	 * order.
+	 * Returns a list containing the parent PRV, the child PRV and context
+	 * PRVs, in this order. The order of context PRVs will be same as defined
+	 * when constructing this parfactor.
 	 */
 	@Override
 	public List<Prv> prvs() {
-		return Lists.listOf(parent, child);
+		List<Prv> prvs = new ArrayList<Prv>(context.size() + 2);
+		prvs.add(parent);
+		prvs.add(child);
+		prvs.addAll(context);
+		return prvs;
 	}
 	
 
@@ -1134,9 +1192,6 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 	}
 	
 
-	/**
-	 * Returns an empty list.
-	 */
 	@Override
 	public List<Prv> context() {
 		return Lists.listOf(context);
@@ -1215,7 +1270,7 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 	 * </p>
 	 */
 	@Override
-	public boolean isExpandable(Prv cf, Term t) {
+	public boolean isExpandable(Prv cf, Substitution s) {
 		return false;
 	}
 	
@@ -1510,7 +1565,7 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 	
 	@Override
 	public String toString() {
-		return "p = " + parent 
+		return "\np = " + parent 
 				+ ", c = " + child
 				+ ", V = " + context
 				+ ", C_A = " + constraintsOnExtra

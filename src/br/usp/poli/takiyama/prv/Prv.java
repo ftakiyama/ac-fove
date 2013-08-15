@@ -144,6 +144,12 @@ public interface Prv extends Replaceable<Prv> {
 	public boolean isEquivalentTo(RandomVariableSet s);
 	
 	
+	/**
+	 * Returns the Standard PRV associated with this PRV. If it is a counting
+	 * formula #.A:C [f], returns f, if it is a random variable set f:C, returns
+	 * f, and if it is a standard prv, returns itself.
+	 * @return
+	 */
 	public Prv getCanonicalForm();
 	
 	

@@ -58,7 +58,7 @@ public class FactorTest {
 		vals.add(new BigDecimal(0.3));
 		vals.add(new BigDecimal(0.4));
 		
-		Factor factor = Factor.getInstance("F", vars, vals);
+		Factor factor = StdFactor.getInstance("F", vars, vals);
 		
 		Factor result = factor.sumOut(f);
 		
@@ -69,7 +69,7 @@ public class FactorTest {
 		ansVals.add(new BigDecimal(0.1).add(new BigDecimal(0.3)));
 		ansVals.add(new BigDecimal(0.2).add(new BigDecimal(0.4)));
 		
-		Factor answer = Factor.getInstance("F", ansVars, ansVals);
+		Factor answer = StdFactor.getInstance("F", ansVars, ansVals);
 		
 		assertTrue(result.equals(answer));
 	}
@@ -114,7 +114,7 @@ public class FactorTest {
 		vals.add(new BigDecimal(0.3));
 		vals.add(new BigDecimal(0.4));
 		
-		Factor factor = Factor.getInstance("F", vars, vals);
+		Factor factor = StdFactor.getInstance("F", vars, vals);
 		
 		Factor result = factor.sumOut(g);
 		
@@ -125,7 +125,7 @@ public class FactorTest {
 		ansVals.add(new BigDecimal(0.1).add(new BigDecimal(0.2)));
 		ansVals.add(new BigDecimal(0.3).add(new BigDecimal(0.4)));
 		
-		Factor answer = Factor.getInstance("F", ansVars, ansVals);
+		Factor answer = StdFactor.getInstance("F", ansVars, ansVals);
 		
 		assertTrue(result.equals(answer));
 	}
@@ -175,7 +175,7 @@ public class FactorTest {
 		vals.add(new BigDecimal(10000));
 		vals.add(new BigDecimal(100000));
 		
-		Factor factor = Factor.getInstance("F", vars, vals);
+		Factor factor = StdFactor.getInstance("F", vars, vals);
 		
 		Factor result = factor.sumOut(cf);
 		
@@ -186,7 +186,7 @@ public class FactorTest {
 		ansVals.add(new BigDecimal(10201));
 		ansVals.add(new BigDecimal(102010));
 		
-		Factor answer = Factor.getInstance("F", ansVars, ansVals);
+		Factor answer = StdFactor.getInstance("F", ansVars, ansVals);
 		
 		assertTrue(result.equals(answer));
 	}
@@ -249,7 +249,7 @@ public class FactorTest {
 			vals.add(new BigDecimal(1));
 		}
 		
-		Factor factor = Factor.getInstance("F", vars, vals);
+		Factor factor = StdFactor.getInstance("F", vars, vals);
 		
 		Factor result = factor.sumOut(cf);
 		
@@ -260,7 +260,7 @@ public class FactorTest {
 		ansVals.add(new BigDecimal(1024));
 		ansVals.add(new BigDecimal(1024));
 		
-		Factor answer = Factor.getInstance("F", ansVars, ansVals);
+		Factor answer = StdFactor.getInstance("F", ansVars, ansVals);
 		
 		assertTrue(result.equals(answer));
 	}
@@ -307,7 +307,7 @@ public class FactorTest {
 		vals.add(new BigDecimal(4));
 		vals.add(new BigDecimal(0));
 		
-		Factor factor = Factor.getInstance("F", vars, vals);
+		Factor factor = StdFactor.getInstance("F", vars, vals);
 		
 		Factor result = factor.pow(2, 1);
 		
@@ -321,7 +321,7 @@ public class FactorTest {
 		ansVals.add(new BigDecimal(16));
 		ansVals.add(new BigDecimal(0));
 		
-		Factor answer = Factor.getInstance("F", ansVars, ansVals);
+		Factor answer = StdFactor.getInstance("F", ansVars, ansVals);
 		
 		assertTrue(result.equals(answer));
 	}
@@ -368,7 +368,7 @@ public class FactorTest {
 		vals.add(new BigDecimal(9));
 		vals.add(new BigDecimal(16));
 		
-		Factor factor = Factor.getInstance("F", vars, vals);
+		Factor factor = StdFactor.getInstance("F", vars, vals);
 		
 		Factor result = factor.pow(1, 2);
 		
@@ -382,7 +382,7 @@ public class FactorTest {
 		ansVals.add(new BigDecimal(3));
 		ansVals.add(new BigDecimal(4));
 		
-		Factor answer = Factor.getInstance("F", ansVars, ansVals);
+		Factor answer = StdFactor.getInstance("F", ansVars, ansVals);
 		
 		assertTrue(result.equals(answer));
 	}
@@ -434,7 +434,7 @@ public class FactorTest {
 		vals1.add(new BigDecimal(0.1));
 		vals1.add(new BigDecimal(0.2));
 		
-		Factor factor1 = Factor.getInstance("F1", vars1, vals1);
+		Factor factor1 = StdFactor.getInstance("F1", vars1, vals1);
 		
 		List<Prv> vars2 = new ArrayList<Prv>(1);
 		vars2.add(f);
@@ -446,7 +446,7 @@ public class FactorTest {
 		vals2.add(new BigDecimal(0.3));
 		vals2.add(new BigDecimal(0.4));
 
-		Factor factor2 = Factor.getInstance("F2", vars2, vals2);
+		Factor factor2 = StdFactor.getInstance("F2", vars2, vals2);
 		
 		Factor result = factor1.multiply(factor2);
 		
@@ -460,7 +460,7 @@ public class FactorTest {
 		ansVals.add(new BigDecimal(0.2).multiply(new BigDecimal(0.3)));
 		ansVals.add(new BigDecimal(0.2).multiply(new BigDecimal(0.4)));
 		
-		Factor answer = Factor.getInstance("F", ansVars, ansVals);
+		Factor answer = StdFactor.getInstance("F", ansVars, ansVals);
 		
 		assertTrue(result.equals(answer));
 	}
@@ -470,7 +470,7 @@ public class FactorTest {
 	 */
 	@Test
 	public void testMultiplicationBy1() {
-		Factor constant = Factor.getInstance();
+		Factor constant = StdFactor.getInstance();
 		
 		Prv f = StdPrv.getBooleanInstance("f");
 		Prv h = StdPrv.getBooleanInstance("h");
@@ -481,7 +481,7 @@ public class FactorTest {
 				BigDecimal.valueOf(2.0),
 				BigDecimal.valueOf(3.0),
 				BigDecimal.valueOf(4.0));
-		Factor factor = Factor.getInstance("f", vars, vals);
+		Factor factor = StdFactor.getInstance("f", vars, vals);
 		
 		Factor result = factor.multiply(constant);
 		Factor expected = factor;

@@ -23,7 +23,9 @@ public final class Scanner implements ParfactorDecorator {
 		Set<LogicalVariable> logicalVariables = new HashSet<LogicalVariable>();
 		for (Prv prv : p.factor().variables()) {
 			logicalVariables.addAll(prv.parameters());
-			logicalVariables.add(prv.boundVariable());
+			if (!prv.boundVariable().isEmpty()) {
+				logicalVariables.add(prv.boundVariable());
+			}
 		}
 		return logicalVariables;
 	}
@@ -71,8 +73,8 @@ public final class Scanner implements ParfactorDecorator {
 	}
 
 	@Override
-	public boolean isExpandable(Prv cf, Term t) {
-		return p.isExpandable(cf, t);
+	public boolean isExpandable(Prv cf, Substitution s) {
+		return p.isExpandable(cf, s);
 	}
 
 	@Override

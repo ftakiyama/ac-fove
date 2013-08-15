@@ -3,10 +3,13 @@ package br.usp.poli.takiyama.prv;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.Stack;
 
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.EqualityConstraint;
+import br.usp.poli.takiyama.utils.Lists;
+import br.usp.poli.takiyama.utils.Sets;
 
 /**
  * Operations for {@link Prv}.
@@ -49,7 +52,7 @@ public final class Prvs {
 	
 	private static boolean areUnifiable(Prv prv1, Prv prv2) {
 		boolean sameFunctor = prv1.name().equals(prv2.name());
-		boolean sameNumberOfParam = prv1.terms().size() == prv2.terms().size();
+		boolean sameNumberOfParam = (prv1.terms().size() == prv2.terms().size());
 		return sameFunctor && sameNumberOfParam;
 	}
 	
@@ -73,6 +76,70 @@ public final class Prvs {
 			e = (EqualityConstraint) e.apply(s);
 		}
 		return buffer;
+	}
+	
+	/**
+	 * Returns <code>true</code> if the specified PRVs represent disjoint sets
+	 * of random variables.
+	 * This method does not consider constraints associated with PRVs.
+	 * @param prv1
+	 * @param prv2
+	 * @return
+	 */
+	public static boolean areDisjoint(Prv prv1, Prv prv2) {
+		
+		/*
+		 * This algorithm is similar to the one used in Shatter.
+		 * 
+		 * rename all logical variables
+		 * get the MGU between these two variables
+		 * if MGU is empty OR error:
+		 *     return true
+		 * else
+		 *     if MGU is not consistent with constraints
+		 *     	   return false
+		 *     else
+		 *     	   return true;
+		 */
+		
+		// Renames all logical variables in PRVs
+		boolean areDisjoint = false;
+		List<LogicalVariable> allVariables = Lists.union(
+				prv1.getCanonicalForm().parameters(), 
+				prv2.getCanonicalForm().parameters());
+		Prv renamed1 = prv1.apply(NameGenerator.rename(allVariables));
+		Prv renamed2 = prv2.apply(NameGenerator.rename(allVariables));
+		
+		try {
+			Substitution mgu = Prvs.mgu(renamed1.getCanonicalForm(), renamed2.getCanonicalForm());
+			Set<Constraint> constraints = Sets.union(renamed1.constraints(), renamed2.constraints());
+			if (mgu.isEmpty()) {
+				// each PRV is a single random variable
+				areDisjoint = !(renamed1.equals(renamed2));
+			} else {
+				areDisjoint = !mgu.isConsistentWith(constraints);
+			}
+		} catch (IllegalArgumentException e) {
+			areDisjoint = true;
+		}
+		
+		return areDisjoint;
+		
+		
+//		boolean areDisjoint = false;
+//		try {
+//			// weak check, does not verify the case f(A) = f(A)
+//			areDisjoint = Prvs.mgu(prv1.getCanonicalForm(), prv2.getCanonicalForm()).isEmpty();
+//		} catch (IllegalArgumentException e) {
+//			// are not unifiable
+//			areDisjoint = prv1.constraints().equals(prv2.constraints());
+//		}
+//		RandomVariableSet rvs1 = RandomVariableSet.getInstance(prv1.getCanonicalForm(), prv1.constraints());
+//		RandomVariableSet rvs2 = RandomVariableSet.getInstance(prv2.getCanonicalForm(), prv2.constraints());
+//		if (rvs1.equals(rvs2)) {
+//			areDisjoint = false;
+//		}
+//		return areDisjoint;
 	}
 	
 	/* *************************************************************************

@@ -2,6 +2,7 @@ package br.usp.poli.takiyama.ve;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import org.junit.Ignore;
@@ -18,7 +19,7 @@ import br.usp.poli.takiyama.ve.VariableEliminationAlgorithm;
  * @author ftakiyama
  *
  */
-@Ignore("Old code")
+//@Ignore("Old code")
 public class VariableEliminationAlgorithmTest {
 	
 	/**
@@ -201,5 +202,460 @@ public class VariableEliminationAlgorithmTest {
 		}
 	}
 	
+	@Ignore
+	@Test
+	public void existsNode2() {
+		// Initialization
+		String[] name = {"r(x1,x1)", "r(x1,x2)", "r(x2,x1)", "r(x2,x2)", "b(x1)", "b(x2)", "exists(x1)", "exists(x2)"};
+		HashMap<String, RandomVariable> randomVariables = new HashMap<String,RandomVariable>();
+		HashMap<String, Factor> factors = new HashMap<String,Factor>();
+		
+		// Creates the random variables
+		for (int i = 0; i < name.length; i++) {
+			randomVariables.put(name[i], getDefaultBooleanRandomVariable(name[i]));
+		}
+		
+		// Creates the factor to "r(X,Y)"
+		ArrayList<BigDecimal> mapping = new ArrayList<BigDecimal>();
+		mapping.add(new BigDecimal(0.2));
+		mapping.add(new BigDecimal(0.8));
+		
+		ArrayList<RandomVariable> variables = new ArrayList<RandomVariable>();
+		for (String var : name) {
+			if (var.substring(0, 1).equals("r")) {
+				variables.add(randomVariables.get(var));
+				String factorName = "f[" + var + "]";
+				factors.put(factorName, new Factor(factorName, variables, mapping));
+				variables.clear();
+			}
+		}
+		
+		// Creates the factor to "b(X)"
+		mapping.clear();
+		mapping.add(new BigDecimal(0.1));
+		mapping.add(new BigDecimal(0.9));
+		
+		for (String var : name) {
+			if (var.substring(0, 1).equals("b")) {
+				variables.add(randomVariables.get(var));
+				String factorName = "f[" + var + "]";
+				factors.put(factorName, new Factor(factorName, variables, mapping));
+				variables.clear();
+			}
+		}
+		
+		// Creates the factor to "b(X)"
+		mapping.clear();
+		mapping.add(new BigDecimal(1.0));
+		mapping.add(new BigDecimal(0.0));
+		mapping.add(new BigDecimal(1.0));
+		mapping.add(new BigDecimal(0.0));
+		mapping.add(new BigDecimal(1.0));
+		mapping.add(new BigDecimal(0.0));
+		mapping.add(new BigDecimal(0.0));
+		mapping.add(new BigDecimal(1.0));
+		mapping.add(new BigDecimal(1.0));
+		mapping.add(new BigDecimal(0.0));
+		mapping.add(new BigDecimal(1.0));
+		mapping.add(new BigDecimal(0.0));
+		mapping.add(new BigDecimal(1.0));
+		mapping.add(new BigDecimal(0.0));
+		mapping.add(new BigDecimal(0.0));
+		mapping.add(new BigDecimal(1.0));
+		mapping.add(new BigDecimal(1.0));
+		mapping.add(new BigDecimal(0.0));
+		mapping.add(new BigDecimal(1.0));
+		mapping.add(new BigDecimal(0.0));
+		mapping.add(new BigDecimal(1.0));
+		mapping.add(new BigDecimal(0.0));
+		mapping.add(new BigDecimal(0.0));
+		mapping.add(new BigDecimal(1.0));
+		mapping.add(new BigDecimal(0.0));
+		mapping.add(new BigDecimal(1.0));
+		mapping.add(new BigDecimal(0.0));
+		mapping.add(new BigDecimal(1.0));
+		mapping.add(new BigDecimal(0.0));
+		mapping.add(new BigDecimal(1.0));
+		mapping.add(new BigDecimal(0.0));
+		mapping.add(new BigDecimal(1.0));
+		
+		variables.add(randomVariables.get(name[0]));
+		variables.add(randomVariables.get(name[4]));
+		variables.add(randomVariables.get(name[1]));
+		variables.add(randomVariables.get(name[5]));
+		variables.add(randomVariables.get(name[6]));
+		
+		factors.put("f[exists(x1)]", new Factor("f[exists(x1)]", variables, mapping));
+
+		variables.clear();
+		
+
+		variables.add(randomVariables.get(name[2]));
+		variables.add(randomVariables.get(name[4]));
+		variables.add(randomVariables.get(name[3]));
+		variables.add(randomVariables.get(name[5]));
+		variables.add(randomVariables.get(name[7]));
+		
+		factors.put("f[exists(x2)]", new Factor("f[exists(x2)]", variables, mapping));
+		
+		// Creates the vector of random variables
+		RandomVariable[] v = new RandomVariable[randomVariables.size()];
+		for (int i = 0; i < randomVariables.size(); i++) {
+			v[i] = randomVariables.get(name[i]);
+		}
+		
+		// Creates the array of factors
+		Factor[] f = new Factor[factors.size()];
+		for (int i = 0; i < factors.size(); i++) {
+			f[i] = factors.get("f[" + name[i] + "]");
+		}
+		
+		// Creates the array of observed variables
+		RandomVariable[] o = new RandomVariable[0];
+		
+		// Creates the query random variable
+		RandomVariable q = randomVariables.get("exists(x1)");
+		
+		// Creates a new instance of the algorithm
+		VariableEliminationAlgorithm algorithm = new VariableEliminationAlgorithm(v, f, o, q);
+		
+		// Executes the algorithm
+		try {
+			System.out.println(algorithm.execute());
+		} catch (Exception e) {
+			System.err.print(e.getMessage());
+			System.exit(-1);
+		}
+	}
 	
+	@Test
+	public void existsNode() {
+		
+		int n = 2;
+		HashMap<String, RandomVariable> randomVariables = new HashMap<String,RandomVariable>();
+		HashMap<String, Factor> factors = new HashMap<String,Factor>();
+		
+		// creates random variables
+		for (int i = 0; i < n; i++) {
+			String b = "b(" + i + ")";
+			String e = "e(" + i + ")";
+			randomVariables.put(b, getDefaultBooleanRandomVariable(b));
+			randomVariables.put(e, getDefaultBooleanRandomVariable(e));
+			for (int j = 0; j < n; j++) {
+				String r = "r(" + i + ", " + j + ")";
+				randomVariables.put(r, getDefaultBooleanRandomVariable(r));
+				r = "r'(" + i + ", " + j + ")";
+				randomVariables.put(r, getDefaultBooleanRandomVariable(r));
+			}
+		}
+		
+		// Creates the factor to "r(X,Y)"
+		ArrayList<BigDecimal> mapping = new ArrayList<BigDecimal>();
+		mapping.add(new BigDecimal(0.2));
+		mapping.add(new BigDecimal(0.8));
+		
+		ArrayList<RandomVariable> variables = new ArrayList<RandomVariable>();
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				String r = "r(" + i + ", " + j + ")";
+				variables.add(randomVariables.get(r));
+				String factorName = "f[" + r + "]";
+				factors.put(factorName, new Factor(factorName, variables, mapping));
+				variables.clear();
+			}
+		}
+		
+		// Creates the factor to "b(Y)"
+		mapping.clear();
+		mapping.add(new BigDecimal(0.1));
+		mapping.add(new BigDecimal(0.9));
+		
+		for (String var : randomVariables.keySet()) {
+			if (var.substring(0, 1).equals("b")) {
+				variables.add(randomVariables.get(var));
+				String factorName = "f[" + var + "]";
+				factors.put(factorName, new Factor(factorName, variables, mapping));
+				variables.clear();
+			}
+		}
+		
+		// Creates the factor for "r(X,Y) b(Y) r'(X,Y)"
+		mapping.clear();
+		mapping.add(BigDecimal.ONE);
+		mapping.add(BigDecimal.ZERO);
+		mapping.add(BigDecimal.ONE);
+		mapping.add(BigDecimal.ZERO);
+		mapping.add(BigDecimal.ONE);
+		mapping.add(BigDecimal.ZERO);
+		mapping.add(BigDecimal.ZERO);
+		mapping.add(BigDecimal.ONE);
+		
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				String b = "b(" + j + ")";
+				String r = "r(" + i + ", " + j + ")";
+				String r1 = "r'(" + i + ", " + j + ")";
+				variables.add(randomVariables.get(r));
+				variables.add(randomVariables.get(b));
+				variables.add(randomVariables.get(r1));
+				String factorName = "f[and(" + i + ", " + j + ")]";
+				factors.put(factorName, new Factor(factorName, variables, mapping));
+				variables.clear();
+			}
+		}
+		
+		// Creates the factor for "r'(X,y1) ... r'(X,yn) e(X)"
+		mapping.clear();
+		for (int i = 0; i < (int) Math.pow(2, n); i++) {
+			mapping.add(BigDecimal.ZERO);
+			mapping.add(BigDecimal.ONE);
+		}
+		mapping.set(0, BigDecimal.ONE);
+		mapping.set(1, BigDecimal.ZERO);
+		
+		for (int i = 0; i < n; i++) {
+			String e = "e(" + i + ")";
+			for (int j = 0; j < n; j++) {
+				String r1 = "r'(" + i + ", " + j + ")";
+				variables.add(randomVariables.get(r1));
+			}
+			variables.add(randomVariables.get(e));
+			String factorName = "f[e(" + i + ")]";
+			factors.put(factorName, new Factor(factorName, variables, mapping));
+			variables.clear();
+		}
+		
+		// Creates the vector of random variables
+		RandomVariable[] v = new ArrayList<RandomVariable>(randomVariables.values()).toArray(new RandomVariable[randomVariables.size()]);
+		
+		// Creates the array of factors
+		Factor[] f = new ArrayList<Factor>(factors.values()).toArray(new Factor[factors.size()]);
+		
+		// Creates the array of observed variables
+		RandomVariable[] o = new RandomVariable[0];
+		
+		// Creates the query random variable
+		RandomVariable q = randomVariables.get("e(0)");
+		
+		// Creates a new instance of the algorithm
+		VariableEliminationAlgorithm algorithm = new VariableEliminationAlgorithm(v, f, o, q);
+		
+		// Executes the algorithm
+		try {
+			System.out.println("Welcome to this incredible test!");
+			System.out.println(algorithm.execute());
+		} catch (Exception e) {
+			System.err.print(e.getMessage());
+			System.exit(-1);
+		}
+	}
+	
+	@Test
+	public void existsNodeSize1() {
+		// Initialization
+		String[] name = {"r(x1,x1)", "b(x1)", "exists(x1)"};
+		HashMap<String, RandomVariable> randomVariables = new HashMap<String,RandomVariable>();
+		HashMap<String, Factor> factors = new HashMap<String,Factor>();
+		
+		// Creates random variables
+		for (int i = 0; i < name.length; i++) {
+			randomVariables.put(name[i], getDefaultBooleanRandomVariable(name[i]));
+		}
+		
+		// Creates the factor "r(X,Y)"
+		ArrayList<BigDecimal> mapping = new ArrayList<BigDecimal>();
+		mapping.add(new BigDecimal(0.2));
+		mapping.add(new BigDecimal(0.8));
+		
+		ArrayList<RandomVariable> variables = new ArrayList<RandomVariable>();
+		for (String var : name) {
+			if (var.substring(0, 1).equals("r")) {
+				variables.add(randomVariables.get(var));
+				String factorName = "f[" + var + "]";
+				factors.put(factorName, new Factor(factorName, variables, mapping));
+				variables.clear();
+			}
+		}
+		
+		// Creates the factor "b(X)"
+		mapping.clear();
+		mapping.add(new BigDecimal(0.1));
+		mapping.add(new BigDecimal(0.9));
+		
+		for (String var : name) {
+			if (var.substring(0, 1).equals("b")) {
+				variables.add(randomVariables.get(var));
+				String factorName = "f[" + var + "]";
+				factors.put(factorName, new Factor(factorName, variables, mapping));
+				variables.clear();
+			}
+		}
+		
+		// Creates the factor "exists(X)"
+		mapping.clear();
+		mapping.add(new BigDecimal(1.0));
+		mapping.add(new BigDecimal(0.0));
+		mapping.add(new BigDecimal(1.0));
+		mapping.add(new BigDecimal(0.0));
+		mapping.add(new BigDecimal(1.0));
+		mapping.add(new BigDecimal(0.0));
+		mapping.add(new BigDecimal(0.0));
+		mapping.add(new BigDecimal(1.0));
+		
+		variables.add(randomVariables.get(name[0]));
+		variables.add(randomVariables.get(name[1]));
+		variables.add(randomVariables.get(name[2]));
+		
+		factors.put("f[exists(x1)]", new Factor("f[exists(x1)]", variables, mapping));
+
+		// Creates the vector of random variables
+		RandomVariable[] v = new RandomVariable[randomVariables.size()];
+		for (int i = 0; i < randomVariables.size(); i++) {
+			v[i] = randomVariables.get(name[i]);
+		}
+		
+		// Creates the array of factors
+		Factor[] f = new Factor[factors.size()];
+		for (int i = 0; i < factors.size(); i++) {
+			f[i] = factors.get("f[" + name[i] + "]");
+		}
+		
+		// Creates the array of observed variables
+		RandomVariable[] o = new RandomVariable[0];
+		
+		// Creates the query random variable
+		RandomVariable q = randomVariables.get("exists(x1)");
+		
+		// Creates a new instance of the algorithm
+		VariableEliminationAlgorithm algorithm = new VariableEliminationAlgorithm(v, f, o, q);
+		
+		// Executes the algorithm
+		try {
+			System.out.println(algorithm.execute());
+		} catch (Exception e) {
+			System.err.print(e.getMessage());
+			System.exit(-1);
+		}
+	}
+	
+	@Test
+	public void multiplication() {
+		
+		int n = 3;
+		HashMap<String, RandomVariable> randomVariables = new HashMap<String,RandomVariable>();
+		HashMap<String, Factor> factors = new HashMap<String,Factor>();
+		
+		// creates random variables
+		for (int i = 0; i < n; i++) {
+			String b = "b(" + i + ")";
+			String e = "e(" + i + ")";
+			randomVariables.put(b, getDefaultBooleanRandomVariable(b));
+			randomVariables.put(e, getDefaultBooleanRandomVariable(e));
+			for (int j = 0; j < n; j++) {
+				String r = "r(" + i + ", " + j + ")";
+				randomVariables.put(r, getDefaultBooleanRandomVariable(r));
+				r = "r'(" + i + ", " + j + ")";
+				randomVariables.put(r, getDefaultBooleanRandomVariable(r));
+			}
+		}
+		
+		// Creates the factor to "r(X,Y)"
+		ArrayList<BigDecimal> mapping = new ArrayList<BigDecimal>();
+		mapping.add(new BigDecimal(0.2));
+		mapping.add(new BigDecimal(0.8));
+		
+		ArrayList<RandomVariable> variables = new ArrayList<RandomVariable>();
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				String r = "r(" + i + ", " + j + ")";
+				variables.add(randomVariables.get(r));
+				String factorName = "f[" + r + "]";
+				factors.put(factorName, new Factor(factorName, variables, mapping));
+				variables.clear();
+			}
+		}
+		
+		// Creates the factor to "b(Y)"
+		mapping.clear();
+		mapping.add(new BigDecimal(0.1));
+		mapping.add(new BigDecimal(0.9));
+		
+		for (String var : randomVariables.keySet()) {
+			if (var.substring(0, 1).equals("b")) {
+				variables.add(randomVariables.get(var));
+				String factorName = "f[" + var + "]";
+				factors.put(factorName, new Factor(factorName, variables, mapping));
+				variables.clear();
+			}
+		}
+		
+		// Creates the factor for "r(X,Y) b(Y) r'(X,Y)"
+		mapping.clear();
+		mapping.add(BigDecimal.ONE);
+		mapping.add(BigDecimal.ZERO);
+		mapping.add(BigDecimal.ONE);
+		mapping.add(BigDecimal.ZERO);
+		mapping.add(BigDecimal.ONE);
+		mapping.add(BigDecimal.ZERO);
+		mapping.add(BigDecimal.ZERO);
+		mapping.add(BigDecimal.ONE);
+		
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				String b = "b(" + j + ")";
+				String r = "r(" + i + ", " + j + ")";
+				String r1 = "r'(" + i + ", " + j + ")";
+				variables.add(randomVariables.get(r));
+				variables.add(randomVariables.get(b));
+				variables.add(randomVariables.get(r1));
+				String factorName = "f[and(" + i + ", " + j + ")]";
+				factors.put(factorName, new Factor(factorName, variables, mapping));
+				variables.clear();
+			}
+		}
+		
+		// Creates the factor for "r'(X,y1) ... r'(X,yn) e(X)"
+		mapping.clear();
+		for (int i = 0; i < (int) Math.pow(2, n); i++) {
+			mapping.add(BigDecimal.ZERO);
+			mapping.add(BigDecimal.ONE);
+		}
+		mapping.set(0, BigDecimal.ONE);
+		mapping.set(1, BigDecimal.ZERO);
+		
+		for (int i = 0; i < n; i++) {
+			String e = "e(" + i + ")";
+			for (int j = 0; j < n; j++) {
+				String r1 = "r'(" + i + ", " + j + ")";
+				variables.add(randomVariables.get(r1));
+			}
+			variables.add(randomVariables.get(e));
+			String factorName = "f[e(" + i + ")]";
+			factors.put(factorName, new Factor(factorName, variables, mapping));
+			variables.clear();
+		}
+		
+		// Creates the vector of random variables
+		RandomVariable[] v = new ArrayList<RandomVariable>(randomVariables.values()).toArray(new RandomVariable[randomVariables.size()]);
+		
+		// Creates the array of factors
+		Factor[] f = new ArrayList<Factor>(factors.values()).toArray(new Factor[factors.size()]);
+		
+		// Creates the array of observed variables
+		RandomVariable[] o = new RandomVariable[0];
+		
+		// Creates the query random variable
+		RandomVariable q = randomVariables.get("e(1)");
+		
+		// Creates a new instance of the algorithm
+		VariableEliminationAlgorithm algorithm = new VariableEliminationAlgorithm(v, f, o, q);
+		
+		// Executes the algorithm
+		try {
+			System.out.println(algorithm.execute());
+		} catch (Exception e) {
+			System.err.print(e.getMessage());
+			System.exit(-1);
+		}
+	}
 }

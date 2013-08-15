@@ -1,12 +1,13 @@
 package br.usp.poli.takiyama.common;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
 import br.usp.poli.takiyama.utils.Lists;
 
-public final class Tuple<E> {
+public final class Tuple<E> implements Iterable<E> {
 	
 	private final List<E> values;
 	
@@ -152,6 +153,12 @@ public final class Tuple<E> {
 	 */
 	public boolean isEmpty() {
 		return (values == null || values.isEmpty());
+	}
+
+
+	@Override
+	public Iterator<E> iterator() {
+		return values.iterator();
 	}
 	
 	

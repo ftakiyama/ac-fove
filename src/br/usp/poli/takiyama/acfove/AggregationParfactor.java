@@ -26,7 +26,7 @@ import br.usp.poli.takiyama.prv.ParameterizedRandomVariable;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
 
-
+@Deprecated
 public class AggregationParfactor implements ParfactorI {
 
 	private final ParameterizedRandomVariable parent;

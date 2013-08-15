@@ -6,6 +6,8 @@ import java.util.Set;
 import br.usp.poli.takiyama.cfove.StdParfactor;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.Prv;
+import br.usp.poli.takiyama.prv.Prvs;
+import br.usp.poli.takiyama.prv.RandomVariableSet;
 import br.usp.poli.takiyama.utils.Sets;
 
 /**
@@ -43,26 +45,46 @@ public final class MultiplicationChecker implements ParfactorVisitor {
 	 */
 	@Override
 	public void visit(StdParfactor p1, StdParfactor p2) {
+		
+		/*
+		 * This code only verifies the first condition.
+		 * The other condition, concerning disjoint logical variables, is not
+		 * verified. I think I have misinterpreted this rule...
+		 */
+		areMultipliable = true;
+		for (Prv prv1 : p1.prvs()) {
+			for (Prv prv2 : p2.prvs()) {
+				RandomVariableSet rvs1 = RandomVariableSet.getInstance(prv1, Sets.union(prv1.constraints(), p1.constraints()));
+				RandomVariableSet rvs2 = RandomVariableSet.getInstance(prv2, Sets.union(prv2.constraints(), p2.constraints()));
+				if (!Prvs.areDisjoint(rvs1, rvs2) && !rvs1.equals(rvs2)) {
+					areMultipliable = false;
+					break;
+				}
+			}
+		}
+		
+		
+		
 		// TODO Need to use unification, nevertheless, I'll have a set of shattered parfactors,
 		// so multiplication is always possible between std parfactors.
 		
 		// hehe - it is not
-		areMultipliable = true;
-		Set<LogicalVariable> lv1 = p1.logicalVariables();
-		Set<LogicalVariable> lv2 = p2.logicalVariables();
-		for (Prv prv1 : p1.prvs()) {
-			for (Prv prv2 : p2.prvs()) {
-				if (sameName(prv1, prv2)) {
-					boolean sameParameters = sameParameters(prv1, prv2);
-					// I think the disjoint lv thing is not correct
-					//boolean disjointRemainingLogicalVariables = disjointRemainingLogicalVariables(lv1, prv1, lv2, prv2);
-					if (!sameParameters /*|| !disjointRemainingLogicalVariables*/) {
-						areMultipliable = false;
-						break;
-					}
-				}
-			}
-		}
+//		areMultipliable = true;
+//		Set<LogicalVariable> lv1 = p1.logicalVariables();
+//		Set<LogicalVariable> lv2 = p2.logicalVariables();
+//		for (Prv prv1 : p1.prvs()) {
+//			for (Prv prv2 : p2.prvs()) {
+//				if (sameName(prv1, prv2)) {
+//					boolean sameParameters = sameParameters(prv1, prv2);
+//					// I think the disjoint lv thing is not correct
+//					//boolean disjointRemainingLogicalVariables = disjointRemainingLogicalVariables(lv1, prv1, lv2, prv2);
+//					if (!sameParameters /*|| !disjointRemainingLogicalVariables*/) {
+//						areMultipliable = false;
+//						break;
+//					}
+//				}
+//			}
+//		}
 	}
 	
 	private boolean sameName(Prv v1, Prv v2) {

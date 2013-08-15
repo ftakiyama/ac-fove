@@ -42,7 +42,7 @@ public class WaterSprinkler {
 		
 		// Network initialization
 		
-		int domainSize = 30;
+		int domainSize = 5;
 		Example network = Example.waterSprinklerNetWork(domainSize);
 		
 		Parfactor gc = network.parfactor("gcloudy");

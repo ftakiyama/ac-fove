@@ -16,6 +16,7 @@ import br.usp.poli.takiyama.common.Marginal;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.StdFactor;
 import br.usp.poli.takiyama.common.StdMarginal.StdMarginalBuilder;
+import br.usp.poli.takiyama.prv.And;
 import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
@@ -25,6 +26,7 @@ import br.usp.poli.takiyama.prv.RandomVariableSet;
 import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.StdPrv;
 import br.usp.poli.takiyama.prv.Term;
+import br.usp.poli.takiyama.prv.Xor;
 
 /**
  * Stores parfactors, logical variables, parameterized random variables (PRV)
@@ -508,7 +510,7 @@ public class Example {
 	 * The original network is shown here:
 	 * http://www.cs.ubc.ca/~murphyk/Bayes/bnintro.html
 	 * 
-	 * The number of node in this network is 2 * (domainSize + 1)
+	 * The number of nodes in this network is 2 * (domainSize + 1)
 	 * 
 	 * @param domainSize
 	 * @return
@@ -543,6 +545,71 @@ public class Example {
 		network.putFactor("frain", g2.factor());
 		network.putFactor("fsprinkler", g3.factor());
 		network.putFactor("fwetgrass", g4.factor());
+		
+		return network;
+	}
+	
+	/**
+	 * The Sick and Death network used as example by Rodrigo de Salvo Braz in 
+	 * his IJCAI-05 paper. The network has been adapted to use aggregation 
+	 * parfactors by adding a 'someDeath' node. It also uses a directed graph
+	 * to represent cause/consequence relations (the original is a Markov
+	 * network).
+	 * <p>
+	 * The number of nodes in this network is 2 * (domainSize + 1)
+	 * </p>
+	 * 
+	 * @param domainSize
+	 * @return
+	 */
+	public static Example sickDeathNetwork(int domainSize) {
+		
+		Example network = new Example();
+		
+		LogicalVariable person = network.putLogicalVariable("Person", "person", domainSize);
+		
+		Prv epidemic = network.putPrv("epidemic");
+		Prv sick = network.putPrv("sick", person);
+		Prv death = network.putPrv("death", person);
+		Prv someDeath = network.putPrv("someDeath");
+		
+		List<BigDecimal> fEpidemic = TestUtils.toBigDecimalList(0.45, 0.55);
+		List<BigDecimal> fSick = TestUtils.toBigDecimalList(0.9, 0.1, 0.3, 0.7);
+		List<BigDecimal> fDeath = TestUtils.toBigDecimalList(1, 0, 0.45, 0.55);
+		
+		Parfactor g1 = new StdParfactorBuilder().variables(epidemic).values(fEpidemic).build();
+		Parfactor g2 = new StdParfactorBuilder().variables(epidemic, sick).values(fSick).build();
+		Parfactor g3 = new StdParfactorBuilder().variables(sick, death).values(fDeath).build();
+		Parfactor g4 = new AggParfactorBuilder(death, someDeath, Or.OR).context(epidemic).build();
+		
+		network.putParfactor("gepidemic", g1);
+		network.putParfactor("gsick", g2);
+		network.putParfactor("gdeath", g3);
+		network.putParfactor("gsomedeath", g4);
+		
+		return network;
+	}
+	
+	public static Example competingWorkshopsNetwork(int numberOfWorkshops, int numberOfPeople) {
+		
+		Example network = new Example();
+		
+		LogicalVariable workshop = network.putLogicalVariable("Workshop", "w", numberOfWorkshops);
+		LogicalVariable person = network.putLogicalVariable("Person", "p", numberOfPeople);
+		
+		Prv hot = network.putPrv("hot", workshop);
+		Prv attends = network.putPrv("attends", person);
+		Prv success = network.putPrv("success");
+		
+		List<BigDecimal> fHot = TestUtils.toBigDecimalList(0.3, 0.7);
+		
+		Parfactor g1 = new StdParfactorBuilder().variables(hot).values(fHot).build();
+		Parfactor g2 = new AggParfactorBuilder(hot, attends, Xor.XOR).build();
+		Parfactor g3 = new AggParfactorBuilder(attends, success, And.AND).build();
+		
+		network.putParfactor("ghot", g1);
+		network.putParfactor("gattends", g2);
+		network.putParfactor("gsuccess", g3);
 		
 		return network;
 	}

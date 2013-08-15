@@ -2,6 +2,7 @@ package br.usp.poli.takiyama.acfove.operator;
 
 import java.util.Set;
 
+@Deprecated
 final public class And implements BooleanOperator {
 
 	/**

@@ -11,7 +11,8 @@ import java.util.Set;
  * <li> &otimes; must be commutative, that is, A &otimes; B = B &otimes; A
  * <li> &otimes; must be associative, that is, 
  * (A &otimes; B) &otimes; C = A &otimes; (B &otimes; C)
- * 
+ * @Deprecated
+
  * @author ftakiyama
  *
  */

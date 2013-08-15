@@ -9,16 +9,20 @@ import br.usp.poli.takiyama.prv.Prv;
 public final class ConvertToStdParfactors implements MacroOperation {
 
 	private final Parfactor parfactorToConvert;
+	private final Marginal marginal;
 	
-	public ConvertToStdParfactors(Parfactor p) {
+	public ConvertToStdParfactors(Marginal m, Parfactor p) {
+		this.marginal = m;
 		this.parfactorToConvert = p;
 	}
 	
 	@Override
 	public Marginal run() {
 		StdMarginalBuilder m = new StdMarginalBuilder();
+		m.add(marginal);
 		if (parfactorToConvert instanceof AggregationParfactor) {
 			m.parfactors(((AggregationParfactor) parfactorToConvert).toStdParfactors());
+			m.remove(parfactorToConvert);
 		}
 		return m.build();
 	}
@@ -49,4 +53,10 @@ public final class ConvertToStdParfactors implements MacroOperation {
 		return 0;
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("CONVERT-TO-STD-PARFACTORS");
+		return builder.toString();
+	}
 }

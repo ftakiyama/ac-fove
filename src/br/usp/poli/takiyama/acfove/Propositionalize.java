@@ -9,6 +9,8 @@ import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.Population;
 import br.usp.poli.takiyama.prv.Substitution;
+import br.usp.poli.takiyama.common.AggregationParfactor;
+
 
 /**
  * This operation executes a split on a parfactor for every 
@@ -75,7 +77,7 @@ public final class Propositionalize implements MacroOperation {
 		return freeVariable.individualsSatisfying(propositionalizable.constraints());
 	}
 
-	/**
+	/*
 	 * The cost of propositionalization is given by the following expression:
 	 * <p>
 	 * |F| x |D(X):C|
@@ -95,6 +97,11 @@ public final class Propositionalize implements MacroOperation {
 	 * expensive.
 	 * </p>
 	 */
+	
+	/**
+	 * Returns infinity - 1. This operation is only feasible when no other
+	 * operation is possible.
+	 */
 	@Override
 	public int cost() {
 		
@@ -107,7 +114,8 @@ public final class Propositionalize implements MacroOperation {
 		int populationSize = getIndividuals().size();
 		int factorSize = propositionalizable.factor().size();
 		int result = populationSize * factorSize;
-		return result;
+		
+		return ((int) Double.POSITIVE_INFINITY) - 1;
 	}
 
 	/**

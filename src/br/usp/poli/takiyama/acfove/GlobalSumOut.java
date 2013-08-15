@@ -1,20 +1,14 @@
 package br.usp.poli.takiyama.acfove;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
+import java.util.Queue;
 
 import br.usp.poli.takiyama.cfove.StdParfactor;
 import br.usp.poli.takiyama.cfove.StdParfactor.StdParfactorBuilder;
-import br.usp.poli.takiyama.common.ConstantFactor;
-import br.usp.poli.takiyama.common.Constraint;
-import br.usp.poli.takiyama.common.Factor;
 import br.usp.poli.takiyama.common.Marginal;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.StdMarginal.StdMarginalBuilder;
-import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.Prv;
 import br.usp.poli.takiyama.prv.Prvs;
 import br.usp.poli.takiyama.prv.RandomVariableSet;
@@ -36,62 +30,12 @@ final class GlobalSumOut implements MacroOperation {
 	private boolean isPossible;
 	
 	private static int infinity = (int) Double.POSITIVE_INFINITY;
-
-	/**
-	 * This class has the same structure of a StdParfactor, except for the
-	 * values. 
-	 */
-	private final class ParfactorSkeleton {
-		
-		private final Set<Constraint> constraints;
-		private final Set<Prv> variables;
-		
-		private ParfactorSkeleton() {
-			constraints = new HashSet<Constraint>();
-			variables = new LinkedHashSet<Prv>();
-		}
-		
-		private boolean isMultipliable(Parfactor p) {
-			/*
-			 * Assuming this skeleton represents StdParfactors.
-			 * This assumption is not true if Aggregation parfactors are not
-			 * converted in the beginning of the AC-FOVE algorithm
-			 */
-			// it is a waist of memory to create a factor here. what now?
-			// better yet: it is a waist of memory to use constant factors
-			// need to take simplification out
-			Parfactor parfactor = new StdParfactorBuilder()
-					.variables(new ArrayList<Prv>(variables))
-					.constraints(constraints).build();
-			return p.isMultipliable(parfactor);
-		}
-		
-		private ParfactorSkeleton multiply(Parfactor p) {
-			constraints.addAll(p.constraints());
-			variables.addAll(p.prvs());
-			return this;
-		}
-		
-		private boolean isEliminable() {
-			Set<LogicalVariable> lvs = Sets.getInstance(0);
-			for (Prv v : variables) {
-				lvs.addAll(v.parameters());
-			}
-			return eliminables.prv().parameters().containsAll(lvs);
-		}
-		
-		private Factor getFactor() {
-			return ConstantFactor.getInstance(new ArrayList<Prv>(variables));
-		}
-	}
 	
 	public GlobalSumOut(Marginal marginal, RandomVariableSet eliminables) {
 		this.marginal = marginal;
 		this.eliminables = eliminables;
 		calculateFeasibility();
 	}
-	
-
 	
 	/*
 	 * Calculates the feasibility of this operation. This operation is possible
@@ -101,14 +45,15 @@ final class GlobalSumOut implements MacroOperation {
 	private void calculateFeasibility() {
 		setCost(infinity);
 		
-		if (Prvs.areDisjoint(eliminables, marginal.preservable())) {
+		RandomVariableSet elim = RandomVariableSet.getInstance(eliminables.prv().getCanonicalForm(), eliminables.constraints());
+		if (Prvs.areDisjoint(elim, marginal.preservable())) {
 			
-			// assembles a dummy parfactor that represents the result of this operation
-			ParfactorSkeleton result = new ParfactorSkeleton();
-			for (Parfactor candidate : marginal) {
+			Queue<Parfactor> queue = new LinkedList<Parfactor>(marginal.distribution().toSet());
+			Parfactor result = new StdParfactorBuilder().build();
+			for (Parfactor candidate : queue) {
 				if (containsEliminable(candidate)) {
 					if (result.isMultipliable(candidate)) {
-						result.multiply(candidate);
+						result = result.multiply(candidate);
 					} else {
 						// contains eliminables but cannot be multiplied: be sure
 						// to shatter before!
@@ -117,10 +62,8 @@ final class GlobalSumOut implements MacroOperation {
 				}
 			}
 			
-			// if it got here, it means multiplication is possible
-			// now, can we sum out eliminables?
-			if (result.isEliminable()) {
-				int f = result.getFactor().size();
+			if (result.isEliminable(eliminables)) {
+				int f = result.factor().size();
 				int v = eliminables.range().size();
 				setCost(f / v); 
 			}
@@ -150,24 +93,15 @@ final class GlobalSumOut implements MacroOperation {
 		 * eliminables or not.
 		 */
 		
+		RandomVariableSet elim = RandomVariableSet.getInstance(eliminables.prv().getCanonicalForm(), Sets.union(eliminables.prv().constraints(), eliminables.constraints()));
 		List<Prv> variables = candidate.prvs();
 		for (Prv prv : variables) {
-			RandomVariableSet rvs = RandomVariableSet.getInstance(prv, candidate.constraints());
-			if (rvs.equals(eliminables)) {
+			RandomVariableSet rvs = RandomVariableSet.getInstance(prv.getCanonicalForm(), candidate.constraints());
+			if (rvs.equals(elim)) {
 				return true;
 			}
 		}
 		return false;
-		
-//		List<Prv> variables = candidate.prvs();
-//		for (Prv prv : variables) {
-//			boolean hasFunctor = prv.name().equals(eliminables.prv().name());
-//			boolean hasConstraints = candidate.constraints().containsAll(eliminables.constraints());
-//			if (hasFunctor && hasConstraints) {
-//				return true;
-//			}
-//		}
-//		return false;
 	}
 	
 	@Override

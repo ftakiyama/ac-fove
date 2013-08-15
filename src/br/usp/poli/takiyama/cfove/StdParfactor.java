@@ -896,7 +896,7 @@ public final class StdParfactor implements Parfactor {
 		for (Prv v : factor.variables()) {
 			lvs.addAll(v.parameters());
 		}
-		return prv.parameters().equals(lvs);
+		return prv.parameters().containsAll(lvs);
 	}
 	
 	

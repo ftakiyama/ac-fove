@@ -214,7 +214,7 @@ public class ACFOVE {
 	}
 	
 	private void evaluateConversionToStdParfactors(Parfactor p) {
-		MacroOperation candidate = new ConvertToStdParfactors(p);
+		MacroOperation candidate = new ConvertToStdParfactors(result, p);
 		compareAndUpdate(candidate);
 	}
 	

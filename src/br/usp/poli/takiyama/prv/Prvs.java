@@ -81,7 +81,6 @@ public final class Prvs {
 	/**
 	 * Returns <code>true</code> if the specified PRVs represent disjoint sets
 	 * of random variables.
-	 * This method does not consider constraints associated with PRVs.
 	 * @param prv1
 	 * @param prv2
 	 * @return

@@ -5,7 +5,7 @@ import java.util.Set;
 /**
  * Aggregation operator.
  * @author ftakiyama
- *
+ *@Deprecated
  */
 final public class Or implements BooleanOperator {
 

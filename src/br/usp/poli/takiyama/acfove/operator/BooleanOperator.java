@@ -1,5 +1,6 @@
 package br.usp.poli.takiyama.acfove.operator;
 
+@Deprecated
 public interface BooleanOperator extends Operator<Boolean> {
 	
 	/**

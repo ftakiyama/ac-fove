@@ -1,6 +1,8 @@
 package br.usp.poli.takiyama.acfove;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -10,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
@@ -25,9 +28,11 @@ import br.usp.poli.takiyama.common.InequalityConstraint;
 import br.usp.poli.takiyama.common.InputOutput;
 import br.usp.poli.takiyama.common.Marginal;
 import br.usp.poli.takiyama.common.Parfactor;
+import br.usp.poli.takiyama.common.SplitResult;
 import br.usp.poli.takiyama.common.StdFactor;
 import br.usp.poli.takiyama.common.StdMarginal.StdMarginalBuilder;
 import br.usp.poli.takiyama.common.Tuple;
+import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.Bool;
 import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.CountingFormula;
@@ -38,6 +43,9 @@ import br.usp.poli.takiyama.prv.RandomVariableSet;
 import br.usp.poli.takiyama.prv.RangeElement;
 import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.StdPrv;
+import br.usp.poli.takiyama.prv.Substitution;
+import br.usp.poli.takiyama.prv.Term;
+import br.usp.poli.takiyama.samples.WaterSprinklerNetwork;
 import br.usp.poli.takiyama.utils.Example;
 import br.usp.poli.takiyama.utils.Lists;
 import br.usp.poli.takiyama.utils.MathUtils;
@@ -967,5 +975,277 @@ public class ACFOVETest {
 		
 	}
 
+	/**
+	 * Some tests involving the lifted version of the water sprinkler network.
+	 * Data structures used in test cases from this class are created by
+	 * {@link WaterSprinklerNetwork} class.
+	 */
+	public static class WaterSprinklerNetworkTest {
+		
+		/**
+		 * Network: water sprinkler
+		 * Query: wet_grass(Lot)
+		 * Evidence: none
+		 * Population size: n >= 5
+		 * 
+		 * For n < 5, the algorithm propositionalizes the logical variable Lot
+		 * because it is cheaper than counting it. In the end, the result will
+		 * be propositionalized. This test assumes the answer is lifted so it
+		 * is easier to compare with the expected result. Last time I checked
+		 * the answer is correct for n < 5 too.
+		 */
+		@Test
+		public void queryWetGrass() {
+			int domainSize = 5;
+			WaterSprinklerNetwork wsn = new WaterSprinklerNetwork(domainSize);
+			wsn.setQuery(wsn.wetGrass);
+			Marginal input = wsn.getMarginal();
+			
+			// Runs AC-FOVE on input marginal
+			ACFOVE acfove = new LoggedACFOVE(input);
+			Parfactor result = acfove.run();
+			Parfactor expected = getResultWetGrass(wsn);
+			
+			// Compares expected with result
+			assertEquals(expected, result);
+		}
+		
+		private Parfactor getResultWetGrass(WaterSprinklerNetwork wsn) {
+			
+			Parfactor afterSumOutSprinkler = wsn.sprinklerParfactor
+					.multiply(wsn.wetGrassParfactor).sumOut(wsn.sprinkler);
+			
+			Parfactor afterCountingLot = afterSumOutSprinkler.count(wsn.lot);
 
+			Parfactor afterSumOutRain = afterCountingLot
+					.multiply(wsn.rainParfactor).sumOut(wsn.rain);
+
+			Parfactor afterSumOutCloudy = afterSumOutRain
+					.multiply(wsn.cloudyParfactor).sumOut(wsn.cloudy);
+			
+			return afterSumOutCloudy;
+		}
+		
+		/**
+		 * Network: water sprinkler
+		 * Query: rain()
+		 * Evidence: wet_grass(lot0) = true
+		 * Population size: 1
+		 * 
+		 * Even though the answer is consistent, the real probability is obtained
+		 * by dividing the result by the normalizing constant. I thought AC-FOVE
+		 * results did not need this kind of correction. Is it correct?
+		 * 
+		 * TODO Check the need for normalizing constants
+		 */
+		@Test
+		public void queryRainGivenWetGrassWithOneLot() {
+			int domainSize = 1;
+			WaterSprinklerNetwork wsn = new WaterSprinklerNetwork(domainSize);
+			wsn.setEvidence(wsn.wetGrass, 0); 
+			wsn.setQuery(wsn.rain);
+			Marginal input = wsn.getMarginal();
+			
+			// Runs AC-FOVE on input marginal
+			ACFOVE acfove = new LoggedACFOVE(input);
+			Parfactor result = acfove.run();
+			Parfactor expected = getResultRainGivenWetGrassWithOneLot(wsn);
+			
+			// Compares expected with result
+			assertEquals(expected, result);
+		}
+		
+		private Parfactor getResultRainGivenWetGrassWithOneLot(WaterSprinklerNetwork wsn) {
+			
+			// Sum out wet_grass(lot0)
+			Prv wetGrass = wsn.wetGrass.apply(wsn.getLot(0));
+			Parfactor wetGrassParfactor = wsn.wetGrassParfactor.apply(wsn.getLot(0));
+			Factor afterSumOutWetGrass = wsn.evidenceParfactor.factor()
+					.multiply(wetGrassParfactor.factor()).sumOut(wetGrass);
+
+			// Sum out sprinkler(lot0)
+			Prv sprinkler = wsn.sprinkler.apply(wsn.getLot(0));
+			Parfactor sprinklerParfactor = wsn.sprinklerParfactor.apply(wsn.getLot(0));
+			Factor afterSumOutSprinkler = afterSumOutWetGrass
+					.multiply(sprinklerParfactor.factor()).sumOut(sprinkler);
+			
+			// Sum out cloudy
+			Factor afterSumOutCloudy = afterSumOutSprinkler
+					.multiply(wsn.cloudyParfactor.factor())
+					.multiply(wsn.rainParfactor.factor()).sumOut(wsn.cloudy);
+			
+			Parfactor expected = new StdParfactorBuilder().factor(afterSumOutCloudy).build();
+			
+			return expected;
+		}
+		
+		
+		/**
+		 * Network: water sprinkler
+		 * Query: sprinkler(lot0)
+		 * Evidence: wet_grass(lot0) = true
+		 * Population size: 1
+		 * 
+		 * Even though the answer is consistent, the real probability is obtained
+		 * by dividing the result by the normalizing constant. I thought AC-FOVE
+		 * results did not need this kind of correction. Is it correct?
+		 * 
+		 * TODO Check the need for normalizing constants
+		 */
+		@Test
+		public void querySprinklerGivenWetGrassWithOneLot() {
+			int domainSize = 1;
+			WaterSprinklerNetwork wsn = new WaterSprinklerNetwork(domainSize);
+			wsn.setEvidence(wsn.wetGrass, 0); 
+			wsn.setQuery(wsn.sprinkler.apply(wsn.getLot(0)));
+			Marginal input = wsn.getMarginal();
+			
+			// Runs AC-FOVE on input marginal
+			ACFOVE acfove = new LoggedACFOVE(input);
+			Parfactor result = acfove.run();
+			Parfactor expected = getResultSprinklerGivenWetGrassWithOneLot(wsn);
+			
+			// Compares expected with result
+			assertEquals(expected, result);
+		}
+		
+		private Parfactor getResultSprinklerGivenWetGrassWithOneLot(WaterSprinklerNetwork wsn) {
+			
+			// Sum out wet_grass(lot0)
+			Prv wetGrass = wsn.wetGrass.apply(wsn.getLot(0));
+			Parfactor wetGrassParfactor = wsn.wetGrassParfactor.apply(wsn.getLot(0));
+			Factor afterSumOutWetGrass = wsn.evidenceParfactor.factor()
+					.multiply(wetGrassParfactor.factor()).sumOut(wetGrass);
+
+			// Sum out rain
+			Factor afterSumOutRain = afterSumOutWetGrass
+					.multiply(wsn.rainParfactor.factor()).sumOut(wsn.rain);
+			
+			// Sum out cloudy
+			Factor afterSumOutCloudy = afterSumOutRain
+					.multiply(wsn.cloudyParfactor.factor())
+					.multiply(wsn.sprinklerParfactor.apply(wsn.getLot(0)).factor())
+					.sumOut(wsn.cloudy);
+			
+			Parfactor expected = new StdParfactorBuilder().factor(afterSumOutCloudy).build();
+			
+			return expected;
+		}
+
+		/**
+		 * Network: Water Sprinkler
+		 * Query: rain()
+		 * Evidence: wet_grass(lot0) = true
+		 * Population size: 100
+		 */
+		@Test
+		public void queryRainGivenWetGrassWithManyLots() {
+			int domainSize = 100;
+			WaterSprinklerNetwork wsn = new WaterSprinklerNetwork(domainSize);
+			wsn.setEvidence(wsn.wetGrass, 0); 
+			wsn.setQuery(wsn.rain);
+			Marginal input = wsn.getMarginal();
+			
+			// Runs AC-FOVE on input marginal
+			ACFOVE acfove = new LoggedACFOVE(input);
+			Parfactor result = acfove.run();
+			Parfactor expected = getResultyRainGivenWetGrassWithManyLots(wsn);
+			
+			// Compares expected with result
+			assertEquals(expected, result);
+		}
+		
+		private Parfactor getResultyRainGivenWetGrassWithManyLots(WaterSprinklerNetwork wsn) {
+			
+			// Splits the marginal on the evidence and the query
+			Parfactor g1 = wsn.cloudyParfactor;
+			Parfactor g2 = wsn.rainParfactor;
+			SplitResult splitSprinkler = wsn.sprinklerParfactor.splitOn(wsn.getLot(0));
+			Parfactor g3 = splitSprinkler.residue().iterator().next();
+			Parfactor g3_0 = splitSprinkler.result();
+			SplitResult splitWetGrass = wsn.wetGrassParfactor.splitOn(wsn.getLot(0));
+			Parfactor g4 = splitWetGrass.residue().iterator().next();
+			Parfactor g4_0 = splitWetGrass.result();
+			Parfactor g5 = wsn.evidenceParfactor;
+			
+			// sum out wet_grass(Lot):{Lot!=lot0}
+			Parfactor afterSumOutWetGrass = g4.sumOut(wsn.wetGrass);
+			
+			// sum out sprinkler(Lot):{Lot!=lot0}
+			Parfactor afterSumOutSprinkler = afterSumOutWetGrass.multiply(g3).sumOut(wsn.sprinkler);
+			
+			// sum out wet_grass(lot0)
+			Prv wetgrass_lot0 = wsn.wetGrass.apply(wsn.getLot(0));
+			Parfactor afterSumOutWetGrassLot0 = g5.multiply(g4_0).sumOut(wetgrass_lot0);
+			
+			// sum out sprinkler(lot0)
+			Prv sprinkler_lot0 = wsn.sprinkler.apply(wsn.getLot(0));
+			Parfactor afterSumOutSprinklerLot0 = afterSumOutWetGrassLot0.multiply(g3_0).sumOut(sprinkler_lot0);
+			
+			// sum out cloudy()
+			Parfactor afterSumOutCloudy = afterSumOutSprinkler
+					.multiply(afterSumOutSprinklerLot0).multiply(g1).multiply(g2)
+					.sumOut(wsn.cloudy);
+			
+			return afterSumOutCloudy;
+		}
+		
+		
+		/**
+		 * Network: Water Sprinkler
+		 * Query: sprinkler(lot0)
+		 * Evidence: wet_grass(lot0) = true
+		 * Population size: 10
+		 */
+		@Test
+		public void querySprinklerGivenWetGrassWithManyLots() {
+
+			int domainSize = 100;
+			WaterSprinklerNetwork wsn = new WaterSprinklerNetwork(domainSize);
+			wsn.setEvidence(wsn.wetGrass, 0); 
+			wsn.setQuery(wsn.sprinkler.apply(wsn.getLot(0)));
+			Marginal input = wsn.getMarginal();
+			
+			// Runs AC-FOVE on input marginal
+			ACFOVE acfove = new LoggedACFOVE(input);
+			Parfactor result = acfove.run();
+			Parfactor expected = getResultSprinklerGivenWetGrassWithManyLots(wsn);
+			
+			// Compares expected with result
+			assertEquals(expected, result);
+		}
+		
+		private Parfactor getResultSprinklerGivenWetGrassWithManyLots(WaterSprinklerNetwork wsn) {
+			
+			// Splits the marginal on the evidence and the query
+			Parfactor g1 = wsn.cloudyParfactor;
+			Parfactor g2 = wsn.rainParfactor;
+			SplitResult splitSprinkler = wsn.sprinklerParfactor.splitOn(wsn.getLot(0));
+			Parfactor g3 = splitSprinkler.residue().iterator().next();
+			Parfactor g3_0 = splitSprinkler.result();
+			SplitResult splitWetGrass = wsn.wetGrassParfactor.splitOn(wsn.getLot(0));
+			Parfactor g4 = splitWetGrass.residue().iterator().next();
+			Parfactor g4_0 = splitWetGrass.result();
+			Parfactor g5 = wsn.evidenceParfactor;
+			
+			// sum out wet_grass(Lot):{Lot!=lot0}
+			Parfactor afterSumOutWetGrass = g4.sumOut(wsn.wetGrass);
+
+			// sum out sprinkler(Lot):{Lot!=lot0}
+			Parfactor afterSumOutSprinkler = afterSumOutWetGrass.multiply(g3).sumOut(wsn.sprinkler);
+			
+			// sum out wet_grass(lot0)
+			Prv wetgrass_lot0 = wsn.wetGrass.apply(wsn.getLot(0));
+			Parfactor afterSumOutWetGrassLot0 = g5.multiply(g4_0).sumOut(wetgrass_lot0);
+			
+			// sum out rain()
+			Parfactor afterSumOutRain = afterSumOutWetGrassLot0
+					.multiply(afterSumOutSprinkler).multiply(g2).sumOut(wsn.rain);
+			
+			// sum out cloudy()
+			Parfactor afterSumOutCloudy = afterSumOutRain.multiply(g1).multiply(g3_0).sumOut(wsn.cloudy);
+			
+			return afterSumOutCloudy;
+		}
+	}
 }

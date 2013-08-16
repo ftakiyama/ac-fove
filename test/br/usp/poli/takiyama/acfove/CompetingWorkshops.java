@@ -32,7 +32,7 @@ public class CompetingWorkshops {
 		
 		// Network initialization
 		int numberOfPeople = 10;
-		int numberOfWorkshops = 1000;
+		int numberOfWorkshops = 10;
 		Example network = Example.competingWorkshopsNetwork(numberOfWorkshops, numberOfPeople);
 		
 		Parfactor gh = network.parfactor("ghot");

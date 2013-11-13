@@ -1,14 +1,21 @@
-AC-FOVE for CRALC
-==========================================================
+AC-FOVE API
+===========
 
-This project intends to implement the AC-FOVE algorithm using the Credal ALC description language.
+What
+----
+This is an implementation of the AC-FOVE algorithm proposed by Kisynski (2010). AC-FOVE stands for Aggregation/Counting First Order Variable Elimination.
 
-The steps I am willing to take to accomplish this are:
+How
+---
+The package is provided as an API (Java) that can be used in other applications. See the [Wiki](https://github.com/ftakiyama/AC-FOVE/wiki) for further details.
 
-- Implement a very basic version of the VE algorithm
+Dependencies
+------------
+The core package does not depend on any external libraries. There are some dependencies if you try to run the test cases:
+- [junit 4.11](https://github.com/junit-team/junit/wiki): testing framework.
+- [hamcrest 1.3](https://code.google.com/p/hamcrest/): matchers used to make tests more readable.
+- [velocity 1.7](http://velocity.apache.org/): templating framework used to build HTML logs.
 
-- Implement the C-FOVE algorithm using CRALC
-
-- Implement the AC_FOVE algorithm using CRALC
-
-It is in a very raw stage right now. Let's hope I can finish this.
+References
+----------
+Kisynski, J. Aggregation and Constraint Processing in Lifted Probabilistic Inference. PhD Thesis. University of British Columbia, 2010.

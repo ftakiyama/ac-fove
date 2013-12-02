@@ -188,6 +188,12 @@ public final class StdLogicalVariable implements LogicalVariable {
 	
 	@Override
 	public Population individualsSatisfying(Set<Constraint> constraints) {
+		
+		// optimization - if there are no constraints there is no need to check
+		if (constraints.isEmpty()) {
+			return this.population;
+		}
+		
 		Population pop = Population.getInstance(this.population);
 		for (Constant individual : population) {
 			Binding bind = Binding.getInstance(this, individual);

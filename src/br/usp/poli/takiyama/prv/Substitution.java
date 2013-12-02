@@ -317,7 +317,7 @@ public final class Substitution {
 	 * specified set of constraints.
 	 * <p>
 	 * A substitution is consistent with a set of constraints when applying
-	 * the former to the latter do generates only valid expressions.
+	 * the former to the latter generates only valid expressions.
 	 * </p>
 	 * 
 	 * @param constraints The set of constraints to test this substitution

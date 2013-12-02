@@ -8,6 +8,7 @@ import java.util.Iterator;
 
 import br.usp.poli.takiyama.common.RandomVariable;
 import br.usp.poli.takiyama.common.IntTuple;
+import br.usp.poli.takiyama.utils.MathUtils;
 
 
 /**
@@ -68,7 +69,7 @@ public class FactorOperation {
 					IntTuple nextTuple = currentTuple.getModifiedTuple(currentRandomVariableIndex, domainCursor);
 					tupleIndex = factor.getTupleIndex(nextTuple);
 					marks[tupleIndex] = 1;
-					sum = sum.add(factor.getTupleValue(tupleIndex));
+					sum = sum.add(factor.getTupleValue(tupleIndex), MathUtils.CONTEXT);
 				}
 				newMapping.add(sum);
 			}
@@ -127,7 +128,7 @@ public class FactorOperation {
 			for(int j = 0; j < secondFactor.size(); j++) {
 				IntTuple t2 = secondFactor.getTuple(j);
 				if (haveSameSubtuple(t1, t2, commonVariablesMapping)) {
-					newMapping.add(firstFactor.getTupleValue(i).multiply(secondFactor.getTupleValue(j)));
+					newMapping.add(firstFactor.getTupleValue(i).multiply(secondFactor.getTupleValue(j), MathUtils.CONTEXT));
 				}
 			}
 		}

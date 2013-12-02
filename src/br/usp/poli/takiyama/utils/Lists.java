@@ -266,7 +266,10 @@ public final class Lists {
 	public static final int hashCode(List<BigDecimal> list) {
 		int result = 1;
 		for (BigDecimal element : list) {
-			result = 31 * result + (element == null ? 0 : element.setScale(50, RoundingMode.HALF_EVEN).hashCode()); // set 15, but this is an arbitrary number
+			// set scale to 15, but this is an arbitrary number
+			//result = 31 * result + (element == null ? 0 : element.setScale(15, RoundingMode.HALF_EVEN).hashCode()); 
+			// Put a math context in every operation, so i should not need to set scale here
+			result = 31 * result + (element == null ? 0 : element.hashCode()); 
 		}
 		return result;
 	}

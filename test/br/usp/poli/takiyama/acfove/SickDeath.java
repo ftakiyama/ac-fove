@@ -15,7 +15,7 @@ import br.usp.poli.takiyama.prv.RandomVariableSet;
 import br.usp.poli.takiyama.utils.Example;
 
 
-public class SickDeath1 {
+public class SickDeath {
 	/**
 	 * Network: sick and death (Braz 2005)
 	 * Query: someDeath

@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.logging.Level;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -26,7 +27,11 @@ public class LoggedACFOVE extends ACFOVE {
 	private final Writer logWriter;
 	
 	public LoggedACFOVE(Marginal parfactors) {
-		super(parfactors);
+		this(parfactors, Level.SEVERE);
+	}
+	
+	public LoggedACFOVE(Marginal parfactors, Level logLevel) {
+		super(parfactors, logLevel);
 		this.engine = new VelocityEngine();
 		this.engine.init();
 		this.context = new VelocityContext();

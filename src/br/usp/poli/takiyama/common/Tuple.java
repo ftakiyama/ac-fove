@@ -10,6 +10,7 @@ import br.usp.poli.takiyama.utils.Lists;
 public final class Tuple<E> implements Iterable<E> {
 	
 	private final List<E> values;
+	private final int size;
 	
 	/* ************************************************************************
 	 *    Constructors
@@ -17,11 +18,13 @@ public final class Tuple<E> implements Iterable<E> {
 
 	private Tuple() {
 		values = new ArrayList<E>(0);
+		size = 0;
 	}
 	
 	
 	private Tuple(List<E> values) {
 		this.values = new ArrayList<E>(values);
+		this.size = values.size();
 	}
 	
 	
@@ -106,11 +109,12 @@ public final class Tuple<E> implements Iterable<E> {
 	 * @return A sub-tuple of this tuple
 	 */
 	public Tuple<E> subTuple(int fromIndex, int toIndex) {
-		List<E> temp = new ArrayList<E>(toIndex - fromIndex);
-		for (int i = fromIndex; i < toIndex; i++) {
-			temp.add(values.get(i));
-		}
-		return Tuple.getInstance(temp);
+//		List<E> temp = new ArrayList<E>(toIndex - fromIndex);
+//		for (int i = fromIndex; i < toIndex; i++) {
+//			temp.add(values.get(i));
+//		}
+//		return Tuple.getInstance(temp);
+		return Tuple.getInstance(values.subList(fromIndex, toIndex));
 	}
 	
 	
@@ -141,7 +145,7 @@ public final class Tuple<E> implements Iterable<E> {
 	 * @return The number of elements in this tuple. 
 	 */
 	public int size() {
-		return values.size();
+		return size;// values.size();
 	}
 	
 	

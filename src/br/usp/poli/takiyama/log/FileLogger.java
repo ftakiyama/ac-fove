@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 public class FileLogger {
 	private static Handler handler;
 	
-	public static void setup() {
+	public static void setup(Level level) {
 		Logger globalLogger = Logger.getLogger("");
 		Handler[] handlers = globalLogger.getHandlers();
 		for(Handler handler : handlers) {
@@ -26,6 +26,6 @@ public class FileLogger {
 		handler.setFormatter(new ConsoleFormatter());
 		
 		globalLogger.addHandler(handler);
-		globalLogger.setLevel(Level.INFO);
+		globalLogger.setLevel(level);
 	}
 }

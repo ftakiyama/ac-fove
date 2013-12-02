@@ -13,6 +13,7 @@ import br.usp.poli.takiyama.common.Factor;
 import br.usp.poli.takiyama.common.StdFactor;
 import br.usp.poli.takiyama.prv.Prv;
 import br.usp.poli.takiyama.utils.Example;
+import br.usp.poli.takiyama.utils.MathUtils;
 
 
 
@@ -65,7 +66,7 @@ public class Temp9 {
 		Factor factorOnR = propositionalized.factor("r ( x0 y0 )");
 		BigDecimal rFalse = factorOnR.getValue(0);
 		
-		BigDecimal eFalse = bFalse.add(rFalse.multiply(bTrue)).pow(domainSize);
+		BigDecimal eFalse = bFalse.add(rFalse.multiply(bTrue, MathUtils.CONTEXT)).pow(domainSize);
 		BigDecimal eTrue  = BigDecimal.ONE.subtract(eFalse);
 		
 		List<BigDecimal> expectedValues = new ArrayList<BigDecimal>(2);

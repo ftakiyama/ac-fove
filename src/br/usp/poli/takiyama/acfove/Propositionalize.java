@@ -128,10 +128,11 @@ public final class Propositionalize implements MacroOperation {
 
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("PROPOSITIONALIZE").append("\n")
-				.append(propositionalizable).append("\n")
-				.append(freeVariable);
-		return builder.toString();
+//		StringBuilder builder = new StringBuilder();
+//		builder.append("PROPOSITIONALIZE").append("\n")
+//				.append(propositionalizable).append("\n")
+//				.append(freeVariable);
+//		return builder.toString();
+		return "";
 	}
 }

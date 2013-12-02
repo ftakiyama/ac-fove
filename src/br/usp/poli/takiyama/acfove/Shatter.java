@@ -151,7 +151,7 @@ public final class Shatter implements MacroOperation {
 	
 	public Shatter(Marginal marginal) {
 		this.marginal = new StdMarginalBuilder().add(marginal).build();
-		ConsoleLogger.setup();
+//		ConsoleLogger.setup();
 	}
 	
 //	@Override

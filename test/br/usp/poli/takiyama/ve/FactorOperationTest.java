@@ -12,6 +12,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import br.usp.poli.takiyama.common.RandomVariable;
+import br.usp.poli.takiyama.utils.MathUtils;
 import br.usp.poli.takiyama.ve.Factor;
 import br.usp.poli.takiyama.ve.FactorOperation;
 
@@ -241,10 +242,10 @@ public class FactorOperationTest {
 		m.add(f1.getTupleValue(3).multiply(f3.getTupleValue(3)));
 		
 		ArrayList<BigDecimal> mSum = new ArrayList<BigDecimal>();
-		mSum.add(m.get(0).add(m.get(4)));
-		mSum.add(m.get(1).add(m.get(5)));
-		mSum.add(m.get(2).add(m.get(6)));
-		mSum.add(m.get(3).add(m.get(7)));
+		mSum.add(m.get(0).add(m.get(4), MathUtils.CONTEXT));
+		mSum.add(m.get(1).add(m.get(5), MathUtils.CONTEXT));
+		mSum.add(m.get(2).add(m.get(6), MathUtils.CONTEXT));
+		mSum.add(m.get(3).add(m.get(7), MathUtils.CONTEXT));
 		
 		Factor correctResult = new Factor("sumOut(x1, f1 * f3)", v, mSum);
 		Factor result = FactorOperation.sumOut(FactorOperation.multiply(factors.get("f1"), factors.get("f3")), randomVariables.get("x1"));

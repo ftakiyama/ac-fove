@@ -3,6 +3,8 @@
  */
 package br.usp.poli.takiyama.acfove;
 
+import java.math.BigInteger;
+
 import br.usp.poli.takiyama.common.Marginal;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.StdMarginal.StdMarginalBuilder;
@@ -134,9 +136,21 @@ public final class FullExpand implements MacroOperation {
 			int domain = getBoundedIndividuals().size();
 			
 			// Finally, the result
-			int resultSize = factor / countingFormula * ((int) Math.pow(prv, domain));
+			//int resultSize = factor / countingFormula * ((int) Math.pow(prv, domain));
+			//cost = resultSize;
 			
-			cost = resultSize;
+			/*
+			 * Here we have a potential overflow problem.
+			 * I calculate the cost and, if it is greater than Double.Infinity,
+			 * set the cost as infinity.
+			 */
+			BigInteger resSize = BigInteger.valueOf(factor / countingFormula).multiply(BigInteger.valueOf(prv).pow(domain));
+			if (resSize.compareTo(BigInteger.valueOf(((int) Double.POSITIVE_INFINITY) - 1)) == -1) {
+				cost = resSize.intValue();
+			} else {
+				cost = ((int) Double.POSITIVE_INFINITY) - 1;
+			}
+			
 		}
 		return cost;
 	}

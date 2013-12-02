@@ -2,6 +2,7 @@ package br.usp.poli.takiyama.utils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +18,11 @@ import java.util.Map;
  *
  */
 public final class MathUtils {
+	
+	public static final MathContext CONTEXT = MathContext.DECIMAL64;
 
+	public static int calls = 0;
+	
 	private MathUtils() { 
 		// avoids instantiation
 	}
@@ -300,7 +305,7 @@ public final class MathUtils {
 		} else if (b.signum() < 0 || sign < 0) {
 			if (p % q == 0) {
 				int exp = p / q;
-				result = b.pow(exp);
+				result = b.pow(exp, CONTEXT);
 			} else {
 				throw new IllegalArgumentException("Operation not defined for"
 						+ " negative numbers.");
@@ -311,14 +316,15 @@ public final class MathUtils {
 			double decPart = ((double) p) / q - intPart;
 			
 			// calculates b^i using BigDecimal.pow()
-			BigDecimal intPow = b.pow(intPart);
+			BigDecimal intPow = b.pow(intPart, CONTEXT);
 			
 			// calculates b^d using Math.pow()
 			double bAsDouble = b.doubleValue();
-			BigDecimal decPow = new BigDecimal(Math.pow(bAsDouble, decPart));
+			BigDecimal decPow = new BigDecimal(Math.pow(bAsDouble, decPart), CONTEXT);
 			
-			result = intPow.multiply(decPow);
+			result = intPow.multiply(decPow, CONTEXT);
 		}
+		calls++;
 		return result;
 	}
 }

@@ -16,6 +16,7 @@ import br.usp.poli.takiyama.prv.Or;
 import br.usp.poli.takiyama.prv.Prv;
 import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.StdPrv;
+import br.usp.poli.takiyama.utils.MathUtils;
 import br.usp.poli.takiyama.utils.TestUtils;
 
 
@@ -61,7 +62,7 @@ public class Temp3 {
 		BigDecimal vFalse = BigDecimal.valueOf(0.28).pow(domainSize);
 		BigDecimal vTrue = BigDecimal.ONE.subtract(vFalse);
 		for (int n = domainSize; n >= 0; n--) {
-			fexp.add(vFalse.pow(n).multiply(vTrue.pow(domainSize - n)));
+			fexp.add(vFalse.pow(n).multiply(vTrue.pow(domainSize - n), MathUtils.CONTEXT));
 		}
 		Parfactor expected = new StdParfactorBuilder().variables(ex).values(fexp).build();
 		

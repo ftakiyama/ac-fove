@@ -15,6 +15,7 @@ import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.StdPrv;
 import br.usp.poli.takiyama.prv.Term;
 import br.usp.poli.takiyama.utils.Lists;
+import br.usp.poli.takiyama.utils.MathUtils;
 
 
 public class FactorTest {
@@ -66,8 +67,8 @@ public class FactorTest {
 		ansVars.add(g);
 		
 		List<BigDecimal> ansVals = new ArrayList<BigDecimal>(2);
-		ansVals.add(new BigDecimal(0.1).add(new BigDecimal(0.3)));
-		ansVals.add(new BigDecimal(0.2).add(new BigDecimal(0.4)));
+		ansVals.add(new BigDecimal(0.1).add(new BigDecimal(0.3), MathUtils.CONTEXT));
+		ansVals.add(new BigDecimal(0.2).add(new BigDecimal(0.4), MathUtils.CONTEXT));
 		
 		Factor answer = StdFactor.getInstance("F", ansVars, ansVals);
 		
@@ -122,8 +123,8 @@ public class FactorTest {
 		ansVars.add(f);
 		
 		List<BigDecimal> ansVals = new ArrayList<BigDecimal>(2);
-		ansVals.add(new BigDecimal(0.1).add(new BigDecimal(0.2)));
-		ansVals.add(new BigDecimal(0.3).add(new BigDecimal(0.4)));
+		ansVals.add(new BigDecimal(0.1).add(new BigDecimal(0.2), MathUtils.CONTEXT));
+		ansVals.add(new BigDecimal(0.3).add(new BigDecimal(0.4), MathUtils.CONTEXT));
 		
 		Factor answer = StdFactor.getInstance("F", ansVars, ansVals);
 		
@@ -455,10 +456,10 @@ public class FactorTest {
 		ansVars.add(h);
 		
 		List<BigDecimal> ansVals = new ArrayList<BigDecimal>(4);
-		ansVals.add(new BigDecimal(0.1).multiply(new BigDecimal(0.1)));
-		ansVals.add(new BigDecimal(0.1).multiply(new BigDecimal(0.2)));
-		ansVals.add(new BigDecimal(0.2).multiply(new BigDecimal(0.3)));
-		ansVals.add(new BigDecimal(0.2).multiply(new BigDecimal(0.4)));
+		ansVals.add(new BigDecimal(0.1).multiply(new BigDecimal(0.1), MathUtils.CONTEXT));
+		ansVals.add(new BigDecimal(0.1).multiply(new BigDecimal(0.2), MathUtils.CONTEXT));
+		ansVals.add(new BigDecimal(0.2).multiply(new BigDecimal(0.3), MathUtils.CONTEXT));
+		ansVals.add(new BigDecimal(0.2).multiply(new BigDecimal(0.4), MathUtils.CONTEXT));
 		
 		Factor answer = StdFactor.getInstance("F", ansVars, ansVals);
 		

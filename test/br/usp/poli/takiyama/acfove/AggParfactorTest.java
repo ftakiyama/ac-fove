@@ -248,8 +248,8 @@ public class AggParfactorTest {
 			Parfactor result = g2.multiply(g1);
 			
 			List<BigDecimal> f3 = new ArrayList<BigDecimal>(2);
-			f3.add(BigDecimal.valueOf(f1[0]).multiply(BigDecimal.valueOf(f2[0])));
-			f3.add(BigDecimal.valueOf(f1[1]).multiply(BigDecimal.valueOf(f2[1])));
+			f3.add(BigDecimal.valueOf(f1[0]).multiply(BigDecimal.valueOf(f2[0]), MathUtils.CONTEXT));
+			f3.add(BigDecimal.valueOf(f1[1]).multiply(BigDecimal.valueOf(f2[1]), MathUtils.CONTEXT));
 			
 			Parfactor answer = new AggParfactorBuilder(p, c, Or.OR)
 					.constraints(a_x1, a_x2, a_b, b_x3).values(f3).build();
@@ -351,7 +351,7 @@ public class AggParfactorTest {
 			List<BigDecimal> fr = new ArrayList<BigDecimal>(size);
 			for (int i = 0; i < size; i++) {
 				fpv.add(BigDecimal.valueOf(i / 10.0));
-				fr.add(fpv.get(i).multiply(fpv.get(i)));
+				fr.add(fpv.get(i).multiply(fpv.get(i), MathUtils.CONTEXT));
 			}
 			Parfactor g1 = new StdParfactorBuilder().constraints(a_x2, b_x1).variables(p, v, u).values(fpv).build();
 			Parfactor ga = new AggParfactorBuilder(p, c, Or.OR).constraints(a_x2, b_x1).context(v, u).values(fpv).build();
@@ -384,19 +384,19 @@ public class AggParfactorTest {
 			f0[0] = BigDecimal.valueOf(fSum[0]);
 			f0[1] = BigDecimal.valueOf(fSum[1]);
 			
-			f1[0] = f0[0].multiply(f0[0]);
-			f1[1] = f0[0].multiply(f0[1]).add(f0[1].multiply(f0[0])).add(f0[1].multiply(f0[1]));
+			f1[0] = f0[0].multiply(f0[0], MathUtils.CONTEXT);
+			f1[1] = f0[0].multiply(f0[1], MathUtils.CONTEXT).add(f0[1].multiply(f0[0], MathUtils.CONTEXT), MathUtils.CONTEXT).add(f0[1].multiply(f0[1], MathUtils.CONTEXT), MathUtils.CONTEXT);
 			
-			f2[0] = BigDecimal.valueOf(fSum[0]).multiply(f1[0]).multiply(f1[0]);
+			f2[0] = BigDecimal.valueOf(fSum[0]).multiply(f1[0], MathUtils.CONTEXT).multiply(f1[0], MathUtils.CONTEXT);
 			
 			
-			f2[1] = BigDecimal.valueOf(fSum[0]).multiply(f1[0]).multiply(f1[1])
-					.add(BigDecimal.valueOf(fSum[0]).multiply(f1[1]).multiply(f1[0]))
-					.add(BigDecimal.valueOf(fSum[0]).multiply(f1[1]).multiply(f1[1]))
-					.add(BigDecimal.valueOf(fSum[1]).multiply(f1[0]).multiply(f1[0]))
-					.add(BigDecimal.valueOf(fSum[1]).multiply(f1[0]).multiply(f1[1]))
-					.add(BigDecimal.valueOf(fSum[1]).multiply(f1[1]).multiply(f1[0]))
-					.add(BigDecimal.valueOf(fSum[1]).multiply(f1[1]).multiply(f1[1]));
+			f2[1] = BigDecimal.valueOf(fSum[0]).multiply(f1[0], MathUtils.CONTEXT).multiply(f1[1], MathUtils.CONTEXT)
+					.add(BigDecimal.valueOf(fSum[0]).multiply(f1[1], MathUtils.CONTEXT).multiply(f1[0], MathUtils.CONTEXT), MathUtils.CONTEXT)
+					.add(BigDecimal.valueOf(fSum[0]).multiply(f1[1], MathUtils.CONTEXT).multiply(f1[1], MathUtils.CONTEXT), MathUtils.CONTEXT)
+					.add(BigDecimal.valueOf(fSum[1]).multiply(f1[0], MathUtils.CONTEXT).multiply(f1[0], MathUtils.CONTEXT), MathUtils.CONTEXT)
+					.add(BigDecimal.valueOf(fSum[1]).multiply(f1[0], MathUtils.CONTEXT).multiply(f1[1], MathUtils.CONTEXT), MathUtils.CONTEXT)
+					.add(BigDecimal.valueOf(fSum[1]).multiply(f1[1], MathUtils.CONTEXT).multiply(f1[0], MathUtils.CONTEXT), MathUtils.CONTEXT)
+					.add(BigDecimal.valueOf(fSum[1]).multiply(f1[1], MathUtils.CONTEXT).multiply(f1[1], MathUtils.CONTEXT), MathUtils.CONTEXT);
 			
 			Parfactor expected = new StdParfactorBuilder().variables(jackpotWon).values(f2).build();
 			

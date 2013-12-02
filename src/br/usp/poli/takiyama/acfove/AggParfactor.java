@@ -751,7 +751,7 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 				for (RangeElement z : childRange) {
 					Tuple<RangeElement> zTuple = x.set(childIndex, z);
 					if (apply(parfactor.operator(), y, z).equals(childValue)) {
-						sum = sum.add(factor.getValue(yTuple).multiply(factor.getValue(zTuple)));
+						sum = sum.add(factor.getValue(yTuple).multiply(factor.getValue(zTuple), MathUtils.CONTEXT), MathUtils.CONTEXT);
 					}
 				}
 			}
@@ -773,7 +773,7 @@ public class AggParfactor implements AggregationParfactor, VisitableParfactor {
 							BigDecimal fw = parfactor.factor().getValue(wTuple);
 							BigDecimal fy = factor.getValue(yTuple);
 							BigDecimal fz = factor.getValue(zTuple);
-							sum = sum.add(fw.multiply(fy).multiply(fz));
+							sum = sum.add(fw.multiply(fy, MathUtils.CONTEXT).multiply(fz, MathUtils.CONTEXT), MathUtils.CONTEXT);
 						}
 					}
 				}

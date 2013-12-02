@@ -9,7 +9,11 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import br.usp.poli.takiyama.acfove.AggParfactor;
 import br.usp.poli.takiyama.acfove.AggParfactor.AggParfactorBuilder;
+import br.usp.poli.takiyama.acfove.ConvertToStdParfactors;
+import br.usp.poli.takiyama.acfove.MacroOperation;
+import br.usp.poli.takiyama.acfove.Propositionalize;
 import br.usp.poli.takiyama.cfove.StdParfactor.StdParfactorBuilder;
 import br.usp.poli.takiyama.common.Factor;
 import br.usp.poli.takiyama.common.Marginal;
@@ -172,10 +176,10 @@ public class Example {
 		List<BigDecimal> fexp = new ArrayList<BigDecimal>();
 		
 		// populates fexp
-		BigDecimal vFalse = BigDecimal.valueOf(0.28).pow(domainSize);
-		BigDecimal vTrue = BigDecimal.ONE.subtract(vFalse);
+		BigDecimal vFalse = BigDecimal.valueOf(0.28).pow(domainSize, MathUtils.CONTEXT);
+		BigDecimal vTrue = BigDecimal.ONE.subtract(vFalse, MathUtils.CONTEXT);
 		for (int n = domainSize; n >= 0; n--) {
-			fexp.add(vFalse.pow(n).multiply(vTrue.pow(domainSize - n)));
+			fexp.add(vFalse.pow(n, MathUtils.CONTEXT).multiply(vTrue.pow(domainSize - n, MathUtils.CONTEXT), MathUtils.CONTEXT));
 		}
 		
 		Parfactor g1 = new StdParfactorBuilder().variables(b).values(fb).build();
@@ -612,5 +616,74 @@ public class Example {
 		network.putParfactor("gsuccess", g3);
 		
 		return network;
+	}
+	
+	/**
+	 * Returns a marginal containing all parfactors in this network and the 
+	 * specified query.
+	 * @param query The query in the marginal
+	 * @return A marginal containing all parfactors in this network and the 
+	 * specified query.
+	 */
+	public Marginal getMarginal(RandomVariableSet query) {
+		Set<Parfactor> parfactors = new HashSet<Parfactor>(this.parfactor.values());
+		return new StdMarginalBuilder().parfactors(parfactors).preservable(query).build();
+	}
+	
+	/**
+	 * Returns the specified network completely propositionalized. The resulting
+	 * network can be used with VE algorithms.
+	 * <p>
+	 * The resulting network will not have logical variables and factors (space
+	 * constraint).
+	 * </p>
+	 * 
+	 * @param network The network to propositionalize.
+	 * @return the specified network completely propositionalized.
+	 */
+	public Marginal propositionalizeAll(Marginal marginal) {
+		
+		Set<LogicalVariable> logicalVariables = new HashSet<LogicalVariable>();
+		
+		// get all logical variables and builds list of parfactors
+		for (Parfactor parfactor : marginal) {
+			logicalVariables.addAll(parfactor.logicalVariables());
+		}
+		
+		// Auxiliary set of parfactors
+		Set<Parfactor> parfactors = marginal.distribution().toSet();
+		
+		for (LogicalVariable lv : logicalVariables) {
+			// propositionalizes all parfactors in the set containing the current logical variable
+			for (Parfactor parfactor : parfactors) {
+				if (parfactor.logicalVariables().contains(lv)) {
+					MacroOperation propositionalize = new Propositionalize(marginal, parfactor, lv);
+					marginal = propositionalize.run();
+				}
+			}
+			// updates the set of parfactors
+			parfactors = marginal.distribution().toSet();
+		}
+		
+		return marginal;
+	}
+	
+	/**
+	 * Returns the specified network with aggregation parfactors converted to
+	 * standard parfactors. The resulting network can be used with the C-FOVE
+	 * algorithm. 
+	 * 
+	 * @param network The network where aggregation parfactors will be converted
+	 * @return The specified network with aggregation parfactors converted to
+	 * standard parfactors. 
+	 */
+	public Marginal removeAggregation(Marginal marginal) {
+		for (Parfactor parfactor : marginal) {
+			if (parfactor instanceof AggParfactor) {
+				MacroOperation convert = new ConvertToStdParfactors(marginal, parfactor);
+				marginal = convert.run();
+			}
+		}
+		return marginal;
 	}
 }

@@ -252,6 +252,7 @@ public class Temp {
 	}
 	
 	@Test
+	@Ignore
 	public void testSumOut1() {
 		
 		int n = 2;
@@ -274,5 +275,30 @@ public class Temp {
 		result = result.multiply(gb);
 		
 		System.out.print(result);
+	}
+	
+	@Test
+	@Ignore
+	public void testIncrement() {
+		for (int i = 1; i < 10001; i = i + inc2(i)) {
+			System.out.println(i);
+		}
+	}
+	
+	private int inc(int i) {
+		int e = (int) Math.log10(i);
+		int r = (int) Math.pow(10.0, (double) e);
+		return r;
+	}
+	
+	private int inc2(int i) {
+		int r = (int) Math.pow(10.0, (int) Math.log10(i));
+		return r;
+	}
+	
+	@Test
+	public void smallMath() {
+		System.out.println(500*1073741824);
+		//System.out.println(  ((int) Math.pow(2, 30)));
 	}
 }

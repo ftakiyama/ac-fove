@@ -1,8 +1,6 @@
 package br.usp.poli.takiyama.acfove;
 
-import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -12,7 +10,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
@@ -22,7 +19,9 @@ import org.junit.runners.Parameterized.Parameters;
 
 import br.usp.poli.takiyama.acfove.AggParfactor.AggParfactorBuilder;
 import br.usp.poli.takiyama.cfove.StdParfactor.StdParfactorBuilder;
+import br.usp.poli.takiyama.common.AggregationParfactor;
 import br.usp.poli.takiyama.common.Constraint;
+import br.usp.poli.takiyama.common.Distribution;
 import br.usp.poli.takiyama.common.Factor;
 import br.usp.poli.takiyama.common.InequalityConstraint;
 import br.usp.poli.takiyama.common.InputOutput;
@@ -31,20 +30,14 @@ import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.SplitResult;
 import br.usp.poli.takiyama.common.StdFactor;
 import br.usp.poli.takiyama.common.StdMarginal.StdMarginalBuilder;
-import br.usp.poli.takiyama.common.Tuple;
-import br.usp.poli.takiyama.prv.Binding;
-import br.usp.poli.takiyama.prv.Bool;
 import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.CountingFormula;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.Or;
 import br.usp.poli.takiyama.prv.Prv;
 import br.usp.poli.takiyama.prv.RandomVariableSet;
-import br.usp.poli.takiyama.prv.RangeElement;
 import br.usp.poli.takiyama.prv.StdLogicalVariable;
 import br.usp.poli.takiyama.prv.StdPrv;
-import br.usp.poli.takiyama.prv.Substitution;
-import br.usp.poli.takiyama.prv.Term;
 import br.usp.poli.takiyama.samples.WaterSprinklerNetwork;
 import br.usp.poli.takiyama.utils.Example;
 import br.usp.poli.takiyama.utils.Lists;
@@ -102,41 +95,41 @@ public class ACFOVETest {
 			
 			List<BigDecimal> f2xf3 = new ArrayList<BigDecimal>(8);
 			for (int i = 0; i < 8; i++) {
-				f2xf3.add(f2.get((i / 2) % 2).multiply(f3.get(i)));
+				f2xf3.add(f2.get((i / 2) % 2).multiply(f3.get(i), MathUtils.CONTEXT));
 			}
 			
 			List<BigDecimal> f5 = new ArrayList<BigDecimal>(4);
-			f5.add(f2xf3.get(0).add(f2xf3.get(2)));
-			f5.add(f2xf3.get(1).add(f2xf3.get(3)));
-			f5.add(f2xf3.get(4).add(f2xf3.get(6)));
-			f5.add(f2xf3.get(5).add(f2xf3.get(7)));
+			f5.add(f2xf3.get(0).add(f2xf3.get(2), MathUtils.CONTEXT));
+			f5.add(f2xf3.get(1).add(f2xf3.get(3), MathUtils.CONTEXT));
+			f5.add(f2xf3.get(4).add(f2xf3.get(6), MathUtils.CONTEXT));
+			f5.add(f2xf3.get(5).add(f2xf3.get(7), MathUtils.CONTEXT));
 			
 			List<BigDecimal> f4xf5 = new ArrayList<BigDecimal>(4);
 			for (int i = 0; i < 4; i++) {
-				f4xf5.add(f4.get(i % 2).multiply(f5.get(i)));
+				f4xf5.add(f4.get(i % 2).multiply(f5.get(i), MathUtils.CONTEXT));
 			}
 			
 			List<BigDecimal> f6 = new ArrayList<BigDecimal>(2);
-			f6.add(f4xf5.get(0).add(f4xf5.get(1)));
-			f6.add(f4xf5.get(2).add(f4xf5.get(3)));
+			f6.add(f4xf5.get(0).add(f4xf5.get(1), MathUtils.CONTEXT));
+			f6.add(f4xf5.get(2).add(f4xf5.get(3), MathUtils.CONTEXT));
 			
 			int n = populationSize;
 			List<BigDecimal> f7 = new ArrayList<BigDecimal>(2 * n);
 			for (int i = 0; i < n; i++) {
-				f7.add(MathUtils.pow(f5.get(0), n - i - 1, 1).multiply(MathUtils.pow(f5.get(1), i, 1)));
+				f7.add(MathUtils.pow(f5.get(0), n - i - 1, 1).multiply(MathUtils.pow(f5.get(1), i, 1), MathUtils.CONTEXT));
 			}
 			for (int i = 0; i < n; i++) {
-				f7.add(MathUtils.pow(f5.get(2), n - i - 1, 1).multiply(MathUtils.pow(f5.get(3), i, 1)));
+				f7.add(MathUtils.pow(f5.get(2), n - i - 1, 1).multiply(MathUtils.pow(f5.get(3), i, 1), MathUtils.CONTEXT));
 			}
 			
 			List<BigDecimal> f1xf6xf7 = new ArrayList<BigDecimal>(2 * n);
 			for (int i = 0; i < 2 * n; i++) {
-				f1xf6xf7.add(f1.get(i / n).multiply(f6.get(i / n).multiply(f7.get(i))));
+				f1xf6xf7.add(f1.get(i / n).multiply(f6.get(i / n).multiply(f7.get(i), MathUtils.CONTEXT), MathUtils.CONTEXT));
 			}
 			
 			List<BigDecimal> f8 = new ArrayList<BigDecimal>(n);
 			for (int i = 0; i < n; i++) {
-				f8.add(f1xf6xf7.get(i).add(f1xf6xf7.get(n + i)));
+				f8.add(f1xf6xf7.get(i).add(f1xf6xf7.get(n + i), MathUtils.CONTEXT));
 			}
 			
 			/**
@@ -154,23 +147,23 @@ public class ACFOVETest {
 			
 			List<BigDecimal> f3xf4 = new ArrayList<BigDecimal>(8);
 			for (int i = 0; i < 8; i++) {
-				f3xf4.add(f4.get(i % 2).multiply(f3.get(i)));
+				f3xf4.add(f4.get(i % 2).multiply(f3.get(i), MathUtils.CONTEXT));
 			}
 			
-			f3xf4.add(f4.get(0).multiply(f3.get(0)));
-			f3xf4.add(f4.get(0).multiply(f3.get(1)));
-			f3xf4.add(f4.get(1).multiply(f3.get(2)));
-			f3xf4.add(f4.get(1).multiply(f3.get(3)));
-			f3xf4.add(f4.get(0).multiply(f3.get(4)));
-			f3xf4.add(f4.get(0).multiply(f3.get(5)));
-			f3xf4.add(f4.get(1).multiply(f3.get(6)));
-			f3xf4.add(f4.get(1).multiply(f3.get(7)));
+			f3xf4.add(f4.get(0).multiply(f3.get(0), MathUtils.CONTEXT));
+			f3xf4.add(f4.get(0).multiply(f3.get(1), MathUtils.CONTEXT));
+			f3xf4.add(f4.get(1).multiply(f3.get(2), MathUtils.CONTEXT));
+			f3xf4.add(f4.get(1).multiply(f3.get(3), MathUtils.CONTEXT));
+			f3xf4.add(f4.get(0).multiply(f3.get(4), MathUtils.CONTEXT));
+			f3xf4.add(f4.get(0).multiply(f3.get(5), MathUtils.CONTEXT));
+			f3xf4.add(f4.get(1).multiply(f3.get(6), MathUtils.CONTEXT));
+			f3xf4.add(f4.get(1).multiply(f3.get(7), MathUtils.CONTEXT));
 			
 			List<BigDecimal> f5alt = new ArrayList<BigDecimal>(4);
-			f5alt.add(f3xf4.get(0).add(f3xf4.get(1)));
-			f5alt.add(f3xf4.get(2).add(f3xf4.get(3)));
-			f5alt.add(f3xf4.get(4).add(f3xf4.get(5)));
-			f5alt.add(f3xf4.get(6).add(f3xf4.get(7)));
+			f5alt.add(f3xf4.get(0).add(f3xf4.get(1), MathUtils.CONTEXT));
+			f5alt.add(f3xf4.get(2).add(f3xf4.get(3), MathUtils.CONTEXT));
+			f5alt.add(f3xf4.get(4).add(f3xf4.get(5), MathUtils.CONTEXT));
+			f5alt.add(f3xf4.get(6).add(f3xf4.get(7), MathUtils.CONTEXT));
 						
 			Parfactor g1 = new StdParfactorBuilder().variables(rain).values(f1).build();
 			Parfactor g2 = new StdParfactorBuilder().variables(sprinkler).values(f2).build();
@@ -285,41 +278,41 @@ public class ACFOVETest {
 			
 			List<BigDecimal> f2xf3 = new ArrayList<BigDecimal>(8);
 			for (int i = 0; i < 8; i++) {
-				f2xf3.add(f2.get((i / 2) % 2).multiply(f3.get(i)));
+				f2xf3.add(f2.get((i / 2) % 2).multiply(f3.get(i), MathUtils.CONTEXT));
 			}
 			
 			List<BigDecimal> f5 = new ArrayList<BigDecimal>(4);
-			f5.add(f2xf3.get(0).add(f2xf3.get(2)));
-			f5.add(f2xf3.get(1).add(f2xf3.get(3)));
-			f5.add(f2xf3.get(4).add(f2xf3.get(6)));
-			f5.add(f2xf3.get(5).add(f2xf3.get(7)));
+			f5.add(f2xf3.get(0).add(f2xf3.get(2), MathUtils.CONTEXT));
+			f5.add(f2xf3.get(1).add(f2xf3.get(3), MathUtils.CONTEXT));
+			f5.add(f2xf3.get(4).add(f2xf3.get(6), MathUtils.CONTEXT));
+			f5.add(f2xf3.get(5).add(f2xf3.get(7), MathUtils.CONTEXT));
 			
 			List<BigDecimal> f4xf5 = new ArrayList<BigDecimal>(4);
 			for (int i = 0; i < 4; i++) {
-				f4xf5.add(f4.get(i % 2).multiply(f5.get(i)));
+				f4xf5.add(f4.get(i % 2).multiply(f5.get(i), MathUtils.CONTEXT));
 			}
 			
 			List<BigDecimal> f6 = new ArrayList<BigDecimal>(2);
-			f6.add(f4xf5.get(0).add(f4xf5.get(1)));
-			f6.add(f4xf5.get(2).add(f4xf5.get(3)));
+			f6.add(f4xf5.get(0).add(f4xf5.get(1), MathUtils.CONTEXT));
+			f6.add(f4xf5.get(2).add(f4xf5.get(3), MathUtils.CONTEXT));
 			
 			int n = populationSize;
 			List<BigDecimal> f7 = new ArrayList<BigDecimal>(2 * n);
 			for (int i = 0; i < n; i++) {
-				f7.add(MathUtils.pow(f5.get(0), n - i - 1, 1).multiply(MathUtils.pow(f5.get(1), i, 1)));
+				f7.add(MathUtils.pow(f5.get(0), n - i - 1, 1).multiply(MathUtils.pow(f5.get(1), i, 1), MathUtils.CONTEXT));
 			}
 			for (int i = 0; i < n; i++) {
-				f7.add(MathUtils.pow(f5.get(2), n - i - 1, 1).multiply(MathUtils.pow(f5.get(3), i, 1)));
+				f7.add(MathUtils.pow(f5.get(2), n - i - 1, 1).multiply(MathUtils.pow(f5.get(3), i, 1), MathUtils.CONTEXT));
 			}
 			
 			List<BigDecimal> f1xf6xf7 = new ArrayList<BigDecimal>(2 * n);
 			for (int i = 0; i < 2 * n; i++) {
-				f1xf6xf7.add(f1.get(i / n).multiply(f6.get(i / n).multiply(f7.get(i))));
+				f1xf6xf7.add(f1.get(i / n).multiply(f6.get(i / n).multiply(f7.get(i), MathUtils.CONTEXT), MathUtils.CONTEXT));
 			}
 			
 			List<BigDecimal> f8 = new ArrayList<BigDecimal>(n);
 			for (int i = 0; i < n; i++) {
-				f8.add(f1xf6xf7.get(i).add(f1xf6xf7.get(n + i)));
+				f8.add(f1xf6xf7.get(i).add(f1xf6xf7.get(n + i), MathUtils.CONTEXT));
 			}
 						
 			Parfactor g1 = new StdParfactorBuilder().variables(rain).values(f1).build();
@@ -364,14 +357,14 @@ public class ACFOVETest {
 			
 			List<BigDecimal> fPlayedxfMatched6 = new ArrayList<BigDecimal>(8);
 			for (int i = 0; i < 8; i++) {
-				fPlayedxfMatched6.add(fPlayed.get(i / 2).multiply(fMatched6.get(i % 4)));
+				fPlayedxfMatched6.add(fPlayed.get(i / 2).multiply(fMatched6.get(i % 4), MathUtils.CONTEXT));
 			}
 			
 			List<BigDecimal> fMatched6Prime = new ArrayList<BigDecimal>(4);
-			fMatched6Prime.add(fPlayedxfMatched6.get(0).add(fPlayedxfMatched6.get(2)));
-			fMatched6Prime.add(fPlayedxfMatched6.get(1).add(fPlayedxfMatched6.get(3)));
-			fMatched6Prime.add(fPlayedxfMatched6.get(4).add(fPlayedxfMatched6.get(6)));
-			fMatched6Prime.add(fPlayedxfMatched6.get(5).add(fPlayedxfMatched6.get(7)));
+			fMatched6Prime.add(fPlayedxfMatched6.get(0).add(fPlayedxfMatched6.get(2), MathUtils.CONTEXT));
+			fMatched6Prime.add(fPlayedxfMatched6.get(1).add(fPlayedxfMatched6.get(3), MathUtils.CONTEXT));
+			fMatched6Prime.add(fPlayedxfMatched6.get(4).add(fPlayedxfMatched6.get(6), MathUtils.CONTEXT));
+			fMatched6Prime.add(fPlayedxfMatched6.get(5).add(fPlayedxfMatched6.get(7), MathUtils.CONTEXT));
 			
 			double [] fJackpotWon = {
 					0.9999999825,
@@ -470,13 +463,13 @@ public class ACFOVETest {
 						0.0000000105);
 				
 				// 0.8 * 0.9999999965^n + 0.2 * 0.9999999895^n
-				BigDecimal r0 = fBigJackpot.get(0).multiply(MathUtils.pow(temp.get(0), n, 1)).add(fBigJackpot.get(1).multiply(MathUtils.pow(temp.get(2), n, 1)));
+				BigDecimal r0 = fBigJackpot.get(0).multiply(MathUtils.pow(temp.get(0), n, 1), MathUtils.CONTEXT).add(fBigJackpot.get(1).multiply(MathUtils.pow(temp.get(2), n, 1), MathUtils.CONTEXT), MathUtils.CONTEXT);
 				
 				// expression is too complicated to put in one line >8O
 				//BigDecimal r1 = fBigJackpot.get(0).multiply(getSum(temp.get(0), temp.get(1), n)).add(fBigJackpot.get(1).multiply(getSum(temp.get(2), temp.get(3), n)));
 				
 				// Hey, this is much easier:
-				BigDecimal r1 = BigDecimal.ONE.subtract(r0);
+				BigDecimal r1 = BigDecimal.ONE.subtract(r0, MathUtils.CONTEXT);
 				
 				List<BigDecimal> fResult = Lists.listOf(r0, r1);
 				
@@ -503,7 +496,7 @@ public class ACFOVETest {
 		private static BigDecimal getSum(BigDecimal a0, BigDecimal a1, int n) {
 			BigDecimal result = BigDecimal.ZERO;
 			for (int i = 1; i <= n; i++) {
-				result = result.add(MathUtils.pow(a0, n - i, 1).multiply(MathUtils.pow(a1, i, 1)));
+				result = result.add(MathUtils.pow(a0, n - i, 1).multiply(MathUtils.pow(a1, i, 1), MathUtils.CONTEXT), MathUtils.CONTEXT);
 			}
 			return result;
 		}
@@ -1248,4 +1241,124 @@ public class ACFOVETest {
 			return afterSumOutCloudy;
 		}
 	}
+
+	/**
+	 * Test using the competing workshop network.
+	 * @see Example#competingWorkshopsNetwork(int, int)
+	 */
+	public static class CompetingWorkshops {
+		/**
+		 * Network: competing workshops (Milch 2008)
+		 * Query: success
+		 * Evidence: none
+		 * Population size: 10 workshops, 1000 people
+		 * 
+		 */
+		@Test
+		public void querySomeDeath() {
+			
+			// Network initialization
+			int numberOfPeople = 10;
+			int numberOfWorkshops = 10;
+			Example network = Example.competingWorkshopsNetwork(numberOfWorkshops, numberOfPeople);
+			
+			Parfactor gh = network.parfactor("ghot");
+			Parfactor ga = network.parfactor("gattends");
+			Parfactor gs = network.parfactor("gsuccess");
+
+			// Query
+			Prv success = network.prv("success ( )");
+			RandomVariableSet query = RandomVariableSet.getInstance(success, new HashSet<Constraint>(0));
+			
+			// Input marginal
+			Marginal input = new StdMarginalBuilder(5).parfactors(gh, ga, gs).preservable(query).build();
+
+			// Runs AC-FOVE on input marginal
+			ACFOVE acfove = new LoggedACFOVE(input);
+			Parfactor result = acfove.run();
+			
+			// Calculates the correct result
+			
+			// Sum out hot
+			Prv hot = network.prv("hot ( Workshop )");
+			Parfactor afterSumOutHot = gh.multiply(ga).sumOut(hot);
+			
+			// Converts aggregation parfactor to standard parfactors
+			Distribution converted = ((AggregationParfactor) gs).toStdParfactors();
+			
+			// Gets the converted parfactor that contains the counting formula
+			Prv attends = network.prv("attends ( Person )");
+			for (Parfactor p : converted) {
+				if (!p.contains(attends)) {
+					gs = p;
+				}
+			}
+			
+			// Sum out attends
+			LogicalVariable person = network.lv("Person");
+			attends = CountingFormula.getInstance(person, attends);
+			Parfactor afterSumOutAttends = afterSumOutHot.multiply(gs).sumOut(attends);
+			
+			Parfactor expected = afterSumOutAttends;
+			
+			// Compares expected with result
+			assertEquals(expected, result);
+		}
+	}
+
+	/**
+	 * Test using the sick and death network.
+	 * @see Example#sickDeathNetwork(int)
+	 */
+	public static class SickDeath {
+		/**
+		 * Network: sick and death (Braz 2005)
+		 * Query: someDeath
+		 * Evidence: none
+		 * Population size: 10
+		 */
+		@Test
+		public void querySomeDeath() {
+			
+			// Network initialization
+			int domainSize = 10;
+			Example network = Example.sickDeathNetwork(domainSize);
+			
+			Parfactor ge = network.parfactor("gepidemic");
+			Parfactor gs = network.parfactor("gsick");
+			Parfactor gd = network.parfactor("gdeath");
+			Parfactor gsd = network.parfactor("gsomedeath");
+
+			// Query
+			Prv someDeath = network.prv("someDeath ( )");
+			RandomVariableSet query = RandomVariableSet.getInstance(someDeath, new HashSet<Constraint>(0));
+			
+			// Input marginal
+			Marginal input = new StdMarginalBuilder(5).parfactors(ge, gs, gd, gsd).preservable(query).build();
+
+			// Runs AC-FOVE on input marginal
+			ACFOVE acfove = new LoggedACFOVE(input);
+			Parfactor result = acfove.run();
+			
+			// Calculates the correct result
+			
+			// Sum out sick
+			Prv sick = network.prv("sick ( Person )");
+			Parfactor afterSumOutSick = gs.multiply(gd).sumOut(sick);
+			
+			// Sum out death
+			Prv death = network.prv("death ( Person )");
+			Parfactor afterSumOutDeath = afterSumOutSick.multiply(gsd).sumOut(death);
+			
+			// Sum out epidemic
+			Prv epidemic = network.prv("epidemic ( )");
+			Parfactor afterSumOutEpidemic = afterSumOutDeath.multiply(ge).sumOut(epidemic);
+			
+			Parfactor expected = afterSumOutEpidemic;
+			
+			// Compares expected with result
+			assertEquals(expected, result);
+		}
+	}
+	
 }

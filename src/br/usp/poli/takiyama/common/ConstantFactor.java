@@ -337,50 +337,51 @@ public class ConstantFactor implements Factor {
 	@Override
 	public String toString() {
 		
-		StringBuilder result = new StringBuilder();
-		
-		if (this.variables.isEmpty()) {
-			return "Empty factor";
-		}
-		
-		String thinRule = "";
-		String thickRule = "";
-		String cellFormat = "%-10s"; //TODO: change to something more dynamic
-		String valueCellFormat = "%-10s\n";
-		
-		// Create the rules - aesthetic
-		for (int i = 0; i <= this.variables.size(); i++) {
-			thinRule += String.format(cellFormat, "").replace(" ", "-");
-		}
-		thickRule = thinRule.replace("-", "=");
-		
-		// Top rule
-		result.append(thickRule).append("\n");
-		
-		// Print the variables names
-		for (Prv prv : variables) {
-			result.append(String.format(cellFormat, prv.toString())); 
-		}
-		
-		// Value column
-		result.append(String.format(cellFormat, "VALUE")).append("\n");
-		
-		// Mid rule
-		result.append(thinRule).append("\n");
-		
-		// Print the contents
-		for (Tuple<RangeElement> tuple : this) {
-			for (int j = 0; j < tuple.size(); j++) {
-				result.append(String.format(cellFormat, tuple.get(j)));
-			}
-			// Round the value to 6 digits
-			result.append(String.format(valueCellFormat, BigDecimal.ONE));			
-		}
-		
-		// Bottom rule
-		result.append(thickRule).append("\n");
-		
-		return result.toString();
+//		StringBuilder result = new StringBuilder();
+//		
+//		if (this.variables.isEmpty()) {
+//			return "Empty factor";
+//		}
+//		
+//		String thinRule = "";
+//		String thickRule = "";
+//		String cellFormat = "%-10s"; //TODO: change to something more dynamic
+//		String valueCellFormat = "%-10s\n";
+//		
+//		// Create the rules - aesthetic
+//		for (int i = 0; i <= this.variables.size(); i++) {
+//			thinRule += String.format(cellFormat, "").replace(" ", "-");
+//		}
+//		thickRule = thinRule.replace("-", "=");
+//		
+//		// Top rule
+//		result.append(thickRule).append("\n");
+//		
+//		// Print the variables names
+//		for (Prv prv : variables) {
+//			result.append(String.format(cellFormat, prv.toString())); 
+//		}
+//		
+//		// Value column
+//		result.append(String.format(cellFormat, "VALUE")).append("\n");
+//		
+//		// Mid rule
+//		result.append(thinRule).append("\n");
+//		
+//		// Print the contents
+//		for (Tuple<RangeElement> tuple : this) {
+//			for (int j = 0; j < tuple.size(); j++) {
+//				result.append(String.format(cellFormat, tuple.get(j)));
+//			}
+//			// Round the value to 6 digits
+//			result.append(String.format(valueCellFormat, BigDecimal.ONE));			
+//		}
+//		
+//		// Bottom rule
+//		result.append(thickRule).append("\n");
+//		
+//		return result.toString();
+		return "";
 	}
 
 }

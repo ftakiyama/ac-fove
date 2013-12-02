@@ -1,17 +1,17 @@
 package br.usp.poli.takiyama.acfove;
 
 import java.util.Set;
-import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import br.usp.poli.takiyama.cfove.StdParfactor.StdParfactorBuilder;
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.Marginal;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.StdMarginal;
-import br.usp.poli.takiyama.log.FileLogger;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.Prv;
 import br.usp.poli.takiyama.prv.RandomVariableSet;
+import br.usp.poli.takiyama.utils.Sets;
 
 public class ACFOVE {
 	
@@ -19,13 +19,13 @@ public class ACFOVE {
 	private Marginal result;
 	private MacroOperation currentOperation;
 	
-	private final static Logger logger = Logger.getLogger(ACFOVE.class.getName());
+//	private final static Logger logger = Logger.getLogger(ACFOVE.class.getName());
 	
 	// change later
-	private final long timeout;
-	private final long deadline;
-	long start, end;
-	double timeSeconds;
+//	private final long timeout;
+//	private final long deadline;
+//	long start, end;
+//	double timeSeconds;
 	
 	
 	/*
@@ -35,40 +35,41 @@ public class ACFOVE {
 	 * as the best operation available.
 	 */
 	
+	
 	/**
 	 * Constructor. Initializes AC-FOVE by shattering the specified marginal on
-	 * the query, shattering all parfactors and converting all aggregation
-	 * parfactors to standard parfactors.
+	 * the query and shattering all parfactors.
 	 */
-	public ACFOVE(Marginal parfactors) {
+	public ACFOVE(Marginal parfactors, Level logLevel) {
 		
-		FileLogger.setup();
-		timeout = 100000;
-		deadline = System.currentTimeMillis() + timeout;
+//		FileLogger.setup(logLevel);
+//		timeout = 100000;
+//		deadline = System.currentTimeMillis() + timeout;
 		
-		logger.info("Starting AC-FOVE...");
+//		logger.info("Starting AC-FOVE...");
 		this.input = parfactors;
 		
-		logger.info("Input: \n" + input);
+//		logger.info("Input: \n" + input + "\n");
 		
 		result = input;
+		
 //		start = System.currentTimeMillis();
-//		this.result = performConversionToStdParfactors(input);
-//		end = System.currentTimeMillis();
-//		
-//		timeSeconds = (end - start) / 1000.0;
-//		logger.severe("Time to convert aggregation parfactors: " + timeSeconds + "\n");
-		
-		
-		start = System.currentTimeMillis();
 		this.result = performInitialShattering(result);
-		end = System.currentTimeMillis();
+//		end = System.currentTimeMillis();
 		
-		timeSeconds = (end - start) / 1000.0;
-		logger.severe("Time to initial shatter: " + timeSeconds + "\n");
+//		timeSeconds = (end - start) / 1000.0;
+//		logger.severe("Time to initial shatter: " + timeSeconds + " s\n");
 		
-		logger.info("Initial shattering and conversion: \n" + result);
-		this.currentOperation = new Shatter(result); //ImpossibleOperation.instance;
+//		logger.info("Initial shattering and conversion: \n" + result + "\n");
+		this.currentOperation = new Shatter(result);
+	}
+	
+	/**
+	 * Constructor. Initializes AC-FOVE using <code>Level.SEVERE</code> as log
+	 * level.
+	 */
+	public ACFOVE(Marginal parfactors) {
+		this(parfactors, Level.OFF); 
 	}
 	
 
@@ -86,24 +87,10 @@ public class ACFOVE {
 				.variables(arg.preservable().prv())
 				.constraints(arg.preservable().constraints())
 				.build();
-		//Marginal result = new ShatterOnQuery(arg).run();
 		Marginal result = new StdMarginal.StdMarginalBuilder().add(arg).add(query).build();
 		result = new Shatter(result).run();
 		return result;
 	}
-	
-	
-	/**
-	 * Converts all aggregation parfactors in the specified marginal to 
-	 * standard parfactors.
-	 * @param arg The marginal containing parfactors to convert.
-	 * @return The specified marginal with all aggregation parfactors 
-	 * converted to standard parfactors.
-	 */
-//	private Marginal performConversionToStdParfactors(Marginal arg) {
-//		return new ConvertToStdParfactors(arg).run();
-//	}
-	
 	
 	/**
 	 * Runs the AC-FOVE algorithm and returns the result.
@@ -114,10 +101,6 @@ public class ACFOVE {
 		while (thereAreVariablesToEliminate()) {
 			runStep();
 			resetCurrentOperation();
-//			if (System.currentTimeMillis() > deadline) {
-//				logger.warning("Timeout.");
-//				break;
-//			}
 		}
 		
 		evaluateFinalMultiplication();
@@ -127,7 +110,7 @@ public class ACFOVE {
 			throw new IllegalStateException();
 		}
 		
-		logger.info("\nResult:\n" + result);
+//		logger.info("Result:\n" + result + "\n");
 		return result.iterator().next();
 	}
 	
@@ -138,7 +121,6 @@ public class ACFOVE {
 	 * eliminated.
 	 */
 	private boolean thereAreVariablesToEliminate() {
-//		return (result.size() > 1); // no, because there may be eliminables in one parfactor
 		return !result.eliminables().isEmpty();
 	}
 	
@@ -150,20 +132,19 @@ public class ACFOVE {
 	 */
 	Marginal runStep() {
 		
-		start = System.currentTimeMillis();
+//		start = System.currentTimeMillis();
 		chooseMacroOperation();
-		end = System.currentTimeMillis();
+//		end = System.currentTimeMillis();
 		
-		timeSeconds = (end - start) / 1000.0;
-		logger.severe("Time to choose operation: " + timeSeconds + "\n");
+//		logger.severe("Time to choose operation: " + (end - start) + " ms\n");
 		
-		start = System.currentTimeMillis();
+//		start = System.currentTimeMillis();
 		executeMacroOperation();
-		end = System.currentTimeMillis();
+//		end = System.currentTimeMillis();
 		
-		timeSeconds = (end - start) / 1000.0;
-		logger.severe("Time to run operation: " + timeSeconds + "\n");
-		logger.info("Operation result:\n" + result + "\n\n\n");
+//		timeSeconds = (end - start) / 1000.0;
+//		logger.severe("Time to run operation: " + (end - start) + " ms\n");
+//		logger.info("Operation result:\n" + result + "\n\n\n");
 		
 		return result;
 	}
@@ -173,7 +154,7 @@ public class ACFOVE {
 	 * Chooses the macro operation to execute. The chosen operation must have
 	 * a smaller cost than the current operation. 
 	 */
-	private void chooseMacroOperation() {
+	void chooseMacroOperation() {
 		for (Parfactor p : result) {
 			for (Prv prv : p.prvs()) {
 				evaluateFullExpand(p, prv);
@@ -189,6 +170,13 @@ public class ACFOVE {
 	
 	private void evaluateGlobalSumOut(Prv prv, Set<Constraint> c) {
 		RandomVariableSet eliminables = RandomVariableSet.getInstance(prv, c);
+		MacroOperation candidate = new GlobalSumOut(result, eliminables);
+		compareAndUpdate(candidate);
+	}
+	
+	// used by VariableElimination
+	void evaluateGlobalSumOut(Prv prv) {
+		RandomVariableSet eliminables = RandomVariableSet.getInstance(prv, Sets.<Constraint>getInstance(0));
 		MacroOperation candidate = new GlobalSumOut(result, eliminables);
 		compareAndUpdate(candidate);
 	}
@@ -226,22 +214,21 @@ public class ACFOVE {
 	 * In case of another draw, current operation is kept.
 	 */
 	private void compareAndUpdate(MacroOperation candidate) {
-		logger.fine("\nEvaluating candidate " + candidate + " with " + currentOperation + "\n");
+//		logger.fine("Evaluating candidate " + candidate + " with " + currentOperation + "\n");
 		int candidateCost = candidate.cost();
 		int currentCost = currentOperation.cost();
 		int candidateEliminables = candidate.numberOfRandomVariablesEliminated();
 		int currentEliminables = currentOperation.numberOfRandomVariablesEliminated();
 		
 		boolean costIsSmaller = (candidateCost < currentCost);
-		boolean costIsEqual = (candidateCost == currentCost);
 		boolean eliminatesMore = (candidateEliminables > currentEliminables);
 		boolean eliminatesTheSame = (candidateEliminables == currentEliminables);
 		
 		if (eliminatesMore || (eliminatesTheSame && costIsSmaller)) {
-			logger.fine("\nSetting " + candidate + " as current operation.\n");
+//			logger.fine("Setting " + candidate + " as current operation.\n");
 			currentOperation = candidate;
 		} else {
-			logger.fine("\nKeeping " + currentOperation + " as current operation.\n");
+//			logger.fine("Keeping " + currentOperation + " as current operation.\n");
 		}
 	}
 	
@@ -251,7 +238,7 @@ public class ACFOVE {
 	 * TODO: throw exception when something happens
 	 */
 	private void executeMacroOperation() {
-		logger.info("\nRunning " + currentOperation + "\n");
+//		logger.info("Running " + currentOperation + "\n");
 		result = currentOperation.run();
 	}
 	
@@ -268,16 +255,5 @@ public class ACFOVE {
 	
 	MacroOperation currentOperation() {
 		return this.currentOperation;
-	}
-	
-//	private Parfactor multiplyParfactors() {
-//		Parfactor product = new StdParfactorBuilder().build();
-//		
-//		// Multiplies all parfactors in the marginal
-//		for (Parfactor candidate : result) {
-//			product = product.multiply(candidate);
-//		}
-//		
-//		return product;
-//	}
+	}	
 }

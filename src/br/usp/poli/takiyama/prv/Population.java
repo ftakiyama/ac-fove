@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -28,10 +29,13 @@ public class Population implements Iterable<Constant> {
 	/**
 	 * Creates an empty population.
 	 */
-	private Population() {
-		individuals = new ArrayList<Constant>(0);
+	private Population(int size) {
+		individuals = new ArrayList<Constant>(size);
 	}
 	
+	private Population(Population p) {
+		individuals = new ArrayList<Constant>(p.individuals);
+	}
 	
 	/**
 	 * Creates a population. All specified individuals that are repeated are
@@ -39,7 +43,7 @@ public class Population implements Iterable<Constant> {
 	 * @param individuals The individuals of the population. 
 	 */
 	private Population(List<Constant> individuals) {
-		this();
+		this(individuals.size());
 		for (Constant c : individuals) {
 			if (!this.individuals.contains(c)) {
 				this.individuals.add(c);
@@ -57,7 +61,7 @@ public class Population implements Iterable<Constant> {
 	 * @return An empty population.
 	 */
 	public static Population getInstance() {
-		return new Population();
+		return new Population(0);
 	}
 	
 	
@@ -69,7 +73,7 @@ public class Population implements Iterable<Constant> {
 	 * @return The copy of the specified population.
 	 */
 	public static Population getInstance(Population p) {
-		return new Population(p.toList());
+		return new Population(p);
 	}
 	
 	

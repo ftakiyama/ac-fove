@@ -32,6 +32,7 @@ import br.usp.poli.takiyama.prv.StdPrv;
 import br.usp.poli.takiyama.prv.Substitution;
 import br.usp.poli.takiyama.prv.Term;
 import br.usp.poli.takiyama.utils.Lists;
+import br.usp.poli.takiyama.utils.MathUtils;
 import br.usp.poli.takiyama.utils.Sets;
 
 public final class StdParfactor implements Parfactor {
@@ -360,7 +361,7 @@ public final class StdParfactor implements Parfactor {
 					Tuple<RangeElement> old = tuple.set(countedIndex, e);
 					CountingFormula cf = (CountingFormula) countingFormula;
 					int count = cf.getCount(tuple.get(countedIndex), e);
-					value = value.multiply(parfactor.factor().getValue(old).pow(count));
+					value = value.multiply(parfactor.factor().getValue(old).pow(count, MathUtils.CONTEXT), MathUtils.CONTEXT);
 				}
 				values.add(value);
 			}

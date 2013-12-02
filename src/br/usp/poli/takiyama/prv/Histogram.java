@@ -238,8 +238,7 @@ public final class Histogram<T extends RangeElement> implements RangeElement {
 	
 	@Override
 	public int hashCode() { 
-		int result = 17;
-		result = 31 + result + this.distribution.hashCode();
+		int result = 48 + this.distribution.hashCode(); // 48 = 17 + 31
 		return result;
 	}
 }

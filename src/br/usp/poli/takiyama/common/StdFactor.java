@@ -487,7 +487,7 @@ public class StdFactor implements Factor {
 	
 	@Override
 	public String toString() {
-		
+		/*
 		StringBuilder result = new StringBuilder();
 		
 		// Appends the name it is not empty
@@ -537,7 +537,7 @@ public class StdFactor implements Factor {
 		// Bottom rule
 		result.append(thickRule).append("\n");
 		
-		return result.toString();
+		return result.toString();*/return "";
 	}
 	
 	
@@ -640,7 +640,7 @@ public class StdFactor implements Factor {
 				for (RangeElement e : prv.range()) {
 					Tuple<RangeElement> next = current.set(prvIndex, e);
 					BigDecimal correction = prv.getSumOutCorrection(e);
-					sum = sum.add(getValue(next).multiply(correction));
+					sum = sum.add(getValue(next).multiply(correction, MathUtils.CONTEXT), MathUtils.CONTEXT);
 					wasVisited[getIndex(next)] = true;
 				}
 				vals.add(sum);
@@ -725,7 +725,7 @@ public class StdFactor implements Factor {
 		for (Tuple<RangeElement> t1 : this) {
 			for (Tuple<RangeElement> t2 : factor) {
 				if (haveSameSubtuple(t1, t2, mapOfCommomVariables)) {
-					mult.add(getValue(t1).multiply(factor.getValue(t2)));
+					mult.add(getValue(t1).multiply(factor.getValue(t2), MathUtils.CONTEXT));
 				}
 			}
 		}

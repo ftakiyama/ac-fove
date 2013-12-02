@@ -198,7 +198,7 @@ public class StdParfactorTest {
 			for (int j = i % 2; j < g2vals.length; j = j + 2) {
 				BigDecimal beta = BigDecimal.valueOf(g2vals[j]);
 				BigDecimal betaN = MathUtils.pow(beta, 1, n - 1);
-				ansVals.add(alphaM.multiply(betaN));
+				ansVals.add(alphaM.multiply(betaN, MathUtils.CONTEXT));
 			}
 		}
 		Parfactor answer = new StdParfactorBuilder().constraints(ab)

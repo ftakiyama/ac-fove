@@ -15,7 +15,6 @@
  ******************************************************************************/
 package br.usp.poli.takiyama.common;
 
-import java.util.IllegalFormatException;
 import java.util.Iterator;
 
 import br.usp.poli.takiyama.prv.Binding;

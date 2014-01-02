@@ -24,7 +24,6 @@ import br.usp.poli.takiyama.prv.Constant;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.Population;
 import br.usp.poli.takiyama.prv.Substitution;
-import br.usp.poli.takiyama.common.AggregationParfactor;
 
 
 /**
@@ -119,17 +118,6 @@ public final class Propositionalize implements MacroOperation {
 	 */
 	@Override
 	public int cost() {
-		
-		/*
-		 * This calculation is valid for standard parfactors.
-		 * For aggregation parfactors, propositionalization creates even
-		 * bigger factors.
-		 */
-		
-		int populationSize = getIndividuals().size();
-		int factorSize = propositionalizable.factor().size();
-		int result = populationSize * factorSize;
-		
 		return ((int) Double.POSITIVE_INFINITY) - 1;
 	}
 

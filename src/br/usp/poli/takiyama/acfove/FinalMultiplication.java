@@ -16,10 +16,8 @@
 package br.usp.poli.takiyama.acfove;
 
 import java.util.Iterator;
-import java.util.Set;
 
 import br.usp.poli.takiyama.cfove.StdParfactor.StdParfactorBuilder;
-import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.Marginal;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.StdMarginal.StdMarginalBuilder;

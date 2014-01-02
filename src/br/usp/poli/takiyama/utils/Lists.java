@@ -16,7 +16,6 @@
 package br.usp.poli.takiyama.utils;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;

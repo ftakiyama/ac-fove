@@ -29,7 +29,6 @@ import br.usp.poli.takiyama.common.StdMarginal.StdMarginalBuilder;
  * 
  * @author Felipe Takiyama
  * @see Parfactor
- * @see Elimination
  * @see Distribution
  * @see Marginal
  */

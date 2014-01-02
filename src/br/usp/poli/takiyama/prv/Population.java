@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -134,15 +133,6 @@ public class Population implements Iterable<Constant> {
 	 */
 	public boolean contains(Constant individual) {
 		return individuals.contains(individual);
-	}
-	
-	
-	/**
-	 * Returns the individuals in this population as a list.
-	 * @return the individuals in this population as a list.
-	 */
-	private List<Constant> toList() {
-		return new ArrayList<Constant>(individuals);
 	}
 	
 	

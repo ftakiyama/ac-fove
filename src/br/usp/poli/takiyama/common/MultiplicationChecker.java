@@ -16,10 +16,8 @@
 package br.usp.poli.takiyama.common;
 
 import java.util.List;
-import java.util.Set;
 
 import br.usp.poli.takiyama.cfove.StdParfactor;
-import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.Prv;
 import br.usp.poli.takiyama.prv.Prvs;
 import br.usp.poli.takiyama.prv.RandomVariableSet;
@@ -102,22 +100,6 @@ public final class MultiplicationChecker implements ParfactorVisitor {
 //		}
 	}
 	
-	private boolean sameName(Prv v1, Prv v2) {
-		return (v1.name().equals(v2.name()));
-	}
-	
-	private boolean sameParameters(Prv v1, Prv v2) {
-		return (v1.parameters().equals(v2.parameters()));
-	}
-	
-	private boolean disjointRemainingLogicalVariables(Set<LogicalVariable> lv1, 
-			Prv prv1, Set<LogicalVariable> lv2, Prv prv2) {
-		Set<LogicalVariable> remaining1 = Sets.difference(lv1, prv1.parameters());
-		Set<LogicalVariable> remaining2 = Sets.difference(lv2, prv2.parameters());
-		Set<LogicalVariable> intersection = Sets.intersection(remaining1, remaining2);
-		return intersection.isEmpty();
-	}
-
 	/**
 	 * Checks whether the specified {@link AggregationParfactor} can be
 	 * multiplied by the specified {@link StdParfactor}. This is possible if

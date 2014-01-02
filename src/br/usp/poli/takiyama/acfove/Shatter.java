@@ -29,7 +29,6 @@ import br.usp.poli.takiyama.common.Scanner;
 import br.usp.poli.takiyama.common.SplitResult;
 import br.usp.poli.takiyama.common.StdMarginal.StdMarginalBuilder;
 import br.usp.poli.takiyama.common.Tuple;
-import br.usp.poli.takiyama.log.ConsoleLogger;
 import br.usp.poli.takiyama.prv.Binding;
 import br.usp.poli.takiyama.prv.NameGenerator;
 import br.usp.poli.takiyama.prv.Prv;

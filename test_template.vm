@@ -1,8 +1,0 @@
-<html>
-<body>
-    <h1>There are $list.size() itens in the list:</h1>
-    #foreach ($item in $list)
-        <li>$item</li>
-    #end
-</body>
-</html>

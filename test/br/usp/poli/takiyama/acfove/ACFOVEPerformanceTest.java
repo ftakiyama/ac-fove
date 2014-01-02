@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright 2014 Felipe Takiyama
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 package br.usp.poli.takiyama.acfove;
 
 import java.io.FileOutputStream;
@@ -278,11 +293,11 @@ public class ACFOVEPerformanceTest {
 
 	private final String SICK_DEATH = OUT_PATH + "experiment_sick_death_network_";
 	
-	@Test(timeout=800000)
+	@Test(timeout=550000)
 	@Ignore("Test already done")
 	public void SickDeathVe() throws IOException {
 		Experiment experiment = new VeTest(new SickDeath(), CYCLES);
-		int numberOfPoints = 5;
+		int numberOfPoints = 10;
 		String fileName = SICK_DEATH + experiment.name().toLowerCase() + EXTENSION;
 		new PerformanceTest(experiment, numberOfPoints, fileName).run();
 	}
@@ -307,7 +322,7 @@ public class ACFOVEPerformanceTest {
 
 	private final String WATER_SPRINKLER = OUT_PATH + "experiment_water_sprinkler_network_";
 	
-	@Test(timeout=10000000)
+	@Test(timeout=30000)
 	@Ignore("Test already done")
 	public void WaterSprinklerVe() throws IOException {
 		Experiment experiment = new VeTest(new WaterSprinkler(), CYCLES);
@@ -316,8 +331,8 @@ public class ACFOVEPerformanceTest {
 		new PerformanceTest(experiment, numberOfPoints, fileName).run();
 	}
 	
-	@Test
-	@Ignore("Test again")
+	@Test(timeout=70000)
+	@Ignore("Test already done")
 	public void WaterSprinklerCfove() throws IOException {
 		Experiment experiment = new CfoveTest(new WaterSprinkler(), CYCLES);
 		int numberOfPoints = 500;
@@ -325,8 +340,8 @@ public class ACFOVEPerformanceTest {
 		new PerformanceTest(experiment, numberOfPoints, fileName).run();
 	}
 	
-	@Test
-	@Ignore("Test again")
+	@Test(timeout=80000)
+	@Ignore("Test already done")
 	public void WaterSprinklerAcfove() throws IOException {
 		Experiment experiment = new AcfoveTest(new WaterSprinkler(), CYCLES);
 		int numberOfPoints = 500;
@@ -336,11 +351,11 @@ public class ACFOVEPerformanceTest {
 	
 	private final String BIG_JACKPOT = OUT_PATH + "experiment_big_jackpot_network_";
 	
-	@Test(timeout=800000)
+	@Test(timeout=1200000)
 	@Ignore("Test already done")
 	public void BigJackpotVe() throws IOException {
 		Experiment experiment = new VeTest(new BigJackpot(), CYCLES);
-		int numberOfPoints = 5;
+		int numberOfPoints = 10;
 		String fileName = BIG_JACKPOT + experiment.name().toLowerCase() + EXTENSION;
 		new PerformanceTest(experiment, numberOfPoints, fileName).run();
 	}
@@ -366,10 +381,10 @@ public class ACFOVEPerformanceTest {
 	private final String COMPETING_WORKSHOPS_PEOPLE = OUT_PATH + "experiment_competing_workshops_network_people_";
 	
 	@Test
-	//@Ignore("correct propositionalization")
+	@Ignore("Test already done")
 	public void CompetingWorkshopsWithFixedNumberOfPeopleVe() throws IOException {
 		Experiment experiment = new VeTest(new CompetingWorkshopsWithFixedNumberOfPeople(5), CYCLES);
-		int numberOfPoints = 5;
+		int numberOfPoints = 10;
 		String fileName = COMPETING_WORKSHOPS_PEOPLE + experiment.name().toLowerCase() + EXTENSION;
 		new PerformanceTest(experiment, numberOfPoints, fileName).run();
 	}
@@ -395,7 +410,7 @@ public class ACFOVEPerformanceTest {
 	private final String COMPETING_WORKSHOPS_WORKSHOPS = OUT_PATH + "experiment_competing_workshops_network_workshops_";
 	
 	@Test
-	//@Ignore
+	@Ignore("Test already done")
 	public void CompetingWorkshopsWithFixedNumberOfWorkshopsVe() throws IOException {
 		Experiment experiment = new VeTest(new CompetingWorkshopsWithFixedNumberOfWorkshops(3), CYCLES);
 		int numberOfPoints = 10;
@@ -403,17 +418,16 @@ public class ACFOVEPerformanceTest {
 		new PerformanceTest(experiment, numberOfPoints, fileName).run();
 	}
 
-	@Test // demora para menos de 10
-	//@Ignore
+	@Test 
+	@Ignore("Test already done")
 	public void CompetingWorkshopsWithFixedNumberOfWorkshopsCfove() throws IOException {
 		Experiment experiment = new CfoveTest(new CompetingWorkshopsWithFixedNumberOfWorkshops(3), CYCLES);
-		int numberOfPoints = 100;
+		int numberOfPoints = 1000;
 		String fileName = COMPETING_WORKSHOPS_WORKSHOPS + experiment.name().toLowerCase() + EXTENSION;
 		new PerformanceTest(experiment, numberOfPoints, fileName).run();
 	}
 	
 	@Test
-	//@Ignore
 	@Ignore("Test already done")
 	public void CompetingWorkshopsWithFixedNumberOfWorkshopsAcfove() throws IOException {
 		Experiment experiment = new AcfoveTest(new CompetingWorkshopsWithFixedNumberOfWorkshops(3), CYCLES);

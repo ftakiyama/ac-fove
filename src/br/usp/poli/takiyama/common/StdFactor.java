@@ -1,3 +1,18 @@
+/*******************************************************************************
+ * Copyright 2014 Felipe Takiyama
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 package br.usp.poli.takiyama.common;
 
 import java.math.BigDecimal;
@@ -487,57 +502,58 @@ public class StdFactor implements Factor {
 	
 	@Override
 	public String toString() {
-		/*
-		StringBuilder result = new StringBuilder();
 		
-		// Appends the name it is not empty
-		if (name == null || name.isEmpty()) {
-			result.append(this.name + "\n");
-		}
-		
-		if (this.variables.isEmpty()) {
-			return this.name + " is empty.";
-		}
-		
-		String thinRule = "";
-		String thickRule = "";
-		String cellFormat = "%-10s"; //TODO: change to something more dynamic
-		String valueCellFormat = "%-10s\n";
-		
-		// Create the rules - aesthetic
-		for (int i = 0; i <= this.variables.size(); i++) {
-			thinRule += String.format(cellFormat, "").replace(" ", "-");
-		}
-		thickRule = thinRule.replace("-", "=");
-		
-		// Top rule
-		result.append("\n").append(thickRule).append("\n");
-		
-		// Print the variables names
-		for (Prv prv : variables) {
-			result.append(String.format(cellFormat, prv.toString())); 
-		}
-		
-		// Value column
-		result.append(String.format(cellFormat, "VALUE")).append("\n");
-		
-		// Mid rule
-		result.append(thinRule).append("\n");
-		
-		// Print the contents
-		for (int i = 0; i < values.size(); i++) {
-			Tuple<RangeElement> tuple = getTuple(i);
-			for (int j = 0; j < tuple.size(); j++) {
-				result.append(String.format(cellFormat, tuple.get(j)));
-			}
-			// Round the value to 6 digits
-			result.append(String.format(valueCellFormat, values.get(i).toString()));			
-		}
-		
-		// Bottom rule
-		result.append(thickRule).append("\n");
-		
-		return result.toString();*/return "";
+//		StringBuilder result = new StringBuilder();
+//		
+//		// Appends the name it is not empty
+//		if (name == null || name.isEmpty()) {
+//			result.append(this.name + "\n");
+//		}
+//		
+//		if (this.variables.isEmpty()) {
+//			return this.name + " is empty.";
+//		}
+//		
+//		String thinRule = "";
+//		String thickRule = "";
+//		String cellFormat = "%-10s"; //TODO: change to something more dynamic
+//		String valueCellFormat = "%-10s\n";
+//		
+//		// Create the rules - aesthetic
+//		for (int i = 0; i <= this.variables.size(); i++) {
+//			thinRule += String.format(cellFormat, "").replace(" ", "-");
+//		}
+//		thickRule = thinRule.replace("-", "=");
+//		
+//		// Top rule
+//		result.append("\n").append(thickRule).append("\n");
+//		
+//		// Print the variables names
+//		for (Prv prv : variables) {
+//			result.append(String.format(cellFormat, prv.toString())); 
+//		}
+//		
+//		// Value column
+//		result.append(String.format(cellFormat, "VALUE")).append("\n");
+//		
+//		// Mid rule
+//		result.append(thinRule).append("\n");
+//		
+//		// Print the contents
+//		for (int i = 0; i < values.size(); i++) {
+//			Tuple<RangeElement> tuple = getTuple(i);
+//			for (int j = 0; j < tuple.size(); j++) {
+//				result.append(String.format(cellFormat, tuple.get(j)));
+//			}
+//			// Round the value to 6 digits
+//			result.append(String.format(valueCellFormat, values.get(i).toString()));			
+//		}
+//		
+//		// Bottom rule
+//		result.append(thickRule).append("\n");
+//		
+//		return result.toString();
+		return "";
 	}
 	
 	

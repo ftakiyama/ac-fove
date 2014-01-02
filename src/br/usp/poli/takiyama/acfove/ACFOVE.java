@@ -1,13 +1,30 @@
+/*******************************************************************************
+ * Copyright 2014 Felipe Takiyama
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 package br.usp.poli.takiyama.acfove;
 
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import br.usp.poli.takiyama.cfove.StdParfactor.StdParfactorBuilder;
 import br.usp.poli.takiyama.common.Constraint;
 import br.usp.poli.takiyama.common.Marginal;
 import br.usp.poli.takiyama.common.Parfactor;
 import br.usp.poli.takiyama.common.StdMarginal;
+import br.usp.poli.takiyama.log.FileLogger;
 import br.usp.poli.takiyama.prv.LogicalVariable;
 import br.usp.poli.takiyama.prv.Prv;
 import br.usp.poli.takiyama.prv.RandomVariableSet;
@@ -19,7 +36,7 @@ public class ACFOVE {
 	private Marginal result;
 	private MacroOperation currentOperation;
 	
-//	private final static Logger logger = Logger.getLogger(ACFOVE.class.getName());
+	private final static Logger logger = Logger.getLogger(ACFOVE.class.getName());
 	
 	// change later
 //	private final long timeout;
@@ -42,14 +59,14 @@ public class ACFOVE {
 	 */
 	public ACFOVE(Marginal parfactors, Level logLevel) {
 		
-//		FileLogger.setup(logLevel);
+		FileLogger.setup(logLevel);
 //		timeout = 100000;
 //		deadline = System.currentTimeMillis() + timeout;
 		
-//		logger.info("Starting AC-FOVE...");
+		logger.info("Starting AC-FOVE...");
 		this.input = parfactors;
 		
-//		logger.info("Input: \n" + input + "\n");
+		logger.info("Input: \n" + input + "\n");
 		
 		result = input;
 		
@@ -60,7 +77,7 @@ public class ACFOVE {
 //		timeSeconds = (end - start) / 1000.0;
 //		logger.severe("Time to initial shatter: " + timeSeconds + " s\n");
 		
-//		logger.info("Initial shattering and conversion: \n" + result + "\n");
+		logger.info("Initial shattering and conversion: \n" + result + "\n");
 		this.currentOperation = new Shatter(result);
 	}
 	
@@ -110,7 +127,7 @@ public class ACFOVE {
 			throw new IllegalStateException();
 		}
 		
-//		logger.info("Result:\n" + result + "\n");
+		logger.info("Result:\n" + result + "\n");
 		return result.iterator().next();
 	}
 	
@@ -144,7 +161,7 @@ public class ACFOVE {
 		
 //		timeSeconds = (end - start) / 1000.0;
 //		logger.severe("Time to run operation: " + (end - start) + " ms\n");
-//		logger.info("Operation result:\n" + result + "\n\n\n");
+		logger.info("Operation result:\n" + result + "\n\n\n");
 		
 		return result;
 	}
@@ -214,7 +231,7 @@ public class ACFOVE {
 	 * In case of another draw, current operation is kept.
 	 */
 	private void compareAndUpdate(MacroOperation candidate) {
-//		logger.fine("Evaluating candidate " + candidate + " with " + currentOperation + "\n");
+		logger.fine("Evaluating candidate " + candidate + " with " + currentOperation + "\n");
 		int candidateCost = candidate.cost();
 		int currentCost = currentOperation.cost();
 		int candidateEliminables = candidate.numberOfRandomVariablesEliminated();
@@ -223,12 +240,15 @@ public class ACFOVE {
 		boolean costIsSmaller = (candidateCost < currentCost);
 		boolean eliminatesMore = (candidateEliminables > currentEliminables);
 		boolean eliminatesTheSame = (candidateEliminables == currentEliminables);
+
+		logger.fine("Eliminates:" + candidateEliminables +  "\n");
+		logger.fine("Cost:" + candidateCost +  "\n");
 		
 		if (eliminatesMore || (eliminatesTheSame && costIsSmaller)) {
-//			logger.fine("Setting " + candidate + " as current operation.\n");
+			logger.fine("Setting " + candidate + " as current operation.\n");
 			currentOperation = candidate;
 		} else {
-//			logger.fine("Keeping " + currentOperation + " as current operation.\n");
+			logger.fine("Keeping " + currentOperation + " as current operation.\n");
 		}
 	}
 	
@@ -238,7 +258,7 @@ public class ACFOVE {
 	 * TODO: throw exception when something happens
 	 */
 	private void executeMacroOperation() {
-//		logger.info("Running " + currentOperation + "\n");
+		logger.info("Running " + currentOperation + "\n");
 		result = currentOperation.run();
 	}
 	
